@@ -8,7 +8,7 @@ return [
      */
     'fonts' => [
         'default' => 'https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;1,400;1,700',
-        'code' => 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400&display=swap',
+        'code' => 'https://fonts.bunny.net/css?family=figtree:400,600&display=swap',
     ],
 
     /*

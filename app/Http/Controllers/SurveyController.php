@@ -13,6 +13,6 @@ class SurveyController extends Controller
         $survey = new Survey;
         $survey->vote = $request->vote;
         $survey->save();
-        return redirect('/')->withSuccess('Survey successfully submitted!');
+        return redirect('/')->withSuccess('Thank you for your feedback!');
     }
 }
