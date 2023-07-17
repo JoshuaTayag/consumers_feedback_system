@@ -93,6 +93,20 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'sqlSrvMembership' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL_SQLSRV2'),
+            'host' => env('DB_HOST_SQLSRV2', 'localhost'),
+            'port' => env('DB_PORT_SQLSRV2', '1433'),
+            'database' => env('DB_DATABASE_SQLSRV2', 'forge'),
+            'username' => env('DB_USERNAME_SQLSRV2', 'forge'),
+            'password' => env('DB_PASSWORD_SQLSRV2', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'encrypt' => 'yes',
+            'trust_server_certificate' => true,
+        ],
+
     ],
 
     /*

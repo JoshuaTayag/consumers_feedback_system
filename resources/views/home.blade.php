@@ -3,18 +3,43 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">{{ __('Dashboard') }}</div>
 
                 <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
+                    <div class="row text-center">
+                        <div class="col-lg-3">
+                            <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('membership.index') }}">
+                                <img src="{{asset('images/icons/membership-card.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
+                                <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">MEMBERSHIP</p>
+                            </a>
                         </div>
-                    @endif
-
-                    {{ __('You are logged in!') }}
+                        <div class="col-lg-3">
+                            <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('pre_membership_index') }}">
+                                <img src="{{asset('images/icons/membership-card.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
+                                <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">PRE-MEMBERSHIP</p>
+                            </a>
+                        </div>
+                        <div class="col-lg-3">
+                            <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('surveyReport') }}">
+                                <img src="{{asset('images/icons/notes.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
+                                <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">SURVEY REPORT</p>
+                            </a>
+                        </div>
+                        <!-- <div class="col-lg-3">
+                            <button type="button" class="btn btn-outline-warning">
+                                <img src="{{asset('images/icons/notes.png')}}" class="img-fluid" style="max-width:40%;" alt="...">
+                                <p class="fs-5">PRE-MEMBERSHIP</p>
+                            </button>
+                        </div>
+                        <div class="col-lg-3">
+                            <button type="button" class="btn btn-outline-warning">
+                                <img src="{{asset('images/icons/notes.png')}}" class="img-fluid" style="max-width:40%;" alt="...">
+                                <p class="fs-5">PRE-MEMBERSHIP</p>
+                            </button>
+                        </div> -->
+                    </div>
                 </div>
             </div>
         </div>
