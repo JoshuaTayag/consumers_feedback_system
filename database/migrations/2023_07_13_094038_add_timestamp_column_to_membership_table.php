@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('sqlSrvMembership')->table('Consumer Masterdatabase Table', function (Blueprint $table) {
-            $table->timestamps();
-            $table->softDeletes(); 
-        });
+        if (!Schema::connection('sqlSrvMembership')->hasTable('Consumer Masterdatabase Table')) {
+
+            Schema::connection('sqlSrvMembership')->table('Consumer Masterdatabase Table', function (Blueprint $table) {
+                $table->timestamps();
+                $table->softDeletes(); 
+            });
+
+        }
     }
 
     /**

@@ -40,6 +40,21 @@ Route::group(['middleware' => 'auth'], function () {
     //survey
     Route::get('survey-report', [App\Http\Controllers\HomeController::class, 'surveyReport'])->name('surveyReport');
     Route::post('api/fetch-survey', [App\Http\Controllers\HomeController::class, 'fetchSurvey']);
+
+    // roles and permissions
+    Route::resource('roles', App\Http\Controllers\Auth\RoleController::class);
+
+    // users routes
+    Route::get('users', [App\Http\Controllers\Auth\UserController::class, 'index'])->name('users.index');
+    Route::get('users/create', [App\Http\Controllers\Auth\UserController::class, 'create'])->name('users.create');
+    Route::post('users', [App\Http\Controllers\Auth\UserController::class, 'store'])->name('userStore');
+    Route::get('users/{id}/edit', [App\Http\Controllers\Auth\UserController::class, 'edit'])->name('users.edit');
+    Route::put('users/update/{id}', [App\Http\Controllers\Auth\UserController::class, 'update'])->name('userUpdate');
+    Route::delete('users/{id}', [App\Http\Controllers\Auth\UserController::class, 'destroy'])->name('userDestroy');
+
+    // roles and permissions
+    Route::resource('teller', App\Http\Controllers\PowerBill\TellerController::class);
+
 });
 
 Route::get('/survey', function () {

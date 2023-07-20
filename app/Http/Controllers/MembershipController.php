@@ -11,6 +11,20 @@ use Illuminate\Validation\Rule;
 
 class MembershipController extends Controller
 {
+
+    function __construct()
+    {
+         $this->middleware('permission:membership-list|membership-create|membership-edit|membership-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:membership-create', ['only' => ['create','store']]);
+         $this->middleware('permission:membership-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:membership-delete', ['only' => ['destroy']]);
+
+         $this->middleware('permission:pre-membership-list|pre-membership-create|pre-membership-edit|pre-membership-delete', ['only' => ['preMembershipIndex','preMembershipStore']]);
+         $this->middleware('permission:pre-membership-create', ['only' => ['preMembershipCreate','preMembershipStore']]);
+         $this->middleware('permission:pre-membership-edit', ['only' => ['preMembershipEdit','preMembershipUpdate']]);
+         $this->middleware('permission:pre-membership-delete', ['only' => ['preMembershipDestroy']]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -215,12 +229,7 @@ class MembershipController extends Controller
     {
         // validate requests
         $this->validate($request, [
-            'or_no' => ['required', 'string', 'max:255', 'unique:sqlSrvMembership.Consumer Masterdatabase Table,OR No,'.$id],
-            // 'or_no' => ['required', 
-            //     Rule::unique('sqlSrvMembership.Consumer Masterdatabase Table')->ignore($id)->where(function ($query) use($request) {
-            //         // return $query->where('OR No', $request->or_no);
-            //     }),
-            // ],
+            'or_no' => ['required', 'string', 'max:255', 'unique:sqlSrvMembership.Consumer Masterdatabase Table,OR No,'.$id],     
             'or_no_issued' => ['required', 'string', 'max:255'],
             'first_name' => ['required', 'string', 'max:255'],
             'middle_name' => ['required', 'string', 'max:255'],
