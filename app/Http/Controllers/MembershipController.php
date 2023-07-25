@@ -371,4 +371,11 @@ class MembershipController extends Controller
 
         return view('membership.membership_index')->with(compact('members'));
     }
+
+    public function onlineSeminarQuestionare(Request $request)
+    {
+        return view('consumer.index');
+    }
+
+
 }

@@ -24,12 +24,14 @@
                                 <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">PRE-MEMBERSHIP</p>
                             </a>
                         </div>
+                        @if(Auth::user()->hasRole('Admin'))
                         <div class="col-lg-3">
                             <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('surveyReport') }}">
                                 <img src="{{asset('images/icons/notes.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
                                 <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">SURVEY REPORT</p>
                             </a>
                         </div>
+                        @endif
                         <!-- <div class="col-lg-3">
                             <button type="button" class="btn btn-outline-warning">
                                 <img src="{{asset('images/icons/notes.png')}}" class="img-fluid" style="max-width:40%;" alt="...">

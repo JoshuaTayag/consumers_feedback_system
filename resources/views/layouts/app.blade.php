@@ -67,29 +67,33 @@
                         <a class="dropdown-item" href="#">Action</a>
                         </li>
                     </ul> --}}
-                    @if(Auth::user()->hasRole('Admin'))
-                        @include('layouts.navigation')
-                    @elseif(Auth::user()->hasRole('Consumer'))
-                        <a class="dropdown-item" href="{{ route('roles.index') }}">E-Pre Membership Seminar</a>
-                    @endif
+                    @auth
+                        @if(Auth::user()->hasRole('Admin'))
+                            @include('layouts.navigation')
+                        @elseif(Auth::user()->hasRole('Consumer'))
+                            <a class="dropdown-item" href="{{ route('roles.index') }}">E-Pre Membership Seminar</a>
+                        @endif
+                    @endauth
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
-                      @if(Auth::user()->hasRole('Admin'))
-                        <li class="nav-item dropdown">
-                            <a id="navbarManagementDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                MANAGEMENT
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarManagementDropdown">
-                              <li>
-                                <a class="dropdown-item" href="{{ route('users.index') }}">USER MANAGEMENT</a>
-                              </li>
-                              <li>
-                                <a class="dropdown-item" href="{{ route('roles.index') }}">ROLES MANAGEMENT</a>
-                              </li>
-                            </ul>
-                        </li>
-                      @endif
+                        @auth
+                            @if(Auth::user()->hasRole('Admin'))
+                                <li class="nav-item dropdown">
+                                    <a id="navbarManagementDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                        MANAGEMENT
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarManagementDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('users.index') }}">USER MANAGEMENT</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('roles.index') }}">ROLES MANAGEMENT</a>
+                                    </li>
+                                    </ul>
+                                </li>
+                            @endif
+                        @endauth
                         <!-- Authentication Links -->
                         @guest
                             @if (Route::has('login'))

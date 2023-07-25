@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Auth::routes();
+Auth::routes(['verify' => true]);
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', function () {
@@ -75,6 +76,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('service-connect-order', App\Http\Controllers\ServiceConnectOrderController::class);
 
 });
+
+Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])->name('online.pms')->middleware(['auth', 'verified']);
+
+
 
 Route::get('/survey', function () {
     return view('welcome');
