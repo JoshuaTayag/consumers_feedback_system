@@ -67,8 +67,11 @@
                         <a class="dropdown-item" href="#">Action</a>
                         </li>
                     </ul> --}}
-                    @include('layouts.navigation')
-                    
+                    @if(Auth::user()->hasRole('Admin'))
+                        @include('layouts.navigation')
+                    @elseif(Auth::user()->hasRole('Consumer'))
+                        <a class="dropdown-item" href="{{ route('roles.index') }}">E-Pre Membership Seminar</a>
+                    @endif
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">

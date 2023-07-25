@@ -24,7 +24,13 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        if(Auth::user()->hasRole('Consumer')){
+            return view('consumer.dashboard');
+        }
+        else{
+            return view('home');
+        }
+        
     }
 
     public function surveyReport(Request $request)

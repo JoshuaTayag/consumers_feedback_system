@@ -23,7 +23,7 @@
             <a class="dropdown-item" href="{{ route('membership.index') }}">MEMBERSHIP</a>
           </li>
           <li>
-            <a class="dropdown-item" href="#">APPLICATION</a>
+            <a class="dropdown-item" href="{{ route('service-connect-order.index') }}">APPLICATION</a>
           </li>
           <li>
             <a class="dropdown-item" href="#">Submenu item 3 &raquo; </a>

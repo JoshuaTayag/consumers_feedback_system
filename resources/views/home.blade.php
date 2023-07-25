@@ -7,6 +7,9 @@
             <div class="card">
                 <div class="card-header">{{ __('Dashboard') }}</div>
 
+                @if(Auth::user()->hasRole('Consumer'))
+                    @include('consumer.dashboard')
+                @else
                 <div class="card-body">
                     <div class="row text-center">
                         <div class="col-lg-3">
@@ -41,6 +44,7 @@
                         </div> -->
                     </div>
                 </div>
+                @endif
             </div>
         </div>
     </div>

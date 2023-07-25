@@ -33,6 +33,11 @@ class PermissionTableSeeder extends Seeder
             'pre-membership-create',
             'pre-membership-edit',
             'pre-membership-delete',
+
+            'service-connect-order-list',
+            'service-connect-order-create',
+            'service-connect-order-edit',
+            'service-connect-order-delete',
          ];
       
          foreach ($permissions as $permission) {
