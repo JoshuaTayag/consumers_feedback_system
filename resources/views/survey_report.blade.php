@@ -18,12 +18,23 @@
                         <div class="col-lg-6">
                             <input type="text" class="form-control" name="datetimes" id="date_range">
                         </div>
+
+                        <div class="col-lg-2">
+                            <select name="type" id="type" class="form-control">
+                                <option value="">ALL</option>
+                                <option value="1">CUSTCARE & CASHIER</option>
+                                <option value="0">BILLING & HOUSEWIRING</option>
+                            </select>
+                        </div>
+
                         <div class="col-lg-2">
                             <button class="btn btn-primary" id="search" ><i class="fa fa-search"></i></button>
                         </div>
                     </div>
                     
                     <h5 id="period"></h5>
+
+                    <h5 id="text_type"></h5>
                     {{-- <h5 id="satisfied"></h5>
                     <h5 id="fine"></h5>
                     <h5 id="un_satisfied"></h5> --}}
@@ -42,26 +53,31 @@
     $(function() {
         $('input[name="datetimes"]').daterangepicker({
             timePicker: true,
+            timePicker24Hour: true,
             startDate: moment().startOf('hour'),
             endDate: moment().startOf('hour').add(32, 'hour'),
             locale: {
-            format: 'YYYY/MM/DD hh:mm:ss'
+            format: 'YYYY/MM/DD H:mm:ss'
             }
         });
 
         $('#search').on('click', function () {
             var range_value = $('#date_range').val();
-            
+            var type = $('#type').val();
+            var text_type = $( "#type option:selected" ).text();
+
             $.ajax({
                 url: "{{url('api/fetch-survey')}}",
                 type: "POST",
                 data: {
                     value: range_value,
+                    value_type: type,
                     _token: '{{csrf_token()}}'
                 },
                 dataType: 'json',
                 success: function (result) {
                     $("#period").text("Period: "+range_value);
+                    $("#text_type").text("Division: "+text_type);
                     var data_chart = [];
                     $.each(result.survey_result, function (key, value) {
                         // console.log(value.vote);
@@ -103,4 +119,12 @@
         });
     });
 </script>
+@endsection
+@section('style')
+<style>
+    thead tr th {
+        background-color: #ffffff !important;
+        color: rgb(0, 0, 0) !important;
+      }
+</style>
 @endsection

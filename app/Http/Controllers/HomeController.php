@@ -29,7 +29,8 @@ class HomeController extends Controller
             return view('consumer.dashboard');
         }
         else{
-            return view('home');
+            $pending_count = DB::table('lifelines')->where('application_status', 0)->count();    
+            return view('home')->with(compact('pending_count'));
         }
         
     }
@@ -49,7 +50,16 @@ class HomeController extends Controller
 
         list($from, $to) = explode(' - ', $request->value);
 
-        // dd($startDate);
+        if($request->value_type != null){
+            $data['survey_result'] = DB::table('surveys')
+            ->select(DB::raw('count(vote) as total_vote, vote'))
+            ->whereBetween('created_at', [$from, $to])
+            ->where('feedback_type', $request->value_type)
+            ->groupBy('vote')
+            ->get();  
+            return response()->json($data);
+        }
+
         $data['survey_result'] = DB::table('surveys')
         ->select(DB::raw('count(vote) as total_vote, vote'))
         ->whereBetween('created_at', [$from, $to])

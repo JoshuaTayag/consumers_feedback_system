@@ -75,6 +75,11 @@ Route::group(['middleware' => 'auth'], function () {
     // roles and permissions
     Route::resource('service-connect-order', App\Http\Controllers\ServiceConnectOrderController::class);
 
+    // lifeline
+    Route::resource('lifeline', App\Http\Controllers\LifelineController::class);
+    Route::get('fetch-accounts-records', [App\Http\Controllers\LifelineController::class, 'getAccountDetails'])->name('fetchAccounts');
+    Route::get('lifeline-approval', [App\Http\Controllers\LifelineController::class, 'approveLifelineIndex'])->name('approvedLifelineIndex');
+    Route::put('lifeline-approval/{id}', [App\Http\Controllers\LifelineController::class, 'approveLifelineUpdate'])->name('LifelineUpdate');
 });
 
 Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])->name('online.pms')->middleware(['auth', 'verified']);
@@ -84,6 +89,10 @@ Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::
 Route::get('/survey', function () {
     return view('welcome');
 });
+Route::get('/survey-custcare', function () {
+    return view('welcome_custcare');
+});
 Route::post('store-survey', [App\Http\Controllers\SurveyController::class, 'store']);
+Route::post('store-survey-custcare', [App\Http\Controllers\SurveyController::class, 'storeCustcareSurvey'])->name('store.custcare.survey');
 Route::post('api/fetch-municipalities', [App\Http\Controllers\AddressController::class, 'fetchMunicipalities']);
 Route::post('api/fetch-barangays', [App\Http\Controllers\AddressController::class, 'fetchBarangays']);

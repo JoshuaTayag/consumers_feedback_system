@@ -51,7 +51,7 @@
             <div class="col-lg-10 text-center mx-auto mt-5">
                 <div class="card my-3 text-white" id="mask">
                     <div class="p-4 ">
-                        <strong class="fs-1" style="font-size: 50px !important;">LEYECO V CONSUMER FEEDBACK SURVEY (BILLING & HOUSEWIRING)</strong>
+                        <strong class="fs-1" style="font-size: 40px !important;">LEYECO V CONSUMER FEEDBACK SURVEY (CUSTCARE & CASHIER)</strong>
                     </div>
                 </div>
                 <div class="card my-3 text-white">
@@ -64,7 +64,7 @@
                         <div class="row mb-5">
                             
                             <div class="col-lg-4">
-                                <form method="post" action="{{url('store-survey')}}">
+                                <form method="post" action="{{url('store-survey-custcare')}}">
                                     @csrf
                                     <p class="fs-4">Satisfied</p>
                                     <input type="hidden" name="vote" value="2">
@@ -75,7 +75,7 @@
                             </div>
 
                             <div class="col-lg-4">
-                                <form method="post" action="{{url('store-survey')}}">
+                                <form method="post" action="{{url('store-survey-custcare')}}">
                                     @csrf
                                     <p class="fs-4">Fine</p>
                                     <input type="hidden" name="vote" value="1">
