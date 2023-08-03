@@ -6,12 +6,6 @@
     </a>
     <ul class="dropdown-menu" aria-labelledby="navbarPowerServe">
       <li>
-        <a class="dropdown-item" href="#">Action</a>
-      </li>
-      <li>
-        <a class="dropdown-item" href="#">Another action</a>
-      </li>
-      <li>
         <a class="dropdown-item" href="#">
           HOUSE WIRING &raquo;
         </a>
@@ -23,7 +17,10 @@
             <a class="dropdown-item" href="{{ route('membership.index') }}">MEMBERSHIP</a>
           </li>
           <li>
-            <a class="dropdown-item" href="{{ route('service-connect-order.index') }}">APPLICATION</a>
+            <a class="dropdown-item" href="{{ route('service-connect-order.index') }}">SERVICE CONNECT ORDER</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ route('lifeline.index') }}">APPLY FOR LIFELINE</a>
           </li>
           <li>
             <a class="dropdown-item" href="#">Submenu item 3 &raquo; </a>
@@ -36,10 +33,6 @@
               </li>
             </ul>
           </li>
-          
-          <li>
-            <a class="dropdown-item" href="#">Submenu item 5</a>
-          </li>
         </ul>
       </li>
     </ul>
@@ -50,9 +43,6 @@
       POWERPAY
     </a>
     <ul class="dropdown-menu" aria-labelledby="navbarPowerPay">
-      <li>
-        <a class="dropdown-item" href="#">Action</a>
-      </li>
       <li>
         <a class="dropdown-item" href="#">
           ANOTHER DROP &raquo;
@@ -68,10 +58,6 @@
                 <a class="dropdown-item" href="#">Multi level 1</a>
               </li>
             </ul>
-          </li>
-          
-          <li>
-            <a class="dropdown-item" href="#">Submenu item 5</a>
           </li>
         </ul>
       </li>

@@ -18,7 +18,7 @@
         <div class="card-body">
           {!! Form::open(array('route' => 'service-connect-order.store','method'=>'POST')) !!}
           <div class="row">
-            <div class="col-lg-6">
+            <div class="col-lg-4">
               <div class="mb-2">
                   {{ Form::label('project_name', 'Project Name') }}
                   <select id="project_name" class="form-control" name="project_name" required>
@@ -28,17 +28,63 @@
                     @endforeach 
                   </select>
               </div>
+            </div>
+            <div class="col-lg-4">
               <div class="mb-2">
-                  <label for="first_name" class="form-label mb-1">First Name *</label>
-                  <input type="text" class="form-control" id="first_name" name="first_name">
+                  {{ Form::label('or_no', 'OR No.') }}
+                  {{ Form::text('or_no', null, array('placeholder' => 'OR','class' => 'form-control')) }}
               </div>
+            </div>
+            <div class="col-lg-4">
               <div class="mb-2">
-                  <label for="middle_name" class="form-label mb-1">Middle Name *</label>
-                  <input type="text" class="form-control" id="middle_name" name="middle_name">
+                {{ Form::label('occupancy_type', 'Occupancy Type') }}
+                <select id="occupancy_type" class="form-control" name="occupancy_type" required>
+                  <option value="">Choose...</option>
+                  @foreach (Config::get('constants.occupancy_tpe') as $type)          
+                    <option value="{{ $type['name'] }}" id="">{{ $type['name'] }}</option>
+                  @endforeach 
+                </select>
               </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-4">
               <div class="mb-2">
-                  <label for="last_name" class="form-label mb-1">Last Name *</label>
+                <label for="first_name" class="form-label mb-1">First Name *</label>
+                <input type="text" class="form-control" id="first_name" name="first_name">
+              </div>
+            </div>
+            <div class="col-lg-4">
+              <div class="mb-2">
+                <label for="middle_name" class="form-label mb-1">Middle Name *</label>
+                <input type="text" class="form-control" id="middle_name" name="middle_name">
+              </div>
+            </div>
+            <div class="col-lg-4">
+              <div class="mb-2">
+                <label for="last_name" class="form-label mb-1">Last Name *</label>
                   <input type="text" class="form-control" id="last_name" name="last_name">
+              </div>
+            </div>
+            <div class="col-lg-4">
+              <div class="mb-2">
+                <label for="last_name" class="form-label mb-1">Last Name *</label>
+                  <input type="text" class="form-control" id="last_name" name="last_name">
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="mb-2">
+                  
+              </div>
+              <div class="mb-2">
+                  
+              </div>
+              <div class="mb-2">
+                  
               </div>
               <div class="mb-2">
                   <div class="row my-2">

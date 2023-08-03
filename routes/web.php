@@ -79,7 +79,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('lifeline', App\Http\Controllers\LifelineController::class);
     Route::get('fetch-accounts-records', [App\Http\Controllers\LifelineController::class, 'getAccountDetails'])->name('fetchAccounts');
     Route::get('lifeline-approval', [App\Http\Controllers\LifelineController::class, 'approveLifelineIndex'])->name('approvedLifelineIndex');
-    Route::put('lifeline-approval/{id}', [App\Http\Controllers\LifelineController::class, 'approveLifelineUpdate'])->name('LifelineUpdate');
+    Route::put('lifeline-approval/{id}', [App\Http\Controllers\LifelineController::class, 'approveLifeline'])->name('LifelineUpdate');
+    Route::put('lifeline-approval', [App\Http\Controllers\LifelineController::class, 'approveLifelineMultiple'])->name('LifelineMassUpdate');
 });
 
 Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])->name('online.pms')->middleware(['auth', 'verified']);

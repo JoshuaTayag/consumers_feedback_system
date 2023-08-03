@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('surveys', function (Blueprint $table) {
             $table->id();
             $table->integer('vote');
+            $table->integer('feedback_type');
             $table->timestamps();
         });
     }

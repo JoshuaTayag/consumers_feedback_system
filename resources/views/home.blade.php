@@ -4,6 +4,9 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
+            @if(Auth::user()->hasRole('ISD Manager'))
+                <a href="{{ route('approvedLifelineIndex') }}"><span>lifeline applicants are pending</span></a>
+            @endif
             <div class="card">
                 <div class="card-header">{{ __('Dashboard') }}</div>
 

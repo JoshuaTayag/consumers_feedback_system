@@ -24,8 +24,12 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-    @yield('style')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.5.1/sweetalert2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.5.1/sweetalert2.all.min.js"></script>
+    
+    
     <style>
       .dropdown-menu li {
       position: relative;
@@ -47,7 +51,14 @@
         background-color: #006DCC !important;
         color: rgb(0, 0, 0) !important;
       }
+      hr{
+        border-top: 3px solid;
+        border-color:rgb(0, 202, 0);
+        margin-bottom: 10px;
+        margin-top: 10px;
+      }
     </style>
+    @yield('style')
 </head>
 <body>
     <div id="app">
@@ -68,10 +79,10 @@
                         </li>
                     </ul> --}}
                     @auth
-                        @if(Auth::user()->hasRole('Admin'))
-                            @include('layouts.navigation')
-                        @elseif(Auth::user()->hasRole('Consumer'))
+                        @if(Auth::user()->hasRole('Consumer'))
                             <a class="dropdown-item" href="{{ route('roles.index') }}">E-Pre Membership Seminar</a>
+                        @else
+                            @include('layouts.navigation')
                         @endif
                     @endauth
 

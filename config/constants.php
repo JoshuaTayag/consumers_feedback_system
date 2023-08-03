@@ -18,6 +18,10 @@
                 "id" => 4,
                 "status_name" => "Divorced"
             ],
+            [
+                "id" => 5,
+                "status_name" => "Separated"
+            ],
         ],
 
         'membership_status' => [
@@ -218,6 +222,120 @@
             [
                 "id" => 40,
                 "name" => "NHA Hiloctogan"
+            ]
+        ],
+
+        'occupancy_type' => [
+            [
+                "id" => 1,
+                "name" => "BAPA"
+            ],
+            [
+                "id" => 2,
+                "name" => "BAPA/Lower Voltage"
+            ],
+            [
+                "id" => 3,
+                "name" => "Commercial"
+            ],
+            [
+                "id" => 4,
+                "name" => "Commercial/Lower Voltage"
+            ],
+            [
+                "id" => 5,
+                "name" => "Comunual Water System/Lower Voltage"
+            ],
+            [
+                "id" => 6,
+                "name" => "Gov. Industrial"
+            ],
+            [
+                "id" => 7,
+                "name" => "Industrial"
+            ],
+            [
+                "id" => 8,
+                "name" => "Industrial/Lower Voltage"
+            ],
+            [
+                "id" => 9,
+                "name" => "Irrigation"
+            ],
+            [
+                "id" => 10,
+                "name" => "Large Load"
+            ],
+            [
+                "id" => 11,
+                "name" => "Large Load/Higher Voltage"
+            ],
+            [
+                "id" => 12,
+                "name" => "Mtrd St. Lights"
+            ],
+            [
+                "id" => 13,
+                "name" => "Public Building"
+            ],
+            [
+                "id" => 14,
+                "name" => "Public Building/Lower Voltage"
+            ],
+            [
+                "id" => 15,
+                "name" => "Relegious Institution"
+            ],
+            [
+                "id" => 16,
+                "name" => "Relegious Institution (Res)"
+            ],
+            [
+                "id" => 17,
+                "name" => "Res. Industrial"
+            ],
+            [
+                "id" => 18,
+                "name" => "Residential"
+            ],
+            [
+                "id" => 19,
+                "name" => "Residential/BAPA"
+            ],
+            [
+                "id" => 20,
+                "name" => "Sales for resale/Lower Voltage"
+            ],
+            [
+                "id" => 21,
+                "name" => "St. Light"
+            ],
+            [
+                "id" => 22,
+                "name" => "StLight Industrial"
+            ],
+            [
+                "id" => 23,
+                "name" => "Street Light/Lower Voltage"
+            ],
+            [
+                "id" => 24,
+                "name" => "Water System"
+            ],
+        ],
+
+        'ownership' => [
+            [
+                "id" => 1,
+                "name" => "Owned"
+            ],
+            [
+                "id" => 2,
+                "name" => "Rented"
+            ],
+            [
+                "id" => 3,
+                "name" => "Others"
             ]
         ],
     ];

@@ -107,6 +107,20 @@ return [
             'trust_server_certificate' => true,
         ],
 
+        'sqlSrvBilling' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL_SQLSRV3'),
+            'host' => env('DB_HOST_SQLSRV3', 'localhost'),
+            'port' => env('DB_PORT_SQLSRV3', '1433'),
+            'database' => env('DB_DATABASE_SQLSRV3', 'forge'),
+            'username' => env('DB_USERNAME_SQLSRV3', 'forge'),
+            'password' => env('DB_PASSWORD_SQLSRV3', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'encrypt' => 'yes',
+            'trust_server_certificate' => true,
+        ],
+
     ],
 
     /*
