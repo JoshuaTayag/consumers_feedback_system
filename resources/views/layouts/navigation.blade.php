@@ -96,4 +96,40 @@
       </li>
     </ul>
   </li>
+
+  <li class="nav-item dropdown">
+    <a id="navbarPowerBill" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+      POWER HOUSE
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="navbarPowerBill">
+      <li>
+        <a class="dropdown-item" href="#">
+          PURCHASING&raquo;
+        </a>
+        <ul class="dropdown-menu dropdown-submenu">
+          <li>
+            <a class="dropdown-item" href="{{ route('pre_membership_index') }}">CANVASS</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a class="dropdown-item" href="#">
+          WAREHOUSING&raquo;
+        </a>
+        <ul class="dropdown-menu dropdown-submenu">
+          <li>
+            <a class="dropdown-item" href="{{ route('material-requisition-form.index') }}">MRF</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#">DATA MANAGEMENT &raquo; </a>
+            <ul class="dropdown-menu dropdown-submenu">
+              <li>
+                <a class="dropdown-item" href="{{ route('structure.index') }}">STRUCTURE</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
 </ul>
