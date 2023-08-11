@@ -61,6 +61,16 @@
                                         <option value="LEYECO V Main Office" @selected($pre_member->place_conducted == 'LEYECO V Main Office' ) >LEYECO V Main Office</option>
                                         <option value="OSS Albuera" @selected($pre_member->place_conducted == 'OSS Albuera' ) >OSS Albuera</option>
                                         <option value="OSS Albuera Damulaan" @selected($pre_member->place_conducted == 'OSS Albuera Damulaan' ) >OSS Albuera Damulaan</option>
+                                        <option value="OSS Merida" @selected($pre_member->place_conducted == 'OSS Merida' ) >OSS Merida</option>
+                                        <option value="OSS Isabel" @selected($pre_member->place_conducted == 'OSS Isabel' ) >OSS Isabel</option>
+                                        <option value="OSS Palompon" @selected($pre_member->place_conducted == 'OSS Palompon' ) >OSS Palompon</option>
+                                        <option value="OSS Villaba" @selected($pre_member->place_conducted == 'OSS Villaba' ) >OSS Villaba</option>
+                                        <option value="OSS Tabango" @selected($pre_member->place_conducted == 'OSS Tabango' ) >OSS Tabango</option>
+                                        <option value="OSS San Isidro" @selected($pre_member->place_conducted == 'OSS San Isidro' ) >OSS San Isidro</option>
+                                        <option value="OSS Leyte" @selected($pre_member->place_conducted == 'OSS Leyte' ) >OSS Leyte</option>
+                                        <option value="OSS Calubian" @selected($pre_member->place_conducted == 'OSS Calubian' ) >OSS Calubian</option>
+                                        <option value="OSS Kananga" @selected($pre_member->place_conducted == 'OSS Kananga' ) >OSS Kananga</option>
+                                        <option value="OSS Matag-ob" @selected($pre_member->place_conducted == 'OSS Matag-ob' ) >OSS Matag-ob</option>
                                     </select>
                                 </div>
                             </div>
