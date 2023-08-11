@@ -14,8 +14,10 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
     <!-- Scripts -->
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-
+    {{-- @vite(['resources/sass/app.scss', 'resources/js/app.js']) --}}
+    <link href="{{asset('build/assets/app-4cfe6a2c.css')}}" rel="stylesheet" />
+    <script src="{{asset('build/assets/app-66e7f68a.js')}}"></script>
+    
     <style>
         .card-transparent {
             margin-right: auto;
