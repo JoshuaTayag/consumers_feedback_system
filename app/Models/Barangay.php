@@ -21,4 +21,9 @@ class Barangay extends Model
     {
         return $this->hasMany('App\Models\Premembership');
     }
+
+    public function lifeline()
+    {
+        return $this->hasMany('App\Models\Lifeline');
+    }
 }

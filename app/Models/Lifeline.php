@@ -14,6 +14,20 @@ class Lifeline extends Model implements Auditable
     use HasFactory, SoftDeletes, HasRoles;
     use \OwenIt\Auditing\Auditable;
 
+    public function district()
+    {
+        return $this->belongsTo('App\Models\District', 'district_id', 'id');
+    }
+
+    public function municipality()
+    {
+        return $this->belongsTo('App\Models\Municipality', 'municipality_id', 'id');
+    }
+
+    public function barangay()
+    {
+        return $this->belongsTo('App\Models\Barangay', 'barangay_id', 'id');
+    }
 
     protected $fillable = [
                             "control_no",

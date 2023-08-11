@@ -77,7 +77,7 @@
                 dataType: 'json',
                 success: function (result) {
                     $("#period").text("Period: "+range_value);
-                    $("#text_type").text("Division: "+text_type);
+                    $("#text_type").text("Window: "+text_type);
                     var data_chart = [];
                     $.each(result.survey_result, function (key, value) {
                         // console.log(value.vote);

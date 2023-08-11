@@ -26,15 +26,25 @@
                   <th>Address</th>
                   <th>Date Of Birth</th>
                   <th>Account No</th>
-                  <th width="280px">Action</th>
+                  <th>Applicant Type</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
                 <tbody id="show_data">
                   @include('lifeline.search')
                 </tbody>
                </table>
+               <div id="pagination">{{ $lifeline_datas->links() }}</div>
             </div>
           </div>
       </div>
   </div>
 </div>
+@endsection
+@section('style')
+<style>
+  .badge{
+    line-height: 0.3;
+  }
+</style>
 @endsection

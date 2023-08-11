@@ -77,6 +77,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     // lifeline
     Route::resource('lifeline', App\Http\Controllers\LifelineController::class);
+    Route::post('lifeline-store-non-poor', [App\Http\Controllers\LifelineController::class, 'storeNonPoor'])->name('lifeline.store.non_poor');
     Route::get('fetch-accounts-records', [App\Http\Controllers\LifelineController::class, 'getAccountDetails'])->name('fetchAccounts');
     Route::get('lifeline-approval', [App\Http\Controllers\LifelineController::class, 'approveLifelineIndex'])->name('approvedLifelineIndex');
     Route::put('lifeline-approval/{id}', [App\Http\Controllers\LifelineController::class, 'approveLifeline'])->name('LifelineUpdate');
