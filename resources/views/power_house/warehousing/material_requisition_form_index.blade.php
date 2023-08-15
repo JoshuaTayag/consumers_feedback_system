@@ -19,12 +19,25 @@
             <div class="card-body">
               <table class="table table-bordered">
                 <tr>
-                  <th>Code</th>
-                  <th>Notes</th>
+                  <th>Project Name</th>
+                  <th>Address</th>
                   <th>Items</th>
+                  <th>Requested by</th>
                   <th>Status</th>
                   <th width="280px">Action</th>
                 </tr>
+                <tbody>
+                  @foreach ($mrfs as $index => $mrf)                        
+                    <tr class="text-center">
+                        <th>{{ $mrf->project_name }}</th>
+                        <th>{{ $mrf->district->district_name }}, {{ $mrf->barangay->barangay_name }}, {{ $mrf->municipality->municipality_name }}</th>
+                        <th>{{ $mrf->items }}</th>
+                        <th>{{ $mrf->requested_by }}</th>
+                        <th class="badge rounded-pill bg-{{ $mrf->status == 0 ? 'primary' : ($mrf->status == 1 ? 'success' : 'danger') }}"  >{{ $mrf->application_status == 0 ? "Pending" : "Approved" }}</th>
+                        
+                    </tr>
+                  @endforeach
+                </tbody>
                </table>
             </div>
           </div>

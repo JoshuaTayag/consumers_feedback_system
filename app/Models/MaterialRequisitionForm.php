@@ -9,6 +9,26 @@ class MaterialRequisitionForm extends Model
 {
     use HasFactory;
 
+    public function items()
+    {
+        return $this->hasMany('App\Models\MaterialRequisitionFormItems');
+    }
+
+    public function district()
+    {
+        return $this->belongsTo('App\Models\District', 'district_id', 'id');
+    }
+
+    public function municipality()
+    {
+        return $this->belongsTo('App\Models\Municipality', 'municipality_id', 'id');
+    }
+
+    public function barangay()
+    {
+        return $this->belongsTo('App\Models\Barangay', 'barangay_id', 'id');
+    }
+    
     protected $fillable = [ 'project_name', 
                             'district_id', 
                             'municipality_id', 

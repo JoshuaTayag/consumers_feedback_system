@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('Service Connect Table', function (Blueprint $table) {
+        if (!Schema::hasTable('Service Connect Table')) {
             Schema::table('Service Connect Table', function (Blueprint $table) {
-                $table->timestamps();
-                $table->softDeletes(); 
+                Schema::table('Service Connect Table', function (Blueprint $table) {
+                    $table->timestamps();
+                    $table->softDeletes(); 
+                });
             });
-        });
+        }
     }
 
     /**

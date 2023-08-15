@@ -31,4 +31,9 @@ class Municipality extends Model
     {
         return $this->hasMany('App\Models\Lifeline');
     }
+
+    public function mrf()
+    {
+        return $this->hasMany('App\Models\MaterialRequisitionForm');
+    }
 }

@@ -13,29 +13,20 @@
                   <span class="mb-0 align-middle fs-3">Create MRF</span>
               </div>
               <div class="col-lg-6 text-end">
-                <a class="btn btn-primary" href="{{ route('structure.index') }}"> Back </a>
+                <a class="btn btn-primary" href="{{ route('material-requisition-form.index') }}"> Back </a>
               </div>
           </div>
         </div>
         <div class="card-body">
           {!! Form::open(array('route' => 'material-requisition-form.store','method'=>'POST')) !!}
             <div class="row">
-              <div class="col-lg-4">
+              <div class="col-lg-8">
                 <div class="mb-2">
                   <label for="project_name" class="form-label mb-1">Project Name *</label>
-                    <input type="text" class="form-control" id="project_name" name="project_name" required>
+                  <input type="text" class="form-control" id="project_name" name="project_name" required>
                 </div>
               </div>
-              <div class="col-lg-6">
-                <div class="mb-2">
-                  <label for="project_name" class="form-label mb-1">Item</label>
-                  <div class="input-group">
-                    <select class="js-example-basic-multiple form-control" id="item" name="item"></select>
-                    <span class="input-group-addon"><a href="#" id="add_item" name="add_item" class="btn btn-success"><i class="fa fa-plus"></i></a></span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-2">
+              <div class="col-lg-4">
                 <div class="mb-2">
                   <label for="structure" class="form-label mb-1">Structure</label>
                     <div class="input-group">
@@ -46,6 +37,66 @@
                       </select>
                       <span class="input-group-addon"><a href="#" id="get_items" name="get_items" class="btn btn-success"><i class="fa fa-plus"></i></a></span>
                     </div>
+                </div>
+              </div>
+              <div class="col-lg-8">
+                <div class="mb-2">
+                  <label for="project_name" class="form-label mb-1">Item</label>
+                  <select class="js-example-basic-multiple form-control" id="item" name="item"></select>
+                </div>
+              </div>
+              <div class="col-lg-1 align-bottom">
+                <div class="mb-2">
+                  <label for="add_item" class="form-label mb-1">&nbsp;</label><br>
+                  <a href="#" id="add_item" name="add_item" class="btn btn-success"><i class="fa fa-plus"></i></a>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="mb-3">
+                  <label for="structure" class="form-label mb-1">Approved By:</label>
+                    <select id="approved_by" class="form-control" name="approved_by" required>
+                      @foreach ($users as $user)          
+                        <option value="{{ $user->id }}" id="">
+                          {{ $user->name }} | 
+                          @if(!empty($user->getRoleNames()))
+                            @foreach($user->getRoleNames() as $v)
+                                <label class="badge bg-secondary">{{ $v }}</label>
+                            @endforeach
+                          @endif
+                        </option>
+                      @endforeach 
+                    </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-3">
+                <div class="mb-3">
+                  <label for="district" class="form-label mb-1">District *</label>
+                  <select id="district" class="form-control" name="district" required>
+                      <option value="">Choose...</option>
+                      @foreach ($districts as $district)                        
+                          <option value="{{ $district->id }}" id="{{ $district->id }}">{{$district->district_name}}</option>
+                      @endforeach 
+                  </select>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="mb-3">
+                  <label for="municipality" class="form-label mb-1">Municipality *</label>
+                  <select id="municipality" class="form-control" name="municipality"></select>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="mb-3">
+                  <label for="barangay" class="form-label mb-1">Barangay</label>
+                  <select id="barangay" class="form-control" name="barangay"></select>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="mb-3">
+                  <label for="sitio" class="form-label mb-1">Sitio</label>
+                  <input type="text" class="form-control" id="sitio" name="sitio" required>
                 </div>
               </div>
               <div class="col-lg-12">
@@ -201,20 +252,61 @@ $(document).ready(function () {
   });
   
 
-  // $('#get_items').click(function() {
-  //     var structure_id = $('#structure').val();
-  //     console.log(structure_id);
-  //     $.ajax({
-  //     method: 'GET',
-  //     url: "{{route('getItems')}}",
-  //     data: {
-  //       structure_id:structure_id
-  //     },
-  //     success:function(response){
-  //         $("#show_data").html(response);
-  //     }
-  //     });
-  // });
+  /*------------------------------------------
+  --------------------------------------------
+  District Dropdown Change Event
+  --------------------------------------------
+  --------------------------------------------*/
+  $('#district').on('change', function () {
+      var id = $(this).children(":selected").attr("id");
+      $("#municipality").html('');
+      $.ajax({
+          url: "{{url('api/fetch-municipalities')}}",
+          type: "POST",
+          data: {
+              district_id: id,
+              _token: '{{csrf_token()}}'
+          },
+          dataType: 'json',
+          success: function (result) {
+              $('#municipality').html('<option value="">-- Select Municipality --</option>');
+              
+              $.each(result.municipalities, function (key, value) {
+                    $("#municipality").append('<option value="' + value
+                        .id + '" id="'+ value.id +'">' + value.municipality_name + '</option>');
+                });
+              $('#barangay').html('<option value="">-- Select Barangay --</option>');
+          }
+      });
+  });
+
+  /*------------------------------------------
+  --------------------------------------------
+  Municipality Dropdown Change Event
+  --------------------------------------------
+  --------------------------------------------*/
+  $('#municipality').on('change', function () {
+      var id = $(this).children(":selected").attr("id");
+      $("#barangay").html('');
+      console.log(id);
+      $.ajax({
+          url: "{{url('api/fetch-barangays')}}",
+          type: "POST",
+          data: {
+              municipality_id: id,
+              _token: '{{csrf_token()}}'
+          },
+          dataType: 'json',
+          success: function (res) {
+              $('#barangay').html('<option value="">-- Select Barangay --</option>');
+              $.each(res.barangays, function (key, value) {
+                    $("#barangay").append('<option value="' + value
+                        .id + '" id="'+ value.id +'">' + value.barangay_name + '</option>');
+              });
+          }
+      });
+  });
+
 
 });
 
@@ -234,6 +326,8 @@ function removeItem(val) {
     });
   });
 }
+
+
 
 </script>
 @endsection

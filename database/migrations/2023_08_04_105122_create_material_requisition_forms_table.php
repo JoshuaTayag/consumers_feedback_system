@@ -22,15 +22,16 @@ return new class extends Migration
             $table->integer('status');
             $table->integer('requested_id');
             $table->timestamp('requested_by');
-            $table->integer('approved_id');
-            $table->timestamp('approved_by');
-            $table->integer('processed_id');
-            $table->timestamp('processed_by');
-            $table->integer('released_id');
-            $table->timestamp('released_by');
-            $table->integer('liquidated_id');
-            $table->timestamp('liquidated_by');
+            $table->integer('approved_id')->nullable();
+            $table->timestamp('approved_by')->nullable();
+            $table->integer('processed_id')->nullable();
+            $table->timestamp('processed_by')->nullable();
+            $table->integer('released_id')->nullable();
+            $table->timestamp('released_by')->nullable();
+            $table->integer('liquidated_id')->nullable();
+            $table->timestamp('liquidated_by')->nullable();
             $table->timestamps();
+            
         });
     }
 
