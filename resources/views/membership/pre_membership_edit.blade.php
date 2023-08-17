@@ -127,6 +127,9 @@
                                         <option value="Vinz Alvin C. Caberos" @selected($pre_member->pms_conductor == 'Vinz Alvin C. Caberos' ) >Vinz Alvin C. Caberos</option>
                                         <option value="Quenie Marie L. Sotabento" @selected($pre_member->pms_conductor == 'Quenie Marie L. Sotabento' ) >Quenie Marie L. Sotabento</option>
                                         <option value="Irish Kathleen Y. Fantonial" @selected($pre_member->pms_conductor == 'Irish Kathleen Y. Fantonial' ) >Irish Kathleen Y. Fantonial</option>
+                                        <option value="Paul Jason C. Dagamac" @selected($pre_member->pms_conductor == 'Paul Jason C. Dagamac') >Paul Jason C. Dagamac</option>
+                                        <option value="Nino Rey C. Poniente" @selected($pre_member->pms_conductor == 'Nino Rey C. Poniente') >Nino Rey C. Poniente</option>
+                                        <option value="Elma L. Gasatan" @selected($pre_member->pms_conductor == 'Elma L. Gasatan') >Elma L. Gasatan</option>
                                     </select>
                                 </div>
                             </div>  

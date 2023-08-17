@@ -40,7 +40,7 @@
                                 <th scope="col">Address (District, Barangay, Municipality, Sitio)</th>
                                 <th scope="col">Date of Birth</th>
                                 <th scope="col">Date & Time Conducted</th>
-                                <th scope="col">PMS Conductor</th>
+                                <th scope="col">PMS Facilitator</th>
                                 <th><i class="fa fa-wrench"></i></th>
                                 </tr>
                             </thead>

@@ -25,7 +25,7 @@
                             <div class="col-lg-6">
                                 <div class="mb-2">
                                     <label for="first_name" class="form-label mb-1">First Name *</label>
-                                    <input type="text" class="form-control" id="first_name" name="first_name">
+                                    <input type="text" class="form-control" id="first_name" name="first_name" required>
                                 </div>
                                 <div class="mb-2">
                                     <label for="middle_name" class="form-label mb-1">Middle Name *</label>
@@ -33,7 +33,7 @@
                                 </div>
                                 <div class="mb-2">
                                     <label for="last_name" class="form-label mb-1">Last Name *</label>
-                                    <input type="text" class="form-control" id="last_name" name="last_name">
+                                    <input type="text" class="form-control" id="last_name" name="last_name" required>
                                 </div>
                                 <div class="mb-2">
                                     <div class="row my-2">
@@ -120,7 +120,7 @@
                                     </select>
                                 </div>
                                 <div class="mb-2">
-                                    <label for="pms_conductor" class="form-label mb-1">PMS Conductor *</label>
+                                    <label for="pms_conductor" class="form-label mb-1">PMS Facilitator *</label>
                                     <select id="pms_conductor" class="form-control" name="pms_conductor" required>
                                         <option value="">Choose...</option>                     
                                         <option value="Mark Gregory C. Tugonon" >Mark Gregory C. Tugonon</option>
@@ -132,6 +132,9 @@
                                         <option value="Vinz Alvin C. Caberos" >Vinz Alvin C. Caberos</option>
                                         <option value="Quenie Marie L. Sotabento" >Quenie Marie L. Sotabento</option>
                                         <option value="Irish Kathleen Y. Fantonial" >Irish Kathleen Y. Fantonial</option>
+                                        <option value="Paul Jason C. Dagamac" >Paul Jason C. Dagamac</option>
+                                        <option value="Nino Rey C. Poniente" >Nino Rey C. Poniente</option>
+                                        <option value="Elma L. Gasatan" >Elma L. Gasatan</option>
                                     </select>
                                 </div>
                             </div>  

@@ -148,7 +148,7 @@ class MembershipController extends Controller
                     ->where('last_name', $request->last_name);
                 }),
             ],
-            'middle_name' => ['required', 'string', 'max:255'],
+            // 'middle_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             // 'date_of_birth' => ['required', 'string', 'max:255'],
             'contact_no' => ['regex:/^((09))[0-9]{9}/', 'digits:11'],
@@ -278,7 +278,7 @@ class MembershipController extends Controller
                     ->where('last_name', $request->last_name);
                 }),
             ],
-            'middle_name' => ['required', 'string', 'max:255'],
+            // 'middle_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             // 'date_of_birth' => ['required', 'string', 'max:255'],
             'contact_no' => ['regex:/^((09))[0-9]{9}/','digits:11'],
