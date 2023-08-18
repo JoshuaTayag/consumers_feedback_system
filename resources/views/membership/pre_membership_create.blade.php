@@ -81,6 +81,12 @@
                                         <option value="OSS Calubian" >OSS Calubian</option>
                                         <option value="OSS Kananga" >OSS Kananga</option>
                                         <option value="OSS Matag-ob" >OSS Matag-ob</option>
+                                        <option value="SEP Cabaloan Libertad Kananga" >SEP Cabaloan Libertad Kananga</option>
+                                        <option value="SEP Proper San Isidro Kananga" >SEP Proper San Isidro Kananga</option>
+                                        <option value="OSS Merida Calunangan">OSS Merida Calunangan</option>
+                                        <option value="OSS Merida Lundag">OSS Merida Lundag</option>
+                                        <option value="OSS Merida Poblacion">OSS Merida Poblacion</option>
+                                        <option value="OSS Merida Libas">OSS Merida Libas</option>
                                     </select>
                                 </div>
                             </div>

@@ -71,6 +71,13 @@
                                         <option value="OSS Calubian" @selected($pre_member->place_conducted == 'OSS Calubian' ) >OSS Calubian</option>
                                         <option value="OSS Kananga" @selected($pre_member->place_conducted == 'OSS Kananga' ) >OSS Kananga</option>
                                         <option value="OSS Matag-ob" @selected($pre_member->place_conducted == 'OSS Matag-ob' ) >OSS Matag-ob</option>
+                                        <option value="SEP Cabaloan Libertad Kananga" @selected($pre_member->place_conducted == 'SEP Cabaloan Libertad Kananga' ) >SEP Cabaloan Libertad Kananga</option>
+                                        <option value="SEP Proper San Isidro Kananga" @selected($pre_member->place_conducted == 'SEP Proper San Isidro Kananga' ) >SEP Proper San Isidro Kananga</option>
+                                        <option value="OSS Merida Calunangan" @selected($pre_member->place_conducted == 'OSS Merida Calunangan' ) >OSS Merida Calunangan</option>
+                                        <option value="OSS Merida Lundag" @selected($pre_member->place_conducted == 'OSS Merida Lundag' ) >OSS Merida Lundag</option>
+                                        <option value="OSS Merida Poblacion" @selected($pre_member->place_conducted == 'OSS Merida Poblacion' ) >OSS Merida Poblacion</option>
+                                        <option value="OSS Merida Libas" @selected($pre_member->place_conducted == 'OSS Merida Libas' ) >OSS Merida Libas</option>
+
                                     </select>
                                 </div>
                             </div>
