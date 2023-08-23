@@ -87,6 +87,11 @@
                                         <option value="OSS Merida Lundag">OSS Merida Lundag</option>
                                         <option value="OSS Merida Poblacion">OSS Merida Poblacion</option>
                                         <option value="OSS Merida Libas">OSS Merida Libas</option>
+                                        <option value="OSS Calubian Don Luis">OSS Calubian Don Luis</option>
+                                        <option value="OSS Calubian Nipa">OSS Calubian Nipa</option>
+                                        <option value="OSS Calubian Herrera">OSS Calubian Herrera</option>
+                                        <option value="OSS Calubian Ul-og">OSS Calubian Ul-og</option>
+                                        <option value="OSS Calubian F.E. Marcos">OSS Calubian F.E. Marcos</option>
                                     </select>
                                 </div>
                             </div>
