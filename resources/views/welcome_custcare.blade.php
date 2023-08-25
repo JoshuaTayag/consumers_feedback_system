@@ -86,7 +86,7 @@
                             </div>
                         
                             <div class="col-lg-4">
-                                <form method="post" action="{{url('store-survey')}}">
+                                <form method="post" action="{{url('store-survey-custcare')}}">
                                     @csrf
                                     <p class="fs-4">Unsatisfied</p>
                                     <input type="hidden" name="vote" value="0">
