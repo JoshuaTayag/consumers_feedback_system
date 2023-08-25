@@ -138,7 +138,7 @@
                 <div class="mb-2">
                   <label for="electric_service_details" class="form-label mb-1">Electric Service Details (Search by account number) *</label>
                   <input type="hidden" id="hidden_value" value="{{$account[0]->id}} | {{$account[0]->Name}} | {{$account[0]->Address}}">
-                  <select class="form-control" id="electric_service_details" name="electric_service_details" required>
+                  <select class="form-control" id="electric_service_details" name="electric_service_details" readonly required>
                     <option value="{{$account[0]->id}}"></option>
                   </select>
                 </div>
@@ -148,6 +148,17 @@
             <hr>
 
             <div class="row">
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <label for="type_of_id" class="form-label mb-1">Type of Valid ID *</label>
+                  <select id="type_of_id" class="form-control" name="type_of_id" required>
+                    <option value="">Choose...</option>
+                    @foreach (Config::get('constants.valid_id') as $id)          
+                      <option value="{{ $id['id'] }}" id="" @selected($lifeline->valid_id_type == $id['id'] )>{{ $id['name'] }}</option>
+                    @endforeach 
+                  </select>
+                </div>
+              </div>
               <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="id_no" class="form-label mb-1">Valid ID No. *</label>
@@ -165,20 +176,26 @@
               @if(!$lifeline->pppp_id)
               <div class="col-lg-3">
                 <div class="mb-2">
-                  <label for="validity_period" class="form-label mb-1">Validity Period *</label>
-                  <input type="date" class="form-control" id="validity_period" name="validity_period" value="{{$lifeline->validity_period}}" required>
+                  <label for="validity_period_from" class="form-label mb-1">Validity Period From *</label>
+                  <input type="date" class="form-control" id="validity_period_from" name="validity_period_from" value="{{$lifeline->validity_period_from}}" readonly required>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="mb-2">
+                  <label for="validity_period_to" class="form-label mb-1">Validity Period To *</label>
+                  <input type="date" class="form-control" id="validity_period_to" name="validity_period_to" value="{{$lifeline->validity_period_to}}" readonly required>
                 </div>
               </div>
               <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="annual_income" class="form-label mb-1">Annual Income *</label>
-                  <input type="text" class="form-control" id="annual_income" name="annual_income" value="{{$lifeline->annual_income}}" required>
+                  <input type="text" class="form-control numbers" id="annual_income" name="annual_income" value="{{$lifeline->annual_income}}" required>
                 </div>
               </div>
               <div class="col-lg-3">
                 <div class="mb-2">
-                  <label for="sdwo_certification" class="form-label mb-1">SWDO Certification No. *</label>
-                  <input type="text" class="form-control" id="sdwo_certification" name="sdwo_certification" value="{{$lifeline->swdo_certificate_no}}"  required>
+                  <label for="swdo_certification" class="form-label mb-1">SWDO Certification No. *</label>
+                  <input type="text" class="form-control" id="swdo_certification" name="swdo_certification" value="{{$lifeline->swdo_certificate_no}}"  required>
                 </div>
               </div>
               @endif
@@ -220,13 +237,26 @@
 <script>
 $(document).ready(function () {
 
-  // $('.js-example-basic-single').select2({
-  //       theme: "classic"
-  //   });
+    $('input.numbers').keyup(function(event) {
+
+      // skip for arrow keys
+      if(event.which >= 37 && event.which <= 40){
+        event.preventDefault();
+      }
+
+      $(this).val(function(index, value) {
+        return value
+          .replace(/\D/g, "")
+          .replace(/([0-9])([0-9]{2})$/, '$1.$2')  
+          .replace(/\B(?=(\d{3})+(?!\d)\.?)/g, ",")
+        ;
+      });
+    });
 
     $('.js-example-basic-single').select2({
         theme: "classic"
     });
+    $("#electric_service_details").prop("disabled", true);
 
       $( "#electric_service_details" ).select2({
         ajax: { 

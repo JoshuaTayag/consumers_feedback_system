@@ -19,17 +19,17 @@
           <li>
             <a class="dropdown-item" href="{{ route('service-connect-order.index') }}">SERVICE CONNECT ORDER</a>
           </li>
-          <li>
+          {{-- <li>
             <a class="dropdown-item" href="{{ route('lifeline.index') }}">APPLY FOR LIFELINE</a>
-          </li>
+          </li> --}}
           <li>
-            <a class="dropdown-item" href="#">Submenu item 3 &raquo; </a>
+            <a class="dropdown-item" href="#">LIFELINE &raquo; </a>
             <ul class="dropdown-menu dropdown-submenu">
               <li>
-                <a class="dropdown-item" href="#">Multi level 1</a>
+                <a class="dropdown-item" href="{{ route('lifeline.index') }}">APPLY FOR LIFELINE</a>
               </li>
               <li>
-                <a class="dropdown-item" href="#">Multi level 2</a>
+                <a class="dropdown-item" href="{{ route('lifeline.report') }}">REPORTS</a>
               </li>
             </ul>
           </li>

@@ -40,6 +40,7 @@ class Lifeline extends Model implements Auditable
                             "district_id",
                             "municipality_id",
                             "barangay_id",
+                            "postal_code",
                             "date_of_birth",
                             "marital_status",
                             "contact_no",
@@ -49,10 +50,15 @@ class Lifeline extends Model implements Auditable
                             "representative_full_name",
                             "pppp_id",
                             "valid_id_no",
+                            "valid_id_type",
+                            "date_of_application",
                             "swdo_certificate_no",
                             "annual_income",
-                            "validity_period",
+                            "validity_period_from",
+                            "validity_period_to",
                             "application_status",
                             "remarks"
                           ];
+
+    protected $dates = ['date_of_application'];
 }

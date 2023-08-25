@@ -338,6 +338,37 @@
                 "name" => "Others"
             ]
         ],
+
+        'valid_id' => [
+            [
+                "id" => 1,
+                "name" => "PhilSys"
+            ],
+            [
+                "id" => 2,
+                "name" => "Voters ID"
+            ],
+            [
+                "id" => 3,
+                "name" => "Philhealth ID"
+            ],
+            [
+                "id" => 4,
+                "name" => "SSS ID"
+            ],
+            [
+                "id" => 5,
+                "name" => "TIN ID"
+            ],
+            [
+                "id" => 6,
+                "name" => "UMID"
+            ],
+            [
+                "id" => 7,
+                "name" => "Senior Citizen ID"
+            ]
+        ],
     ];
 
 ?>

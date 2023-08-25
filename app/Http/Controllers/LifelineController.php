@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Lifeline;
+use App\Helpers\Helper;
 use DB;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use PDF;
+use App;
 
 class LifelineController extends Controller
 {
@@ -16,6 +19,7 @@ class LifelineController extends Controller
     public function index()
     {
         $lifeline_datas = Lifeline::with('district', 'municipality', 'barangay')->orderBy('id','DESC')->paginate(10);
+        
         // $lifeline_data = "";
         return view('lifeline.index',compact('lifeline_datas'));
     }
@@ -30,8 +34,12 @@ class LifelineController extends Controller
         ->select('*')
         ->get();
 
+        $year = date("Y");
+        $control_id = Helper::IDGenerator(new Lifeline, 'control_no', 4, $year);
+        // dd($control_id);
+
         // dd($districts);
-        return view('lifeline.create')->with(compact('districts'));
+        return view('lifeline.create')->with(compact('districts', 'control_id'));
     }
 
     /**
@@ -40,25 +48,30 @@ class LifelineController extends Controller
     public function store(Request $request)
     {
         // validate requests
-        // dd($request);
         $this->validate($request, [
-            'control_no' => ['required', 'string', 'max:255', 'unique:lifelines,control_no'],
+            // 'control_no' => ['required', 'string', 'max:255', 'unique:lifelines,control_no'],
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'district' => ['required', 'string', 'max:255'],
             'municipality' => ['required', 'string', 'max:255'],
+            'postal_code' => ['required'],
             'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
             'date_of_birth' => ['required', 'string', 'max:255'],
             'marital_status' => ['required', 'string', 'max:255'],
             'ownership' => ['required', 'string', 'max:255'],
             'electric_service_details' => ['required'],
+            'type_of_id' => ['required'],
             'id_no' => ['required', 'string', 'max:255', 'unique:lifelines,valid_id_no'],
+            'date_of_application' => ['required'],
             'household_id_no' => ['required', 'string', 'max:255', 'unique:lifelines,pppp_id'],
         ]);
 
+        $year = date("Y");
+        $control_id = Helper::IDGenerator(new Lifeline, 'control_no', 4, $year); /** Generate control no */
+
         // Insert Record
         Lifeline::create([
-            "control_no" => $request->control_no,
+            "control_no" => $control_id,
             "first_name" => $request->first_name,
             "middle_name" => $request->middle_name,
             "last_name" => $request->last_name,
@@ -68,6 +81,7 @@ class LifelineController extends Controller
             "district_id" => $request->district,
             "municipality_id" => $request->municipality,
             "barangay_id" => $request->barangay,
+            "postal_code" => $request->postal_code,
             "date_of_birth" => $request->date_of_birth,
             "marital_status" => $request->marital_status,
             "contact_no" => $request->contact_no,
@@ -76,7 +90,9 @@ class LifelineController extends Controller
             "representative_id_no" => $request->representative_id_no,
             "representative_full_name" => $request->representative_fullname,
             "pppp_id" => $request->household_id_no,
+            "valid_id_type" => $request->type_of_id,
             "valid_id_no" => $request->id_no,
+            "date_of_application" => $request->date_of_application,
             "swdo_certificate_no" => $request->exists('swdo_certificate_no') ? $request->swdo_certificate_no : null,
             "annual_income" => $request->exists('annual_income') ? $request->annual_income : null,
             "validity_period" => $request->exists('validity_period') ? $request->validity_period : null,
@@ -96,20 +112,27 @@ class LifelineController extends Controller
             'last_name' => ['required', 'string', 'max:255'],
             'district' => ['required', 'string', 'max:255'],
             'municipality' => ['required', 'string', 'max:255'],
+            'postal_code' => ['required'],
             'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
             'date_of_birth' => ['required', 'string', 'max:255'],
             'marital_status' => ['required', 'string', 'max:255'],
             'ownership' => ['required', 'string', 'max:255'],
             'electric_service_detail' => ['required'],
             'id_no' => ['required', 'string', 'max:255', 'unique:lifelines,valid_id_no'],
-            'annual_income' => ['required', 'numeric'],
+            'type_of_id' => ['required'],
+            'date_of_application' => ['required'],
+            'validity_period_from' => ['required'],
+            'validity_period_to' => ['required'],
+            'annual_income' => ['required'],
             'sdwo_certification' => ['required', 'string', 'max:255'],
-            'validity_period' => ['required', 'string', 'max:255'],
         ]);
+
+        $year = date("Y");
+        $control_id = Helper::IDGenerator(new Lifeline, 'control_no', 4, $year); /** Generate control no */
 
         // Insert Record
         Lifeline::create([
-            "control_no" => $request->control_no,
+            "control_no" => $control_id,
             "first_name" => $request->first_name,
             "middle_name" => $request->middle_name,
             "last_name" => $request->last_name,
@@ -119,6 +142,7 @@ class LifelineController extends Controller
             "district_id" => $request->district,
             "municipality_id" => $request->municipality,
             "barangay_id" => $request->barangay,
+            "postal_code" => $request->postal_code,
             "date_of_birth" => $request->date_of_birth,
             "marital_status" => $request->marital_status,
             "contact_no" => $request->contact_no,
@@ -126,11 +150,14 @@ class LifelineController extends Controller
             "ownership" => $request->ownership,
             "representative_id_no" => $request->representative_id_no,
             "representative_full_name" => $request->representative_fullname,
+            "date_of_application" => $request->date_of_application,
             "pppp_id" => $request->exists('household_id_no') ? $request->household_id_no: null,
             "valid_id_no" => $request->id_no,
-            "swdo_certificate_no" => $request->exists('swdo_certificate_no') ? $request->swdo_certificate_no : null ,
+            "valid_id_type" => $request->type_of_id,
+            "swdo_certificate_no" => $request->exists('sdwo_certification') ? $request->sdwo_certification : null ,
             "annual_income" => $request->exists('annual_income') ? $request->annual_income : null,
-            "validity_period" => $request->exists('validity_period') ? $request->validity_period : null,
+            "validity_period_from" => $request->exists('validity_period_from') ? $request->validity_period_from : null,
+            "validity_period_to" => $request->exists('validity_period_to') ? $request->validity_period_to : null,
             "application_status" => 0,
             "remarks" => $request->remarks,
         ]);
@@ -188,6 +215,7 @@ class LifelineController extends Controller
                 'ownership' => ['required', 'string', 'max:255'],
                 'electric_service_details' => ['required', 'unique:lifelines,account_no,'.$id],
                 'id_no' => ['required', 'string', 'max:255', 'unique:lifelines,valid_id_no,'.$id],
+                'type_of_id' => ['required'],
                 'household_id_no' => ['required', 'string', 'max:255', 'unique:lifelines,pppp_id,'.$id],
             ]);
         }
@@ -203,11 +231,13 @@ class LifelineController extends Controller
                 'date_of_birth' => ['required', 'string', 'max:255'],
                 'marital_status' => ['required', 'string', 'max:255'],
                 'ownership' => ['required', 'string', 'max:255'],
-                'electric_service_details' => ['required', 'unique:lifelines,account_no,'.$id],
+                // 'electric_service_details' => ['required', 'unique:lifelines,account_no,'.$id],
                 'id_no' => ['required', 'string', 'max:255', 'unique:lifelines,valid_id_no,'.$id],
-                'annual_income' => ['required', 'numeric'],
-                'sdwo_certification' => ['required', 'string', 'max:255', 'unique:lifelines,sdwo_certificate_no,'.$id],
-                'validity_period' => ['required', 'string', 'max:255'],
+                'type_of_id' => ['required'],
+                'annual_income' => ['required'],
+                'swdo_certification' => ['required', 'string', 'max:255', 'unique:lifelines,swdo_certificate_no,'.$id],
+                'validity_period_from' => ['required'],
+                'validity_period_to' => ['required'],
             ]);
         }
         
@@ -227,15 +257,17 @@ class LifelineController extends Controller
         $lifeline->date_of_birth = $request->date_of_birth;
         $lifeline->marital_status = $request->marital_status;
         $lifeline->contact_no = $request->contact_no;
-        $lifeline->account_no = $request->electric_service_details;
+        // $lifeline->account_no = $request->electric_service_details;
         $lifeline->ownership = $request->ownership;
         $lifeline->representative_id_no = $request->representative_id_no;
         $lifeline->representative_full_name = $request->representative_fullname;
         $lifeline->pppp_id = $request->exists('household_id_no') ? $request->household_id_no: null;
         $lifeline->valid_id_no = $request->id_no;
-        $lifeline->swdo_certificate_no = $request->exists('sdwo_certification') ? $request->sdwo_certification : null ;
+        $lifeline->valid_id_type = $request->type_of_id;
+        $lifeline->swdo_certificate_no = $request->exists('swdo_certification') ? $request->swdo_certification : null ;
         $lifeline->annual_income = $request->exists('annual_income') ? $request->annual_income : null;
-        $lifeline->validity_period = $request->exists('validity_period') ? $request->validity_period : null;
+        $lifeline->validity_period_from = $request->exists('validity_period_from') ? $request->validity_period_from : null;
+        $lifeline->validity_period_to = $request->exists('validity_period_to') ? $request->validity_period_to : null;
         $lifeline->application_status = 0;
         $lifeline->remarks = $request->remarks;
         $lifeline->save();
@@ -266,17 +298,37 @@ class LifelineController extends Controller
     {
         DB::beginTransaction();
         // dd($request->exists('disapproved'));
-        if($request->exists('disapproved')){
-            DB::table('lifelines')
-                ->where('id', $id)
-                ->update([
-                    'application_status' => 2,
-                    'approved_by' =>  Auth::id(),
-                    'dis_approved_date' => Carbon::now(),
-                ]);
+        if($request->exists('un_tag')){
+            try {
+                $update_account = DB::connection('sqlSrvBilling')
+                    ->table('Consumers Table')
+                    ->where('Accnt No', $request->account_no)
+                    ->update([
+                        'LFflag' => null,
+                        'LFdate' => null,
+                    ]);
 
-            DB::commit();
-            return redirect()->back()->withSuccess('Application Disapproved!');
+                if($update_account == 0){
+                    return redirect()->back()->withError("Invalid Account No.");
+                }
+                else{
+                    Lifeline::find($id)->update([
+                        'application_status' => 2,
+                        'approved_by' =>  Auth::id(),
+                        'approved_date' => Carbon::now(),
+                    ]);
+
+                    DB::commit();
+
+                    return redirect()->back()->withSuccess('Application Successfully Untag!');
+                    // all good
+                }
+                
+            } catch (\Exception $e) {
+                DB::rollback();
+                // something went wrong
+                return redirect()->back()->withError($e->getMessage());
+            }
         }else{
             try {
                 $update_account = DB::connection('sqlSrvBilling')
@@ -291,9 +343,7 @@ class LifelineController extends Controller
                     return redirect()->back()->withError("Invalid Account No.");
                 }
                 else{
-                    DB::table('lifelines')
-                    ->where('id', $id)
-                    ->update([
+                    Lifeline::find($id)->update([
                         'application_status' => 1,
                         'approved_by' =>  Auth::id(),
                         'approved_date' => Carbon::now(),
@@ -301,7 +351,8 @@ class LifelineController extends Controller
 
                     DB::commit();
 
-                    return redirect()->back()->withSuccess('Applications Successfully Approved!');
+                    return redirect()->route('lifelineCoverageCertificate',$id);
+                    // return redirect()->back()->withSuccess('Applications Successfully Approved!');
                     // all good
                 }
                 
@@ -315,80 +366,213 @@ class LifelineController extends Controller
         
     }
 
-    public function approveLifelineMultiple(Request $request)
-    {
-        // dd($request->exists('disapproved'));
-        DB::beginTransaction();
+    // public function approveLifelineMultiple(Request $request)
+    // {
+    //     // dd($request->exists('disapproved'));
+    //     DB::beginTransaction();
 
-        if($request->exists('disapproved')){
-            Lifeline::whereIn('id', $request->ids)->update([
-                'application_status' => 2,
-                'approved_by' =>  Auth::id(),
-                'dis_approved_date' => Carbon::now(),
-            ]);
+    //     if($request->exists('disapproved')){
+    //         Lifeline::whereIn('id', $request->ids)->update([
+    //             'application_status' => 2,
+    //             'approved_by' =>  Auth::id(),
+    //             'dis_approved_date' => Carbon::now(),
+    //         ]);
 
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => "Applications Disapproved!",
-            ]);
-        }else{
-            try {
+    //         DB::commit();
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => "Applications Disapproved!",
+    //         ]);
+    //     }else{
+    //         try {
 
-                $update_account = DB::connection('sqlSrvBilling')
-                    ->table('Consumers Table')
-                    ->whereIn('Accnt No', $request->accounts)
-                    ->update([
-                        'LFflag' => "Yes",
-                        'LFdate' => Carbon::now(),
-                    ]);
+    //             $update_account = DB::connection('sqlSrvBilling')
+    //                 ->table('Consumers Table')
+    //                 ->whereIn('Accnt No', $request->accounts)
+    //                 ->update([
+    //                     'LFflag' => "Yes",
+    //                     'LFdate' => Carbon::now(),
+    //                 ]);
 
-                if($update_account == 0){
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Invalid Account No.",
-                    ]);
-                }
-                else{
-                    Lifeline::whereIn('id', $request->ids)->update([
-                        'application_status' => 1,
-                        'approved_by' =>  Auth::id(),
-                        'approved_date' => Carbon::now(),
-                    ]);
+    //             if($update_account == 0){
+    //                 return response()->json([
+    //                     'success' => false,
+    //                     'message' => "Invalid Account No.",
+    //                 ]);
+    //             }
+    //             else{
+    //                 Lifeline::whereIn('id', $request->ids)->update([
+    //                     'application_status' => 1,
+    //                     'approved_by' =>  Auth::id(),
+    //                     'approved_date' => Carbon::now(),
+    //                 ]);
         
-                    DB::commit();
-                    return response()->json([
-                        'success' => true,
-                        'message' => "Applications Successfully Approved",
-                    ]);
-                    // all good
-                }
+    //                 DB::commit();
+    //                 return response()->json([
+    //                     'success' => true,
+    //                     'message' => "Applications Successfully Approved",
+    //                 ]);
+    //                 // all good
+    //             }
 
-                // all good
-            } catch (\Exception $e) {
-                DB::rollback();
-                // something went wrong
-            }
-        }
+    //             // all good
+    //         } catch (\Exception $e) {
+    //             DB::rollback();
+    //             // something went wrong
+    //         }
+    //     }
 
         
-    } 
+    // } 
 
     // Fetch records
     public function getAccountDetails(Request $request){
         $search = $request->search;
-
+        $lifeline_data = Lifeline::pluck('account_no');
         if($search == ''){
         $accounts = DB::connection('sqlSrvBilling')
         ->table('Consumers Table')
+        ->whereNotIn('Accnt No', $lifeline_data)
         ->select('Accnt No as id', 'Name', 'Address');
         }else{
         $accounts = DB::connection('sqlSrvBilling')
         ->table('Consumers Table')
         ->where('Accnt No', 'like', '%' .$search . '%')
+        ->whereNotIn('Accnt No', $lifeline_data)
         ->select('Accnt No as id', 'Name', 'Address');
         }
         $data = $accounts->paginate(10, ['*'], 'page', $request->page);
         return response()->json($data); 
     } 
+
+    public function lifelineCoverageCertificate(Request $request, string $id)
+    {
+        $lifeline_data = Lifeline::find($id);
+        // dd($lifeline_data->application_status);
+        if($lifeline_data->application_status == 1){
+            if($lifeline_data->pppp_id){
+                view()->share('data', $lifeline_data);
+                $pdf = PDF::loadView('lifeline.pppps_certification_of_lifeline_coverage_pdf');
+                return $pdf->stream();
+            }
+            else{
+                view()->share('data', $lifeline_data);
+                $pdf = PDF::loadView('lifeline.non_pppps_certification_of_lifeline_coverage_pdf');
+                return $pdf->stream();
+            }
+        }
+        elseif($lifeline_data->application_status == 2){
+            view()->share('data', $lifeline_data);
+            $pdf = PDF::loadView('lifeline.untaging_certification_of_lifeline_coverage_pdf');
+            return $pdf->stream();
+        }
+        
+        
+    }
+
+    public function lifelineReport()
+    {
+        // $lifeline_datas = Lifeline::with('district', 'municipality', 'barangay')->orderBy('id','DESC')->paginate(10);
+        $districts = DB::connection('sqlSrvMembership')
+        ->table('districts')
+        ->select('*')
+        ->get();
+        // $lifeline_data = "";
+        return view('lifeline.report.index',compact('districts'));
+    }
+
+    public function lifelineGenerateReport(Request $request)
+    {
+        if (!$request->status_type) {
+            $non_four_ps = DB::table('lifelines')
+            // ->select(DB::raw('first_name'))
+            ->where('pppp_id', NULL)
+            ->whereBetween('date_of_application', [$request->date_from, $request->date_to]);
+
+            $four_ps = DB::table('lifelines')
+            // ->select(DB::raw('first_name'))
+            ->where('pppp_id','!=', NULL)
+            ->whereBetween('date_of_application', [$request->date_from, $request->date_to]);
+        }
+        if ($request->status_type == 1) {
+            $non_four_ps = DB::table('lifelines')
+            // ->select(DB::raw('first_name'))
+            ->where('pppp_id', NULL)
+            ->where('application_status', 1)
+            ->whereBetween('date_of_application', [$request->date_from, $request->date_to]);
+
+            $four_ps = DB::table('lifelines')
+            // ->select(DB::raw('first_name'))
+            ->where('pppp_id','!=', NULL)
+            ->where('application_status', 1)
+            ->whereBetween('date_of_application', [$request->date_from, $request->date_to]);
+
+        }
+        if ($request->status_type == 2) {
+            $non_four_ps = DB::table('lifelines')
+            // ->select(DB::raw('first_name'))
+            ->where('pppp_id', NULL)
+            ->where('application_status', 2)
+            ->whereBetween('date_of_application', [$request->date_from, $request->date_to]);
+
+            $four_ps = DB::table('lifelines')
+            // ->select(DB::raw('first_name'))
+            ->where('pppp_id','!=', NULL)
+            ->where('application_status', 2)
+            ->whereBetween('date_of_application', [$request->date_from, $request->date_to]);
+        }
+        
+
+        
+
+        if($request->district){
+            $four_ps = $four_ps->where('district_id', $request->district);
+            $non_four_ps = $non_four_ps->where('district_id', $request->district);
+        }
+        if($request->municipality){
+            $four_ps = $four_ps->where('municipality_id', $request->municipality);
+            $non_four_ps = $non_four_ps->where('municipality_id', $request->municipality);
+        }
+        // dd();
+        $four_ps_count = $four_ps->count();
+        $non_four_ps_count = $non_four_ps->count();
+        $requests = $request->all();
+
+        $district_name = DB::connection('sqlSrvMembership')
+        ->table('districts')
+        ->select('district_name')
+        ->where('id', $requests['district'])
+        ->pluck('district_name');
+
+        $municipality_name = DB::connection('sqlSrvMembership')
+        ->table('municipalities')
+        ->select('municipality_name')
+        ->where('id', $requests['municipality'])
+        ->pluck('municipality_name');
+
+        // dd($municipality_name);
+        $pdf = PDF::loadView('lifeline.report.generate_report_qualified', compact('requests', 'four_ps_count', 'non_four_ps_count', 'district_name', 'municipality_name'));
+        return $pdf->stream();
+        // if($lifeline_data->application_status == 1){
+        //     if($lifeline_data->pppp_id){
+        //         view()->share('data', $lifeline_data);
+        //         $pdf = PDF::loadView('lifeline.pppps_certification_of_lifeline_coverage_pdf');
+        //         return $pdf->stream();
+        //     }
+        //     else{
+        //         view()->share('data', $lifeline_data);
+        //         $pdf = PDF::loadView('lifeline.non_pppps_certification_of_lifeline_coverage_pdf');
+        //         return $pdf->stream();
+        //     }
+        // }
+        // elseif($lifeline_data->application_status == 2){
+        //     view()->share('data', $lifeline_data);
+        //     $pdf = PDF::loadView('lifeline.untaging_certification_of_lifeline_coverage_pdf');
+        //     return $pdf->stream();
+        // }
+        
+        
+    }
+
+ 
 }

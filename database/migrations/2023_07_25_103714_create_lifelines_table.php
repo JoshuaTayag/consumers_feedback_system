@@ -23,6 +23,7 @@ return new class extends Migration
             $table->integer('district_id');
             $table->integer('municipality_id');
             $table->integer('barangay_id')->nullable();
+            $table->integer('postal_code')->nullable();
             $table->date('date_of_birth');
             $table->integer('marital_status');
             $table->string('contact_no')->nullable();
@@ -31,10 +32,13 @@ return new class extends Migration
             $table->string('representative_id_no')->nullable();
             $table->string('representative_full_name')->nullable();
             $table->string('pppp_id')->nullable();
+            $table->string('valid_id_type');
             $table->string('valid_id_no');
             $table->string('swdo_certificate_no')->nullable();
             $table->string('annual_income')->nullable();
-            $table->date('validity_period')->nullable();
+            $table->date('validity_period_from')->nullable();
+            $table->date('validity_period_to')->nullable();
+            $table->date('date_of_application')->nullable();
             $table->integer('application_status')->nullable();
             $table->string('remarks')->nullable();
             $table->integer('approved_by')->nullable();
