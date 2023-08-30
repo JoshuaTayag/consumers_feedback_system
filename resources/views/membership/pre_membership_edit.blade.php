@@ -82,7 +82,13 @@
                                         <option value="OSS Calubian Herrera" @selected($pre_member->place_conducted == 'OSS Calubian Herrera' )>OSS Calubian Herrera</option>
                                         <option value="OSS Calubian Ul-og" @selected($pre_member->place_conducted == 'OSS Calubian Ul-og' )>OSS Calubian Ul-og</option>
                                         <option value="OSS Calubian F.E. Marcos" @selected($pre_member->place_conducted == 'OSS Calubian F.E. Marcos' )>OSS Calubian F.E. Marcos</option>
-
+                                        <option value="SEP Mahayag Ormoc" @selected($pre_member->place_conducted == 'SEP Mahayag Ormoc' )>SEP Mahayag Ormoc</option>
+                                        <option value="SEP Mahayahay II San Isidro" @selected($pre_member->place_conducted == 'SEP Mahayahay II San Isidro' )>SEP Mahayahay II San Isidro</option>
+                                        <option value="SEP San Isidro Kananga" @selected($pre_member->place_conducted == 'SEP San Isidro Kananga' )>SEP San Isidro Kananga</option>
+                                        <option value="SEP San Andres San Isidro Kananga" @selected($pre_member->place_conducted == 'SEP San Andres San Isidro Kananga' )>SEP San Andres San Isidro Kananga</option>
+                                        <option value="SEP Dapanas San Isidro Kananga" @selected($pre_member->place_conducted == 'SEP Dapanas San Isidro Kananga' )>SEP Dapanas San Isidro Kananga</option>
+                                        <option value="OSS Merida Puertobello" @selected($pre_member->place_conducted == 'OSS Merida Puertobello' )>OSS Merida Puertobello</option>
+                                        <option value="OSS Albuera Mahayahay" @selected($pre_member->place_conducted == 'OSS Albuera Mahayahay' )>OSS Albuera Mahayahay</option>
                                     </select>
                                 </div>
                             </div>
