@@ -20,13 +20,13 @@
         <div class="card-body">
           {!! Form::open(array('route' => 'material-requisition-form.store','method'=>'POST')) !!}
             <div class="row">
-              <div class="col-lg-8">
+              <div class="col-lg-6">
                 <div class="mb-2">
                   <label for="project_name" class="form-label mb-1">Project Name *</label>
                   <input type="text" class="form-control" id="project_name" name="project_name" required>
                 </div>
               </div>
-              <div class="col-lg-4">
+              <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="structure" class="form-label mb-1">Structure</label>
                     <div class="input-group">
@@ -37,6 +37,23 @@
                       </select>
                       <span class="input-group-addon"><a href="#" id="get_items" name="get_items" class="btn btn-success"><i class="fa fa-plus"></i></a></span>
                     </div>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="mb-3">
+                  <label for="requested_by" class="form-label mb-1">Requested By</label>
+                    <select id="requested_by" class="form-control" name="requested_by" required>
+                      @foreach ($users as $user)          
+                        <option value="{{ $user->id }}" id="">
+                          {{ $user->name }} | 
+                          @if(!empty($user->getRoleNames()))
+                            @foreach($user->getRoleNames() as $v)
+                                <label class="badge bg-secondary">{{ $v }}</label>
+                            @endforeach
+                          @endif
+                        </option>
+                      @endforeach 
+                    </select>
                 </div>
               </div>
               <div class="col-lg-8">
@@ -53,7 +70,7 @@
               </div>
               <div class="col-lg-3">
                 <div class="mb-3">
-                  <label for="structure" class="form-label mb-1">Approved By:</label>
+                  <label for="structure" class="form-label mb-1">Approved By</label>
                     <select id="approved_by" class="form-control" name="approved_by" required>
                       @foreach ($users as $user)          
                         <option value="{{ $user->id }}" id="">
@@ -111,7 +128,7 @@
                       <th width="20px">Action</th>
                     </tr>
                     <tbody id="show_data">
-                      @include('power_house.warehousing.material_requisition_form_get_items')
+                      @include('power_house.warehousing.material_requisition_form_get_temp_items')
                     </tbody>
                    </table>
                 </div>

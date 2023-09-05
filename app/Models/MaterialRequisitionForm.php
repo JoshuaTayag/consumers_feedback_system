@@ -9,6 +9,28 @@ class MaterialRequisitionForm extends Model
 {
     use HasFactory;
 
+    public function getRequestedNameAttribute()
+    {
+        $user = User::where('id', $this->requested_id)
+            ->get();
+        $employee = $user[0]->employee;
+        if($employee){
+            return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
+        }
+        return $user[0]->name;
+    }
+
+    public function getApprovedNameAttribute()
+    {
+        $user = User::where('id', $this->approved_id)
+            ->get();
+        $employee = $user[0]->employee;
+        if($employee){
+            return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
+        }
+        return $user[0]->name;
+    }
+
     public function items()
     {
         return $this->hasMany('App\Models\MaterialRequisitionFormItems');
@@ -28,6 +50,18 @@ class MaterialRequisitionForm extends Model
     {
         return $this->belongsTo('App\Models\Barangay', 'barangay_id', 'id');
     }
+
+    public function user_requested()
+    {
+        return $this->belongsTo('App\Models\User', 'requested_id', 'id');
+    }
+
+    public function user_approved()
+    {
+        return $this->belongsTo('App\Models\User', 'approved_id', 'id');
+    }
+
+    
     
     protected $fillable = [ 'project_name', 
                             'district_id', 

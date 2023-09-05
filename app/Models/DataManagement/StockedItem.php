@@ -19,17 +19,9 @@ class StockedItem extends Model
         return $this->belongsTo('App\Models\Datamanagement\StructureItem');
     }
 
-    public function mrf()
+    public function mrf_item()
     {
         return $this->belongsTo('App\Models\MaterialRequisitionFormItems');
-    }
-
-    public function posts()
-    {
-        return $this->hasManyThrough(
-                                    'App\Models\MaterialRequisitionForm', 'App\Models\MaterialRequisitionFormItems',
-                                    'item_id', 'material_requisition_form_id', 'id'
-                                        );
     }
 
     protected $connection = 'mysqlCmbis';

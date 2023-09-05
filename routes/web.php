@@ -69,6 +69,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('users/update/{id}', [App\Http\Controllers\Auth\UserController::class, 'update'])->name('userUpdate');
     Route::delete('users/{id}', [App\Http\Controllers\Auth\UserController::class, 'destroy'])->name('userDestroy');
 
+    // employees
+    Route::resource('employee', App\Http\Controllers\EmployeeController::class);
+
     // roles and permissions
     Route::resource('teller', App\Http\Controllers\PowerBill\TellerController::class);
 
@@ -93,6 +96,22 @@ Route::group(['middleware' => 'auth'], function () {
     // MRF
     Route::resource('material-requisition-form', App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class);
     Route::get('fetch-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getItems'])->name('getItems');
+    Route::post('mrf-edit-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItems'])->name('mrfUpdateItems');
+    Route::post('mrf-edit-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItem'])->name('mrfUpdateItem');
+    Route::post('mrf-edit-material-code', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItemCode'])->name('mrfUpdateItemCode');
+    Route::post('mrf-edit-material-quantity', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItemQuantity'])->name('mrfUpdateItemQuantity');
+    Route::post('mrf-edit-material-cost', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItemCost'])->name('mrfUpdateItemCost');
+    Route::delete('mrf-delete-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfDeleteItem'])->name('mrfDeleteItem');
+    Route::get('mrf-approval', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfApprovalIndex'])->name('mrfApprovalIndex');
+    Route::put('mrf-approval/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfApprovalUpdate'])->name('mrfApprovalUpdate');
+    Route::get('mrf-print-pdf/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfPrintPdf'])->name('mrfPrintPdf');
+    Route::get('mrf-liquidate/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidate'])->name('mrfLiquidate');
+    Route::get('fetch-mrv-records', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getMrvs'])->name('fetchMrvs');
+    Route::get('fetch-seriv-records', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getSerivs'])->name('fetchSerivs');
+    Route::put('mrf-create-liquidation/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationCreate'])->name('mrfLiquidationCreate');
+
+
+    //TEMP MRF
     Route::post('edit-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItems'])->name('updateItems');
     Route::post('edit-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItem'])->name('updateItem');
     Route::post('edit-material-code', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItemCode'])->name('updateItemCode');

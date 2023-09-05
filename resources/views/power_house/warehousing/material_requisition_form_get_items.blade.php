@@ -1,24 +1,47 @@
-@foreach ($temp_items as $index => $temp_item)
+@foreach ($mrf->items as $index => $mrf_item)
 <tr id="{{ $loop->iteration }}">
   <th>
-    {{-- <input type="text" name="temp_nea_code|{{$temp_item->id}}" class="form-control" placeholder="{{$temp_item->item->ItemCode}}"> --}}
-    <a href="" class="updateCode form-control" data-name="code" data-type="text" data-pk="{{ $temp_item->id }}" data-title="Enter code">{{ $temp_item->nea_code }}</a>
+    @if($mrf->status == 0)
+    <a href="" class="updateCode form-control" data-name="code" data-type="text" data-pk="{{ $mrf_item->id }}" data-title="Enter code">{{ $mrf_item->nea_code }}</a>
+    @else
+      <input type="text" class="form-control" value="{{ $mrf_item->nea_code }}" readonly>
+    @endif
   </th>
   <th>
-    <input type="text" class="form-control" value="{{$temp_item->item->Description}}" readonly>
+    <input type="text" class="form-control" value="{{$mrf_item->item->Description}}" readonly>
   </th>
   <th>
-    <input type="number" class="form-control" value="{{$temp_item->item->AveragePrice}}" readonly>
+    <input type="number" class="form-control" value="{{$mrf_item->item->AveragePrice}}" readonly>
   </th>
   <th>
-    <a href="" class="updateQuantity form-control" data-name="1000" data-type="number" data-pk="{{ $temp_item->id }}" data-title="Enter quantity">{{ $temp_item->quantity }}</a>
+    @if($mrf->status == 0)
+      <a href="" class="updateQuantity form-control" data-name="1000" data-type="number" data-pk="{{ $mrf_item->id }}" data-title="Enter quantity">{{ $mrf_item->quantity }}</a>
+    @elseif(isset($liquidation))
+      <input type="hidden" class="form-control" name="item_ids[]" value="{{ $mrf_item->id }}">
+      <input type="number" class="form-control" min="0" max="{{ $mrf_item->quantity }}" name="quantity[]" value="{{ $mrf_item->quantity }}">
+    @else
+      <input type="number" class="form-control" value="{{ $mrf_item->quantity }}" readonly>
+    @endif
+  </th>
+  
+  @if($mrf->status == 2)
+    <th>
+      <input type="number" class="form-control" value="{{ $mrf_item->liquidation_quantity }}" readonly>
+    </th>
+  @endif
+  
+  <th>
+    {{-- <input type="number" name="temp_cost|{{$mrf_item->id}}" class="form-control" value="{{$mrf_item->unit_cost}}" required> --}}
+    @if($mrf->status == 0)
+      <a href="" class="updateCost form-control" data-name="cost" data-type="number" data-pk="{{ $mrf_item->id }}" data-title="Enter unit cost" disabled>{{ $mrf_item->unit_cost }}</a>
+    @else
+      <input type="number" class="form-control" value="{{ $mrf_item->unit_cost }}" readonly>
+    @endif
   </th>
   <th>
-    {{-- <input type="number" name="temp_cost|{{$temp_item->id}}" class="form-control" value="{{$temp_item->unit_cost}}" required> --}}
-    <a href="" class="updateCost form-control" data-name="cost" data-type="number" data-pk="{{ $temp_item->id }}" data-title="Enter unit cost">{{ $temp_item->unit_cost }}</a>
-  </th>
-  <th>
-    <a href="#"  class="btn btn-danger" onclick="removeItem({{$temp_item->id}})"><i class="fa fa-times"></i></a>
+    @if($mrf->status == 0)
+    <a href="#"  class="btn btn-danger" onclick="removeItem({{$mrf_item->id}})"><i class="fa fa-times"></i></a>
+    @endif
   </th>
 </tr>
 @endforeach

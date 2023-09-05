@@ -12,6 +12,21 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
+
+    public function employee()
+    {
+        return $this->hasOne('App\Models\Employee');
+    }
+
+    public function requested_mrf()
+    {
+        return $this->hasMany('App\Models\MaterialRequisitionForm');
+    }
+
+    public function approved_mrf()
+    {
+        return $this->hasMany('App\Models\MaterialRequisitionForm');
+    }
     
     /**
      * The attributes that are mass assignable.

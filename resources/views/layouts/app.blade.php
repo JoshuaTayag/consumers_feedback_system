@@ -76,14 +76,15 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     {{-- <ul class="navbar-nav me-auto">
-                        <li>
-                        <a class="dropdown-item" href="#">Action</a>
-                        </li>
+                        
                     </ul> --}}
                     @auth
                         @if(Auth::user()->hasRole('Consumer'))
                             <a class="dropdown-item" href="{{ route('roles.index') }}">E-Pre Membership Seminar</a>
                         @else
+                            <a href="{{route('home')}}" class="pr-3">
+                                <img src="{{asset('images/logo.png')}}" style="width: 50px" alt="...">
+                            </a>
                             @include('layouts.navigation')
                         @endif
                     @endauth
@@ -99,6 +100,9 @@
                                     <ul class="dropdown-menu" aria-labelledby="navbarManagementDropdown">
                                     <li>
                                         <a class="dropdown-item" href="{{ route('users.index') }}">USER MANAGEMENT</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('employee.index') }}">EMPLOYEE MANAGEMENT</a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" href="{{ route('roles.index') }}">ROLES MANAGEMENT</a>

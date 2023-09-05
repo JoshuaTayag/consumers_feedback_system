@@ -21,9 +21,9 @@ class StructureItem extends Model implements Auditable
         return $this->belongsTo('App\Models\Datamanagement\Structure', 'structure_id', 'id');
     }
 
-    public function items()
+    public function item()
     {
-        return $this->hasMany('App\Models\Datamanagement\StockedItem', 'ItemId', 'item_id');
+        return $this->hasOne('App\Models\Datamanagement\StockedItem', 'ItemId', 'item_id');
     }
     
     protected $fillable = [ 'structure_id', 
