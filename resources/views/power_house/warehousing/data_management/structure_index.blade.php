@@ -29,11 +29,11 @@
                  <tr>
                    <td>{{ $structure->structure_code }}</td>
                    <td>{{ $structure->remarks }}</td>
-                   <td>{{ $structure->structure_items[0] }}</td>
+                   {{-- <td>{{ $structure->structure_items[0] }}</td> --}}
                    <td>{{ $structure->status == 1 ? "Active" : "In Active"  }}</td>
                    <td>
-                      <a class="btn btn-primary" href="{{ route('users.edit',$structure->id) }}">Edit</a>
-                       {!! Form::open(['method' => 'DELETE','route' => ['userDestroy', $structure->id],'style'=>'display:inline']) !!}
+                      <a class="btn btn-primary" href="{{ route('structure.edit',$structure->id) }}">Edit</a>
+                       {!! Form::open(['method' => 'DELETE','route' => ['structure.destroy', $structure->id],'style'=>'display:inline']) !!}
                            {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
                        {!! Form::close() !!}
                    </td>

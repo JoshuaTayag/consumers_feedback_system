@@ -314,7 +314,7 @@ class MaterialRequisitionFormController extends Controller
                         array("nea_code" => $item->item->ItemCode,
                                 "material_requisition_form_id" => $mrf_id,
                                 "item_id" => $item->item_id,
-                                "quantity" => 1,
+                                "quantity" => $item->quantity,
                                 "unit_cost" => $item->unit_cost,
                                 )
                     );
@@ -323,7 +323,7 @@ class MaterialRequisitionFormController extends Controller
                     DB::table('material_requisition_form_items')
                     ->where('id', $mrf_item->id)
                     ->update(
-                        array("quantity" => $mrf_item->quantity+1)
+                        array("quantity" => $mrf_item->quantity+$item->quantity)
                     );
                 }
                 
@@ -454,7 +454,7 @@ class MaterialRequisitionFormController extends Controller
                                 "nea_code" => $stocked_item->ItemCode,
                                 "material_requisition_form_id" => 1,
                                 "item_id" => $item->item_id,
-                                "quantity" => 1,
+                                "quantity" => $item->quantity,
                                 "unit_cost" => $item->unit_cost,
                                 )
                     );
@@ -463,7 +463,7 @@ class MaterialRequisitionFormController extends Controller
                     DB::table('temp_material_requisition_form_items')
                     ->where('id', $temp_item->id)
                     ->update(
-                        array("quantity" => $temp_item->quantity+1)
+                        array("quantity" => $temp_item->quantity+$item->quantity)
                     );
                 }
                 

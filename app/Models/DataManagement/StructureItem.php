@@ -28,6 +28,7 @@ class StructureItem extends Model implements Auditable
     
     protected $fillable = [ 'structure_id', 
                             'item_id',
-                            'unit_cost'
+                            'unit_cost',
+                            'quantity'
                           ];
 }

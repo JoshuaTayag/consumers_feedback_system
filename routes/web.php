@@ -93,6 +93,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('structure', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class);
     Route::get('fetch-items', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'fetchItemsFromCmbis'])->name('fetchItems');
 
+    // TEMP Structures
+    Route::post('edit-structure-items', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'updateStructureItem'])->name('updateStructureItem');
+    Route::post('temp-structure-edit-quantity', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'structureUpdateQuantity'])->name('structureUpdateQuantity');
+    Route::post('temp-structure-edit-cost', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'structureUpdateCost'])->name('structureUpdateCost');
+    Route::delete('temp-structure-delete-item', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'structureDeleteItem'])->name('structureDeleteItem');
+
     // MRF
     Route::resource('material-requisition-form', App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class);
     Route::get('fetch-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getItems'])->name('getItems');

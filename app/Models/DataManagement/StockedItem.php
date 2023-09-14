@@ -19,6 +19,11 @@ class StockedItem extends Model
         return $this->belongsTo('App\Models\Datamanagement\StructureItem');
     }
 
+    public function temp_structure()
+    {
+        return $this->belongsTo('App\Models\Temporary\TemporaryStructureItem');
+    }
+
     public function mrf_item()
     {
         return $this->belongsTo('App\Models\MaterialRequisitionFormItems');
