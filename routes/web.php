@@ -88,6 +88,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('lifeline-generate-pdf/{id}', [App\Http\Controllers\LifelineController::class, 'lifelineCoverageCertificate'])->name('lifelineCoverageCertificate');
     Route::get('lifeline-report', [App\Http\Controllers\LifelineController::class, 'lifelineReport'])->name('lifeline.report');
     Route::get('lifeline-report-generate', [App\Http\Controllers\LifelineController::class, 'lifelineGenerateReport'])->name('lifeline.generate.report');
+    Route::get('fetch-lifelines', [App\Http\Controllers\LifelineController::class, 'fetchLifelineApplication'])->name('fetchLifelineApplication');
 
     // Strucutures
     Route::resource('structure', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class);
@@ -115,6 +116,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('fetch-mrv-records', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getMrvs'])->name('fetchMrvs');
     Route::get('fetch-seriv-records', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getSerivs'])->name('fetchSerivs');
     Route::put('mrf-create-liquidation/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationCreate'])->name('mrfLiquidationCreate');
+    Route::get('view-liquidated-mrf/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'viewLiquidatedMrf'])->name('viewLiquidatedMrf');
+    Route::get('mrf-liquidation-report-pdf', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationReport'])->name('mrfLiquidationReport');
 
 
     //TEMP MRF
@@ -126,7 +129,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::delete('delete-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'deleteItem'])->name('removeItem');
 
     // Strucutures
-    Route::resource('signatory', App\Http\Controllers\SignatoryController::class);
+    // Route::resource('signatory', App\Http\Controllers\SignatoryController::class);
 });
 
 Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])->name('online.pms')->middleware(['auth', 'verified']);

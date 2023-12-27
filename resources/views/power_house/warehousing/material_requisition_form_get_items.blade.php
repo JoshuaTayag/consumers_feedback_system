@@ -15,7 +15,7 @@
   </th>
   <th>
     @if($mrf->status == 0)
-      <a href="" class="updateQuantity form-control" data-name="1000" data-type="number" data-pk="{{ $mrf_item->id }}" data-title="Enter quantity">{{ $mrf_item->quantity }}</a>
+      <a href="" class="updateQuantity form-control" data-name="1000" data-type="number" data-pk="{{ $mrf_item->id }}" data-title="Enter quantity" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>{{ $mrf_item->quantity }}</a>
     @elseif(isset($liquidation))
       <input type="hidden" class="form-control" name="item_ids[]" value="{{ $mrf_item->id }}">
       <input type="number" class="form-control" min="0" max="{{ $mrf_item->quantity }}" name="quantity[]" value="{{ $mrf_item->quantity }}">

@@ -82,13 +82,51 @@
                                         <option value="OSS Calubian Herrera" @selected($pre_member->place_conducted == 'OSS Calubian Herrera' )>OSS Calubian Herrera</option>
                                         <option value="OSS Calubian Ul-og" @selected($pre_member->place_conducted == 'OSS Calubian Ul-og' )>OSS Calubian Ul-og</option>
                                         <option value="OSS Calubian F.E. Marcos" @selected($pre_member->place_conducted == 'OSS Calubian F.E. Marcos' )>OSS Calubian F.E. Marcos</option>
-                                        <option value="SEP Mahayag Ormoc" @selected($pre_member->place_conducted == 'SEP Mahayag Ormoc' )>SEP Mahayag Ormoc</option>
+					                    <option value="SEP Mahayag Ormoc" @selected($pre_member->place_conducted == 'SEP Mahayag Ormoc' )>SEP Mahayag Ormoc</option>
                                         <option value="SEP Mahayahay II San Isidro" @selected($pre_member->place_conducted == 'SEP Mahayahay II San Isidro' )>SEP Mahayahay II San Isidro</option>
                                         <option value="SEP San Isidro Kananga" @selected($pre_member->place_conducted == 'SEP San Isidro Kananga' )>SEP San Isidro Kananga</option>
                                         <option value="SEP San Andres San Isidro Kananga" @selected($pre_member->place_conducted == 'SEP San Andres San Isidro Kananga' )>SEP San Andres San Isidro Kananga</option>
                                         <option value="SEP Dapanas San Isidro Kananga" @selected($pre_member->place_conducted == 'SEP Dapanas San Isidro Kananga' )>SEP Dapanas San Isidro Kananga</option>
                                         <option value="OSS Merida Puertobello" @selected($pre_member->place_conducted == 'OSS Merida Puertobello' )>OSS Merida Puertobello</option>
                                         <option value="OSS Albuera Mahayahay" @selected($pre_member->place_conducted == 'OSS Albuera Mahayahay' )>OSS Albuera Mahayahay</option>
+
+                                        <option value="OSS Ormoc Lao" @selected($pre_member->place_conducted == 'OSS Ormoc Lao' )>OSS Ormoc Lao</option>
+                                        <option value="OSS Ormoc Libertad" @selected($pre_member->place_conducted == 'OSS Ormoc Libertad' )>OSS Ormoc Libertad</option>
+                                        <option value="OSS Ormoc R.M. Tan" @selected($pre_member->place_conducted == 'OSS Ormoc R.M. Tan' )>OSS Ormoc R.M. Tan</option>
+                                        <option value="OSS Ormoc Manlilinao" @selected($pre_member->place_conducted == 'OSS Ormoc Manlilinao' )>OSS Ormoc Manlilinao</option>
+                                        <option value="OSS Ormoc Mabato" @selected($pre_member->place_conducted == 'OSS Ormoc Mabato' )>OSS Ormoc Mabato</option>
+                                        <option value="OSS Ormoc Valencia" @selected($pre_member->place_conducted == 'OSS Ormoc Valencia' )>OSS Ormoc Valencia</option>
+                                        <option value="OSS Ormoc Guintigui-an" @selected($pre_member->place_conducted == 'OSS Ormoc Guintigui-an' )>OSS Ormoc Guintigui-an</option>
+                                        <option value="OSS Ormoc Matica-a" @selected($pre_member->place_conducted == 'OSS Ormoc Matica-a' )>OSS Ormoc Matica-a</option>
+                                        <option value="OSS Ormoc San Jose" @selected($pre_member->place_conducted == 'OSS Ormoc San Jose' )>OSS Ormoc San Jose</option>
+                                        <option value="OSS Ormoc Curva" @selected($pre_member->place_conducted == 'OSS Ormoc Curva' )>OSS Ormoc Curva</option>
+                                        <option value="OSS Ormoc Sumangga" @selected($pre_member->place_conducted == 'OSS Ormoc Sumangga' )>OSS Ormoc Sumangga</option>
+                                        <option value="OSS Ormoc San Juan" @selected($pre_member->place_conducted == 'OSS Ormoc San Juan' )>OSS Ormoc San Juan</option>
+                                        <option value="OSS Ormoc Margen" @selected($pre_member->place_conducted == 'OSS Ormoc Margen' )>OSS Ormoc Margen</option>
+                                        <option value="SEP Ormoc Green Valley" @selected($pre_member->place_conducted == 'SEP Ormoc Green Valley' )>SEP Ormoc Green Valley</option>
+                                        <option value="SEP Isabel Honan" @selected($pre_member->place_conducted == 'SEP Isabel Honan' )>SEP Isabel Honan</option>
+
+                                        <option value="OSS Palompon Rizal" @selected($pre_member->place_conducted == 'OSS Palompon Rizal')>OSS Palompon Rizal</option>
+                                        <option value="OSS Ormoc Green Valley" @selected($pre_member->place_conducted == 'OSS Ormoc Green Valley')>OSS Ormoc Green Valley</option>
+                                        <option value="SEP Tabango Tagaytay" @selected($pre_member->place_conducted == 'SEP Tabango Tagaytay')>SEP Tabango Tagaytay</option>
+                                        <option value="SEP Leyte Consuegra" @selected($pre_member->place_conducted == 'SEP Leyte Consuegra')>SEP Leyte Consuegra</option>
+                                        <option value="SEP San Isidro Busay" @selected($pre_member->place_conducted == 'SEP San Isidro Busay')>SEP San Isidro Busay</option>
+                                        <option value="SEP Tabango Gimarco" @selected($pre_member->place_conducted == 'SEP Tabango Gimarco')>SEP Tabango Gimarco</option>
+                                        <option value="SEP Tabango Manlawa-an" @selected($pre_member->place_conducted == 'SEP Tabango Manlawa-an')>SEP Tabango Manlawa-an</option>
+                                        <option value="SEP Calubian Matagok" @selected($pre_member->place_conducted == 'SEP Calubian Matagok')>SEP Calubian Matagok</option>
+                                        <option value="SEP Calubian Enage" @selected($pre_member->place_conducted == 'SEP Calubian Enage')>SEP Calubian Enage</option>
+                                        <option value="SEP Leyte Calaguise" @selected($pre_member->place_conducted == 'SEP Leyte Calaguise')>SEP Leyte Calaguise</option>
+                                        <option value="SEP Villaba Jalas" @selected($pre_member->place_conducted == 'SEP Villaba Jalas')>SEP Villaba Jalas</option>
+                                        <option value="SEP Palompon Tinubdan" @selected($pre_member->place_conducted == 'SEP Palompon Tinubdan')>SEP Palompon Tinubdan</option>
+                                        <option value="SEP Merida Benabaye" @selected($pre_member->place_conducted == 'SEP Merida Benabaye')>SEP Merida Benabaye</option>
+                                        <option value="SEP Matag-ob Bulak" @selected($pre_member->place_conducted == 'SEP Matag-ob Bulak')>SEP Matag-ob Bulak</option>
+                                        <option value="SEP Calubian Igang" @selected($pre_member->place_conducted == 'SEP Calubian Igang')>SEP Calubian Igang</option>
+                                        <option value="SEP Tabango Campokpok" @selected($pre_member->place_conducted == 'SEP Tabango Campokpok')>SEP Tabango Campokpok</option>
+                                        <option value="SEP Leyte Poblacion" @selected($pre_member->place_conducted == 'SEP Leyte Poblacion')>SEP Leyte Poblacion</option>
+                                        <option value="OSS Ormoc Esperanza" @selected($pre_member->place_conducted == 'OSS Ormoc Esperanza')>OSS Ormoc Esperanza</option>
+                                        <option value="SEP Merida Canbantug" @selected($pre_member->place_conducted == 'SEP Merida Canbantug')>SEP Merida Canbantug</option>
+                                        <option value="SEP Ormoc Magaswe" @selected($pre_member->place_conducted == 'SEP Ormoc Magaswe')>SEP Ormoc Magaswe</option>
+                                        <option value="SEP Leyte Burabod" @selected($pre_member->place_conducted == 'SEP Leyte Burabod')>SEP Leyte Burabod</option>
                                     </select>
                                 </div>
                             </div>

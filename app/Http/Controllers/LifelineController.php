@@ -213,7 +213,7 @@ class LifelineController extends Controller
                 'date_of_birth' => ['required', 'string', 'max:255'],
                 'marital_status' => ['required', 'string', 'max:255'],
                 'ownership' => ['required', 'string', 'max:255'],
-                'electric_service_details' => ['required', 'unique:lifelines,account_no,'.$id],
+                // 'electric_service_details' => ['required', 'unique:lifelines,account_no,'.$id],
                 'id_no' => ['required', 'string', 'max:255', 'unique:lifelines,valid_id_no,'.$id],
                 'type_of_id' => ['required'],
                 'household_id_no' => ['required', 'string', 'max:255', 'unique:lifelines,pppp_id,'.$id],
@@ -572,6 +572,23 @@ class LifelineController extends Controller
         // }
         
         
+    }
+
+    public function fetchLifelineApplication(Request $request)
+    {
+        $lifeline_datas = Lifeline::orderBy('id', 'desc')->paginate(10);
+        
+        if($request->ajax()){
+            
+            $lifeline_datas = Lifeline::where('control_no', 'LIKE', '%'.$request->control_number.'%')
+            ->where('first_name', 'LIKE', '%'.$request->fname.'%')
+            ->where('last_name', 'LIKE', '%'.$request->lname.'%')
+            ->paginate(10);
+            
+            return view('lifeline.search')->with(compact('lifeline_datas'))->render();
+        }
+
+        return view('lifeline.index')->with(compact('lifeline_datas'));
     }
 
  

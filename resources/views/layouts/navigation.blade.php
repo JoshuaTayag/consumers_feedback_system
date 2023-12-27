@@ -13,12 +13,25 @@
           <li>
             <a class="dropdown-item" href="{{ route('pre_membership_index') }}">PRE-MEMBERSHIP</a>
           </li>
+
+          <!-- <li>
+            <a class="dropdown-item" href="#">PRE-MEMBERSHIP &raquo; </a>
+            <ul class="dropdown-menu dropdown-submenu">
+              <li>
+                <a class="dropdown-item" href="{{ route('lifeline.index') }}">APPLY FOR LIFELINE</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('lifeline.report') }}">REPORTS</a>
+              </li>
+            </ul>
+          </li> -->
+
           <li>
             <a class="dropdown-item" href="{{ route('membership.index') }}">MEMBERSHIP</a>
           </li>
-          <li>
+          <!-- <li>
             <a class="dropdown-item" href="{{ route('service-connect-order.index') }}">SERVICE CONNECT ORDER</a>
-          </li>
+          </li> -->
           {{-- <li>
             <a class="dropdown-item" href="{{ route('lifeline.index') }}">APPLY FOR LIFELINE</a>
           </li> --}}
@@ -106,11 +119,11 @@
         <a class="dropdown-item" href="#">
           PURCHASING&raquo;
         </a>
-        <ul class="dropdown-menu dropdown-submenu">
+        <!-- <ul class="dropdown-menu dropdown-submenu">
           <li>
             <a class="dropdown-item" href="{{ route('pre_membership_index') }}">CANVASS</a>
           </li>
-        </ul>
+        </ul> -->
       </li>
       <li>
         <a class="dropdown-item" href="#">

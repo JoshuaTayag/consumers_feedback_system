@@ -367,6 +367,50 @@
             [
                 "id" => 7,
                 "name" => "Senior Citizen ID"
+            ],
+            [
+                "id" => 8,
+                "name" => "Driver’s License"
+            ],
+            [
+                "id" => 9,
+                "name" => "4PS ID"
+            ],
+            [
+                "id" => 10,
+                "name" => "Passport"
+            ],
+            [
+                "id" => 11,
+                "name" => "Person’s With Disability (PWD) ID"
+            ],
+            [
+                "id" => 12,
+                "name" => "NBI Clearance"
+            ],
+            [
+                "id" => 13,
+                "name" => "COMELEC / Voter’s ID / COMELEC Registration Form"
+            ]
+            
+        ],
+
+        'area_id' => [
+            [
+                "id" => 1,
+                "name" => "Area I"
+            ],
+            [
+                "id" => 2,
+                "name" => "Area II"
+            ],
+            [
+                "id" => 3,
+                "name" => "Area III"
+            ],
+            [
+                "id" => 4,
+                "name" => "Area IV"
             ]
         ],
     ];

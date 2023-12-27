@@ -18,8 +18,8 @@
           </div>
         </div>
         <div class="card-body">
-          {!! Form::open(array('route' => ['mrfLiquidationCreate', $mrf->id],'method'=>'PUT')) !!}
-          {{$liquidation = true}}
+          {!! Form::open(array('route' => ['mrfLiquidationCreate', $mrf->id],'method'=>'PUT', 'enctype' => 'multipart/form-data')) !!}
+          @php $liquidation = true; @endphp
             <div class="row">
               <div class="col-lg-4 d-flex">
                 <div class="card w-100" style="height:auto;">
@@ -95,6 +95,7 @@
                 </div>
               </div>
             </div>
+
             <div class="row pt-4">
               <div class="col-lg-12">
                 <div class="card">
@@ -124,6 +125,69 @@
               <div class="col-lg-12">
                 <div class="card">
                   <div class="card-header bg-info">
+                    Action
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-lg-3">
+                        <div class="mb-2">
+                          <label for="date_acted" class="form-label mb-1">Date Acted *</label>
+                          <input type="date" class="form-control" id="date_acted" name="date_acted" required>
+                        </div>
+                      </div>
+                      <div class="col-lg-3">
+                        <div class="mb-2">
+                          <label for="date_finished" class="form-label mb-1">Date Finished *</label>
+                          <input type="date" class="form-control" id="date_finished" name="date_finished" required>
+                        </div>
+                      </div>
+                      <div class="col-lg-3">
+                        <div class="mb-2">
+                          <label for="lineman" class="form-label mb-1">Lineman/s *</label>
+                          <input type="text" class="form-control" id="lineman" name="lineman" required>
+                        </div>
+                      </div>
+                      <div class="col-lg-3">
+                        <div class="mb-2">
+                          <label for="image_path" class="form-label mb-1">Upload Image</label>
+                          <input type="file" class="form-control" id="image_path" name="image_path">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-lg-9">
+                        <div class="mb-2">
+                          <label for="remarks" class="form-label mb-1">Remarks</label>
+                          <textarea class="form-control" name="remarks" id="exampleFormControlTextarea1" style="width: 100% !important;" >{{old('remarks')}}</textarea>
+                        </div>
+                      </div>
+                      <div class="col-lg-3">
+                        <div class="row">
+                          <div class="col-lg-12">
+                            <div class="mb-2">
+                              <label for="mcrt_no" class="form-label mb-1">MCRT No *</label>
+                              <input type="text" class="form-control" id="mcrt_no" name="mcrt_no" required>
+                            </div>
+                          </div>
+                          <div class="col-lg-12">
+                            <div class="mb-2">
+                              <label for="mst_no" class="form-label mb-1">MST No *</label>
+                              <input type="text" class="form-control" id="mst_no" name="mst_no" required>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- <div class="row pt-4">
+              <div class="col-lg-12">
+                <div class="card">
+                  <div class="card-header bg-info">
                     Liquidate
                   </div>
                   <div class="card-body">
@@ -147,26 +211,14 @@
                       <div class="col-lg-2">
                         <div class="mb-2">
                           <label for="wo_no" class="form-label mb-1">WO No. </label>
-                          <input type="text" class="form-control" id="wo_no" name="wo_no" required>
-                        </div>
-                      </div>
-                      <div class="col-lg-2">
-                        <div class="mb-2">
-                          <label for="mcrt_no" class="form-label mb-1">MCRT No *</label>
-                          <input type="text" class="form-control" id="mcrt_no" name="mcrt_no" required>
-                        </div>
-                      </div>
-                      <div class="col-lg-2">
-                        <div class="mb-2">
-                          <label for="mst_no" class="form-label mb-1">MST No *</label>
-                          <input type="text" class="form-control" id="mst_no" name="mst_no" required>
+                          <input type="text" class="form-control" id="wo_no" name="wo_no">
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
             <div class="row">
               <div class="col-lg-6">
                 <input type="submit" class="btn btn-primary btn-sm fa fa-trash" value="Save">

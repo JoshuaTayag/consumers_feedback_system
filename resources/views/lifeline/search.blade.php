@@ -63,6 +63,95 @@
 @section('script')
 <script type="text/javascript">
 $(document).ready(function () {
+    if($('#control_number').val() || $('#first_name').val() || $('#last_name').val()){
+        var getFirstName = $('#first_name').val();
+        var getLastName = $('#last_name').val();
+        var getControlNo = $('#control_number').val();
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            $.ajax({
+            method: 'GET',
+            url: "{{route('fetchLifelineApplication')}}",
+            data: {
+                fname:getFirstName,
+                lname:getLastName,
+                control_number:getControlNo
+            },
+            success:function(response){
+                $("#show_data").html(response);
+                $('#pagination').delay(500).fadeOut('fast');
+            }
+            });
+        }, 500);
+    }
+
+    var timeout = null;
+        $('#control_number').keyup(function() {
+        var getFirstName = $('#first_name').val();
+        var getLastName = $('#last_name').val();
+        var getControlNo = $(this).val();
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            $.ajax({
+            method: 'GET',
+            url: "{{route('fetchLifelineApplication')}}",
+            data: {
+                fname:getFirstName,
+                lname:getLastName,
+                control_number:getControlNo
+            },
+            success:function(response){
+                $("#show_data").html(response);
+                $('#pagination').delay(500).fadeOut('fast');
+            }
+            });
+        }, 500);
+    });
+
+    $('#first_name').keyup(function() {
+        var getFirstName = $(this).val();
+        var getLastName = $('#last_name').val();
+        var getControlNo = $('#control_number').val();
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            $.ajax({
+            method: 'GET',
+            url: "{{route('fetchLifelineApplication')}}",
+            data: {
+                fname:getFirstName,
+                lname:getLastName,
+                control_number:getControlNo
+            },
+            success:function(response){
+                console.log(response)
+                $("#show_data").html(response);
+                $('#pagination').delay(500).fadeOut('fast');
+            }
+            });
+        }, 500);
+    });
+
+    $('#last_name').keyup(function() {
+        var getFirstName = $('#first_name').val();
+        var getLastName = $(this).val();
+        var getControlNo = $('#control_number').val();
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            $.ajax({
+            method: 'GET',
+            url: "{{route('fetchLifelineApplication')}}",
+            data: {
+                fname:getFirstName,
+                lname:getLastName,
+                control_number:getControlNo
+            },
+            success:function(response){
+                $("#show_data").html(response);
+                $('#pagination').delay(500).fadeOut('fast');
+            }
+            });
+        }, 500);
+    });
 
     $('.confirm-print').click(function(event) {
         var form =  $(this).closest("form");

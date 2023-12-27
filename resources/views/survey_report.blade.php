@@ -65,7 +65,10 @@
             var range_value = $('#date_range').val();
             var type = $('#type').val();
             var text_type = $( "#type option:selected" ).text();
-
+            var arr = range_value.split('-');
+            var from = new Date(arr[0]).toDateString();
+            var to = new Date(arr[1]).toDateString();
+            // console.log(from);
             $.ajax({
                 url: "{{url('api/fetch-survey')}}",
                 type: "POST",
@@ -76,7 +79,7 @@
                 },
                 dataType: 'json',
                 success: function (result) {
-                    $("#period").text("Period: "+range_value);
+                    $("#period").text("Period: "+from+" - " + to);
                     $("#text_type").text("Window: "+text_type);
                     var data_chart = [];
                     $.each(result.survey_result, function (key, value) {
@@ -108,7 +111,7 @@
                                 startAngle: 45,
                                 showInLegend: "true",
                                 legendText: "{label}",
-                                indexLabel: "{label} ({y}) #percent%",
+                                indexLabel: "{label} ({y})",
                                 yValueFormatString:"#,##0.#"%"",
                                 dataPoints: data_chart
                         }]

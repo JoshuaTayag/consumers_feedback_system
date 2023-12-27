@@ -12,6 +12,7 @@
                       <span class="mb-0 align-middle fs-3">Material Requisition Form</span>
                   </div>
                   <div class="col-lg-6 text-end">
+                    <a class="btn btn-success" href="{{ route('mrfLiquidationReport') }}" target="_blank"> <i class="fa fa-eye"></i> Liquidation Report </a>
                     @if($unliquidated_mrf < 5)
                       <a class="btn btn-success" href="{{ route('material-requisition-form.create') }}"> Create New Form </a>
                     @endif
@@ -30,7 +31,8 @@
                   <th style="min-width: 60px;">Action</th>
                 </tr>
                 <tbody>
-                  @foreach ($mrfs as $index => $mrf)                        
+                  @foreach ($mrfs as $index => $mrf)  
+                  @php $liquidation = $liquidations->where('material_requisition_form_id', $mrf->id)->count(); @endphp                      
                     <tr class="text-center">
                         <th>{{ $mrf->project_name }}</th>
                         <th>{{ $mrf->district->district_name }}, {{ $mrf->barangay->barangay_name }}, {{ $mrf->municipality->municipality_name }}</th>
@@ -45,8 +47,9 @@
                         </th> --}}
                         <th>{{ $mrf->requested_name }}</th>
                         <th>{{ date('F d, Y', strtotime($mrf->requested_by)) }}</th>
-                        <th class="badge rounded-pill text-white bg-{{ $mrf->status == 0 ? 'primary' : ($mrf->status == 1 ? 'success' : ($mrf->status == 2 ? 'warning' : 'danger')) }}"  >{{ $mrf->status == 0 ? "Pending" : ($mrf->status == 1 ? 'Approved' : ($mrf->status == 2 ? 'Liquidated' : "DisApproved")) }}</th>
+                        <th class="badge rounded-pill text-white bg-{{ $mrf->status == 0 ? 'secondary' : ($mrf->status == 1 && $liquidation == 0 ? 'success' : ($mrf->status == 2 && $liquidation != 0 ? 'primary' : ($mrf->status == 3 ? 'warning' : 'danger'))) }}"  >{{ $mrf->status == 0 ? "Pending" : ($mrf->status == 1 && $liquidation == 0 ? 'Approved'  : ($mrf->status == 2 && $liquidation != 0 ? 'Processed' : ($mrf->status == 3 ? 'Liquidated' : "DisApproved"))) }}</th>
                         <th>
+                          <!-- {{$liquidations->where('material_requisition_form_id', $mrf->id)->count()}} -->
                           <div class="row p-1">
                             <div class="col">
                               <div class="dropdown">
@@ -54,22 +57,35 @@
                                   Action
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                  <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>
+                                  @if($mrf->status == 0)
+                                    <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>
+                                    @if($mrf->requested_id == auth()->user()->id)
+                                      <li>
+                                        <form method="POST" action="{{ route('material-requisition-form.destroy', $mrf->id) }}">
+                                          @method('DELETE')
+                                          @csrf
+                                          <a class="confirm-button dropdown-item" type="submit" style="text-decoration: none;" href="#"><i class="fa fa-trash"></i> Delete</a>
+                                        </form>
+                                      </li>
+                                    @endif
+                                  @endif
                                   @if($mrf->status == 1)
+                                    @if(Auth::user()->hasRole('CETD'))
+                                      <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-gear"></i> Process</a></li>
+                                    @endif
+                                    <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>
+                                  @endif
+                                  @if($mrf->status == 2)
+                                    <!-- <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li> -->
                                     <li><a href="{{ route('mrfPrintPdf', $mrf->id) }}" target="_blank" class="dropdown-item"><i class="fa fa-print"></i> Print MRF</a></li>
+                                    
                                     @if($mrf->requested_id == auth()->user()->id)
                                       <li><a href="{{ route('mrfLiquidate', $mrf->id) }}" target="_blank" class="dropdown-item"><i class="fa fa-pencil"></i> Liquidate</a></li>
                                     @endif
                                   @endif
-                                  <li>
-                                    @if($mrf->status == 0)
-                                      <form method="POST" action="{{ route('material-requisition-form.destroy', $mrf->id) }}">
-                                        @method('DELETE')
-                                        @csrf
-                                        <a class="confirm-button dropdown-item" type="submit" style="text-decoration: none;" href="#"><i class="fa fa-trash"></i> Delete</a>
-                                      </form>
-                                    @endif
-                                  </li>
+                                  @if($mrf->status == 3)
+                                    <li><a href="{{route('viewLiquidatedMrf', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>
+                                  @endif
                                 </ul>
                               </div>
                             </div>

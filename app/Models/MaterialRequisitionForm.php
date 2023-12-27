@@ -80,5 +80,6 @@ class MaterialRequisitionForm extends Model
                             'released_by',
                             'liquidated_id',
                             'liquidated_by',
+                            'area_id',
                           ];
 }

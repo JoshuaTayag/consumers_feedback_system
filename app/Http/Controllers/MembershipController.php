@@ -377,5 +377,8 @@ class MembershipController extends Controller
         return view('consumer.index');
     }
 
+    public function getMembers(Request $request){
+        return Membership::orderBy('id', 'desc')->take(1)->get();
+    }
 
 }

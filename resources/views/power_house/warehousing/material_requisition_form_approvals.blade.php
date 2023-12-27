@@ -53,7 +53,7 @@
                                       }
                                     @endphp
                                     <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal" data-bs-name="{{$data}}"
-                                    data-bs-items="{{json_encode($ii)}}" data-bs-address="{{ $data->district->district_name }}, {{ $data->barangay->barangay_name }}, {{ $data->municipality->municipality_name }}, {{ $data->municipality->sitio }}" data-bs-requested="{{$data->requested_name}}" data-bs-requested-date="{{ date('F d, Y', strtotime($data->requested_by)) }}"><i class="fa fa-eye"></i></button>
+                                    data-bs-items="{{json_encode($ii)}}" data-bs-address="{{Config::get('constants.area_id.0.name')}}, {{ $data->district->district_name }}, {{ $data->barangay->barangay_name }}, {{ $data->municipality->municipality_name }}, {{ $data->municipality->sitio }}" data-bs-requested="{{$data->requested_name}}" data-bs-requested-date="{{ date('F d, Y', strtotime($data->requested_by)) }}"><i class="fa fa-eye"></i></button>
                                   </div>
                                   <div class="col-lg-4 p-1 text-center">
                                     <form method="POST" action="{{ route('mrfApprovalUpdate', $data->id) }}">
@@ -137,6 +137,7 @@
                         Address
                       </div>
                       <div class="card-body text-center">
+                        <span id="area" class="fs-5"></span>
                         <span id="address" class="fs-5"></span>
                       </div>
                     </div>

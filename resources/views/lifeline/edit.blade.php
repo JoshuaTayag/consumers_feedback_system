@@ -23,7 +23,7 @@
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="control_no" class="form-label mb-1">Control No. *</label>
-                  <input type="text" class="form-control" id="control_no" name="control_no" value="{{$lifeline->control_no}}" required>
+                  <input type="text" class="form-control" id="control_no" name="control_no" value="{{$lifeline->control_no}}" required readonly>
                 </div>
               </div>
               <div class="col-lg-2">

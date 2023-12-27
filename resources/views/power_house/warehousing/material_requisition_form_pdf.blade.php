@@ -132,31 +132,43 @@
       <tbody>
         <tr>
           <th rowspan="3" style="text-align: left;">PROJECT NAME: <br><br>
-            {{ $datas->project_name }}</th>
+            {{ $datas[0]->project_name }}</th>
           <td colspan="2"></td>
-          <td style="width: 80px;">Date</td>
+          <td style="width: 80px;">Date: {{ date('m/d/Y', strtotime($datas[0]->created_at)) }} </td>
           <td style="width: 70px;">Endorsed By</td>
           <td style="width: 67px;">Prepared By</td>
         </tr>
         <tr>
           <td style="width: 70px;">WO No.</td>
-          <td style="width: 80px;"></td>
+          <td style="width: 70px;">{{$datas[0]->with_wo}}</td>
           <td></td>
           <td></td>
           <td></td>
         </tr>
         <tr>
           <td>MRV No.</td>
-          <td></td>
+          <td>
+            @foreach ($datas[1] as $index => $mrf) 
+              @if($mrf->type == "MRV")
+                {{ $mrf->type_number }} <br>
+              @endif
+            @endforeach
+          </td>
           <td></td>
           <td></td>
           <td></td>
         </tr>
         <tr>
           <th rowspan="3" style="text-align: left;">LOCATION: <br><br>
-            {{ $datas->district->district_name }}, {{ $datas->barangay->barangay_name }}, {{ $datas->municipality->municipality_name }}</th>
+            {{ $datas[0]->district->district_name }}, {{ $datas[0]->barangay->barangay_name }}, {{ $datas[0]->municipality->municipality_name }}</th>
           <td>SERIV No.</td>
-          <td></td>
+          <td>
+            @foreach ($datas[1] as $index => $mrf) 
+              @if($mrf->type == "SERIV")
+                {{ $mrf->type_number }} <br>
+              @endif
+            @endforeach
+          </td>
           <td></td>
           <td></td>
           <td></td>
@@ -192,7 +204,7 @@
         </tr>
       </thead>
       <tbody>
-          @foreach($datas->items as $index => $data)
+          @foreach($datas[0]->items as $index => $data)
           <tr>
             <td>{{$data->nea_code}}</td>
             <td>{{$data->item->Description}}</td>
@@ -212,25 +224,25 @@
       <tr>
         <td style="border: none; width:33%; position: relative;">
           <p class="text-center">Requested By:</p> <br>
-          @if($datas->user_requested->employee)
-            <img src="{{$datas->user_requested->employee->signature_path}}"  alt="" class="img-signature">
+          @if($datas[0]->user_requested->employee)
+            <img src="{{$datas[0]->user_requested->employee->signature_path}}"  alt="" class="img-signature">
           @endif
           <h4 class="text-center" style="position: relative; text-decoration: underline;">
-            &nbsp;&nbsp;&nbsp;&nbsp;{{$datas->requested_name}}&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->requested_name}}&nbsp;&nbsp;&nbsp;&nbsp;
           </h4>
           <p class="text-center" style="padding: 0px; margin-top: -10px; position: relative;">
-            {{$datas->user_requested->employee ? $datas->user_requested->employee->position : 'Pls Add employee data'}}
-            {{-- {{$datas->user_req->employee->prefix . " " . $datas->user_req->employee->first_name . " " . substr($datas->user_req->employee->middle_name, 0, 1). "." . " " . $datas->user_req->employee->last_name . " " . $datas->user_req->employee->suffix}} --}}
+            {{$datas[0]->user_requested->employee ? $datas[0]->user_requested->employee->position : 'Pls Add employee data'}}
+            {{-- {{$datas[0]->user_req->employee->prefix . " " . $datas[0]->user_req->employee->first_name . " " . substr($datas[0]->user_req->employee->middle_name, 0, 1). "." . " " . $datas[0]->user_req->employee->last_name . " " . $datas[0]->user_req->employee->suffix}} --}}
           </p>
         </td>
         <td style="border: none; width:33%; position: relative;">
           <p class="text-center">Approved By:</p> <br>
-          <img src="{{$datas->user_approved->employee->signature_path}}"  alt="" class="img-signature">
+          <img src="{{$datas[0]->user_approved->employee->signature_path}}"  alt="" class="img-signature">
           <h4 class="text-center" style="position: relative; text-decoration: underline;">
-            &nbsp;&nbsp;&nbsp;&nbsp;{{$datas->approved_name}}&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->approved_name}}&nbsp;&nbsp;&nbsp;&nbsp;
           </h4>
           <p class="text-center" style="padding: 0px; margin-top: -10px; position: relative;">
-            {{$datas->user_approved->employee->position}}
+            {{$datas[0]->user_approved->employee->position}}
           </p>
         </td>
         <td style="border: none; width:34%;">
@@ -270,6 +282,8 @@
       </tr>
     </tbody>
   </table>
+
+  <p style="text-align:right; margin-top: 80px">Date and Time Generated: {{ date('m/d/Y h:i:a') }}</p>
 
 </body>
 </html>

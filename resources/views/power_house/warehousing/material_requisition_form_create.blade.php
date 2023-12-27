@@ -73,13 +73,13 @@
                   <label for="structure" class="form-label mb-1">Approved By</label>
                     <select id="approved_by" class="form-control" name="approved_by" required>
                       @foreach ($users as $user)          
-                        <option value="{{ $user->id }}" id="">
-                          {{ $user->name }} | 
-                          @if(!empty($user->getRoleNames()))
+                        <option value="{{ $user->id }}" id="" @selected($user->getRoleNames()[0] == "TSD Manager")>
+                          {{ $user->name }} | {{ $user->getRoleNames()[0] }}
+                          <!-- @if(!empty($user->getRoleNames()))
                             @foreach($user->getRoleNames() as $v)
                                 <label class="badge bg-secondary">{{ $v }}</label>
                             @endforeach
-                          @endif
+                          @endif -->
                         </option>
                       @endforeach 
                     </select>
@@ -87,7 +87,18 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-lg-3">
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <label for="area" class="form-label mb-1">Area *</label>
+                  <select id="area" class="form-control" name="area_id" required>
+                    <option value="">Choose...</option>
+                    @foreach (Config::get('constants.area_id') as $area)          
+                      <option value="{{ $area['id'] }}" id="" {{ old('area') ? 'selected' : '' }}>{{ $area['name'] }}</option>
+                    @endforeach 
+                  </select>
+                </div>
+              </div>
+              <div class="col-lg-2">
                 <div class="mb-3">
                   <label for="district" class="form-label mb-1">District *</label>
                   <select id="district" class="form-control" name="district" required>
@@ -98,7 +109,7 @@
                   </select>
                 </div>
               </div>
-              <div class="col-lg-3">
+              <div class="col-lg-2">
                 <div class="mb-3">
                   <label for="municipality" class="form-label mb-1">Municipality *</label>
                   <select id="municipality" class="form-control" name="municipality"></select>
@@ -286,13 +297,13 @@ $(document).ready(function () {
           },
           dataType: 'json',
           success: function (result) {
-              $('#municipality').html('<option value="">-- Select Municipality --</option>');
+              $('#municipality').html('<option value="">Select Municipality</option>');
               
               $.each(result.municipalities, function (key, value) {
                     $("#municipality").append('<option value="' + value
                         .id + '" id="'+ value.id +'">' + value.municipality_name + '</option>');
                 });
-              $('#barangay').html('<option value="">-- Select Barangay --</option>');
+              $('#barangay').html('<option value="">Select Barangay</option>');
           }
       });
   });
@@ -315,7 +326,7 @@ $(document).ready(function () {
           },
           dataType: 'json',
           success: function (res) {
-              $('#barangay').html('<option value="">-- Select Barangay --</option>');
+              $('#barangay').html('<option value="">Select Barangay</option>');
               $.each(res.barangays, function (key, value) {
                     $("#barangay").append('<option value="' + value
                         .id + '" id="'+ value.id +'">' + value.barangay_name + '</option>');
