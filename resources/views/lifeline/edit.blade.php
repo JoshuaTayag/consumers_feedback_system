@@ -199,6 +199,12 @@
                 </div>
               </div>
               @endif
+              <div class="col-lg-3">
+                <div class="mb-2">
+                  <label for="date_of_application" class="form-label mb-1">Date Of Application*</label>
+                  <input type="date" class="form-control" id="date_of_application" name="date_of_application" value="{{$lifeline->date_of_application}}" required>
+                </div>
+              </div>
               <div class="col-lg-6">
                 <div class="mb-2">
                   <label for="representative_id_no" class="form-label mb-1">Rep ID No. (IF FILED THROUGH A REPRESENTATIVE)</label>

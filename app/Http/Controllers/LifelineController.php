@@ -269,6 +269,7 @@ class LifelineController extends Controller
         $lifeline->validity_period_from = $request->exists('validity_period_from') ? $request->validity_period_from : null;
         $lifeline->validity_period_to = $request->exists('validity_period_to') ? $request->validity_period_to : null;
         $lifeline->application_status = 0;
+        $lifeline->date_of_application = $request->date_of_application;
         $lifeline->remarks = $request->remarks;
         $lifeline->save();
 
@@ -304,7 +305,7 @@ class LifelineController extends Controller
                     ->table('Consumers Table')
                     ->where('Accnt No', $request->account_no)
                     ->update([
-                        'LFflag' => null,
+                        'LFflag' => "NO",
                         'LFdate' => null,
                     ]);
 
@@ -336,7 +337,7 @@ class LifelineController extends Controller
                     ->where('Accnt No', $request->account_no)
                     ->update([
                         'LFflag' => "Yes",
-                        'LFdate' => Carbon::now(),
+                        'LFdate' => $request->date_of_application,
                     ]);
 
                 if($update_account == 0){
