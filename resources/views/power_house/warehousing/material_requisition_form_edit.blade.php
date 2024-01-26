@@ -10,7 +10,7 @@
         <div class="card-header">
           <div class="row align-items-center">
               <div class="col-lg-6">
-                  <span class="mb-0 align-middle fs-3">Edit MRF</span>
+                  <span class="mb-0 align-middle fs-3">Edit Material/Equipment Request</span>
               </div>
               <div class="col-lg-6 text-end">
                 <a class="btn btn-primary" href="{{ route('material-requisition-form.index') }}"> Back </a>

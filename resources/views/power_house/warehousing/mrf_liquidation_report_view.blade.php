@@ -70,7 +70,7 @@
         /* margin: 25px 0; */
         font-size: 0.9em;
         font-family: sans-serif;
-        min-width: 400px;
+        /* min-width: 400px; */
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
         margin-left: auto;
         margin-right: auto;
@@ -136,6 +136,7 @@
           <th rowspan="3">DIVISION</th>
           <th colspan="3">WITHOUT WORK ORDER NO.</th>
           <th rowspan="2">DISAPPROVED/CANCELLED</th>
+          <th rowspan="3">%</th>
         </tr>
         <tr>
           <th>TOTAL REQUESTS</th>
@@ -150,15 +151,19 @@
         </tr>
       </thead>
       <tbody>
+        @foreach($datas['without_wo'] as $index => $data)
           <tr>
-            <td>asdasd</td>
-            <td>asdasd</td>
-            <td>asdasd</td>
-            <td>asdasd</td>
-            <td>asdasd</td>
+            <td>{{ $data->user_requested->name }}</td>
+            <td>{{ $all_request = $data->total_pending }}</td>
+            <td>{{ $all_liquidated = $data->user_requested->requested_mrf->where('status', 3)->where('with_wo', null)->count() }}</td>
+            <td>{{ $all_unliquidated = $data->user_requested->requested_mrf->where('status', '<', 3)->where('with_wo', null)->count() }}</td>
+            <td>{{ $all_cancelled = $data->user_requested->requested_mrf->where('status', 4)->where('with_wo', null)->count() }}</td>
+            <td>{{ ($all_request - ($all_liquidated + $all_cancelled) / $all_request) * 100}}</td>
           </tr>
+        @endforeach
       </tbody>
     </table>
+   
   </div>
 
   <div class="text-align" style="margin-top: 70px; padding-top: 0px;">
@@ -168,6 +173,7 @@
           <th rowspan="3">DIVISION</th>
           <th colspan="3">WITH WORK ORDER NO.</th>
           <th rowspan="2">DISAPPROVED/CANCELLED</th>
+          <th rowspan="3">%</th>
         </tr>
         <tr>
           <th>TOTAL REQUESTS</th>
@@ -182,44 +188,21 @@
         </tr>
       </thead>
       <tbody>
+        @foreach($datas['with_wo'] as $index => $data)
           <tr>
-            <td>asdasd</td>
-            <td>asdasd</td>
-            <td>asdasd</td>
-            <td>asdasd</td>
-            <td>asdasd</td>
+            <td>{{ $data->user_requested->name }}</td>
+            <td>{{ $all_request = $data->total_pending }}</td>
+            <td>{{ $all_liquidated = $data->user_requested->requested_mrf->where('status', 3)->where('with_wo', '<>', null)->count() }}</td>
+            <td>{{ $all_unliquidated = $data->user_requested->requested_mrf->where('status', '<', 3)->where('with_wo', '<>', null)->count() }}</td>
+            <td>{{ $all_cancelled = $data->user_requested->requested_mrf->where('status', 4)->where('with_wo', '<>', null)->count() }}</td>
+            <td>{{ ($all_request - ($all_liquidated + $all_cancelled) / $all_request) * 100}}</td>
           </tr>
+        @endforeach
       </tbody>
     </table>
   </div>
 
-  <table style="font-size: 15px; width: 100%; margin-top: 35px; padding-bottom: 30px;">
-    <tbody>
-      <tr>
-        <td style="border: none; width:33%; position: relative; padding-left: 20px; padding-right: 20px;">
-          <p class="text-center" style="padding-top: 15px;">Checked By:</p> <br>
-          @if($datas->user_requested->employee)
-            <img src="{{$datas->user_requested->employee->signature_path}}"  alt="" style="padding-top: 30px;" class="img-signature">
-          @endif
-          <h4 class="text-center" style="position: relative; margin-top: 40px;">
-            {{$datas->requested_name}}
-          </h4>
-          <div style="border-top: 1px solid black; position:relative; margin-top: -10px;" ></div>
-          <p class="text-center" style="padding: 0px; position: relative;">
-            {{$datas->user_requested->employee ? $datas->user_requested->employee->position : 'Pls Add employee data'}}
-          </p>
-        </td>
-        <td style="border: none; width:33%; position: relative; padding-left: 20px; padding-right: 20px;">
-          <p class="text-center">Checked By:</p> <br>
-          <div style="border-top: 1px solid black; margin-top: 50px; margin-bottom: 15px;"></div>
-        </td>
-        <td style="border: none; width:33%; position: relative; padding-left: 20px; padding-right: 20px;">
-          <p class="text-center">Noted By:</p> <br>
-          <div style="border-top: 1px solid black; margin-top: 50px; margin-bottom: 15px;"></div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  
 
 </body>
 </html>

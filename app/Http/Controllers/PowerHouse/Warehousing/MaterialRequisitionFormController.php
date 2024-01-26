@@ -60,7 +60,7 @@ class MaterialRequisitionFormController extends Controller
 
         // dd($temp_items);
 
-        if($unliquidated_mrf >= 5){
+        if($unliquidated_mrf >= 10){
             // dd($unliquidated_mrf);
             return redirect(route('material-requisition-form.index'))->withWarning('Please Liquidate atleast one MRF to proceed!');
             return view('power_house.warehousing.material_requisition_form_create', compact('structures','temp_items','users','districts'))->withSuccess('Please Liquidate atleast one MRF to proceed!');
@@ -85,7 +85,7 @@ class MaterialRequisitionFormController extends Controller
 
         $unliquidated_mrf = MaterialRequisitionForm::where([['requested_id', $request->requested_by], ['status', '<=', 2]])->count();
         // check if this user has unliquidated MRF's
-        if($unliquidated_mrf >= 5){
+        if($unliquidated_mrf >= 10){
             return redirect(route('material-requisition-form.index'))->withWarning('Please Liquidate atleast one MRF to proceed!');
         }
         // dd($request);
@@ -142,7 +142,6 @@ class MaterialRequisitionFormController extends Controller
         ->table('districts')
         ->select('*')
         ->get();
-        // dd($liquidation->first() ? "true" : 'false');
         return view('power_house.warehousing.material_requisition_form_edit', compact('structures','users','districts','mrf','liquidation'));
     }
 
@@ -350,7 +349,7 @@ class MaterialRequisitionFormController extends Controller
                             "type_number" => $request->mcrt_no,
                             "date_acted" => $request->date_acted,
                             "date_finished" => $request->date_finished,
-                            "image_path" => $request->image_path,
+                            "image_path" => $input['image_path'],
                             "remarks" => $request->remarks,
                             "lineman" => $request->lineman,
                             "created_at" => Carbon::now(),
@@ -366,7 +365,7 @@ class MaterialRequisitionFormController extends Controller
                             "type_number" => $request->mst_no,
                             "date_acted" => $request->date_acted,
                             "date_finished" => $request->date_finished,
-                            "image_path" => $request->image_path,
+                            "image_path" => $input['image_path'],
                             "remarks" => $request->remarks,
                             "lineman" => $request->lineman,
                             "created_at" => Carbon::now(),
@@ -763,40 +762,22 @@ class MaterialRequisitionFormController extends Controller
     public function viewLiquidatedMrf(string $id){
         $mrf = MaterialRequisitionForm::with('items')->find($id);
         $mrf_liquidation = DB::table('material_requisition_form_liquidations')->where('material_requisition_form_id', $mrf->id)->get();
-        // dd($mrf_liquidation);
         return view('power_house.warehousing.material_requisition_form_liquidated_view', compact('mrf', 'mrf_liquidation'));
     }
 
     public function mrfLiquidationReport()
     {
         // $mrf = MaterialRequisitionForm::with('items')->find(16);
-        $mrfs = [];
-        $mrf = MaterialRequisitionForm::all();
-        // $mrf = DB::table('material_requisition_forms', 'material_requisition_form_liquidations')->select('material_requisition_forms.project_name, material_requisition_form_liquidations.type, material_requisition_form_liquidations.type_number')
-        // ->from('material_requisition_forms')
-        // ->join('material_requisition_form_liquidations')
-        // ->on('material_requisition_forms.id = material_requisition_form_liquidations.material_requisition_form_id');
-
-        // $mrf = DB::table('material_requisition_forms')
-        // ->select('material_requisition_forms.project_name', 'material_requisition_forms.status' , 'material_requisition_form_liquidations.type' , 'material_requisition_form_liquidations.type_number')
-        // ->join('material_requisition_form_liquidations', 'material_requisition_forms.id', '=', 'material_requisition_form_liquidations.material_requisition_form_id')
-        // ->where('material_requisition_forms.status', 2)
-        // ->get();
-
+        $requested_mrf = [];
         
+        // $mrfs['total_pending'] = MaterialRequisitionForm::with('user_requested')->groupBy('requested_id')->selectRaw('count(*) as total_pending, requested_id')->where('status', 0)->get();
+        // $mrfs['total_approved'] = MaterialRequisitionForm::with('user_requested')->groupBy('requested_id')->selectRaw('count(*) as total_approved, requested_id')->where('status', 1)->get();
+        // $mrfs['total_processed'] = MaterialRequisitionForm::with('user_requested')->groupBy('requested_id')->selectRaw('count(*) as total_processed, requested_id')->where('status', 2)->get();
+        // $mrfs['total_liquidated'] = MaterialRequisitionForm::with('user_requested')->groupBy('requested_id')->selectRaw('count(*) as total_liquidated, requested_id')->where('status', 3)->get();
 
-        $mrfs['pending'] = $mrf->where('status', 0)->count();
-        $mrfs['approved'] = $mrf->where('status', 1)->count();
-        $mrfs['liquidated'] = $mrf->where('status', 2)->count();
-        $mrfs['disapproved'] = $mrf->where('status', 3)->count();
-
-        $mrfs['pending_with_wo'] = $mrf->where('status', 0)->where('with_wo')->count();
-        $mrfs['approved_with_wo'] = $mrf->where('status', 1)->where('with_wo')->count();
-        $mrfs['liquidated_with_wo'] = $mrf->where('status', 2)->where('with_wo')->count();
-        $mrfs['disapproved_with_wo'] = $mrf->where('status', 3)->where('with_wo')->count();
-        
-        dd($mrfs);
-        view()->share('datas', $mrf);
+        $requested_mrf['without_wo'] = MaterialRequisitionForm::where('with_wo', null)->groupBy('requested_id')->selectRaw('count(*) as total_pending, requested_id')->get();
+        $requested_mrf['with_wo'] = MaterialRequisitionForm::where('with_wo', '<>', null)->groupBy('requested_id')->selectRaw('count(*) as total_pending, requested_id')->get();
+        view()->share('datas', $requested_mrf);
         $pdf = PDF::loadView('power_house.warehousing.mrf_liquidation_report_view');
         return $pdf->stream();
     }

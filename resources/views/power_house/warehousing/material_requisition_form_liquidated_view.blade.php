@@ -172,7 +172,7 @@
                       Image
                     </div>
                     <div class="card-body fs-5">
-                      <img src="{{ asset($mrf_liquidation[0]->image_path)}}" class="img-fluid pt-2" style="max-height: 40vh;" alt="...">
+                      <img src="{{ asset($mrf_liquidation->last()->image_path)}}" class="img-fluid pt-2" style="max-height: 40vh;" alt="...">
                     </div>
                   </div>
                 </div>

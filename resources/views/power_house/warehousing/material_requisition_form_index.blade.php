@@ -9,12 +9,12 @@
             <div class="card-header">
               <div class="row align-items-center">
                   <div class="col-lg-6">
-                      <span class="mb-0 align-middle fs-3">Material Requisition Form</span>
+                      <span class="mb-0 align-middle fs-3">Material/Equipment Requisition</span>
                   </div>
                   <div class="col-lg-6 text-end">
                     <a class="btn btn-success" href="{{ route('mrfLiquidationReport') }}" target="_blank"> <i class="fa fa-eye"></i> Liquidation Report </a>
-                    @if($unliquidated_mrf < 5)
-                      <a class="btn btn-success" href="{{ route('material-requisition-form.create') }}"> Create New Form </a>
+                    @if($unliquidated_mrf < 10)
+                      <a class="btn btn-success" href="{{ route('material-requisition-form.create') }}"> Create New Request </a>
                     @endif
                   </div>
               </div>
@@ -58,7 +58,9 @@
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                   @if($mrf->status == 0)
-                                    <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>
+                                    @if($mrf->requested_id == auth()->user()->id)
+                                      <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>
+                                    @endif
                                     @if($mrf->requested_id == auth()->user()->id)
                                       <li>
                                         <form method="POST" action="{{ route('material-requisition-form.destroy', $mrf->id) }}">
