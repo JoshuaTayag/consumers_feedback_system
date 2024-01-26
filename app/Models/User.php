@@ -20,7 +20,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function requested_mrf()
     {
-        return $this->hasMany('App\Models\MaterialRequisitionForm');
+        return $this->hasMany('App\Models\MaterialRequisitionForm', 'requested_id', 'id');
     }
 
     public function approved_mrf()

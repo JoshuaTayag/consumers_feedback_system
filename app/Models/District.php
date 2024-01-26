@@ -31,4 +31,9 @@ class District extends Model
     {
         return $this->hasMany('App\Models\MaterialRequisitionForm');
     }
+    
+    public function electrician_address()
+    {
+        return $this->hasMany('App\Models\BarangayElectrician\ElectricianAddress');
+    }
 }

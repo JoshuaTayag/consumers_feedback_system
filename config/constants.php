@@ -413,6 +413,25 @@
                 "name" => "Area IV"
             ]
         ],
+
+        'educational_background' => [
+            [
+                "id" => 1,
+                "name" => "Elementary"
+            ],
+            [
+                "id" => 2,
+                "name" => "Secondary"
+            ],
+            [
+                "id" => 3,
+                "name" => "Tertiary"
+            ],
+            [
+                "id" => 4,
+                "name" => "Others"
+            ]
+        ],
     ];
 
 ?>

@@ -128,6 +128,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('edit-material-cost', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItemCost'])->name('updateItemCost');
     Route::delete('delete-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'deleteItem'])->name('removeItem');
 
+    // MRF
+    Route::resource('electrician', App\Http\Controllers\ElectricianController::class);
+
     // Strucutures
     // Route::resource('signatory', App\Http\Controllers\SignatoryController::class);
 });

@@ -46,6 +46,17 @@
               </li>
             </ul>
           </li>
+          <li>
+            <a class="dropdown-item" href="#">BRGY ELECTRICIANS &raquo; </a>
+            <ul class="dropdown-menu dropdown-submenu">
+              <li>
+                <a class="dropdown-item" href="{{ route('electrician.index') }}">NEW/RENEWAL OF APPLICATION</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('lifeline.report') }}">COMPLAINTS</a>
+              </li>
+            </ul>
+          </li>
         </ul>
       </li>
     </ul>
