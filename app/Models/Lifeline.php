@@ -61,6 +61,8 @@ class Lifeline extends Model implements Auditable
                             "validity_period_from",
                             "validity_period_to",
                             "application_status",
+                            "approved_by",
+                            "approved_date",
                             "remarks"
                           ];
 

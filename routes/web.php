@@ -89,6 +89,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('lifeline-report', [App\Http\Controllers\LifelineController::class, 'lifelineReport'])->name('lifeline.report');
     Route::get('lifeline-report-generate', [App\Http\Controllers\LifelineController::class, 'lifelineGenerateReport'])->name('lifeline.generate.report');
     Route::get('fetch-lifelines', [App\Http\Controllers\LifelineController::class, 'fetchLifelineApplication'])->name('fetchLifelineApplication');
+    Route::get('upload-lifelines', [App\Http\Controllers\LifelineController::class, 'uploadLifeline'])->name('uploadLifeline');
 
     // Strucutures
     Route::resource('structure', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class);
