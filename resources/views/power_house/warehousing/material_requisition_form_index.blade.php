@@ -72,7 +72,7 @@
                                     @endif
                                   @endif
                                   @if($mrf->status == 1)
-                                    @if(Auth::user()->hasRole('CETD'))
+                                    @if(Auth::user()->hasRole('CETD') || Auth::user()->hasRole('CETD SPRC'))
                                       <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-gear"></i> Process</a></li>
                                     @endif
                                     <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>

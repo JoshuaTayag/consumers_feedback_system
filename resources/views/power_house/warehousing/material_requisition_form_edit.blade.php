@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="card-body">
-          @if($mrf->status == 1 && !$liquidation->first() && Auth::user()->hasRole('CETD'))
+          @if($mrf->status == 1 && !$liquidation->first() && (Auth::user()->hasRole('CETD') or Auth::user()->hasRole('CETD SPRC')))
             <div class="row mb-4">
               <div class="col-lg-12">
                 <div class="card">
@@ -29,27 +29,63 @@
                     {!! Form::open(array('route' => ['mrfLiquidationCreate', $mrf->id],'method'=>'PUT')) !!}
                       <input type="hidden" name="assigning" value="true">
                       <div class="row">
-                        <div class="col-lg-4">
-                          <div class="mb-2">
-                            <label for="project_name" class="form-label mb-1">MRV No.</label>
-                            <select class="form-control" id="mrvs" name="mrvs[]" multiple="multiple">
-                            </select>
+                        @if($mrf->status == 1 && !$liquidation->first() &&  Auth::user()->hasRole('CETD SPRC'))
+                          <div class="col-lg-3">
+                            <div class="mb-3">
+                              <label for="req_type" class="form-label mb-1">Request Type</label>
+                              <!-- <input type="text" class="form-control" id="req_type" name="req_type" > -->
+                              <select id="req_type" class="form-control" name="req_type" required @disabled($mrf->req_type)>
+                                <option value="">Choose...</option>
+                                  @foreach (Config::get('constants.mer_request_type') as $req)          
+                                    <option value="{{ $req['id'] }}" id="" @selected( $mrf->req_type == $req['id']) >{{ $req['name'] }}</option>
+                                  @endforeach 
+                              </select>
+                            </div>
                           </div>
-                        </div>
-                        <div class="col-lg-4">
-                          <div class="mb-2">
-                            <label for="project_name" class="form-label mb-1">SERIV No.</label>
-                            <select class="form-control" id="serivs" name="serivs[]" style="width: 100%" multiple="multiple">
-                            </select>
+                          <div class="col-lg-3">
+                            <div class="mb-3">
+                              <label for="wo_no" class="form-label mb-1">WO No. </label>
+                              <input type="text" class="form-control" id="wo_no" name="wo_no" value="{{ $mrf->with_wo }}" @disabled($mrf->with_wo) disabled>
+                            </div>
                           </div>
-                        </div>
-                        <div class="col-lg-4">
-                          <div class="mb-3">
-                            <label for="wo_no" class="form-label mb-1">WO No. </label>
-                            <input type="text" class="form-control" id="wo_no" name="wo_no" required>
+                        @endif
+
+                        @if($mrf->status == 1 && !$liquidation->first() &&  Auth::user()->hasRole('CETD') && $mrf->req_type)
+                          <div class="col-lg-3">
+                            <div class="mb-3">
+                              <label for="req_type" class="form-label mb-1">Request Type</label>
+                              <!-- <input type="text" class="form-control" id="req_type" name="req_type" > -->
+                              <select id="req_type" class="form-control" name="req_type" required @disabled($mrf->req_type)>
+                                <option value="">Choose...</option>
+                                  @foreach (Config::get('constants.mer_request_type') as $req)          
+                                    <option value="{{ $req['id'] }}" id="" @selected( $mrf->req_type == $req['id']) >{{ $req['name'] }}</option>
+                                  @endforeach 
+                              </select>
+                            </div>
                           </div>
-                        </div>
-                        <div class="col-lg-4">
+                          <div class="col-lg-3">
+                            <div class="mb-3">
+                              <label for="wo_no" class="form-label mb-1">WO No. </label>
+                              <input type="text" class="form-control" id="wo_no" name="wo_no" value="{{ $mrf->with_wo }}">
+                            </div>
+                          </div>
+
+                          <div class="col-lg-3">
+                            <div class="mb-2">
+                              <label for="project_name" class="form-label mb-1">MRV No.</label>
+                              <select class="form-control" id="mrvs" name="mrvs[]" multiple="multiple">
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-lg-3">
+                            <div class="mb-2">
+                              <label for="project_name" class="form-label mb-1">SERIV No.</label>
+                              <select class="form-control" id="serivs" name="serivs[]" style="width: 100%" multiple="multiple">
+                              </select>
+                            </div>
+                          </div>
+                        @endif
+                        <div class="col col-lg-4 d-flex justify-content-left align-items-center">
                           <input type="submit" class="btn btn-primary btn-sm fa fa-trash" value="Assign">
                         </div>
                       </div>
@@ -77,7 +113,8 @@
                     <div class="col-lg-12">
                       <div class="mb-3">
                         <label for="requested_by" class="form-label mb-1">Requested By</label>
-                          <select id="requested_by" class="form-control" name="requested_by" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        <input type="text" class="form-control" id="requested_by" name="requested_by" value="{{ auth()->user()->name }}" disabled required>
+                        <!-- <select id="requested_by" class="form-control" name="requested_by" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                             @foreach ($users as $user)          
                               <option value="{{ $user->id }}" @selected( $mrf->requested_id == $user->id) id="">
                                 {{ $user->name }} | 
@@ -88,7 +125,7 @@
                                 @endif
                               </option>
                             @endforeach 
-                          </select>
+                          </select> -->
                       </div>
                     </div>
                     <div class="col-lg-12">
@@ -209,7 +246,7 @@
                     <div class="col-lg-4">
                       <div class="mb-3">
                         <label for="sitio" class="form-label mb-1">Sitio</label>
-                        <input type="text" class="form-control" id="sitio" name="sitio" value="{{$mrf->sitio }}" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        <input type="text" class="form-control" id="sitio" name="sitio" value="{{$mrf->sitio }}" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                       </div>
                     </div>
                   </div>
@@ -394,6 +431,15 @@
 
 $(document).ready(function () {
 
+  const textbox1 = document.getElementById('req_type');
+  const textbox2 = document.getElementById('wo_no');
+  console.log(textbox1.value.trim())
+  if (textbox1.value.trim() != 2) {
+              // Enable textbox2 if textbox1 has a value
+              textbox2.disabled = true;
+              textbox2.required = false;
+          }
+
   $('.js-example-basic-multiple').select2();
 
   $( "#item" ).select2({
@@ -547,7 +593,25 @@ function removeItem(val) {
   });
 }
 
-
+  document.addEventListener('DOMContentLoaded', function () {
+      // Get references to the textboxes
+      const textbox1 = document.getElementById('req_type');
+      const textbox2 = document.getElementById('wo_no');
+      
+      // Add event listener to textbox1
+      textbox1.addEventListener('input', function () {
+          // Check if textbox1 has a value
+          if (textbox1.value.trim() == 2) {
+              // Enable textbox2 if textbox1 has a value
+              textbox2.disabled = false;
+              textbox2.required = true;
+          } else {
+              // Otherwise, disable textbox2
+              textbox2.disabled = true;
+              textbox2.required = false;
+          }
+      });
+  });
 
 </script>
 @endsection

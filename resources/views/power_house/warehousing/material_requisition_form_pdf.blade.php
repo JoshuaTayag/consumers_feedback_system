@@ -230,7 +230,7 @@
           <h4 class="text-center" style="position: relative; text-decoration: underline;">
             &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->requested_name}}&nbsp;&nbsp;&nbsp;&nbsp;
           </h4>
-          <p class="text-center" style="padding: 0px; margin-top: -10px; position: relative;">
+          <p class="text-center" style="padding: 0px; margin-top: -5px; position: relative;">
             {{$datas[0]->user_requested->employee ? $datas[0]->user_requested->employee->position : 'Pls Add employee data'}}
             {{-- {{$datas[0]->user_req->employee->prefix . " " . $datas[0]->user_req->employee->first_name . " " . substr($datas[0]->user_req->employee->middle_name, 0, 1). "." . " " . $datas[0]->user_req->employee->last_name . " " . $datas[0]->user_req->employee->suffix}} --}}
           </p>
@@ -241,16 +241,16 @@
           <h4 class="text-center" style="position: relative; text-decoration: underline;">
             &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->approved_name}}&nbsp;&nbsp;&nbsp;&nbsp;
           </h4>
-          <p class="text-center" style="padding: 0px; margin-top: -10px; position: relative;">
+          <p class="text-center" style="padding: 0px; margin-top: -5px; position: relative;">
             {{$datas[0]->user_approved->employee->position}}
           </p>
         </td>
         <td style="border: none; width:34%;">
           <p class="text-center">Processed By:</p> <br>
-          <h4 class="text-center" style="position: relative;">
-            
+          <h4 class="text-center" style="position: relative; text-decoration: underline;">
+            &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->processed_name}}&nbsp;&nbsp;&nbsp;&nbsp;
           </h4>
-          <p class="text-center" style="text-decoration: overline; padding: 0px; margin-top: -10px; position: relative;">
+          <p class="text-center" style="padding: 0px; margin-top: -5px; position: relative;">
             &nbsp;&nbsp;&nbsp;&nbsp; CETD &nbsp;&nbsp;&nbsp;&nbsp;
           </p>
         </td>
@@ -262,6 +262,16 @@
     <tbody>
       <tr>
         <td style="border: none;">
+          <p class="text-center">Evaluated By:</p> <br>
+          <h4 class="text-center" style="position: relative; text-decoration: underline;">
+            &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->request_type_assignee_name}}&nbsp;&nbsp;&nbsp;&nbsp;
+          </h4>
+          <p class="text-center" style=" padding: 0px; margin-top: -5px; position: relative;">
+            {{$datas[0]->request_type_assignee->employee->position}}
+          </p>
+        </td>
+
+        <td style="border: none;">
           <p class="text-center">Released By:</p> <br>
           <h4 class="text-center" style="position: relative;">
             
@@ -270,6 +280,7 @@
             &nbsp;&nbsp;&nbsp;&nbsp; WAREHOUSE &nbsp;&nbsp;&nbsp;&nbsp;
           </p>
         </td>
+
         <td style="border: none;">
           <p class="text-center">Liquidated By:</p> <br>
           <h4 class="text-center" style="position: relative;">

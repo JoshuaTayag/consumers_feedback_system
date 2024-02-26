@@ -42,7 +42,8 @@
               <div class="col-lg-3">
                 <div class="mb-3">
                   <label for="requested_by" class="form-label mb-1">Requested By</label>
-                    <select id="requested_by" class="form-control" name="requested_by" required>
+                  <input type="text" class="form-control" id="requested_by" name="requested_by" value="{{ auth()->user()->name }}" disabled required>
+                    <!-- <select id="requested_by" class="form-control" name="requested_by" required>
                       @foreach ($users as $user)          
                         <option value="{{ $user->id }}" id="">
                           {{ $user->name }} | 
@@ -53,7 +54,7 @@
                           @endif
                         </option>
                       @endforeach 
-                    </select>
+                    </select> -->
                 </div>
               </div>
               <div class="col-lg-8">
@@ -124,7 +125,7 @@
               <div class="col-lg-3">
                 <div class="mb-3">
                   <label for="sitio" class="form-label mb-1">Sitio</label>
-                  <input type="text" class="form-control" id="sitio" name="sitio" required>
+                  <input type="text" class="form-control" id="sitio" name="sitio">
                 </div>
               </div>
               <div class="col-lg-12">

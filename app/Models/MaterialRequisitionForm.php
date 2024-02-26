@@ -31,6 +31,28 @@ class MaterialRequisitionForm extends Model
         return $user[0]->name;
     }
 
+    public function getProcessedNameAttribute()
+    {
+        $user = User::where('id', $this->processed_id)
+            ->get();
+        $employee = $user[0]->employee;
+        if($employee){
+            return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
+        }
+        return $user[0]->name;
+    }
+
+    public function getRequestTypeAssigneeNameAttribute()
+    {
+        $user = User::where('id', $this->req_type_assignee)
+            ->get();
+        $employee = $user[0]->employee;
+        if($employee){
+            return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
+        }
+        return $user[0]->name;
+    }
+
     public function items()
     {
         return $this->hasMany('App\Models\MaterialRequisitionFormItems');
@@ -59,6 +81,11 @@ class MaterialRequisitionForm extends Model
     public function user_approved()
     {
         return $this->belongsTo('App\Models\User', 'approved_id', 'id');
+    }
+
+    public function request_type_assignee()
+    {
+        return $this->belongsTo('App\Models\User', 'req_type_assignee', 'id');
     }
 
     

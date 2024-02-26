@@ -432,6 +432,37 @@
                 "name" => "Others"
             ]
         ],
+
+        'mer_request_type' => [
+            [
+                "id" => 1,
+                "name" => "Turn on Order"
+            ],
+            [
+                "id" => 2,
+                "name" => "Construction Work Order"
+            ],
+            [
+                "id" => 3,
+                "name" => "Maintenance Work Order"
+            ],
+            [
+                "id" => 4,
+                "name" => "Stock Transfer"
+            ],
+            [
+                "id" => 5,
+                "name" => "Emergency Withdraw"
+            ],
+            [
+                "id" => 6,
+                "name" => "Service Request Order"
+            ],
+            [
+                "id" => 7,
+                "name" => "HW Kit Fabricated"
+            ]
+        ],
     ];
 
 ?>

@@ -165,19 +165,18 @@
                         <div class="row">
                           <div class="col-lg-12">
                             <div class="mb-2">
-                              <label for="mcrt_no" class="form-label mb-1">MCRT No *</label>
-                              <input type="text" class="form-control" id="mcrt_no" name="mcrt_no" required>
+                              <label for="mcrt_no" class="form-label mb-1">MCRT No</label>
+                              <input type="text" class="form-control" id="mcrt_no" name="mcrt_no" >
                             </div>
                           </div>
                           <div class="col-lg-12">
                             <div class="mb-2">
-                              <label for="mst_no" class="form-label mb-1">MST No *</label>
-                              <input type="text" class="form-control" id="mst_no" name="mst_no" required>
+                              <label for="mst_no" class="form-label mb-1">MST No</label>
+                              <input type="text" class="form-control" id="mst_no" name="mst_no">
                             </div>
                           </div>
                         </div>
                       </div>
-                      
                     </div>
                   </div>
                 </div>
