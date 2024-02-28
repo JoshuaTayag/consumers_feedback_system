@@ -142,7 +142,7 @@
         </a>
         <ul class="dropdown-menu dropdown-submenu">
           <li>
-            <a class="dropdown-item" href="{{ route('material-requisition-form.index') }}">MRF</a>
+            <a class="dropdown-item" href="{{ route('material-requisition-form.index') }}">MER</a>
           </li>
           <li>
             <a class="dropdown-item" href="#">DATA MANAGEMENT &raquo; </a>
