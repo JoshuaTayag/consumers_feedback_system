@@ -25,7 +25,16 @@ class MaterialRequisitionFormController extends Controller
      */
     public function index()
     {
-        $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->orderBy('id','DESC')->paginate(10);
+        if(Auth::user()->hasRole('CETD SPRC')){
+            $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->where('status', 1)->where('req_type')->orderBy('id','DESC')->paginate(10);
+        }
+        else if(Auth::user()->hasRole('CETD')){
+            $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->where('status', 1)->where('req_type', '!=', null)->orderBy('id','DESC')->paginate(10);
+        }
+        else{
+            $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->where('requested_id', Auth::id())->orderBy('id','DESC')->paginate(10);
+        }
+        
         $unliquidated_mrf = MaterialRequisitionForm::where([['requested_id', Auth::id()], ['status', '<=', 2]])->count();
         $liquidations = DB::table('material_requisition_form_liquidations')->get();
         // dd($unliquidated_mrf);
