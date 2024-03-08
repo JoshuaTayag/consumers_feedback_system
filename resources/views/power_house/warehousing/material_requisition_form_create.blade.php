@@ -30,7 +30,8 @@
                 <div class="mb-2">
                   <label for="structure" class="form-label mb-1">Structure</label>
                     <div class="input-group">
-                      <select id="structure" class="form-control" name="structure" required>
+                      <select id="structure" class="form-control" name="structure">
+                        <option value="">Select Structure</option>
                         @foreach ($structures as $structure)          
                           <option value="{{ $structure['id'] }}" id="">{{ $structure['structure_code'] }}</option>
                         @endforeach 

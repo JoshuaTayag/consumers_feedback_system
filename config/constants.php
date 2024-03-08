@@ -411,6 +411,10 @@
             [
                 "id" => 4,
                 "name" => "Area IV"
+            ],
+            [
+                "id" => 5,
+                "name" => "Area V"
             ]
         ],
 
@@ -461,6 +465,44 @@
             [
                 "id" => 7,
                 "name" => "HW Kit Fabricated"
+            ]
+        ],
+
+        'nature_of_complaint_barangay_electrician' => [
+            [
+                "id" => 1,
+                "name" => "(Minor Offense) Intentional Delay in Processing for any reasons"
+            ],
+            [
+                "id" => 2,
+                "name" => "(Minor Offense) Intentional misrepresentation of documents"
+            ],
+            [
+                "id" => 3,
+                "name" => "(Minor Offense) Overpricing of labor and processing fee"
+            ],
+            [
+                "id" => 4,
+                "name" => "(Major Offense) Willful deceit of applicant"
+            ],
+            [
+                "id" => 5,
+                "name" => "(Major Offense) Acts in relation to RA 9136, 7832, and/or 11361"
+            ]
+        ],
+
+        'act_of_misconduct' => [
+            [
+                "id" => 1,
+                "name" => "First Offense"
+            ],
+            [
+                "id" => 2,
+                "name" => "Second Offense"
+            ],
+            [
+                "id" => 3,
+                "name" => "Third Offense"
             ]
         ],
     ];

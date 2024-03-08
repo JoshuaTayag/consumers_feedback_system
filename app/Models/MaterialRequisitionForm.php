@@ -88,6 +88,11 @@ class MaterialRequisitionForm extends Model
         return $this->belongsTo('App\Models\User', 'req_type_assignee', 'id');
     }
 
+    public function mrf_liquidations()
+    {
+        return $this->hasMany('App\Models\MaterialRequisitionFormLiquidation');
+    }
+
     
     
     protected $fillable = [ 'project_name', 

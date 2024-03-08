@@ -31,6 +31,9 @@ class MaterialRequisitionFormController extends Controller
         else if(Auth::user()->hasRole('CETD')){
             $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->where('status', 1)->where('req_type', '!=', null)->orderBy('id','DESC')->paginate(10);
         }
+        else if(Auth::user()->hasRole('Admin') || Auth::user()->hasRole('TSD (Richard)')){
+            $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->orderBy('id','DESC')->paginate(10);
+        }
         else{
             $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->where('requested_id', Auth::id())->orderBy('id','DESC')->paginate(10);
         }
@@ -123,10 +126,13 @@ class MaterialRequisitionFormController extends Controller
             ]);
         }
 
+        $ref_no = 'MER No. '.date('y', strtotime($material_requisition_form->created_at)). "-". str_pad($material_requisition_form->id,5,'0',STR_PAD_LEFT);
+
+        // dd($ref_no);
         // Insert Record structure
         TempMaterialRequisitionFormItem::with('item')->where('user_id', Auth::id())->delete();
         
-        return redirect(route('material-requisition-form.index'))->withSuccess('Record Successfully Created!');
+        return redirect(route('material-requisition-form.index'))->withSuccess('Record Successfully Created!<br>'. $ref_no);
     }
 
     /**

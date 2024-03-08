@@ -9,10 +9,10 @@
             <div class="card-header">
               <div class="row align-items-center">
                   <div class="col-lg-6">
-                      <span class="mb-0 align-middle fs-3">Electricians </span>
+                      <span class="mb-0 align-middle fs-3">Electricians Complaints</span>
                   </div>
                   <div class="col-lg-6 text-end">
-                    <a class="btn btn-secondary btn-md text-end" href="{{ route('electrician.create') }}">
+                    <a class="btn btn-secondary btn-md text-end" href="{{ route('electricianComplaintCreate') }}">
                       <i class="fa fa-save"></i> Insert Record
                     </a>
                   </div>
@@ -24,28 +24,26 @@
                     <input type="text" placeholder="Search by Control No" id="control_number" name="control_number" class="form-control">
                 </div>
                 <div class="col-lg-4">
-                    <input type="text" placeholder="Search by First Name" id="first_name" name="first_name" class="form-control">
+                    <input type="text" placeholder="Search by Complainant" id="complaint" name="complaint" class="form-control">
                 </div>
                 <div class="col-lg-4">
-                    <input type="text" placeholder="Search by Last Name" id="last_name" name="last_name" class="form-control">
+                    <input type="text" placeholder="Search by Electrician" id="electrician" name="electrician" class="form-control">
                 </div>
               </div>
               <table class="table table-striped table-bordered border-primary">
                 <thead>
                   <tr class="text-center">
-                    <th>Application No.</th>
-                    <th>Full Name</th>
-                    <th>Address</th>
-                    <th>Date Of Birth</th>
-                    <th>Facebook</th>
-                    <th>Contact #</th>
-                    <th>Status</th>
-                    <th>Complaint count</th>
+                    <th>Control No.</th>
+                    <th>Date</th>
+                    <th>Complainant</th>
+                    <th>Electrician</th>
+                    <th>Nature of Complaint</th>
+                    <th>Act of Misconduct</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="show_data">
-                  @include('electrician.search')
+                  @include('electrician.complaint.search')
                 </tbody>
                </table>
                <div id="pagination">{{ $data->links() }}</div>

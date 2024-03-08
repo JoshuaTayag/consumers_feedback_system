@@ -129,8 +129,15 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('edit-material-cost', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItemCost'])->name('updateItemCost');
     Route::delete('delete-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'deleteItem'])->name('removeItem');
 
-    // MRF
+    // ELECTRICIAN
     Route::resource('electrician', App\Http\Controllers\ElectricianController::class);
+    Route::get('electrician-complaints', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintIndex'])->name('electricianComplaintIndex');
+    Route::get('electrician-complaint-create', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintCreate'])->name('electricianComplaintCreate');
+    Route::post('electrician-complaint-store', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintStore'])->name('electricianComplaintStore');
+    Route::delete('electrician-complaint-delete/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintDelete'])->name('electricianComplaintDelete');
+    Route::get('electrician-complaint-edit/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintEdit'])->name('electricianComplaintEdit');
+    Route::put('electrician-complaint-update/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintUpdate'])->name('electricianComplaintUpdate');
+    Route::get('electrician-complaint-view/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintView'])->name('electricianComplaintView');
 
     // Strucutures
     // Route::resource('signatory', App\Http\Controllers\SignatoryController::class);

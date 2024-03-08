@@ -113,7 +113,7 @@
                     <div class="col-lg-12">
                       <div class="mb-3">
                         <label for="requested_by" class="form-label mb-1">Requested By</label>
-                        <input type="text" class="form-control" id="requested_by" name="requested_by" value="{{ auth()->user()->name }}" disabled required>
+                        <input type="text" class="form-control" id="requested_by" name="requested_by" value="{{ $mrf->requested_id ? $mrf->requested_name : auth()->user()->name }}" disabled required>
                         <!-- <select id="requested_by" class="form-control" name="requested_by" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                             @foreach ($users as $user)          
                               <option value="{{ $user->id }}" @selected( $mrf->requested_id == $user->id) id="">
@@ -249,6 +249,7 @@
                         <input type="text" class="form-control" id="sitio" name="sitio" value="{{$mrf->sitio }}" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                       </div>
                     </div>
+                    <input type="hidden" class="form-control" id="status" name="status" value="{{$mrf->status }}">
                   </div>
                 </div>
               </div>
@@ -431,14 +432,17 @@
 
 $(document).ready(function () {
 
-  const textbox1 = document.getElementById('req_type');
-  const textbox2 = document.getElementById('wo_no');
-  console.log(textbox1.value.trim())
-  if (textbox1.value.trim() != 2) {
-              // Enable textbox2 if textbox1 has a value
-              textbox2.disabled = true;
-              textbox2.required = false;
-          }
+  const app_status = document.getElementById('status');
+  if(app_status == 1){
+    const textbox1 = document.getElementById('req_type');
+    const textbox2 = document.getElementById('wo_no');
+    if (textbox1.value.trim() != 2) {
+      // Enable textbox2 if textbox1 has a value
+      textbox2.disabled = true;
+      textbox2.required = false;
+    }
+  }
+  
 
   $('.js-example-basic-multiple').select2();
 
@@ -593,8 +597,11 @@ function removeItem(val) {
   });
 }
 
-  document.addEventListener('DOMContentLoaded', function () {
+
+  document.addEventListener('DOMContentLoaded', function (status) {
       // Get references to the textboxes
+      const app_status = document.getElementById('status');
+      if(app_status.value == 1){
       const textbox1 = document.getElementById('req_type');
       const textbox2 = document.getElementById('wo_no');
       
@@ -611,7 +618,9 @@ function removeItem(val) {
               textbox2.required = false;
           }
       });
+    }
   });
+  
 
 </script>
 @endsection

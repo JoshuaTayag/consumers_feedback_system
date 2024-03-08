@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="card-body">
-          {!! Form::open(array('route' => 'electrician.store','method'=>'POST')) !!}
+          {!! Form::open(array('route' => ['electrician.update', $data[0]->id],'method'=>'PUT')) !!}
             <div class="row">
               <h5 class="styled-heading">Basic Information</h5>
               <div class="col-lg-2">
@@ -246,16 +246,18 @@
                         <th><button type="button" name="add" id="dynamic-ar" class="btn btn-outline-primary">Add School</button></th>
                     </tr>
                     @foreach($data[0]->electrician_educational_backgrounds as $school)
+                      
                       <tr>
                           <td>
-                            <select id="educational_stage" class="form-control" name="educationalBackground[`+ i +`][educational_stage]" required>
+                          
+                            <select id="educational_stage" class="form-control" name="educationalBackground[{{$loop->iteration}}][educational_stage]" required>
                             @foreach (Config::get('constants.educational_background') as $background)          
                               <option value="{{ $background['id'] }}" @selected($school->educational_stage == $background['id'] ) >{{ $background['name'] }}</option>
                             @endforeach 
                           </td>
-                          <td><input type="text" name="educationalBackground[0][name_of_school]" placeholder="Name of School" class="form-control" value="{{ $school->name_of_school }}" /></td>
-                          <td><input type="text" name="educationalBackground[0][degree_received]" placeholder="Degree Received" class="form-control" value="{{ $school->degree_recieved }}" /></td>
-                          <td><input type="date" name="educationalBackground[0][year_graduated]" placeholder="Year Graduated" class="form-control" value="{{ $school->year_graduated }}" /></td>
+                          <td><input type="text" name="educationalBackground[{{$loop->iteration}}][name_of_school]" placeholder="Name of School" class="form-control" value="{{ $school->name_of_school }}" /></td>
+                          <td><input type="text" name="educationalBackground[{{$loop->iteration}}][degree_recieved]" placeholder="Degree Received" class="form-control" value="{{ $school->degree_recieved }}" /></td>
+                          <td><input type="date" name="educationalBackground[{{$loop->iteration}}][year_graduated]" placeholder="Year Graduated" class="form-control" value="{{ $school->year_graduated }}" /></td>
                           <td><button type="button" class="btn btn-outline-danger remove-input-field">Delete</button></td>
                       </tr>
                     @endforeach
@@ -453,16 +455,16 @@
             $("#dynamicAddRemove").append(
               `<tr>
                 <td>
-                  <select id="educational_stage" class="form-control" name="educationalBackground[`+ i +`][educational_stage]" required>
+                  <select id="educational_stage" class="form-control" name="educationalBackground[${i}][educational_stage]" required>
                     <option value="">Choose...</option>
                     @foreach (Config::get('constants.educational_background') as $id)          
                       <option value="{{ $id['id'] }}" id="" {{ old('educational_stage') ? 'selected' : '' }}>{{ $id['name'] }}</option>
                     @endforeach 
                   </select>
                 </td>
-                <td><input type="text" name="educationalBackground[`+ i +`][name_of_school]" placeholder="Name of School" class="form-control" /></td>
-                <td><input type="text" name="educationalBackground[`+ i +`][degree_recieved]" placeholder="Degree Received" class="form-control" /></td>
-                <td><input type="date" name="educationalBackground[`+ i +`][year_graduated]" placeholder="Year Graduated" class="form-control" /></td>
+                <td><input type="text" name="educationalBackground[${i}][name_of_school]" placeholder="Name of School" class="form-control" required/></td>
+                <td><input type="text" name="educationalBackground[${i}][degree_recieved]" placeholder="Degree Received" class="form-control" required/></td>
+                <td><input type="date" name="educationalBackground[${i}][year_graduated]" placeholder="Year Graduated" class="form-control" required/></td>
                 <td><button type="button" class="btn btn-outline-danger remove-input-field">Delete</button></td>
               </tr>`
             );

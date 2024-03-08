@@ -21,12 +21,14 @@
             </div>
             <div class="card-body">
               <table class="table table-bordered">
-                <tr>
+                <tr class="text-center">
+                  <th>MER #</th>
                   <th>Project Name</th>
                   <th>Address</th>
                   {{-- <th>Items</th> --}}
                   <th>Requested By</th>
                   <th>Requested Date</th>
+                  <th>References</th>
                   <th>Status</th>
                   <th style="min-width: 60px;">Action</th>
                 </tr>
@@ -34,6 +36,7 @@
                   @foreach ($mrfs as $index => $mrf)  
                   @php $liquidation = $liquidations->where('material_requisition_form_id', $mrf->id)->count(); @endphp                      
                     <tr class="text-center">
+                        <th>{{  date('y', strtotime($mrf->created_at)). "-". str_pad($mrf->id,5,'0',STR_PAD_LEFT) }}</th>
                         <th>{{ $mrf->project_name }}</th>
                         <th>{{ $mrf->district->district_name }}, {{ $mrf->barangay->barangay_name }}, {{ $mrf->municipality->municipality_name }}</th>
                         {{-- <th>
@@ -47,6 +50,16 @@
                         </th> --}}
                         <th>{{ $mrf->requested_name }}</th>
                         <th>{{ date('F d, Y', strtotime($mrf->requested_by)) }}</th>
+                        <th>
+                          @if(count($mrf->mrf_liquidations) != 0)
+                            @foreach($mrf->mrf_liquidations as $index => $mrvs)
+                                {{$mrvs->type. '# '.$mrvs->type_number }} <br>
+                            @endforeach
+                          @else
+                            None
+                          @endif
+                          
+                        </th>
                         <th class="badge rounded-pill text-white bg-{{ $mrf->status == 0 ? 'secondary' : ($mrf->status == 1 && $liquidation == 0 ? 'success' : ($mrf->status == 2 && $liquidation != 0 ? 'primary' : ($mrf->status == 3 ? 'warning' : 'danger'))) }}"  >{{ $mrf->status == 0 ? "Pending" : ($mrf->status == 1 && $liquidation == 0 ? 'Approved'  : ($mrf->status == 2 && $liquidation != 0 ? 'Processed' : ($mrf->status == 3 ? 'Liquidated' : "DisApproved"))) }}</th>
                         <th>
                           <!-- {{$liquidations->where('material_requisition_form_id', $mrf->id)->count()}} -->

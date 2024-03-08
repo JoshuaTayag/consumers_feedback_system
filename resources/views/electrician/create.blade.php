@@ -441,9 +441,9 @@
                     @endforeach 
                   </select>
                 </td>
-                <td><input type="text" name="educationalBackground[`+ i +`][name_of_school]" placeholder="Name of School" class="form-control" /></td>
-                <td><input type="text" name="educationalBackground[`+ i +`][degree_recieved]" placeholder="Degree Received" class="form-control" /></td>
-                <td><input type="date" name="educationalBackground[`+ i +`][year_graduated]" placeholder="Year Graduated" class="form-control" /></td>
+                <td><input type="text" name="educationalBackground[`+ i +`][name_of_school]" placeholder="Name of School" class="form-control" required /></td>
+                <td><input type="text" name="educationalBackground[`+ i +`][degree_recieved]" placeholder="Degree Received" class="form-control" required /></td>
+                <td><input type="date" name="educationalBackground[`+ i +`][year_graduated]" placeholder="Year Graduated" class="form-control" required /></td>
                 <td><button type="button" class="btn btn-outline-danger remove-input-field">Delete</button></td>
               </tr>`
             );

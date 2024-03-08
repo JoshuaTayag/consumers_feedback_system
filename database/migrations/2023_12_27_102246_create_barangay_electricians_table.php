@@ -52,6 +52,7 @@ return new class extends Migration
             $table->integer('application_type')->nullable();
             $table->string('remarks')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

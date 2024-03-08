@@ -133,7 +133,7 @@
         <tr>
           <th rowspan="3" style="text-align: left;">PROJECT NAME: <br><br>
             {{ $datas[0]->project_name }}</th>
-          <td colspan="2"></td>
+          <td colspan="2">MER No. {{  date('y', strtotime($datas[0]->created_at)). "-". str_pad($datas[0]->id,5,'0',STR_PAD_LEFT) }}</td>
           <td style="width: 80px;">Date: {{ date('m/d/Y', strtotime($datas[0]->created_at)) }} </td>
           <td style="width: 70px;">Endorsed By</td>
           <td style="width: 67px;">Prepared By</td>

@@ -28,7 +28,7 @@
                       <tr>
                           {{-- <th class="text-center"><input type="checkbox" id="{{$data->account_no}}" class="form-check-input" name="checked" value="{{$data->id}}">  </th> --}}
                           <th>{{ $data->project_name }}</th>
-                          <th>{{ $data->district->district_name }}, {{ $data->barangay->barangay_name }}, {{ $data->municipality->municipality_name }}</th>
+                          <th>{{Config::get('constants.area_id.'.($data->area_id-1).'.name')}}, {{ $data->sitio }}, {{ $data->barangay->barangay_name }}, {{ $data->municipality->municipality_name }}</th>
                           <th>{{ $data->requested_name }}</th>
                           <th>{{ date('F d, Y', strtotime($data->requested_by)) }}</th>
                           <th>
@@ -53,7 +53,7 @@
                                       }
                                     @endphp
                                     <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal" data-bs-name="{{$data}}"
-                                    data-bs-items="{{json_encode($ii)}}" data-bs-address="{{Config::get('constants.area_id.0.name')}}, {{ $data->district->district_name }}, {{ $data->barangay->barangay_name }}, {{ $data->municipality->municipality_name }}, {{ $data->municipality->sitio }}" data-bs-requested="{{$data->requested_name}}" data-bs-requested-date="{{ date('F d, Y', strtotime($data->requested_by)) }}"><i class="fa fa-eye"></i></button>
+                                    data-bs-items="{{json_encode($ii)}}" data-bs-area="{{Config::get('constants.area_id.'.($data->area_id-1).'.name')}}" data-bs-address="{{ $data->sitio }}, {{ $data->barangay->barangay_name }}, {{ $data->municipality->municipality_name }}, {{ $data->municipality->sitio }}" data-bs-requested="{{$data->requested_name}}" data-bs-requested-date="{{ date('F d, Y', strtotime($data->requested_by)) }}"><i class="fa fa-eye"></i></button>
                                   </div>
                                   <div class="col-lg-4 p-1 text-center">
                                     <form method="POST" action="{{ route('mrfApprovalUpdate', $data->id) }}">
@@ -97,7 +97,6 @@
           </div>
 
 
-          {{-- Appliance Calculator modal --}}
     <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="applianceCalculator" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -131,6 +130,16 @@
                   </div>
                 </div>
                 <div class="row pt-4">
+                  <div class="col-lg-6 pb-4">
+                    <div class="card">
+                      <div class="card-header bg-info fs-5">
+                        Area
+                      </div>
+                      <div class="card-body text-center">
+                        <span id="area" class="fs-5"></span>
+                      </div>
+                    </div>
+                  </div>
                   <div class="col-lg-6">
                     <div class="card">
                       <div class="card-header bg-info fs-5">
@@ -211,6 +220,7 @@
     // Extract info from data-bs-* attributes
     var data = button.getAttribute('data-bs-name')
     var data_address = button.getAttribute('data-bs-address')
+    var data_area = button.getAttribute('data-bs-area')
     var data_requested_by = button.getAttribute('data-bs-requested')
     var data_requested_date = button.getAttribute('data-bs-requested-date')
     var new_items = button.getAttribute('data-bs-items')
@@ -223,6 +233,7 @@
       document.getElementById("requested_by").innerHTML = data_requested_by;
       document.getElementById("date_requested").innerHTML = data_requested_date;
       document.getElementById("address").innerHTML = data_address;
+      document.getElementById("area").innerHTML = data_area;
       document.getElementById("remarks").value += encoded_data.remarks;
 
       var items = encoded_data.items;

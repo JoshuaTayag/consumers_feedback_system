@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Electrician extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'barangay_electricians';
 
@@ -29,6 +30,11 @@ class Electrician extends Model
     public function electrician_educational_backgrounds()
     {
         return $this->hasMany('App\Models\BarangayElectrician\ElectricianEducationalBackground');
+    }
+
+    public function electrician_complaints()
+    {
+        return $this->hasMany('App\Models\BarangayElectrician\ElectricianComplaint');
     }
     
 }

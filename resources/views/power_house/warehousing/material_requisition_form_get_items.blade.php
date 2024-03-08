@@ -24,20 +24,24 @@
     @endif
   </th>
   
-  @if($mrf->status == 2)
+  <!-- @if($mrf->status == 2)
     <th>
       <input type="number" class="form-control" value="{{ $mrf_item->liquidation_quantity }}" readonly>
     </th>
-  @endif
+  @endif -->
   
-  <th>
+  
     {{-- <input type="number" name="temp_cost|{{$mrf_item->id}}" class="form-control" value="{{$mrf_item->unit_cost}}" required> --}}
     @if($mrf->status == 0)
+    <th>
       <a href="" class="updateCost form-control" data-name="cost" data-type="number" data-pk="{{ $mrf_item->id }}" data-title="Enter unit cost" disabled>{{ $mrf_item->unit_cost }}</a>
+    </th>
     @else
-      <input type="number" class="form-control" value="{{ $mrf_item->unit_cost }}" readonly>
+      <th>
+        <input type="number" class="form-control" value="{{ $mrf_item->unit_cost }}" readonly>
+      </th>
     @endif
-  </th>
+  
   <th>
     @if($mrf->status == 0)
     <a href="#"  class="btn btn-danger" onclick="removeItem({{$mrf_item->id}})"><i class="fa fa-times"></i></a>

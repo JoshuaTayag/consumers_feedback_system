@@ -110,7 +110,7 @@
                         <th>Unit Cost</th>
                         <th>Quantity</th>
                         <th>Existing Cost</th>
-                        <th width="20px">Action</th>
+                        <th width="40px">Action</th>
                       </tr>
                       <tbody id="show_data">
                         @include('power_house.warehousing.material_requisition_form_get_items')

@@ -53,7 +53,7 @@
                 <a class="dropdown-item" href="{{ route('electrician.index') }}">NEW/RENEWAL OF APPLICATION</a>
               </li>
               <li>
-                <a class="dropdown-item" href="{{ route('lifeline.report') }}">COMPLAINTS</a>
+                <a class="dropdown-item" href="{{ route('electricianComplaintIndex') }}">COMPLAINTS</a>
               </li>
             </ul>
           </li>
