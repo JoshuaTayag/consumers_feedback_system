@@ -42,6 +42,7 @@
                   </tr>
                   @endforeach
               </table>
+              <div id="pagination">{{ $roles->links() }}</div>
             </div>
           </div>
       </div>
