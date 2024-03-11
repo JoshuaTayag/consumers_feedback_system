@@ -89,7 +89,7 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-lg-2">
+              <div class="col-lg-4">
                 <div class="mb-2">
                   <label for="area" class="form-label mb-1">Area *</label>
                   <select id="area" class="form-control" name="area_id" required>
@@ -100,7 +100,7 @@
                   </select>
                 </div>
               </div>
-              <div class="col-lg-2">
+              <div class="col-lg-4">
                 <div class="mb-3">
                   <label for="district" class="form-label mb-1">District *</label>
                   <select id="district" class="form-control" name="district" required>
@@ -111,22 +111,48 @@
                   </select>
                 </div>
               </div>
-              <div class="col-lg-2">
+              <div class="col-lg-4">
                 <div class="mb-3">
                   <label for="municipality" class="form-label mb-1">Municipality *</label>
-                  <select id="municipality" class="form-control" name="municipality"></select>
+                  <select id="municipality" class="form-control" name="municipality">
+                  <option value="">Choose...</option>
+                  </select>
                 </div>
               </div>
-              <div class="col-lg-3">
+              <div class="col-lg-4">
                 <div class="mb-3">
                   <label for="barangay" class="form-label mb-1">Barangay</label>
-                  <select id="barangay" class="form-control" name="barangay"></select>
+                  <select id="barangay" class="form-control" name="barangay">
+                  <option value="">Choose...</option>
+                  </select>
                 </div>
               </div>
-              <div class="col-lg-3">
+              <div class="col-lg-4">
                 <div class="mb-3">
                   <label for="sitio" class="form-label mb-1">Sitio</label>
                   <input type="text" class="form-control" id="sitio" name="sitio">
+                </div>
+              </div>
+              <div class="col-lg-2">
+                <div class="mb-3">
+                  <label for="substation" class="form-label mb-1">Substation</label>
+                  <select id="substation" class="form-control" name="substation">
+                      <option value="">Choose...</option>
+                      @foreach (Config::get('constants.substations') as $substation)          
+                        <option value="{{ $substation['id'] }}" id="" {{ old('substation') ? 'selected' : '' }}>{{ $substation['name'] }}</option>
+                      @endforeach
+                  </select>
+                </div>
+              </div>
+              <div class="col-lg-2">
+                <div class="mb-3">
+                  <label for="feeder" class="form-label mb-1">Feeder</label>
+                  <select id="feeder" class="form-control" name="feeder">
+                      <option value="">Choose...</option>
+                      <!-- @foreach (Config::get('constants.feeders') as $feeder)          
+                        <option value="{{ $feeder['id'] }}" id="" {{ old('feeder') ? 'selected' : '' }}>{{ $feeder['name'] }}</option>
+                      @endforeach -->
+                  </select>
                 </div>
               </div>
               <div class="col-lg-12">
@@ -135,6 +161,7 @@
                     <tr>
                       <th>Nea Code</th>
                       <th>Description</th>
+                      <th>Unit</th>
                       <th>Unit Cost</th>
                       <th>Quantity</th>
                       <th>Existing Cost</th>
@@ -337,8 +364,28 @@ $(document).ready(function () {
       });
   });
 
-
+  // Event listener for district dropdown change
+  $('#substation').change(function() {
+      const substationId = $(this).val();
+      // console.log(substationId)
+      populateMunicipalities(substationId);
+  });
 });
+
+// Function to populate municipalities dropdown based on selected substation
+function populateMunicipalities(substationId) {
+    var feeders = {!! json_encode(Config::get('constants.feeders')) !!};
+    
+    // Filter feeders based on the selected substationId
+    const substationFeeders = feeders.filter(feeder => feeder.substation_id == substationId);
+
+    // Populate municipalities dropdown with filtered feeders
+    $('#feeder').empty(); // Clear existing options
+    $('#feeder').append(`<option value="">Choose...</option>`);
+    substationFeeders.forEach(feeder => {
+        $('#feeder').append(`<option value="${feeder.id}">${feeder.name}</option>`);
+    });
+}
 
 function removeItem(val) {
   $(document).ready(function () {
@@ -411,5 +458,8 @@ function removeItem(val) {
     border-bottom: solid 1px #00cc0a;
   }
 
+  .word-wrap-textfield {
+      white-space: pre-wrap !important;
+    }
 </style>
 @endsection

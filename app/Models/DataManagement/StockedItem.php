@@ -4,6 +4,7 @@ namespace App\Models\DataManagement;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class StockedItem extends Model
 {
@@ -27,6 +28,18 @@ class StockedItem extends Model
     public function mrf_item()
     {
         return $this->belongsTo('App\Models\MaterialRequisitionFormItems');
+    }
+
+    public function getUnitNameAttribute()
+    {
+
+        // $user = User::where('id', )
+        //     ->get();
+        $items = DB::connection('mysqlCmbis')
+        ->table('unit')
+        ->where('UnitId', $this->UnitId)
+        ->select('UnitName')->get();
+        return $items[0]->UnitName;
     }
 
     protected $connection = 'mysqlCmbis';

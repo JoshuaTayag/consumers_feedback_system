@@ -53,7 +53,14 @@
                                       }
                                     @endphp
                                     <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal" data-bs-name="{{$data}}"
-                                    data-bs-items="{{json_encode($ii)}}" data-bs-area="{{Config::get('constants.area_id.'.($data->area_id-1).'.name')}}" data-bs-address="{{ $data->sitio }}, {{ $data->barangay->barangay_name }}, {{ $data->municipality->municipality_name }}, {{ $data->municipality->sitio }}" data-bs-requested="{{$data->requested_name}}" data-bs-requested-date="{{ date('F d, Y', strtotime($data->requested_by)) }}"><i class="fa fa-eye"></i></button>
+                                    data-bs-items="{{json_encode($ii)}}" 
+                                    data-bs-area="{{Config::get('constants.area_id.'.($data->area_id-1).'.name')}}" 
+                                    data-bs-sitio="{{ $data->sitio }}" 
+                                    data-bs-barangay="{{ $data->barangay->barangay_name }}"
+                                    data-bs-municipality="{{ $data->municipality->municipality_name }}"
+                                    data-bs-requested="{{$data->requested_name}}" 
+                                    data-bs-requested-date="{{ date('F d, Y', strtotime($data->requested_by)) }}"><i class="fa fa-eye"></i></button>
+
                                   </div>
                                   <div class="col-lg-4 p-1 text-center">
                                     <form method="POST" action="{{ route('mrfApprovalUpdate', $data->id) }}">
@@ -106,60 +113,86 @@
           </div>
           <div class="modal-body">
             <div class="card">
-              <div class="card-body">
+              <div class="card-body"  >
                 <div class="row">
                   <div class="col-lg-6">
                     <div class="card">
                       <div class="card-header bg-info fs-5">
-                        Project Name
+                        Project Details
                       </div>
                       <div class="card-body text-center">
-                        <span id="project_name" class="fs-5"></span>
+                        <div class="row fs-5 text-start">
+                          <div class="col">
+                            Name: 
+                          </div>
+                          <div class="col text-start">
+                            <span id="project_name"></span>
+                          </div>
+                        </div>
+
+                        <div class="row fs-5 text-start">
+                          <div class="col">
+                            Area: 
+                          </div>
+                          <div class="col text-start">
+                            <span id="area"></span>
+                          </div>
+                        </div>
+
+                        <div class="row fs-5">
+                          <div class="col text-start">
+                            Sitio: 
+                          </div>
+                          <div class="col text-start">
+                            <span id="sitio"></span>
+                          </div>
+                        </div>
+
+                        <div class="row fs-5">
+                          <div class="col text-start">
+                            Barangay: 
+                          </div>
+                          <div class="col text-start">
+                            <span id="barangay"></span>
+                          </div>
+                        </div>
+
+                        <div class="row fs-5">
+                          <div class="col text-start">
+                            Municiaplity: 
+                          </div>
+                          <div class="col text-start">
+                            <span id="municipality"></span>
+                          </div>
+                        </div>
+                        
                       </div>
                     </div>
                   </div>
                   <div class="col-lg-6">
-                    <div class="card">
-                      <div class="card-header bg-info fs-5">
-                        Requested By
+                    <div class="row">
+                      <div class="col-lg-12 mb-4">
+                        <div class="card">
+                          <div class="card-header bg-info fs-5">
+                            Requested By
+                          </div>
+                          <div class="card-body text-center">
+                            <span id="requested_by" class="fs-5"></span>
+                          </div>
+                        </div>
                       </div>
-                      <div class="card-body text-center">
-                        <span id="requested_by" class="fs-5"></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row pt-4">
-                  <div class="col-lg-6 pb-4">
-                    <div class="card">
-                      <div class="card-header bg-info fs-5">
-                        Area
-                      </div>
-                      <div class="card-body text-center">
-                        <span id="area" class="fs-5"></span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-6">
-                    <div class="card">
-                      <div class="card-header bg-info fs-5">
-                        Address
-                      </div>
-                      <div class="card-body text-center">
-                        <span id="area" class="fs-5"></span>
-                        <span id="address" class="fs-5"></span>
+                      <div class="col-lg-12">
+                        <div class="card">
+                          <div class="card-header bg-info fs-5">
+                            Requested Date
+                          </div>
+                          <div class="card-body text-center">
+                            <span id="date_requested" class="fs-5"></span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div class="col-lg-6">
-                    <div class="card">
-                      <div class="card-header bg-info fs-5">
-                        Requested Date
-                      </div>
-                      <div class="card-body text-center">
-                        <span id="date_requested" class="fs-5"></span>
-                      </div>
-                    </div>
+                    
                   </div>
                 </div>
                 <div class="row pt-4">
@@ -219,22 +252,29 @@
     var button = event.relatedTarget
     // Extract info from data-bs-* attributes
     var data = button.getAttribute('data-bs-name')
-    var data_address = button.getAttribute('data-bs-address')
+    
     var data_area = button.getAttribute('data-bs-area')
     var data_requested_by = button.getAttribute('data-bs-requested')
     var data_requested_date = button.getAttribute('data-bs-requested-date')
     var new_items = button.getAttribute('data-bs-items')
+
+    var sitio = button.getAttribute('data-bs-sitio')
+    var barangay = button.getAttribute('data-bs-barangay')
+    var municipality = button.getAttribute('data-bs-municipality')
     // var wattage = button.getAttribute('data-bs-wattage')
     // var rate = button.getAttribute('data-bs-rate')
       var encoded_data = JSON.parse(data);
       var encoded_items = JSON.parse(new_items);
-      // console.log(encoded_data.items)
+
+      // populate new value
       document.getElementById("project_name").innerHTML = encoded_data.project_name;
       document.getElementById("requested_by").innerHTML = data_requested_by;
       document.getElementById("date_requested").innerHTML = data_requested_date;
-      document.getElementById("address").innerHTML = data_address;
+      document.getElementById("sitio").innerHTML = sitio;
+      document.getElementById("barangay").innerHTML = barangay;
+      document.getElementById("municipality").innerHTML = municipality;
       document.getElementById("area").innerHTML = data_area;
-      document.getElementById("remarks").value += encoded_data.remarks;
+      document.getElementById("remarks").value = encoded_data.remarks;
 
       var items = encoded_data.items;
       var all_item = [];

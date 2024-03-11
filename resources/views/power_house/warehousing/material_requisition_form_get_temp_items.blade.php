@@ -4,8 +4,11 @@
     {{-- <input type="text" name="temp_nea_code|{{$temp_item->id}}" class="form-control" placeholder="{{$temp_item->item->ItemCode}}"> --}}
     <a href="" class="updateCode form-control" data-name="code" data-type="text" data-pk="{{ $temp_item->id }}" data-title="Enter code">{{ $temp_item->nea_code }}</a>
   </th>
+  <td>
+    <div contenteditable="false" class="border rounded p-2" aria-multiline="true">{{$temp_item->item->Description}}</div>
+  </td>
   <th>
-    <input type="text" class="form-control" value="{{$temp_item->item->Description}}" readonly>
+    <input type="text" class="form-control" value="{{$temp_item->item->unit_name}}" readonly>
   </th>
   <th>
     <input type="number" class="form-control" value="{{$temp_item->item->AveragePrice}}" readonly>

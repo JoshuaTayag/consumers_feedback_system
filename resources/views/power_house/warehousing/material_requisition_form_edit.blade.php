@@ -85,6 +85,12 @@
                             </div>
                           </div>
                         @endif
+                        <div class="col-lg-12">
+                          <div class="mb-2">
+                            <label for="project_name" class="form-label mb-1">Remarks</label>
+                            <textarea name="cetd_remarks" class="form-control" id="">{{ $mrf->cetd_remarks }}</textarea>
+                          </div>
+                        </div>
                         <div class="col col-lg-4 d-flex justify-content-left align-items-center">
                           <input type="submit" class="btn btn-primary btn-sm fa fa-trash" value="Assign">
                         </div>
@@ -247,6 +253,26 @@
                       <div class="mb-3">
                         <label for="sitio" class="form-label mb-1">Sitio</label>
                         <input type="text" class="form-control" id="sitio" name="sitio" value="{{$mrf->sitio }}" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                      </div>
+                    </div>
+                    <div class="col-lg-4">
+                      <div class="mb-3">
+                        <label for="substation" class="form-label mb-1">Substation</label>
+                        <!-- <input type="text" class="form-control" id="substation" name="substation" value="{{$mrf->substation_id }}" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)> -->
+                        <select id="substation" class="form-control" name="substation" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                          <option value="">Choose...</option>
+                          @foreach (Config::get('constants.substations') as $substation)          
+                            <option value="{{ $substation['id'] }}" id="" @selected( $mrf->substation_id == $substation['id']) >{{ $substation['name'] }}</option>
+                          @endforeach 
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-4">
+                      <div class="mb-3">
+                        <label for="feeder" class="form-label mb-1">Feeder</label>
+                        <!-- <input type="text" class="form-control" id="feeder" name="feeder" value="{{$mrf->feeder_id }}" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)> -->
+                        <select id="feeder" class="form-control" name="feeder">
+                        </select>
                       </div>
                     </div>
                     <input type="hidden" class="form-control" id="status" name="status" value="{{$mrf->status }}">
@@ -576,8 +602,37 @@ $(document).ready(function () {
       });
   });
 
+  const substationId = $('#substation').val();
 
+  if(substationId != ""){
+    
+    populateMunicipalities(substationId);
+  }
+
+  // Event listener for district dropdown change
+  $('#substation').change(function() {
+      const substationId = $(this).val();
+      // console.log(substationId)
+      populateMunicipalities(substationId);
+  });
 });
+
+// Function to populate municipalities dropdown based on selected substation
+function populateMunicipalities(substationId) {
+    var feeders = {!! json_encode(Config::get('constants.feeders')) !!};
+    
+    // Filter feeders based on the selected substationId
+    const substationFeeders = feeders.filter(feeder => feeder.substation_id == substationId);
+
+    // Populate municipalities dropdown with filtered feeders
+    $('#feeder').empty(); // Clear existing options
+    var selectedFeederId = "{{ $mrf->feeder_id }}";
+    $('#feeder').append(`<option value="">Choose...</option>`);
+    substationFeeders.forEach(feeder => {
+        // $('#feeder').append(`<option value="${feeder.id}" @selected($mrf->feeder_id == 1) >${feeder.name}</option>`);
+        $('#feeder').append(`<option value="${feeder.id}" ${feeder.id == selectedFeederId ? 'selected' : ''}>${feeder.name}</option>`);
+    });
+}
 
 function removeItem(val) {
   $(document).ready(function () {

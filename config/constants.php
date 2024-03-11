@@ -415,6 +415,10 @@
             [
                 "id" => 5,
                 "name" => "Area V"
+            ],
+            [
+                "id" => 6,
+                "name" => "LCSD "
             ]
         ],
 
@@ -504,6 +508,219 @@
                 "id" => 3,
                 "name" => "Third Offense"
             ]
+        ],
+
+        'substations' => [
+            [
+                "id" => 1,
+                "name" => "Simangan"
+            ],
+            [
+                "id" => 2,
+                "name" => "Talisayan"
+            ],
+            [
+                "id" => 3,
+                "name" => "Mahayag"
+            ],
+            [
+                "id" => 4,
+                "name" => "Sambulawan"
+            ],
+            [
+                "id" => 5,
+                "name" => "Tambis"
+            ],
+            [
+                "id" => 6,
+                "name" => "Libongao"
+            ],
+            [
+                "id" => 7,
+                "name" => "Alta Vista"
+            ],
+            [
+                "id" => 8,
+                "name" => "Palompon"
+            ],
+        ],
+
+        'feeders' => [
+            [
+                "id" => 1,
+                "substation_id" => 1,
+                "name" => "Feeder 1-1"
+            ],
+            [
+                "id" => 2,
+                "substation_id" => 1,
+                "name" => "Feeder 1-2"
+            ],
+            [
+                "id" => 3,
+                "substation_id" => 1,
+                "name" => "Feeder 1-3"
+            ],
+            [
+                "id" => 4,
+                "substation_id" => 1,
+                "name" => "Feeder 1-4"
+            ],
+            [
+                "id" => 5,
+                "substation_id" => 1,
+                "name" => "Feeder 1-5"
+            ],
+            [
+                "id" => 6,
+                "substation_id" => 1,
+                "name" => "Feeder 1-6"
+            ],
+            [
+                "id" => 7,
+                "substation_id" => 1,
+                "name" => "Feeder 1-7"
+            ],
+
+            //TALISAYAN
+            [
+                "id" => 8,
+                "substation_id" => 2,
+                "name" => "Feeder 2-1"
+            ],
+            [
+                "id" => 9,
+                "substation_id" => 2,
+                "name" => "Feeder 2-2"
+            ],
+            [
+                "id" => 10,
+                "substation_id" => 2,
+                "name" => "Feeder 2-3"
+            ],
+
+            //MAHAYAG
+            [
+                "id" => 11,
+                "substation_id" => 3,
+                "name" => "Feeder 3-1"
+            ],
+            [
+                "id" => 12,
+                "substation_id" => 3,
+                "name" => "Feeder 3-2"
+            ],
+            [
+                "id" => 13,
+                "substation_id" => 3,
+                "name" => "Feeder 3-3"
+            ],
+            [
+                "id" => 14,
+                "substation_id" => 3,
+                "name" => "Feeder 3-4"
+            ],
+
+            //SAMBULAWAN
+            [
+                "id" => 15,
+                "substation_id" => 4,
+                "name" => "Feeder 4-1"
+            ],
+            [
+                "id" => 16,
+                "substation_id" => 4,
+                "name" => "Feeder 4-2"
+            ],
+            [
+                "id" => 17,
+                "substation_id" => 4,
+                "name" => "Feeder 4-3"
+            ],
+
+            //TAMBIS
+            [
+                "id" => 18,
+                "substation_id" => 5,
+                "name" => "Feeder 5-1"
+            ],
+            [
+                "id" => 19,
+                "substation_id" => 5,
+                "name" => "Feeder 5-2"
+            ],
+            [
+                "id" => 20,
+                "substation_id" => 5,
+                "name" => "Feeder 5-3"
+            ],
+
+            //LIBONGAO
+            [
+                "id" => 21,
+                "substation_id" => 6,
+                "name" => "Feeder 6-1"
+            ],
+            [
+                "id" => 22,
+                "substation_id" => 6,
+                "name" => "Feeder 6-2"
+            ],
+            [
+                "id" => 23,
+                "substation_id" => 6,
+                "name" => "Feeder 6-3"
+            ],
+            [
+                "id" => 24,
+                "substation_id" => 6,
+                "name" => "Feeder 6-4"
+            ],
+
+            //ALTA VISTA
+            [
+                "id" => 25,
+                "substation_id" => 7,
+                "name" => "Feeder 7-1"
+            ],
+            [
+                "id" => 26,
+                "substation_id" => 7,
+                "name" => "Feeder 7-2"
+            ],
+            [
+                "id" => 27,
+                "substation_id" => 7,
+                "name" => "Feeder 7-3"
+            ],
+            [
+                "id" => 28,
+                "substation_id" => 7,
+                "name" => "Feeder 7-4"
+            ],
+
+            //ALTA VISTA
+            [
+                "id" => 29,
+                "substation_id" => 8,
+                "name" => "Feeder 8-1"
+            ],
+            [
+                "id" => 30,
+                "substation_id" => 8,
+                "name" => "Feeder 8-2"
+            ],
+            [
+                "id" => 31,
+                "substation_id" => 8,
+                "name" => "Feeder 8-3"
+            ],
+            [
+                "id" => 32,
+                "substation_id" => 8,
+                "name" => "Feeder 8-4"
+            ],
+            
         ],
     ];
 

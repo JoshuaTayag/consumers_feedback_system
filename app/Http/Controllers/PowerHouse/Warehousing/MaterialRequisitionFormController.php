@@ -113,6 +113,8 @@ class MaterialRequisitionFormController extends Controller
             "requested_by" => now(),
             "approved_id" => $request->approved_by,
             "area_id" => $request->area_id,
+            "substation_id" => $request->substation,
+            "feeder_id" => $request->feeder,
             // "approved_by" => now(),
         ]);
         foreach($temp_items as $item){ 
@@ -181,6 +183,8 @@ class MaterialRequisitionFormController extends Controller
         // $material_requisition_form->requested_id = $request->requested_by;
         $material_requisition_form->approved_id = $request->approved_by;
         $material_requisition_form->area_id = $request->area_id;
+        $material_requisition_form->substation_id = $request->substation;
+        $material_requisition_form->feeder_id = $request->feeder;
         $material_requisition_form->save();
         
         return redirect(route('material-requisition-form.index'))->withSuccess('Record Successfully Created!');
@@ -258,7 +262,11 @@ class MaterialRequisitionFormController extends Controller
                 $material_requisition_form->req_type_assignee = Auth::id();
             }
             
-            if ($request->mrvs && $request->serivs) {
+            if ($request->cetd_remarks) {
+                $material_requisition_form->cetd_remarks = $request->cetd_remarks;
+            }
+
+            if ($request->mrvs || $request->serivs) {
                 $material_requisition_form->status = 2;
                 $material_requisition_form->processed_id = Auth::id();
                 $material_requisition_form->processed_by = Carbon::now();
@@ -365,7 +373,7 @@ class MaterialRequisitionFormController extends Controller
                             "type_number" => $request->mcrt_no,
                             "date_acted" => $request->date_acted,
                             "date_finished" => $request->date_finished,
-                            "image_path" => $input['image_path'],
+                            "image_path" => $image_path ? $input['image_path'] : null,
                             "remarks" => $request->remarks,
                             "lineman" => $request->lineman,
                             "created_at" => Carbon::now(),
@@ -381,7 +389,7 @@ class MaterialRequisitionFormController extends Controller
                             "type_number" => $request->mst_no,
                             "date_acted" => $request->date_acted,
                             "date_finished" => $request->date_finished,
-                            "image_path" => $input['image_path'],
+                            "image_path" => $image_path ? $input['image_path'] : null,
                             "remarks" => $request->remarks,
                             "lineman" => $request->lineman,
                             "created_at" => Carbon::now(),

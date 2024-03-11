@@ -113,5 +113,8 @@ class MaterialRequisitionForm extends Model
                             'liquidated_id',
                             'liquidated_by',
                             'area_id',
+                            'substation_id',
+                            'feeder_id',
+                            'cetd_remarks',
                           ];
 }
