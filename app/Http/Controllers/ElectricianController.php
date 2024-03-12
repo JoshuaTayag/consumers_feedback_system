@@ -10,6 +10,14 @@ use App\Helpers\Helper;
 
 class ElectricianController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:electrician-list|electrician-create|electrician-edit|electrician-delete', ['only' => ['index', 'electricianComplaintIndex', 'electricianComplaintView']]);
+         $this->middleware('permission:electrician-create', ['only' => ['create', 'store', 'electricianComplaintCreate', 'electricianComplaintStore']]);
+         $this->middleware('permission:electrician-edit', ['only' => ['edit','update', 'electricianComplaintEdit', 'electricianComplaintUpdate']]);
+         $this->middleware('permission:electrician-delete', ['only' => ['destroy', 'electricianComplaintDelete']]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -357,8 +365,13 @@ class ElectricianController extends Controller
     public function destroy(Electrician $electrician)
     {
         $member = Electrician::find($electrician->id);
-        $member->delete();
-        return redirect(route('electrician.index'))->withSuccess('Record Successfully deleted!');
+        if($member->electrician_complaints->count() == 0){
+            $member->delete();
+            return redirect(route('electrician.index'))->withSuccess('Record Successfully deleted!');
+        }
+        else{
+            return redirect(route('electrician.index'))->withError("Can't delete the record. This record has existing complaints.");
+        }
     }
 
     public function electricianComplaintIndex()

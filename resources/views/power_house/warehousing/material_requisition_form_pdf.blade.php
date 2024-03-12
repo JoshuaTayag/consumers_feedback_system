@@ -237,12 +237,16 @@
         </td>
         <td style="border: none; width:33%; position: relative;">
           <p class="text-center">Approved By:</p> <br>
-          <img src="{{$datas[0]->user_approved->employee->signature_path}}"  alt="" class="img-signature">
+            @if(isset($datas[0]->user_approved->employee->signature_path))
+              <img src="{{$datas[0]->user_approved->employee->signature_path}}"  alt="" class="img-signature">
+            @endif
           <h4 class="text-center" style="position: relative; text-decoration: underline;">
             &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->approved_name}}&nbsp;&nbsp;&nbsp;&nbsp;
           </h4>
           <p class="text-center" style="padding: 0px; margin-top: -5px; position: relative;">
-            {{$datas[0]->user_approved->employee->position}}
+            @if(isset($datas[0]->user_approved->employee->position))
+              {{$datas[0]->user_approved->employee->position}}
+            @endif
           </p>
         </td>
         <td style="border: none; width:34%;">
@@ -267,7 +271,9 @@
             &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->request_type_assignee_name}}&nbsp;&nbsp;&nbsp;&nbsp;
           </h4>
           <p class="text-center" style=" padding: 0px; margin-top: -5px; position: relative;">
-            {{$datas[0]->request_type_assignee->employee->position}}
+            @if(isset($datas[0]->request_type_assignee->employee->position))
+              {{$datas[0]->request_type_assignee->employee->position}}
+            @endif
           </p>
         </td>
 

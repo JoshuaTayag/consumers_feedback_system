@@ -14,13 +14,20 @@ use App;
 
 class LifelineController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:lifeline-list|lifeline-create|lifeline-edit|lifeline-delete', ['only' => ['index']]);
+         $this->middleware('permission:lifeline-create', ['only' => ['create', 'store', 'storeNonPoor']]);
+         $this->middleware('permission:lifeline-edit', ['only' => ['edit','update', 'approveLifeline', 'uploadLifeline']]);
+         $this->middleware('permission:lifeline-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $lifeline_datas = Lifeline::with('district', 'municipality', 'barangay')->orderBy('id','DESC')->paginate(10);
-        
+        // dd($lifeline_datas);
         // $lifeline_data = "";
         return view('lifeline.index',compact('lifeline_datas'));
     }
@@ -371,7 +378,8 @@ class LifelineController extends Controller
     public function uploadLifeline()
     {
         try {
-            $lifelines = Lifeline::where('application_status', 0)->whereIn('control_no', ['2023-1286', '2023-1285'])->get()->take(5);
+            // $lifelines = Lifeline::where('application_status', 0)->whereIn('control_no', ['2023-1286', '2023-1285'])->get()->take(5);
+            $lifelines = Lifeline::where('application_status', 0)->get();
             DB::beginTransaction();
             foreach ($lifelines as $key => $lifeline) {
 

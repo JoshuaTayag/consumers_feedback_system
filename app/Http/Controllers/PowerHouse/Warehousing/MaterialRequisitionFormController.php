@@ -20,6 +20,14 @@ use Image;
 
 class MaterialRequisitionFormController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:material-requisition-form-list|material-requisition-form-create|material-requisition-form-edit|material-requisition-form-delete', ['only' => ['index', 'mrfApprovalIndex']]);
+         $this->middleware('permission:material-requisition-form-create', ['only' => ['create', 'store', 'mrfLiquidationCreate']]);
+         $this->middleware('permission:material-requisition-form-edit', ['only' => ['edit','update', 'mrfApprovalUpdate']]);
+         $this->middleware('permission:material-requisition-form-delete', ['only' => ['destroy']]);
+    }
+
     /**
      * Display a listing of the resource.
      */

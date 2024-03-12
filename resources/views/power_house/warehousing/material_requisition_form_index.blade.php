@@ -36,7 +36,7 @@
                   @foreach ($mrfs as $index => $mrf)  
                   @php $liquidation = $liquidations->where('material_requisition_form_id', $mrf->id)->count(); @endphp                      
                     <tr class="text-center">
-                        <th>{{  date('y', strtotime($mrf->created_at)). "-". str_pad($mrf->id,5,'0',STR_PAD_LEFT) }}</th>
+                        <th style="white-space: nowrap;">{{  date('y', strtotime($mrf->created_at)). "-". str_pad($mrf->id,5,'0',STR_PAD_LEFT) }}</th>
                         <th>{{ $mrf->project_name }}</th>
                         <th>{{ $mrf->district->district_name }}, {{ $mrf->barangay->barangay_name }}, {{ $mrf->municipality->municipality_name }}</th>
                         {{-- <th>
@@ -50,7 +50,7 @@
                         </th> --}}
                         <th>{{ $mrf->requested_name }}</th>
                         <th>{{ date('F d, Y', strtotime($mrf->requested_by)) }}</th>
-                        <th>
+                        <th style="white-space: nowrap;" >
                           @if(count($mrf->mrf_liquidations) != 0)
                             @foreach($mrf->mrf_liquidations as $index => $mrvs)
                                 {{$mrvs->type. '# '.$mrvs->type_number }} <br>

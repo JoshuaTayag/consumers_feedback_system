@@ -48,6 +48,16 @@ class PermissionTableSeeder extends Seeder
             // 'material-requisition-form-create',
             // 'material-requisition-form-edit',
             // 'material-requisition-form-delete',
+
+            // 'electrician-list',
+            // 'electrician-create',
+            // 'electrician-edit',
+            // 'electrician-delete',
+
+            // 'lifeline-list',
+            // 'lifeline-create',
+            // 'lifeline-edit',
+            // 'lifeline-delete',
          ];
       
          foreach ($permissions as $permission) {
