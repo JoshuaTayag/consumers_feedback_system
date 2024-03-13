@@ -29,9 +29,17 @@
           <li>
             <a class="dropdown-item" href="{{ route('membership.index') }}">MEMBERSHIP</a>
           </li>
-          <!-- <li>
-            <a class="dropdown-item" href="{{ route('service-connect-order.index') }}">SERVICE CONNECT ORDER</a>
-          </li> -->
+          <li>
+            <a class="dropdown-item" href="#">SERVICE CONNECT ORDER &raquo; </a>
+            <ul class="dropdown-menu dropdown-submenu">
+              <li>
+                <a class="dropdown-item" href="{{ route('service-connect-order.index') }}">REGULAR</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('indexCM') }}">CHANGE METER</a>
+              </li>
+            </ul>
+          </li>
           {{-- <li>
             <a class="dropdown-item" href="{{ route('lifeline.index') }}">APPLY FOR LIFELINE</a>
           </li> --}}

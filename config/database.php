@@ -143,6 +143,20 @@ return [
             'trust_server_certificate' => true,
         ],
 
+        'sqlSrvHousewiring' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL_SQLSRV3'),
+            'host' => env('DB_HOST_SQLSRV4', 'localhost'),
+            'port' => env('DB_PORT_SQLSRV4', '1433'),
+            'database' => env('DB_DATABASE_SQLSRV4', 'forge'),
+            'username' => env('DB_USERNAME_SQLSRV4', 'forge'),
+            'password' => env('DB_PASSWORD_SQLSRV4', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'encrypt' => 'yes',
+            'trust_server_certificate' => true,
+        ],
+
     ],
 
     /*

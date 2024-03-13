@@ -726,6 +726,25 @@
             ],
             
         ],
+        
+        'line_types' => [
+            [
+                "id" => 1,
+                "name" => "Tiny"
+            ],
+            [
+                "id" => 2,
+                "name" => "Small"
+            ],
+            [
+                "id" => 3,
+                "name" => "Medium"
+            ],
+            [
+                "id" => 4,
+                "name" => "Large"
+            ]
+        ],
     ];
 
 ?>

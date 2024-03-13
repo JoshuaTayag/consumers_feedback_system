@@ -8,7 +8,11 @@
     @endif
   </th>
   <th>
-    <input type="text" class="form-control" value="{{$mrf_item->item->Description}}" readonly>
+    <!-- <input type="text" class="form-control" value="{{$mrf_item->item->Description}}" readonly> -->
+    <div contenteditable="false" class="border rounded p-2" aria-multiline="true">{{$mrf_item->item->Description}}</div>
+  </th>
+  <th>
+    <input type="text" class="form-control" value="{{$mrf_item->item->unit_name}}" readonly>
   </th>
   <th>
     <input type="number" class="form-control" value="{{$mrf_item->item->AveragePrice}}" readonly>

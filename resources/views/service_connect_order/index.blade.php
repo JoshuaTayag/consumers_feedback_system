@@ -18,6 +18,42 @@
               </div>
             </div>
             <div class="card-body">
+              <div class="row">
+              @foreach ($scos as $key => $sco)
+                <div class="col-lg-4 mb-4">
+                  <div class="card">
+                    <div class="card-header p-1 bg-{{ strpos($sco->SCONo, 'h') ? 'primary' :  'danger'  }}"></div>
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col fs-5">SCO No. :</div>
+                        <div class="col fs-5">{{$sco->SCONo}}</div>
+                      </div>
+                      <div class="row">
+                        <div class="col fs-5">Complainant Name:</div>
+                        <div class="col fs-5">{{$sco->SCONo}}</div>
+                      </div>
+                      <div class="row">
+                        <div class="col fs-5">Date of Complaint:</div>
+                        <div class="col fs-5">{{$sco->SCONo}}</div>
+                      </div>
+                      <div class="row">
+                        <div class="col fs-5">Nature Of Complaint:</div>
+                        <div class="col fs-5">{{$sco->SCONo}}</div>
+                      </div>
+                      <div class="row">
+                        <div class="col fs-5">Act of misconduct:</div>
+                        <div class="col fs-5">
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col fs-5">Remarks:</div>
+                        <div class="col fs-5">{{$sco->SCONo}}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              @endforeach
+              </div>
               <table class="table table-bordered">
                 <tr>
                   <th>SCO No</th>
@@ -29,29 +65,7 @@
                   <th>Date Installed</th>
                   <th width="280px">Action</th>
                 </tr>
-                  @foreach ($scos as $key => $sco)
-                  <tr>
-                      <td>{{ $sco->SCONo }}</td>
-                      <td>{{ $sco->Lastname }}</td>
-                      <td>{{ $sco->Firstname }}</td>
-                      <td>{{ $sco->{'CO spouse'} }}</td>
-                      <td>{{ $sco->Address }}</td>
-                      <td>{{ $sco->MeterNo }}</td>
-                      
-                      <td>{{ $sco->{'Date Installed'} }}</td>
-                      <td>
-                          <a class="btn btn-info" href="{{ route('service-connect-order.show', $sco->ID) }}">Show</a>
-                          @can('service-connect-order-edit')
-                              <a class="btn btn-primary" href="{{ route('roles.edit',$sco->ID) }}">Edit</a>
-                          @endcan
-                          @can('service-connect-order-delete')
-                              {!! Form::open(['method' => 'DELETE','route' => ['roles.destroy', $sco->ID],'style'=>'display:inline']) !!}
-                                  {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
-                              {!! Form::close() !!}
-                          @endcan
-                      </td>
-                  </tr>
-                  @endforeach
+                  
               </table>
               <div id="pagination">{{ $scos->links() }}</div>
             </div>

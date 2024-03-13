@@ -74,6 +74,10 @@ class LifelineController extends Controller
             'household_id_no' => ['required', 'string', 'max:255', 'unique:lifelines,pppp_id'],
         ]);
 
+        if ($request->date_of_application < '2023-01-01' || $request->date_of_application == $request->date_of_birth) {
+            return redirect()->back()->withError('Pls double Check the Date of Application!');
+        }
+        
         $year = date("Y");
         $control_id = Helper::IDGenerator(new Lifeline, 'control_no', 4, $year); /** Generate control no */
 

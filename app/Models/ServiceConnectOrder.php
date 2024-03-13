@@ -13,7 +13,9 @@ class ServiceConnectOrder extends Model implements Auditable
     use HasFactory, SoftDeletes, HasRoles;
     use \OwenIt\Auditing\Auditable;
 
+    protected $connection = 'sqlSrvHousewiring';
     protected $table = 'Service Connect Table';
+    protected $primaryKey = 'application_id';
 
     protected $fillable = ['SCONo', 
                         'Lastname'

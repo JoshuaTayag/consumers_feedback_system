@@ -77,6 +77,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     // roles and permissions
     Route::resource('service-connect-order', App\Http\Controllers\ServiceConnectOrderController::class);
+    Route::get('service-connect-order-cm', [App\Http\Controllers\ServiceConnectOrderController::class, 'indexCM'])->name('indexCM');
+    Route::get('service-connect-order-cm-create', [App\Http\Controllers\ServiceConnectOrderController::class, 'createCM'])->name('createCM');
 
     // lifeline
     Route::resource('lifeline', App\Http\Controllers\LifelineController::class);
