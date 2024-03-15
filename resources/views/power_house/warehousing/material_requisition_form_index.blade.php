@@ -38,7 +38,7 @@
                     <tr class="text-center">
                         <th style="white-space: nowrap;">{{  date('y', strtotime($mrf->created_at)). "-". str_pad($mrf->id,5,'0',STR_PAD_LEFT) }}</th>
                         <th>{{ $mrf->project_name }}</th>
-                        <th>{{ $mrf->district->district_name }}, {{ $mrf->barangay->barangay_name }}, {{ $mrf->municipality->municipality_name }}</th>
+                        <th>{{ $mrf->district->district_name }}, {{ $mrf->barangay_id ? $mrf->barangay->barangay_name : '' }}, {{ $mrf->municipality->municipality_name }}</th>
                         {{-- <th>
                           @foreach ($mrf->items as $index => $mrf_item) 
                             <div class="row">

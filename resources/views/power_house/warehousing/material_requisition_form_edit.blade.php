@@ -214,7 +214,7 @@
                     <div class="col-lg-4">
                       <div class="mb-2">
                         <label for="area" class="form-label mb-1">Area *</label>
-                        <select id="area" class="form-control" name="area_id" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        <select id="area" class="form-control" name="area_id" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id) required>
                           <option value="">Choose...</option>
                           @foreach (Config::get('constants.area_id') as $area)          
                             <option value="{{ $area['id'] }}" id="" @selected( $mrf->area_id == $area['id']) >{{ $area['name'] }}</option>
@@ -225,7 +225,7 @@
                     <div class="col-lg-4">
                       <div class="mb-3">
                         <label for="district" class="form-label mb-1">District *</label>
-                        <select id="district" class="form-control" name="district" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        <select id="district" class="form-control" name="district" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id) required>
                             <option value="">Choose...</option>
                             @foreach ($districts as $district)                        
                                 <option value="{{ $district->id }}" @selected( $mrf->district_id == $district->id) id="{{ $district->id }}">{{$district->district_name}}</option>
@@ -236,7 +236,7 @@
                     <div class="col-lg-4">
                       <div class="mb-3">
                         <label for="municipality" class="form-label mb-1">Municipality *</label>
-                        <select id="municipality" class="form-control" name="municipality" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        <select id="municipality" class="form-control" name="municipality" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id) required>
                           <option value="{{ $mrf->municipality_id }}" id="{{ $mrf->municipality_id }}">{{$mrf->municipality->municipality_name }}</option>
                         </select>
                       </div>
@@ -244,7 +244,7 @@
                     <div class="col-lg-4">
                       <div class="mb-3">
                         <label for="barangay" class="form-label mb-1">Barangay</label>
-                        <select id="barangay" class="form-control" name="barangay" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        <select id="barangay" class="form-control" name="barangay" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id) required>
                           <option value="{{ $mrf->barangay_id }}" id="{{ $mrf->barangay_id }}">{{$mrf->barangay->barangay_name }}</option>
                         </select>
                       </div>
