@@ -87,6 +87,17 @@
                                 </div>
                             </div>
                             <div class="row">
+                              <div class="col fs-5">Attached File:</div>
+                              <div class="col fs-5">
+                                @if($electrician_complaint->file_path)
+                                  <a href="{{ asset($electrician_complaint->file_path) }}" target="_blank" style="text-decoration: none"><i class="fa fa-search"></i> View PDF File</a>
+                                @else
+                                  None
+                                @endif
+                              
+                              </div>
+                            </div>
+                            <div class="row">
                               <div class="col fs-5">Remarks:</div>
                               <div class="col fs-5">{{$electrician_complaint->remarks}}</div>
                             </div>

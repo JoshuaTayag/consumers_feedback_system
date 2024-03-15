@@ -161,6 +161,7 @@
             <hr>
 
             <div class="row">
+              <h5 class="styled-heading">Address</h5>
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="district" class="form-label mb-1">District *</label>
@@ -192,8 +193,8 @@
               </div>
               <div class="col-lg-2">
                 <div class="mb-2">
-                  <label for="postal_code" class="form-label mb-1">Postal Code *</label>
-                  <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{old('postal_code')}}" required>
+                  <label for="postal_code" class="form-label mb-1">Postal Code</label>
+                  <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{old('postal_code')}}">
                 </div>
               </div>
             </div>
@@ -201,22 +202,23 @@
             <hr>
 
             <div class="row">
+              <h5 class="styled-heading">Electric Service Details</h5>
               <div class="col-lg-2">
                 <div class="mb-2">
-                  <label for="membership_or" class="form-label mb-1">Membership OR*</label>
-                  <input type="text" class="form-control" id="membership_or" name="membership_or" value="{{old('membership_or')}}" required>
+                  <label for="membership_or" class="form-label mb-1">Membership OR</label>
+                  <input type="text" class="form-control" id="membership_or" name="membership_or" value="{{old('membership_or')}}" >
                 </div>
               </div>
               <div class="col-lg-2">
                 <div class="mb-2">
-                  <label for="membership_date" class="form-label mb-1">Membership Date*</label>
-                  <input type="date" class="form-control" id="membership_date" name="membership_date" value="{{old('membership_date')}}" required>
+                  <label for="membership_date" class="form-label mb-1">Membership Date</label>
+                  <input type="date" class="form-control" id="membership_date" name="membership_date" value="{{old('membership_date')}}" >
                 </div>
               </div>
               <div class="col-lg-6">
                 <div class="mb-2">
-                  <label for="electric_service_details" class="form-label mb-1">Electric Service Details (Search by account number) *</label>
-                  <select class="form-control" id="electric_service_details" name="electric_service_details" required>
+                  <label for="electric_service_details" class="form-label mb-1">Electric Service Details (Search by account number)</label>
+                  <select class="form-control" id="electric_service_details" name="electric_service_details">
                   </select>
                 </div>
               </div>
@@ -337,34 +339,10 @@
                 </div>
               </div>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-            <!-- <hr> -->
-
-            <!-- <div class="row">
-              <div class="col-lg-4">
-                <div class="mb-2">
-                  <label for="representative_id_no" class="form-label mb-1">Rep ID No. (IF FILED THROUGH A REPRESENTATIVE)</label>
-                  <input type="text" class="form-control" id="representative_id_no" name="representative_id_no" value="{{ old('representative_id_no') }}">
-                </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="mb-2">
-                  <label for="representative_fullname" class="form-label mb-1">Rep Full Name (IF FILED THROUGH A REPRESENTATIVE)</label>
-                  <input type="text" class="form-control" id="representative_fullname" name="representative_fullname" value="{{ old('representative_fullname')}}">
-                </div>
-              </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 text-end">
+                <a class="btn btn-primary" href="{{ route('electrician.index') }}"><i class="fa fa-arrow-left me-2"></i>Back </a>
+                <button type="submit" class="btn btn-success"><i class="fa fa-check me-2"></i>Submit</button>
             </div>
-            <div class="row">
-              <div class="col-lg-9">
-                <div class="mb-2">
-                  <label for="remarks" class="form-label mb-1">Remarks</label>
-                  <textarea class="form-control" name="remarks" id="exampleFormControlTextarea1">{{old('remarks')}}</textarea>
-                </div>
-              </div>
-              <div class="col-lg-3 position-relative">
-                <button type="submit" class="btn btn-primary position-absolute" style="bottom: 0; right: 0;">Submit</button>
-              </div>
-            </div> -->
           {!! Form::close() !!}
         </div>
       </div>
@@ -374,6 +352,7 @@
 @endsection
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js" integrity="sha512-57oZ/vW8ANMjR/KQ6Be9v/+/h6bq9/l3f0Oc7vn6qMqyhvPd1cvKBRWWpzu0QoneImqr2SkmO4MSqU+RpHom3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
   var form = $('#myForm'),
     TESDAcheckbox = $('#ifTesda'),
@@ -432,6 +411,20 @@
         //     );
 
             $("#dynamicAddRemove").append(
+              // `<tr>
+              //   <td>
+              //     <select id="educational_stage" class="form-control" name="educationalBackground[`+ i +`][educational_stage]" required>
+              //       <option value="">Choose...</option>
+              //       @foreach (Config::get('constants.educational_background') as $id)          
+              //         <option value="{{ $id['id'] }}" id="" {{ old('educational_stage') ? 'selected' : '' }}>{{ $id['name'] }}</option>
+              //       @endforeach 
+              //     </select>
+              //   </td>
+              //   <td><input type="text" name="educationalBackground[`+ i +`][name_of_school]" placeholder="Name of School" class="form-control" required /></td>
+              //   <td><input type="text" name="educationalBackground[`+ i +`][degree_recieved]" placeholder="Degree Received" class="form-control" required /></td>
+              //   <td><input type="date" name="educationalBackground[`+ i +`][year_graduated]" placeholder="Year Graduated" class="form-control" required /></td>
+              //   <td><button type="button" class="btn btn-outline-danger remove-input-field">Delete</button></td>
+              // </tr>`
               `<tr>
                 <td>
                   <select id="educational_stage" class="form-control" name="educationalBackground[`+ i +`][educational_stage]" required>
@@ -443,7 +436,10 @@
                 </td>
                 <td><input type="text" name="educationalBackground[`+ i +`][name_of_school]" placeholder="Name of School" class="form-control" required /></td>
                 <td><input type="text" name="educationalBackground[`+ i +`][degree_recieved]" placeholder="Degree Received" class="form-control" required /></td>
-                <td><input type="date" name="educationalBackground[`+ i +`][year_graduated]" placeholder="Year Graduated" class="form-control" required /></td>
+                <td>
+                <input type="text" id="yearPicker" name="educationalBackground[`+ i +`][year_graduated]" class="form-control" 
+       placeholder="YYYY" pattern="[0-9]{4}" maxlength="4" required>
+                </td>
                 <td><button type="button" class="btn btn-outline-danger remove-input-field">Delete</button></td>
               </tr>`
             );

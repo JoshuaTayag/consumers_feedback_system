@@ -514,6 +514,21 @@
             ]
         ],
 
+        'complaint_status' => [
+            [
+                "id" => 1,
+                "name" => "Ongoing"
+            ],
+            [
+                "id" => 2,
+                "name" => "Resolve"
+            ],
+            [
+                "id" => 3,
+                "name" => "Un-Resolved"
+            ]
+        ],
+
         'substations' => [
             [
                 "id" => 1,

@@ -18,13 +18,13 @@
           </div>
         </div>
         <div class="card-body">
-          {!! Form::open(array('route' => 'electricianComplaintStore','method'=>'POST')) !!}
+          {!! Form::open(array('route' => 'electricianComplaintStore','method'=>'POST', 'enctype' => 'multipart/form-data')) !!}
             <div class="row">
               <h5 class="styled-heading">Basic Information</h5>
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="control_number" class="form-label mb-1">Complaint No. *</label>
-                    <input type="number" class="form-control" id="control_number" name="control_number" required>
+                    <input type="text" class="form-control" id="control_number" name="control_number" value="{{$control_id}}" disabled>
                 </div>
               </div>
               <div class="col-lg-3">
@@ -71,6 +71,65 @@
               </div>
               <div class="col-lg-2">
                 <div class="mb-2">
+                  <label for="complaint_date" class="form-label mb-1">Date *</label>
+                    <input type="date" class="form-control" id="complaint_date" name="complaint_date" value="{{old('complaint_date')}}" required>
+                </div>
+              </div>
+
+              <div class="col-lg-3">
+                <div class="mb-2">
+                  <label for="sanction_type" class="form-label mb-1">Diciplinary Action/Sanction *</label>
+                    <select name="sanction_type" id="sanction_type" class="form-control" required>
+                      <option value="">Choose...</option>
+                      <option value="1">Reprimand</option>
+                      <option value="2">Suspension</option>
+                      <option value="3">Revocation of Accreditation</option>
+                    </select>
+                </div>
+              </div>
+              <div class="col-lg-2 d-none" id="revocation_date_col">
+                <div class="mb-2">
+                  <label for="revocation_date" class="form-label mb-1">Effectivity Date: </label>
+                    <input type="date" class="form-control border border-warning" id="revocation_date" name="revocation_date">
+                </div>
+              </div>
+              <div class="col-lg-2 d-none" id="suspension_from_col">
+                <div class="mb-2">
+                  <label for="suspension_from" class="form-label mb-1">Suspension From: </label>
+                    <input type="date" class="form-control border border-warning" id="suspension_from" name="suspension_from">
+                </div>
+              </div>
+              <div class="col-lg-2 d-none" id="suspension_to_col">
+                <div class="mb-2">
+                  <label for="suspension_to" class="form-label mb-1">Suspension To: </label>
+                    <input type="date" class="form-control border border-warning" id="suspension_to" name="suspension_to">
+                </div>
+              </div>
+              <div class="col-lg-6" id="sanction_remarks">
+                <div class="mb-2">
+                  <label for="sanction_remarks" class="form-label mb-1">Sanction Remarks: </label>
+                    <input type="text" class="form-control border"  name="sanction_remarks">
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="mb-2">
+                  <label for="status_of_complaint" class="form-label mb-1">Status of Complaint *</label>
+                    <select name="status_of_complaint" id="status_of_complaint" class="form-control" required>
+                      <option value="">Choose...</option>
+                      <option value="1">Ongoing</option>
+                      <option value="2">Resolved</option>
+                      <option value="3">Un-Resolved</option>
+                    </select>
+                </div>
+              </div>
+              <div class="col-lg-5 d-none" id="explanation_col">
+                <div class="mb-2">
+                  <label for="status_explanation" class="form-label mb-1">Explanation</label>
+                    <input type="text" class="form-control border border-warning" id="status_explanation" name="status_explanation">
+                </div>
+              </div>
+              <div class="col-lg-2">
+                <div class="mb-2">
                   <label for="act_of_misconduct" class="form-label mb-1">Act of Misconduct *</label>
                     <select id="act_of_misconduct" class="form-control" name="act_of_misconduct" required>
                       <option value="">Choose...</option>
@@ -81,17 +140,17 @@
                     <!-- <input type="text" class="form-control" id="name_ext" name="name_ext" value="{{old('name_ext')}}" required> -->
                 </div>
               </div>
-              <div class="col-lg-2">
+              <div class="col-lg-4">
                 <div class="mb-2">
-                  <label for="complaint_date" class="form-label mb-1">Date *</label>
-                    <input type="date" class="form-control" id="complaint_date" name="complaint_date" value="{{old('complaint_date')}}" required>
+                  <label for="attached_file" class="form-label mb-1">Attach File</label>
+                    <input type="file" class="form-control border border-default" id="attached_file" name="attached_file">
                 </div>
               </div>
             </div>
             <div class="row">
               <div class="col-lg-12">
                 <div class="mb-2">
-                  <label for="remarks" class="form-label mb-1">Remarks</label>
+                  <label for="remarks" class="form-label mb-1">Complaint Remarks</label>
                   <!-- <input type="text" class="form-control" id="remarks" name="remarks" value="{{ old('remarks') }}"> -->
                   <textarea  class="form-control" name="remarks" value="{{ old('remarks') }}"></textarea>
                 </div>
@@ -127,6 +186,73 @@
               textbox2.required = false;
           }
       });
+  });
+
+  // Get dropdown and text field elements
+  const sanction = document.getElementById('sanction_type');
+  const revocation_date_col = document.getElementById('revocation_date_col');
+  const suspension_from_col = document.getElementById('suspension_from_col');
+  const suspension_to_col = document.getElementById('suspension_to_col');
+
+  const revocation_date = document.getElementById('revocation_date');
+  const suspension_from = document.getElementById('suspension_from');
+  const suspension_to = document.getElementById('suspension_to');
+
+  const status_of_complaint = document.getElementById('status_of_complaint');
+  const explanation_col = document.getElementById('explanation_col');
+  const status_explanation = document.getElementById('status_explanation');
+  
+
+  // Add event listener to dropdown
+  sanction.addEventListener('change', function() {
+      // Toggle visibility of text field based on selected option
+      if (sanction.value == 2) {
+        suspension_from_col.classList.remove('d-none');
+        suspension_to_col.classList.remove('d-none');
+        revocation_date_col.classList.add('d-none');
+
+        // add required attribute in to textfield
+        suspension_to.setAttribute('required', 'required');
+        suspension_from.setAttribute('required', 'required');
+        revocation_date.removeAttribute('required');
+        revocation_date.value = '';
+      } else if (sanction.value == 3) {
+        revocation_date_col.classList.remove('d-none');
+        suspension_from_col.classList.add('d-none');
+        suspension_to_col.classList.add('d-none');
+
+        // add required attribute in to textfield
+        revocation_date.setAttribute('required', 'required');
+        suspension_from.removeAttribute('required');
+        suspension_to.removeAttribute('required');
+        suspension_from.value = '';
+        suspension_to.value = '';
+      } else {
+        suspension_from_col.classList.add('d-none');
+        suspension_to_col.classList.add('d-none');
+        revocation_date_col.classList.add('d-none');
+
+        // add required attribute and clear the value of textfield
+        suspension_from.removeAttribute('required');
+        suspension_to.removeAttribute('required');
+        revocation_date.removeAttribute('required');
+        suspension_from.value = '';
+        suspension_to.value = '';
+        revocation_date.value = '';
+      }
+  });
+
+  // Add event listener to dropdown
+  status_of_complaint.addEventListener('change', function() {
+      // Toggle visibility of text field based on selected option
+      if (status_of_complaint.value == 3) {
+        explanation_col.classList.remove('d-none');
+        status_explanation.setAttribute('required', 'required');
+      } else {
+        explanation_col.classList.add('d-none');
+        status_explanation.removeAttribute('required');
+        status_explanation.value = '';
+      }
   });
 </script>
 @endsection

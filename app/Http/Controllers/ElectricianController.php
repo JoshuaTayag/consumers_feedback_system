@@ -6,7 +6,9 @@ use App\Models\Electrician;
 use App\Models\BarangayElectrician\ElectricianComplaint;
 use Illuminate\Http\Request;
 use DB;
+use Image;
 use App\Helpers\Helper;
+use Illuminate\Support\Facades\File;
 
 class ElectricianController extends Controller
 {
@@ -64,7 +66,6 @@ class ElectricianController extends Controller
             'application_status' => ['required'],
             'district' => ['required'],
             'municipality' => ['required'],
-            'postal_code' => ['required'],
             'membership_or' => ['required'],
             'membership_date' => ['required'],
             'electric_service_details' => ['required'],
@@ -384,28 +385,56 @@ class ElectricianController extends Controller
     public function electricianComplaintCreate()
     {
         $electricians = Electrician::orderBy('id', 'desc')->get();
-        return view('electrician.complaint.create')->with(compact('electricians'));
+        $control_id = Helper::IDGeneratorQueryBuilder(DB::table('barangay_electrician_complaints'), 'control_number', 4, date('Y'));
+        return view('electrician.complaint.create')->with(compact('electricians','control_id'));
     }
 
     public function electricianComplaintStore(Request $request)
     {
         $this->validate($request, [
-            'control_number' => ['required', 'string', 'max:255', 'unique:barangay_electrician_complaints,control_number'],
+            // 'control_number' => ['required', 'string', 'max:255', 'unique:barangay_electrician_complaints,control_number'],
             'complainant' => ['required', 'string'],
             'electrician' => ['required', 'string'],
             'nature_of_complaint' => ['required'],
             'act_of_misconduct' => ['required'],
-            'complaint_date' => ['required']
+            'complaint_date' => ['required'],
+            'sanction_type' => ['required'],
+            'status_of_complaint' => ['required'],
+            'attached_file' => 'mimes:pdf|max:10000',
         ]);
 
+        $attached_file = $request->file('attached_file');
+
+        if($attached_file){
+
+            $file = $request->file('attached_file');
+            $filename = time() . '.' . $request->file('attached_file')->extension();
+            $filePath = public_path() . '/pdf/complaints/';
+            $file->move($filePath, $filename);
+
+            $path = 'pdf/complaints/'.$filename;
+
+        }
+        else{
+            $path = null;
+        }
+
         $now = DB::raw('CURRENT_TIMESTAMP');
+
+        $year = date('Y'); // Assuming you already have the year
+
+        $control_id = Helper::IDGeneratorQueryBuilder(DB::table('barangay_electrician_complaints'), 'control_number', 4, $year); /** Generate control no */
+
+        // dd($path);
+        // Use $control_id to generate the new control number
+
         // dd($request);
-        DB::transaction(function () use ($request, $now) {
+        DB::transaction(function () use ($request, $now, $control_id, $path) {
 
             // INSERT ELECTRICIAN COMPLAINT
             DB::table('barangay_electrician_complaints')->insert(
                 array(
-                    'control_number' => $request->control_number,
+                    'control_number' => $control_id,
                     'date' => $request->complaint_date,
                     'complainant_name' => $request->complainant,
                     'electrician_id' => $request->electrician,
@@ -414,6 +443,16 @@ class ElectricianController extends Controller
                     'nature_of_complaint' => $request->exists('other_complaint') ? null : $request->nature_of_complaint ,
                     'other_nature_of_complaint' => $request->exists('other_complaint') ? $request->other_complaint : null ,
 
+                    'sanction_type' => $request->sanction_type,
+                    'revocation_date' => $request->exists('revocation_date') ? $request->revocation_date : null ,
+                    'date_of_suspension_from' => $request->exists('suspension_from') ? $request->suspension_from : null ,
+                    'date_of_suspension_to' => $request->exists('suspension_to') ? $request->suspension_to : null ,
+
+                    'status_of_complaint' => $request->status_of_complaint,
+                    'status_explanation' => $request->exists('status_explanation') ? $request->status_explanation : null ,
+
+                    'sanction_remarks' => $request->sanction_remarks,
+                    'file_path' => $path,
                     'created_at' => $now
                 )
             );
@@ -435,20 +474,43 @@ class ElectricianController extends Controller
     public function electricianComplaintUpdate(Request $request, $id)
     {
         $this->validate($request, [
-            'control_number' => ['required', 'string', 'max:255', 'unique:barangay_electrician_complaints,control_number,'. $id],
             'complainant' => ['required', 'string'],
             'electrician' => ['required', 'string'],
             'nature_of_complaint' => ['required'],
             'act_of_misconduct' => ['required'],
-            'complaint_date' => ['required']
+            'complaint_date' => ['required'],
+            'sanction_type' => ['required'],
+            'status_of_complaint' => ['required'],
+            'attached_file' => 'mimes:pdf|max:10000',
         ]);
 
-        DB::transaction(function () use ($request, $id) {
+        $attached_file = $request->file('attached_file');
+        
+        if($attached_file){
+
+            $fileToDelete = $request->old_file;
+
+            if (File::exists(public_path($fileToDelete)) || $fileToDelete) {
+                // Delete the file
+                File::delete(public_path($fileToDelete));
+            }
+
+            $file = $request->file('attached_file');
+            $filename = time() . '.' . $request->file('attached_file')->extension();
+            $filePath = public_path() . '/pdf/complaints/';
+            $file->move($filePath, $filename);
+
+            $path = 'pdf/complaints/'.$filename;
+        }
+        else{
+            $path = null;
+        }
+
+        DB::transaction(function () use ($request, $id, $path) {
 
             // INSERT ELECTRICIAN COMPLAINT
             DB::table('barangay_electrician_complaints')->where('id', $id)->update(
                 array(
-                    'control_number' => $request->control_number,
                     'date' => $request->complaint_date,
                     'complainant_name' => $request->complainant,
                     'electrician_id' => $request->electrician,
@@ -456,6 +518,17 @@ class ElectricianController extends Controller
                     'remarks' => $request->remarks,
                     'nature_of_complaint' => $request->exists('other_complaint') ? null : $request->nature_of_complaint ,
                     'other_nature_of_complaint' => $request->exists('other_complaint') ? $request->other_complaint : null ,
+
+                    'sanction_type' => $request->sanction_type,
+                    'revocation_date' => $request->exists('revocation_date') ? $request->revocation_date : null ,
+                    'date_of_suspension_from' => $request->exists('suspension_from') ? $request->suspension_from : null ,
+                    'date_of_suspension_to' => $request->exists('suspension_to') ? $request->suspension_to : null ,
+
+                    'status_of_complaint' => $request->status_of_complaint,
+                    'status_explanation' => $request->exists('status_explanation') ? $request->status_explanation : null ,
+
+                    'sanction_remarks' => $request->sanction_remarks,
+                    'file_path' => $path,
 
                     'created_at' => DB::raw('CURRENT_TIMESTAMP')
                 )
