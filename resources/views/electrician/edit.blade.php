@@ -10,7 +10,7 @@
         <div class="card-header">
           <div class="row align-items-center">
               <div class="col-lg-6">
-                  <span class="mb-0 align-middle fs-3">New Electrician</span>
+                  <span class="mb-0 align-middle fs-3">Edit Electrician</span>
               </div>
               <div class="col-lg-6 text-end">
                 <a class="btn btn-primary" href="{{ route('electrician.index') }}"> Back </a>
@@ -156,6 +156,19 @@
                     </select>
                 </div>
               </div>
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <label for="date_of_application" class="form-label mb-1">Date of Application *</label>
+                    <input type="date" class="form-control" id="date_of_application" name="date_of_application" value="{{ $data[0]->date_of_application }}" {{ $data[0]->date_of_application ? '' : 'disabled' }} required>
+                </div>
+              </div>
+              <div class="col-lg-12">
+                <div class="mb-2">
+                  <label for="application_remarks" class="form-label mb-1">Application status remarks (why disapproved?)</label>
+                  <!-- <input type="text" class="form-control" id="remarks" name="remarks" value="{{ old('remarks') }}"> -->
+                  <textarea  class="form-control" name="application_remarks" id="application_remarks" value="{{ $data[0]->application_status_remarks }}" {{ $data[0]->application_status_remarks ? '' : 'disabled' }}>{{ $data[0]->application_status_remarks }}</textarea>
+                </div>
+              </div>
             </div>
             
             <hr>
@@ -197,7 +210,7 @@
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="postal_code" class="form-label mb-1">Postal Code *</label>
-                  <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ $data[0]->electrician_addresses[0]->postal_code }}" required>
+                  <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ $data[0]->electrician_addresses[0]->postal_code }}">
                 </div>
               </div>
             </div>
@@ -208,25 +221,28 @@
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="membership_or" class="form-label mb-1">Membership OR*</label>
-                  <input type="text" class="form-control" id="membership_or" name="membership_or" value="{{ $data[0]->electrician_accounts[0]->membership_or }}" required>
+                  <input type="text" class="form-control" id="membership_or" name="membership_or" value="{{ $data[0]->electrician_accounts[0]->membership_or }}">
                 </div>
               </div>
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="membership_date" class="form-label mb-1">Membership Date*</label>
-                  <input type="date" class="form-control" id="membership_date" name="membership_date" value="{{ $data[0]->electrician_accounts[0]->membership_date }}" required>
+                  <input type="date" class="form-control" id="membership_date" name="membership_date" value="{{ $data[0]->electrician_accounts[0]->membership_date }}">
                 </div>
               </div>
               <div class="col-lg-6">
                 <div class="mb-2">
-                  <!-- {{$account[0]->Address}} -->
+                
                   <label for="electric_service_details" class="form-label mb-1">Electric Service Details (Search by account number) *</label>
+                  @if(count($account) != 0)
                   <input type="hidden" id="hidden_value" value="{{$account[0]->id}} | {{$account[0]->Name}} | {{$account[0]->Address}}">
                   <select class="form-control" id="electric_service_details" name="electric_service_details" readonly required>
                     <option value="{{$account[0]->id}}"></option>
                   </select>
-                  <!-- <select class="form-control" id="electric_service_details" name="electric_service_details" required>
-                  </select> -->
+                  @else
+                  <select class="form-control" id="electric_service_details" name="electric_service_details">
+                  </select>
+                  @endif
                 </div>
               </div>
             </div>
@@ -257,7 +273,8 @@
                           </td>
                           <td><input type="text" name="educationalBackground[{{$loop->iteration}}][name_of_school]" placeholder="Name of School" class="form-control" value="{{ $school->name_of_school }}" /></td>
                           <td><input type="text" name="educationalBackground[{{$loop->iteration}}][degree_recieved]" placeholder="Degree Received" class="form-control" value="{{ $school->degree_recieved }}" /></td>
-                          <td><input type="date" name="educationalBackground[{{$loop->iteration}}][year_graduated]" placeholder="Year Graduated" class="form-control" value="{{ $school->year_graduated }}" /></td>
+                          <!-- <td><input type="date" name="educationalBackground[{{$loop->iteration}}][year_graduated]" placeholder="Year Graduated" class="form-control" value="{{ $school->year_graduated }}" /></td> -->
+                          <td><input type="text" id="yearPicker" name="educationalBackground[{{$loop->iteration}}][year_graduated]" class="form-control" placeholder="YYYY" pattern="[0-9]{4}" maxlength="4" value="{{ $school->year_graduated }}" required></td>
                           <td><button type="button" class="btn btn-outline-danger remove-input-field">Delete</button></td>
                       </tr>
                     @endforeach
@@ -464,7 +481,10 @@
                 </td>
                 <td><input type="text" name="educationalBackground[${i}][name_of_school]" placeholder="Name of School" class="form-control" required/></td>
                 <td><input type="text" name="educationalBackground[${i}][degree_recieved]" placeholder="Degree Received" class="form-control" required/></td>
-                <td><input type="date" name="educationalBackground[${i}][year_graduated]" placeholder="Year Graduated" class="form-control" required/></td>
+                <td>
+                <input type="text" id="yearPicker" name="educationalBackground[${i}][year_graduated]" class="form-control" 
+       placeholder="YYYY" pattern="[0-9]{4}" maxlength="4" required>
+                </td>
                 <td><button type="button" class="btn btn-outline-danger remove-input-field">Delete</button></td>
               </tr>`
             );
@@ -518,9 +538,12 @@ $(document).ready(function () {
     $('.js-example-basic-single').select2({
         theme: "classic"
     });
-
-    $("#electric_service_details").prop("disabled", true);
-
+    var account = "{{ $account }}";
+    // console.log(account.length)
+    if (account.length != 2) {
+      $("#electric_service_details").prop("disabled", true);
+    }
+  
       $( "#electric_service_details" ).select2({
         ajax: { 
           url: "{{route('fetchAccounts')}}",
@@ -706,6 +729,40 @@ $(document).ready(function () {
 
 });
 })
+
+  const application_status = document.getElementById('application_status');
+  const application_remarks = document.getElementById('application_remarks');
+  const date_of_application = document.getElementById('date_of_application');
+
+  // Add event listener to dropdown
+  application_status.addEventListener('change', function() {
+      // Toggle visibility of text field based on selected option
+      if (application_status.value == 3) {
+        application_remarks.setAttribute('required', 'required');
+        application_remarks.removeAttribute('disabled');
+
+        date_of_application.removeAttribute('required');
+        date_of_application.setAttribute('disabled', 'disabled');
+        date_of_application.value = '';
+
+      } else if (application_status.value == 2) {
+        date_of_application.setAttribute('required', 'required');
+        date_of_application.removeAttribute('disabled');
+
+        application_remarks.removeAttribute('required');
+        application_remarks.setAttribute('disabled', 'disabled');
+        application_remarks.value = '';
+      } else {
+        application_remarks.removeAttribute('required');
+        application_remarks.setAttribute('disabled', 'disabled');
+        application_remarks.value = '';
+
+        date_of_application.removeAttribute('required');
+        date_of_application.setAttribute('disabled', 'disabled');
+        date_of_application.value = '';
+      }
+  });
+
 </script>
 @endsection
 @section('style')

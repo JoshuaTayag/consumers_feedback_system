@@ -156,6 +156,19 @@
                     </select>
                 </div>
               </div>
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <label for="date_of_application" class="form-label mb-1">Date of Application *</label>
+                    <input type="date" class="form-control" id="date_of_application" name="date_of_application" value="{{old('date_of_application')}}" disabled required>
+                </div>
+              </div>
+              <div class="col-lg-12">
+                <div class="mb-2">
+                  <label for="application_remarks" class="form-label mb-1">Application status remarks (why disapproved?)</label>
+                  <!-- <input type="text" class="form-control" id="remarks" name="remarks" value="{{ old('remarks') }}"> -->
+                  <textarea  class="form-control" name="application_remarks" id="application_remarks" value="{{ old('remarks') }}" disabled></textarea>
+                </div>
+              </div>
             </div>
             
             <hr>
@@ -647,6 +660,40 @@ $(document).ready(function () {
 
 });
 })
+
+  const application_status = document.getElementById('application_status');
+  const application_remarks = document.getElementById('application_remarks');
+  const date_of_application = document.getElementById('date_of_application');
+
+  // Add event listener to dropdown
+  application_status.addEventListener('change', function() {
+      // Toggle visibility of text field based on selected option
+      if (application_status.value == 3) {
+        application_remarks.setAttribute('required', 'required');
+        application_remarks.removeAttribute('disabled');
+
+        date_of_application.removeAttribute('required');
+        date_of_application.setAttribute('disabled', 'disabled');
+        date_of_application.value = '';
+
+      } else if (application_status.value == 2) {
+        date_of_application.setAttribute('required', 'required');
+        date_of_application.removeAttribute('disabled');
+
+        application_remarks.removeAttribute('required');
+        application_remarks.setAttribute('disabled', 'disabled');
+        application_remarks.value = '';
+      } else {
+        application_remarks.removeAttribute('required');
+        application_remarks.setAttribute('disabled', 'disabled');
+        application_remarks.value = '';
+
+        date_of_application.removeAttribute('required');
+        date_of_application.setAttribute('disabled', 'disabled');
+        date_of_application.value = '';
+      }
+  });
+
 </script>
 @endsection
 @section('style')

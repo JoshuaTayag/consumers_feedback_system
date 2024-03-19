@@ -21,7 +21,7 @@
             <div class="card-body">
               <div class="row pb-2">
                 <div class="col-lg-4">
-                    <input type="text" placeholder="Search by Control No" id="control_number" name="control_number" class="form-control">
+                    <input type="text" placeholder="Search by Application No" id="control_number" name="control_number" class="form-control">
                 </div>
                 <div class="col-lg-4">
                     <input type="text" placeholder="Search by First Name" id="first_name" name="first_name" class="form-control">
@@ -39,6 +39,7 @@
                     <th>Date Of Birth</th>
                     <th>Facebook</th>
                     <th>Contact #</th>
+                    <th>Expiration Date</th>
                     <th>Status</th>
                     <th>Complaint count</th>
                     <th>Action</th>

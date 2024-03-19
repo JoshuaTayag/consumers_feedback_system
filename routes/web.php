@@ -140,7 +140,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('electrician-complaint-edit/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintEdit'])->name('electricianComplaintEdit');
     Route::put('electrician-complaint-update/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintUpdate'])->name('electricianComplaintUpdate');
     Route::get('electrician-complaint-view/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintView'])->name('electricianComplaintView');
-
+    Route::get('fetch-electrician', [App\Http\Controllers\ElectricianController::class, 'fetchElectricianApplication'])->name('fetchElectricianApplication');
     // Strucutures
     // Route::resource('signatory', App\Http\Controllers\SignatoryController::class);
 });

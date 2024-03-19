@@ -20,20 +20,20 @@
       @endforeach
       
     </th>
-    
+    <th>
+    @if ($electrician->date_of_application)
+      <p class="badge rounded-pill bg-{{ Carbon\Carbon::now()->diffInDays(Carbon\Carbon::parse($electrician->date_of_application)) <= 330 ? 'success' : (Carbon\Carbon::now()->diffInDays(Carbon\Carbon::parse($electrician->date_of_application)) >= 366 ? 'danger' : 'warning') }} p-2">
+        {{ Carbon\Carbon::parse($electrician->date_of_application)->addYears(1)->format('M d, Y') }}
+      </p>
+    @else
+      <p>Not available</p>
+    @endif
+    </th>
     <th>
     <p class="badge rounded-pill bg-{{ $electrician->application_status == 1 ? 'primary' : ($electrician->application_status == 2 ? 'success' : 'danger')  }} p-2"  >{{ $electrician->application_status == 1 ? 'Pending' : ($electrician->application_status == 2 ? 'Approved' : 'Disapproved')  }}</p>
     </th>
     <!-- <th>{{ $electrician->electrician_complaints ? $electrician->electrician_complaints : 'NONE' }}</th> -->
     <th>
-      <!-- @if(count($electrician->electrician_complaints) != 0)
-        @foreach($electrician->electrician_complaints as $index => $complaint)
-        <button class="btn btn-warning btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#viewModal" data-bs-name="{{$complaint}}" data-bs-act="{{Config::get('constants.act_of_misconduct.'.($complaint->act_of_misconduct-1).'.name')}}" data-bs-noc="{{Config::get('constants.nature_of_complaint_barangay_electrician.'.($complaint->nature_of_complaint-1).'.name')}}"><i class="fa fa-eye"></i></button>
-        <br>
-        @endforeach
-      @else
-        None
-      @endif -->
       @if(count($electrician->electrician_complaints) != 0)
         <a href="{{ route('electricianComplaintView', $electrician->id) }}" target="_blank">{{$electrician->electrician_complaints->count()}}</a>
       @else
@@ -56,133 +56,99 @@
         </div>
     </th>
   </tr>
-
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="complaints" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="complaints"></h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div class="card">
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-lg-12">
-                    <div class="card">
-                      <div class="card-header bg-info fs-5">
-                        Complaints
-                      </div>
-                      <div class="card-body text-center">
-                        <div class="container text-start">
-                          <div class="row">
-                            <div class="col">
-                              <h4>Complaint No</h4>
-                            </div>
-                            <div class="col">
-                              <h4><span id="complaint_no"></span></h4>
-                            </div>
-                          </div>
-
-                          <div class="row">
-                            <div class="col">
-                              <h4>Name of Complainant</h4>
-                            </div>
-                            <div class="col">
-                              <h4><span id="complainant_name"></span></h4>
-                            </div>
-                          </div>
-
-                          <div class="row">
-                            <div class="col">
-                              <h4>Date of Complaint</h4>
-                            </div>
-                            <div class="col">
-                              <h4><span id="date_of_complaint"></span></h4>
-                            </div>
-                          </div>
-
-                          <div class="row">
-                            <div class="col">
-                              <h4>Nature of Complaint</h4>
-                            </div>
-                            <div class="col">
-                              <h4><span id="nature_of_complaint"></span></h4>
-                            </div>
-                          </div>
-
-                          <div class="row">
-                            <div class="col">
-                              <h4>Act of misconduct</h4>
-                            </div>
-                            <div class="col">
-                              <h4><span id="act_of_misconduct"></span></h4>
-                            </div>
-                          </div>
-
-                          <div class="row">
-                            <div class="col">
-                              <h4>Remarks</h4>
-                            </div>
-                            <div class="col">
-                              <h4><span id="remarks"></span></h4>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div> -->
 @endforeach 
 @section('script')
 <script>
-// var viewModal = document.getElementById('viewModal')
-//     viewModal.addEventListener('show.bs.modal', function (event) {
-//     // Button that triggered the modal
-//     var button = event.relatedTarget
-//     // Extract info from data-bs-* attributes
-//     var data = button.getAttribute('data-bs-name')
-//     var act = button.getAttribute('data-bs-act')
-//     var noc = button.getAttribute('data-bs-noc')
-//     // var wattage = button.getAttribute('data-bs-wattage')
-//     // var rate = button.getAttribute('data-bs-rate')
-//       var encoded_data = JSON.parse(data);
-//       console.log(encoded_data);
-//       document.getElementById("complaint_no").innerHTML = encoded_data.control_number;
-//       document.getElementById("complainant_name").innerHTML = encoded_data.complainant_name;
-//       document.getElementById("date_of_complaint").innerHTML = encoded_data.date;
-//       document.getElementById("nature_of_complaint").innerHTML = noc;
-//       document.getElementById("act_of_misconduct").innerHTML = act;
-//       document.getElementById("remarks").innerHTML = encoded_data.remarks;
-//   })
+  $(document).ready(function () {
+    if($('#control_number').val() || $('#first_name').val() || $('#last_name').val()){
+        var getFirstName = $('#first_name').val();
+        var getLastName = $('#last_name').val();
+        var getControlNo = $('#control_number').val();
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            $.ajax({
+            method: 'GET',
+            url: "{{route('fetchElectricianApplication')}}",
+            data: {
+                fname:getFirstName,
+                lname:getLastName,
+                control_number:getControlNo
+            },
+            success:function(response){
+                $("#show_data").html(response);
+                $('#pagination').delay(500).fadeOut('fast');
+            }
+            });
+        }, 500);
+    }
+
+    var timeout = null;
+      $('#control_number').keyup(function() {
+        var getFirstName = $('#first_name').val();
+        var getLastName = $('#last_name').val();
+        var getControlNo = $(this).val();
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            $.ajax({
+            method: 'GET',
+            url: "{{route('fetchElectricianApplication')}}",
+            data: {
+                fname:getFirstName,
+                lname:getLastName,
+                control_number:getControlNo
+            },
+            success:function(response){
+                $("#show_data").html(response);
+                $('#pagination').delay(500).fadeOut('fast');
+            }
+            });
+        }, 500);
+    });
+
+    $('#first_name').keyup(function() {
+        var getFirstName = $(this).val();
+        var getLastName = $('#last_name').val();
+        var getControlNo = $('#control_number').val();
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            $.ajax({
+            method: 'GET',
+            url: "{{route('fetchElectricianApplication')}}",
+            data: {
+                fname:getFirstName,
+                lname:getLastName,
+                control_number:getControlNo
+            },
+            success:function(response){
+                console.log(response)
+                $("#show_data").html(response);
+                $('#pagination').delay(500).fadeOut('fast');
+            }
+            });
+        }, 500);
+    });
+
+    $('#last_name').keyup(function() {
+        var getFirstName = $('#first_name').val();
+        var getLastName = $(this).val();
+        var getControlNo = $('#control_number').val();
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            $.ajax({
+            method: 'GET',
+            url: "{{route('fetchElectricianApplication')}}",
+            data: {
+                fname:getFirstName,
+                lname:getLastName,
+                control_number:getControlNo
+            },
+            success:function(response){
+                $("#show_data").html(response);
+                $('#pagination').delay(500).fadeOut('fast');
+            }
+            });
+        }, 500);
+    });
+  })
 </script>
 @endsection

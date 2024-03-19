@@ -9,6 +9,7 @@ use DB;
 use Image;
 use App\Helpers\Helper;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Auth;
 
 class ElectricianController extends Controller
 {
@@ -60,15 +61,15 @@ class ElectricianController extends Controller
             'civil_status' => ['required'],
             'date_of_birth' => ['required', 'string', 'max:255'],
             'type_of_id' => ['required'],
-            'valid_id_no' => ['required', 'string', 'max:255', 'unique:barangay_electricians,valid_id_number'],
+            'valid_id_no' => ['required', 'string', 'max:255'],
             'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
             'application_type' => ['required'],
             'application_status' => ['required'],
             'district' => ['required'],
             'municipality' => ['required'],
-            'membership_or' => ['required'],
-            'membership_date' => ['required'],
-            'electric_service_details' => ['required'],
+            // 'membership_or' => ['required'],
+            // 'membership_date' => ['required'],
+            // 'electric_service_details' => ['required'],
         ]);
 
         $year = date("Y");
@@ -113,6 +114,10 @@ class ElectricianController extends Controller
                     'ree_issued_on' => $request->exists('ree_license_issued_on') ? $request->ree_license_issued_on : null ,
                     'ree_issued_at' => $request->exists('ree_license_issued_at') ? $request->ree_license_issued_at : null ,
                     'ree_valid_until' => $request->exists('ree_validity') ? $request->ree_validity : null ,
+                    'remarks' => $request->remarks,
+                    'application_status_remarks' => $request->application_remarks,
+                    'date_of_application' => $request->date_of_application,
+                    'created_by' => Auth::id(),
 
                     'created_at' => $now
                 )
@@ -224,15 +229,15 @@ class ElectricianController extends Controller
             'civil_status' => ['required'],
             'date_of_birth' => ['required', 'string', 'max:255'],
             'type_of_id' => ['required'],
-            'valid_id_no' => ['required', 'string', 'max:255', 'unique:barangay_electricians,valid_id_number,'.$electrician->id],
+            'valid_id_no' => ['required', 'string', 'max:255'],
             'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
             'application_type' => ['required'],
             'application_status' => ['required'],
             'district' => ['required'],
             'municipality' => ['required'],
-            'postal_code' => ['required'],
-            'membership_or' => ['required'],
-            'membership_date' => ['required'],
+            // 'postal_code' => ['required'],
+            // 'membership_or' => ['required'],
+            // 'membership_date' => ['required'],
             // 'electric_service_details' => ['required'],
         ]);
         // dd($request);
@@ -275,6 +280,10 @@ class ElectricianController extends Controller
                     'ree_issued_on' => $request->exists('ree_license_issued_on') ? $request->ree_license_issued_on : null ,
                     'ree_issued_at' => $request->exists('ree_license_issued_at') ? $request->ree_license_issued_at : null ,
                     'ree_valid_until' => $request->exists('ree_validity') ? $request->ree_validity : null ,
+                    'remarks' => $request->remarks,
+                    'application_status_remarks' => $request->application_remarks,
+                    'date_of_application' => $request->date_of_application,
+                    'created_by' => Auth::id(),
 
                     'updated_at' => $now
                 )
@@ -282,6 +291,7 @@ class ElectricianController extends Controller
 
             //  INSERT EDUCATIONAL BACKGROUND TABLE     
             $educ_background = $request->educationalBackground;
+            // dd($electrician->id);
             if($educ_background){
 
                 // delete existing record
@@ -302,7 +312,13 @@ class ElectricianController extends Controller
                         )
                     );
                 }
+            } else{
+                // delete existing record
+                DB::table('barangay_electrician_educational_backgrounds')
+                ->where('electrician_id', $electrician->id)
+                ->delete();
             }
+            
             
             //  INSERT CONTACT NUMBERS TABLE   
             $contact_numbers = [];
@@ -344,17 +360,17 @@ class ElectricianController extends Controller
                 ]
             );
             // dd($request);
-            // //  INSERT ACCOUNT DETAILS  
-            // DB::table('barangay_electrician_account_details')->insert(
-            //     [
-            //         'electrician_id' => $electrician_id, 
-            //         'membership_or' => $request->membership_or,
-            //         'membership_date' => $request->membership_date,
-            //         'account_no' => $request->electric_service_details,
-            //         'account_name' => 'NONE',
-            //         'created_at' => $now
-            //     ]
-            // );
+            //  INSERT ACCOUNT DETAILS  
+            DB::table('barangay_electrician_account_details')->where('electrician_id', $electrician->id)->update(
+                [
+                    'electrician_id' => $electrician->id, 
+                    'membership_or' => $request->membership_or,
+                    'membership_date' => $request->membership_date,
+                    'account_no' => $request->electric_service_details,
+                    'account_name' => 'NONE',
+                    'created_at' => $now
+                ]
+            );
         });
 
         return redirect(route('electrician.index'))->withSuccess('Record Successfully Updated!');
@@ -552,6 +568,22 @@ class ElectricianController extends Controller
     {
         $electrician = Electrician::find($id);
         return view('electrician.complaint_count')->with(compact('electrician'));
+    }
+
+    public function fetchElectricianApplication(Request $request)
+    {
+        $data = Electrician::orderBy('id','desc')->paginate(10);
+        if($request->ajax()){
+            
+            $data = Electrician::where('control_number', 'LIKE', '%'.$request->control_number.'%')
+            ->where('first_name', 'LIKE', '%'.$request->fname.'%')
+            ->where('last_name', 'LIKE', '%'.$request->lname.'%')
+            ->paginate(10);
+            
+            return view('electrician.search')->with(compact('data'))->render();
+        }
+
+        return view('electrician.index')->with(compact('data'));
     }
     
     
