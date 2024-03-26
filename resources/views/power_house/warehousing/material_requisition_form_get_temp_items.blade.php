@@ -1,5 +1,7 @@
+@php $totalPrice = 0; @endphp
 @foreach ($temp_items as $index => $temp_item)
 <tr id="{{ $loop->iteration }}">
+  <th>{{ $loop->iteration }}</th>
   <th>
     {{-- <input type="text" name="temp_nea_code|{{$temp_item->id}}" class="form-control" placeholder="{{$temp_item->item->ItemCode}}"> --}}
     <a href="" class="updateCode form-control" data-name="code" data-type="text" data-pk="{{ $temp_item->id }}" data-title="Enter code">{{ $temp_item->nea_code }}</a>
@@ -24,4 +26,13 @@
     <a href="#"  class="btn btn-danger" onclick="removeItem({{$temp_item->id}})"><i class="fa fa-times"></i></a>
   </th>
 </tr>
+@php {{ $totalPrice += ($temp_item->item->AveragePrice * $temp_item->quantity); }} @endphp
 @endforeach
+<!-- <tr>
+  <td colspan="3"></td>
+  <td>
+    <p class="fw-bold">Total Cost:</p> 
+  </td>
+  <td class="fw-bold" >₱ {{ number_format($totalPrice, 2) }}</td>
+  <td colspan="3"></td>
+</tr> -->

@@ -271,7 +271,7 @@
                       <div class="mb-3">
                         <label for="feeder" class="form-label mb-1">Feeder</label>
                         <!-- <input type="text" class="form-control" id="feeder" name="feeder" value="{{$mrf->feeder_id }}" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)> -->
-                        <select id="feeder" class="form-control" name="feeder">
+                        <select id="feeder" class="form-control" name="feeder" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                         </select>
                       </div>
                     </div>
@@ -294,8 +294,10 @@
                       <div class="mb-2">
                         <table class="table table-bordered data-table">
                           <tr>
+                            <th>#</th>
                             <th>Nea Code</th>
                             <th>Description</th>
+                            <th>Unit</th>
                             <th>Unit Cost</th>
                             <th>Quantity</th>
                             @if($mrf->status == 2)

@@ -159,6 +159,7 @@
                 <div class="mb-2">
                   <table class="table table-bordered data-table">
                     <tr>
+                      <th>#</th>
                       <th>Nea Code</th>
                       <th>Description</th>
                       <th>Unit</th>
@@ -173,7 +174,6 @@
                    </table>
                 </div>
               </div>
-
               <div class="col-lg-12">
                 <div class="mb-2">
                   <label for="remarks" class="form-label mb-1">Remarks </label>
