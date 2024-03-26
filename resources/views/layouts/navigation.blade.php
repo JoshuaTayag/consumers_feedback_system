@@ -67,6 +67,17 @@
           </li>
         </ul>
       </li>
+
+      <li>
+        <a class="dropdown-item" href="#">
+          BILLING &raquo;
+        </a>
+        <ul class="dropdown-menu dropdown-submenu">
+          <li>
+            <a class="dropdown-item" href="{{ route('pre_membership_index') }}">LEDGER</a>
+          </li>
+        </ul>
+      </li>
     </ul>
   </li>
 

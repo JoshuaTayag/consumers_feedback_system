@@ -129,7 +129,7 @@ class LifelineController extends Controller
             'date_of_birth' => ['required', 'string', 'max:255'],
             'marital_status' => ['required', 'string', 'max:255'],
             'ownership' => ['required', 'string', 'max:255'],
-            'electric_service_detail' => ['required'],
+            'electric_service_detail' => ['required','unique:lifelines,account_no'],
             'id_no' => ['required', 'string', 'max:255', 'unique:lifelines,valid_id_no'],
             'type_of_id' => ['required'],
             'date_of_application' => ['required'],
@@ -423,13 +423,13 @@ class LifelineController extends Controller
         $accounts = DB::connection('sqlSrvBilling')
         ->table('Consumers Table')
         // ->whereNotIn('Accnt No', $lifeline_data)
-        ->select('Accnt No as id', 'Name', 'Address');
+        ->select('Accnt No as id', 'Name', 'Address', 'OR No', 'Date', 'Prev Reading');
         }else{
         $accounts = DB::connection('sqlSrvBilling')
         ->table('Consumers Table')
         ->where('Accnt No', 'like', '%' .$search . '%')
         // ->whereNotIn('Accnt No', $lifeline_data)
-        ->select('Accnt No as id', 'Name', 'Address');
+        ->select('Accnt No as id', 'Name', 'Address', 'OR No', 'Date', 'Prev Reading');
         }
         $data = $accounts->paginate(10, ['*'], 'page', $request->page);
         return response()->json($data); 

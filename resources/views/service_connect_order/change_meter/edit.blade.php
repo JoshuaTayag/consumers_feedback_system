@@ -8,7 +8,7 @@
         <div class="card-header">
           <div class="row align-items-center">
               <div class="col-lg-6">
-                  <span class="mb-0 align-middle fs-3">Insert Change Meter</span>
+                  <span class="mb-0 align-middle fs-3">Edit Change Meter Order</span>
               </div>
               <div class="col-lg-6 text-end">
                 <a class="btn btn-sm btn-primary" href="{{ route('indexCM') }}"> Back </a>
@@ -16,22 +16,22 @@
           </div>
         </div>
         <div class="card-body" style="background-color: #fafafa">
-          {!! Form::open(array('route' => 'storeCM','method'=>'POST')) !!}
+          {!! Form::open(array('route' => ['updateCM', $sco_cm->application_id],'method'=>'PUT')) !!}
             <div class="row">
               <div class="col-lg-8">
                 <div class="row">
-                  <div class="col-lg-8">
+                  <div class="col-lg-6">
                     <div class="mb-2">
                         <!-- {{ Form::label('account_no', 'Account No') }}
                         {{ Form::text('account_no', null, array('placeholder' => 'Ex: 0111111','class' => 'form-control')) }} -->
-                        <label for="electric_service_detail" class="form-label mb-1">Account Number *</label><br>
-                        <select class="form-control" id="electric_service_detail" name="electric_service_detail" style="width: 100%" required></select>
+                        {{ Form::label('electric_service_details', 'Account Number') }}
+                        {{ Form::text('electric_service_details', $sco_cm->NextAcctNo, array('class' => 'form-control', 'disabled')) }}
                     </div>
                   </div>
                   <div class="col-lg-4">
                     <div class="mb-2">
                         {{ Form::label('old_meter', 'Old Meter') }}
-                        {{ Form::text('old_meter', null, array('class' => 'form-control')) }}
+                        {{ Form::text('old_meter', $sco_cm->OldMtr, array('class' => 'form-control')) }}
                     </div>
                   </div>
                 </div>
@@ -42,25 +42,25 @@
                   <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('sco', 'SCO No') }}
-                        {{ Form::text('sco', null, array('class' => 'form-control', 'disabled')) }}
+                        {{ Form::text('sco', $sco_cm->SCONo, array('class' => 'form-control', 'disabled')) }}
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('last_name', 'Last Name') }}
-                        {{ Form::text('last_name', null, array('class' => 'form-control', 'readonly', 'required')) }}
+                        {{ Form::text('last_name', $sco_cm->Lastname, array('class' => 'form-control', 'readonly', 'required')) }}
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('first_name', 'First Name') }}
-                        {{ Form::text('first_name', null, array('class' => 'form-control', 'required')) }}
+                        {{ Form::text('first_name', $sco_cm->Firstname, array('class' => 'form-control', 'required')) }}
                     </div>
                   </div>
                   <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('contact_no', 'Contact No.') }}
-                        {{ Form::text('contact_no', null, array('class' => 'form-control')) }}
+                        {{ Form::text('contact_no', $sco_cm->ContactNo, array('class' => 'form-control')) }}
                     </div>
                   </div>
                   <!-- <div class="col-lg-2">
@@ -74,11 +74,11 @@
                         {{ Form::label('area', 'Area *') }}
                         <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
                           <option value=""></option>
-                          <option value="A1" {{ old('area') == "A1" ? 'selected' : ''}} >A1</option>
-                          <option value="A2" {{ old('area') == "A2" ? 'selected' : ''}} >A2</option>
-                          <option value="A3" {{ old('area') == "A3" ? 'selected' : ''}} >A3</option>
-                          <option value="A4" {{ old('area') == "A4" ? 'selected' : ''}} >A4</option>
-                          <option value="A5" {{ old('area') == "A5" ? 'selected' : ''}} >A5</option>
+                          <option value="A1" {{ $sco_cm->Area == "A1" ? 'selected' : ''}} >A1</option>
+                          <option value="A2" {{ $sco_cm->Area == "A2" ? 'selected' : ''}} >A2</option>
+                          <option value="A3" {{ $sco_cm->Area == "A3" ? 'selected' : ''}} >A3</option>
+                          <option value="A4" {{ $sco_cm->Area == "A4" ? 'selected' : ''}} >A4</option>
+                          <option value="A5" {{ $sco_cm->Area == "A5" ? 'selected' : ''}} >A5</option>
                         </select>
                     </div>
                   </div>
@@ -88,7 +88,7 @@
                         <select id="sitio" class="form-control" name="sitio">
                           <option value=""></option>
                           @foreach ($sitios as $sitio)          
-                            <option value="{{ $sitio->Sitio }}" {{ old('sitio') == $sitio->Sitio ? 'selected' : ''}}>{{ $sitio->Sitio }}</option>
+                            <option value="{{ $sitio->Sitio }}" {{ $sco_cm->Sitio == $sitio->Sitio ? 'selected' : ''}}>{{ $sitio->Sitio }}</option>
                           @endforeach 
                         </select>
                     </div>
@@ -98,8 +98,8 @@
                         {{ Form::label('barangay', 'Barangay *') }}
                         <select id="barangay" class="form-control" name="barangay" required>
                           <option value=""></option>
-                          @foreach ($barangays as $barangay)          
-                            <option value="{{ $barangay->Brgy }}" {{ old('barangay') == $barangay->Brgy ? 'selected' : ''}}>{{ $barangay->Brgy }}</option>
+                          @foreach ($barangays as $barangay)        
+                            <option value="{{ $barangay->Brgy }}" {{ $sco_cm->Brgy == rtrim($barangay->Brgy) ? 'selected' : ''}}>{{ $barangay->Brgy }}</option>
                           @endforeach 
                         </select>
                     </div>
@@ -110,7 +110,7 @@
                         <select id="municipality" class="form-control" name="municipality" value="{{ old('municipality')}}" required>
                           <option value=""></option>
                           @foreach ($municipalities as $municipality)          
-                            <option value="{{ $municipality->Municipality }}" {{ old('municipality') == $municipality->Municipality ? 'selected' : ''}}>{{ $municipality->Municipality }}</option>
+                            <option value="{{ $municipality->Municipality }}" {{ $sco_cm->Municipality == $municipality->Municipality ? 'selected' : ''}}>{{ $municipality->Municipality }}</option>
                           @endforeach 
                         </select>
                     </div>
@@ -118,13 +118,13 @@
                   <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('membership_or', 'Membership OR *') }}
-                        {{ Form::text('membership_or', null, array('class' => 'form-control', 'readonly')) }}
+                        {{ Form::text('membership_or', $sco_cm->{'Membership OR#'}, array('class' => 'form-control', 'readonly')) }}
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('membership_date', 'Membership Date *') }}
-                        {{ Form::date('membership_date', null, array('class' => 'form-control', 'readonly')) }}
+                        {{ Form::date('membership_date', date('Y-m-d', strtotime($sco_cm->{'Membership Date'})) , array('class' => 'form-control', 'readonly')) }}
                     </div>
                   </div>
                   <div class="col-lg-3">
@@ -133,7 +133,7 @@
                         <select id="consumer_type" class="form-control" name="consumer_type" value="{{ old('consumer_type')}}" required>
                           <option value=""></option>
                           @foreach ($consumer_types as $consumer_type)          
-                            <option value="{{ $consumer_type->name_type }}" {{ old('consumer_type') == $consumer_type->name_type ? 'selected' : ''}} >{{ $consumer_type->name_type }}</option>
+                            <option value="{{ $consumer_type->name_type }}" {{ $sco_cm->ConsumerType == $consumer_type->name_type ? 'selected' : ''}} >{{ $consumer_type->name_type }}</option>
                           @endforeach 
                         </select>
                     </div>
@@ -144,7 +144,7 @@
                         <select id="occupancy_type" class="form-control" name="occupancy_type">
                           <option value=""></option>
                           @foreach ($occupancy_types as $occupancy_type)          
-                            <option value="{{ $occupancy_type->occupancy_name }}" >{{ $occupancy_type->occupancy_name }}</option>
+                            <option value="{{ $occupancy_type->occupancy_name }}" {{ $sco_cm->TurnOffOn == $occupancy_type->occupancy_name ? 'selected' : ''}} >{{ $occupancy_type->occupancy_name }}</option>
                           @endforeach 
                         </select>
                     </div>
@@ -155,7 +155,7 @@
                         <select id="line_type" class="form-control" name="line_type">
                           <option value=""></option>
                           @foreach (Config::get('constants.line_types') as $line_type)          
-                            <option value="{{ $line_type['name'] }}" id="">{{ $line_type['name'] }}</option>
+                            <option value="{{ $line_type['name'] }}" {{ $sco_cm->LineType == $line_type['name'] ? 'selected' : ''}} id="">{{ $line_type['name'] }}</option>
                           @endforeach 
                         </select>
                     </div>
@@ -175,7 +175,7 @@
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('meter_or_no', 'Meter OR #') }}
-                        {{ Form::text('meter_or_no', null, array('class' => 'form-control')) }}
+                        {{ Form::text('meter_or_no', $sco_cm->{'Meter OR#'}, array('class' => 'form-control')) }}
                     </div>
                   </div>
                   <div class="col-lg-5">
@@ -184,7 +184,7 @@
                         <select id="meter_code_no" class="form-control" name="meter_code_no" required>
                           <option value=""></option>
                           @foreach ($type_of_meters as $type_of_meter)          
-                            <option value="{{ $type_of_meter->meter_code }}" id="" {{ old('meter_code_no') == $type_of_meter->meter_code ? 'selected' : ''}}>
+                            <option value="{{ $type_of_meter->meter_code }}" id="" {{ $sco_cm->CodeNo == $type_of_meter->meter_code ? 'selected' : ''}}>
                               <div class="row">
                                 <div class="form-group">
                                   <label class="col-xs-6">{{ $type_of_meter->meter_code  }} <span class="fw-bold">|</span></label>
@@ -199,13 +199,13 @@
                   <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('last_reading', 'Last Reading') }}
-                        {{ Form::number('last_reading', null, array('class' => 'form-control', 'readonly')) }}
+                        {{ Form::number('last_reading', $sco_cm->LastRdg, array('class' => 'form-control', 'readonly')) }}
                     </div>
                   </div>
                   <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('reading_initial', 'Initial Reading') }}
-                        {{ Form::number('reading_initial', null, array('class' => 'form-control')) }}
+                        {{ Form::number('reading_initial', $sco_cm->{'Rdg Initial'}, array('class' => 'form-control')) }}
                     </div>
                   </div>
                 </div>
@@ -213,13 +213,13 @@
                   <div class="col-lg-6">
                     <div class="mb-2">
                       <label class="form-label mb-1">Remarks </label>
-                      <textarea class="form-control" name="remarks" id="remarks"></textarea>
+                      <textarea class="form-control" name="remarks" id="remarks">{{ $sco_cm->Remarks }}</textarea>
                     </div>
                   </div>
                   <div class="col-lg-6">
                     <div class="mb-2">
                       <label class="form-label mb-1">Location </label>
-                      <textarea class="form-control" name="location" id="location"></textarea>
+                      <textarea class="form-control" name="location" id="location">{{ $sco_cm->Location }}</textarea>
                     </div>
                   </div>
                 </div>

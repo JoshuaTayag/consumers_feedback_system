@@ -760,6 +760,21 @@
                 "name" => "Large"
             ]
         ],
+
+        'action_status_change_meter' => [
+            [
+                "id" => 1,
+                "name" => "INSTALLED"
+            ],
+            [
+                "id" => 2,
+                "name" => "REJECTED"
+            ],
+            [
+                "id" => 3,
+                "name" => "NOT COMPLETED"
+            ]
+        ],
     ];
 
 ?>
