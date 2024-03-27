@@ -31,7 +31,7 @@
                   <div class="col-lg-4">
                     <div class="mb-2">
                         {{ Form::label('old_meter', 'Old Meter') }}
-                        {{ Form::text('old_meter', null, array('class' => 'form-control')) }}
+                        {{ Form::text('old_meter', null, array('class' => 'form-control', 'readonly')) }}
                     </div>
                   </div>
                 </div>
@@ -39,12 +39,12 @@
                 <hr>
 
                 <div class="row">
-                  <div class="col-lg-2">
+                  <!-- <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('sco', 'SCO No') }}
                         {{ Form::text('sco', null, array('class' => 'form-control', 'disabled')) }}
                     </div>
-                  </div>
+                  </div> -->
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('last_name', 'Last Name') }}
@@ -57,12 +57,20 @@
                         {{ Form::text('first_name', null, array('class' => 'form-control', 'required')) }}
                     </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('contact_no', 'Contact No.') }}
                         {{ Form::text('contact_no', null, array('class' => 'form-control')) }}
                     </div>
                   </div>
+                  <div class="col-lg-3">
+                    <div class="mb-2">
+                        {{ Form::label('care_of', 'Care of') }}
+                        {{ Form::text('care_of', null, array('class' => 'form-control')) }}
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
                   <!-- <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('or_number', 'OR number') }}
@@ -70,6 +78,16 @@
                     </div>
                   </div> -->
                   <div class="col-lg-2">
+                    <label for="feeder">Feeder *</label>
+                    <!-- <input type="text" value="" id="care_of" name="care_of" class="form-control" readonly> -->
+                    <select id="feeder" class="form-control" name="feeder" required>
+                      <option value=""></option>
+                      @foreach (Config::get('constants.feeders') as $feeder)          
+                        <option value="{{ $feeder['name'] }}" id="">{{ $feeder['name'] }}</option>
+                      @endforeach 
+                    </select>
+                  </div>
+                  <div class="col-lg-1">
                     <div class="mb-2">
                         {{ Form::label('area', 'Area *') }}
                         <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
@@ -82,29 +100,7 @@
                         </select>
                     </div>
                   </div>
-                  <div class="col-lg-2">
-                    <div class="mb-2">
-                        {{ Form::label('sitio', 'Sitio') }}
-                        <select id="sitio" class="form-control" name="sitio">
-                          <option value=""></option>
-                          @foreach ($sitios as $sitio)          
-                            <option value="{{ $sitio->Sitio }}" {{ old('sitio') == $sitio->Sitio ? 'selected' : ''}}>{{ $sitio->Sitio }}</option>
-                          @endforeach 
-                        </select>
-                    </div>
-                  </div>
-                  <div class="col-lg-2">
-                    <div class="mb-2">
-                        {{ Form::label('barangay', 'Barangay *') }}
-                        <select id="barangay" class="form-control" name="barangay" required>
-                          <option value=""></option>
-                          @foreach ($barangays as $barangay)          
-                            <option value="{{ $barangay->Brgy }}" {{ old('barangay') == $barangay->Brgy ? 'selected' : ''}}>{{ $barangay->Brgy }}</option>
-                          @endforeach 
-                        </select>
-                    </div>
-                  </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('municipality', 'Municipality *') }}
                         <select id="municipality" class="form-control" name="municipality" value="{{ old('municipality')}}" required>
@@ -115,7 +111,31 @@
                         </select>
                     </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
+                    <div class="mb-2">
+                        {{ Form::label('barangay', 'Barangay *') }}
+                        <select id="barangay" class="form-control" name="barangay" required>
+                          <option value=""></option>
+                          @foreach ($barangays as $barangay)          
+                            <option value="{{ $barangay->Brgy }}" {{ old('barangay') == $barangay->Brgy ? 'selected' : ''}}>{{ $barangay->Brgy }}</option>
+                          @endforeach 
+                        </select>
+                    </div>
+                  </div>
+                  <div class="col-lg-3">
+                    <div class="mb-2">
+                        {{ Form::label('sitio', 'Sitio') }}
+                        <select id="sitio" class="form-control" name="sitio">
+                          <option value=""></option>
+                          @foreach ($sitios as $sitio)          
+                            <option value="{{ $sitio->Sitio }}" {{ old('sitio') == $sitio->Sitio ? 'selected' : ''}}>{{ $sitio->Sitio }}</option>
+                          @endforeach 
+                        </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('membership_or', 'Membership OR *') }}
                         {{ Form::text('membership_or', null, array('class' => 'form-control', 'readonly')) }}
@@ -138,7 +158,7 @@
                         </select>
                     </div>
                   </div>
-                  <div class="col-lg-3">
+                  <!-- <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('occupancy_type', 'Occupancy Type') }}
                         <select id="occupancy_type" class="form-control" name="occupancy_type">
@@ -148,8 +168,8 @@
                           @endforeach 
                         </select>
                     </div>
-                  </div>
-                  <div class="col-lg-2">
+                  </div> -->
+                  <!-- <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('line_type', 'Line Type') }}
                         <select id="line_type" class="form-control" name="line_type">
@@ -159,7 +179,7 @@
                           @endforeach 
                         </select>
                     </div>
-                  </div>
+                  </div> -->
                   <!-- <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('meter_no', 'Meter No') }}
@@ -178,7 +198,9 @@
                         {{ Form::text('meter_or_no', null, array('class' => 'form-control')) }}
                     </div>
                   </div>
-                  <div class="col-lg-5">
+                </div>
+                <div class="row">
+                  <div class="col-lg-8">
                     <div class="mb-2">
                         {{ Form::label('meter_code_no', 'Type Of Meter*') }}
                         <select id="meter_code_no" class="form-control" name="meter_code_no" required>
@@ -298,6 +320,7 @@
 
   var trimmedFirstName = f_name.replace(/\s+$/g, '');
   var trimmedLastName = l_name.replace(/\s+$/g, '');
+  var trimmedSerialNo = data['Serial No'].replace(/\s+$/g, '');
 
   document.getElementById('last_name').value = trimmedLastName;
   document.getElementById('first_name').value = trimmedFirstName;
@@ -308,7 +331,7 @@
   if (!isNaN(prevReading)) {
       document.getElementById('last_reading').value = prevReading.toFixed(0);
   }
-  // document.getElementById('municipality').value = municipality;
+  document.getElementById('old_meter').value = trimmedSerialNo;
 
 
   return data.id + " | " +data.Name + " | " + data.Address

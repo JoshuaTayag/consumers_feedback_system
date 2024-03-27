@@ -20,6 +20,9 @@
             <div class="row">
               <div class="col-lg-8">
                 <div class="row">
+                  <div class="col-lg-12 mb-3">
+                    <span class="fs-4 fw-bold">SCO #: <span class="text-danger">{{$sco_cm->SCONo}}</span></span>
+                  </div>
                   <div class="col-lg-6">
                     <div class="mb-2">
                         <!-- {{ Form::label('account_no', 'Account No') }}
@@ -39,12 +42,6 @@
                 <hr>
 
                 <div class="row">
-                  <div class="col-lg-2">
-                    <div class="mb-2">
-                        {{ Form::label('sco', 'SCO No') }}
-                        {{ Form::text('sco', $sco_cm->SCONo, array('class' => 'form-control', 'disabled')) }}
-                    </div>
-                  </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('last_name', 'Last Name') }}
@@ -57,19 +54,31 @@
                         {{ Form::text('first_name', $sco_cm->Firstname, array('class' => 'form-control', 'required')) }}
                     </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('contact_no', 'Contact No.') }}
                         {{ Form::text('contact_no', $sco_cm->ContactNo, array('class' => 'form-control')) }}
                     </div>
                   </div>
-                  <!-- <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('or_number', 'OR number') }}
-                        {{ Form::text('or_number', null, array('class' => 'form-control', 'readonly')) }}
+                        {{ Form::label('care_of', 'Care of') }}
+                        {{ Form::text('care_of', $sco_cm->Spouse, array('class' => 'form-control')) }}
                     </div>
-                  </div> -->
+                  </div>
+                </div>
+                <div class="row">
                   <div class="col-lg-2">
+                    <label for="feeder">Feeder *</label>
+                    <!-- <input type="text" value="" id="care_of" name="care_of" class="form-control" readonly> -->
+                    <select id="feeder" class="form-control" name="feeder" required>
+                      <option value=""></option>
+                      @foreach (Config::get('constants.feeders') as $feeder)          
+                        <option value="{{ $feeder['name'] }}" id="" {{ $sco_cm->Feeder == $feeder['name'] ? 'selected' : ''}}>{{ $feeder['name'] }}</option>
+                      @endforeach 
+                    </select>
+                  </div>
+                  <div class="col-lg-1">
                     <div class="mb-2">
                         {{ Form::label('area', 'Area *') }}
                         <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
@@ -82,29 +91,7 @@
                         </select>
                     </div>
                   </div>
-                  <div class="col-lg-2">
-                    <div class="mb-2">
-                        {{ Form::label('sitio', 'Sitio') }}
-                        <select id="sitio" class="form-control" name="sitio">
-                          <option value=""></option>
-                          @foreach ($sitios as $sitio)          
-                            <option value="{{ $sitio->Sitio }}" {{ $sco_cm->Sitio == $sitio->Sitio ? 'selected' : ''}}>{{ $sitio->Sitio }}</option>
-                          @endforeach 
-                        </select>
-                    </div>
-                  </div>
-                  <div class="col-lg-2">
-                    <div class="mb-2">
-                        {{ Form::label('barangay', 'Barangay *') }}
-                        <select id="barangay" class="form-control" name="barangay" required>
-                          <option value=""></option>
-                          @foreach ($barangays as $barangay)        
-                            <option value="{{ $barangay->Brgy }}" {{ $sco_cm->Brgy == rtrim($barangay->Brgy) ? 'selected' : ''}}>{{ $barangay->Brgy }}</option>
-                          @endforeach 
-                        </select>
-                    </div>
-                  </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('municipality', 'Municipality *') }}
                         <select id="municipality" class="form-control" name="municipality" value="{{ old('municipality')}}" required>
@@ -115,7 +102,31 @@
                         </select>
                     </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
+                    <div class="mb-2">
+                        {{ Form::label('barangay', 'Barangay *') }}
+                        <select id="barangay" class="form-control" name="barangay" required>
+                          <option value=""></option>
+                          @foreach ($barangays as $barangay)        
+                            <option value="{{ $barangay->Brgy }}" {{ $sco_cm->Brgy == rtrim($barangay->Brgy) ? 'selected' : ''}}>{{ $barangay->Brgy }}</option>
+                          @endforeach 
+                        </select>
+                    </div>
+                  </div>
+                  <div class="col-lg-3">
+                    <div class="mb-2">
+                        {{ Form::label('sitio', 'Sitio') }}
+                        <select id="sitio" class="form-control" name="sitio">
+                          <option value=""></option>
+                          @foreach ($sitios as $sitio)          
+                            <option value="{{ $sitio->Sitio }}" {{ $sco_cm->Sitio == $sitio->Sitio ? 'selected' : ''}}>{{ $sitio->Sitio }}</option>
+                          @endforeach 
+                        </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('membership_or', 'Membership OR *') }}
                         {{ Form::text('membership_or', $sco_cm->{'Membership OR#'}, array('class' => 'form-control', 'readonly')) }}
@@ -138,7 +149,7 @@
                         </select>
                     </div>
                   </div>
-                  <div class="col-lg-3">
+                  <!-- <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('occupancy_type', 'Occupancy Type') }}
                         <select id="occupancy_type" class="form-control" name="occupancy_type">
@@ -148,8 +159,8 @@
                           @endforeach 
                         </select>
                     </div>
-                  </div>
-                  <div class="col-lg-2">
+                  </div> -->
+                  <!-- <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('line_type', 'Line Type') }}
                         <select id="line_type" class="form-control" name="line_type">
@@ -159,7 +170,7 @@
                           @endforeach 
                         </select>
                     </div>
-                  </div>
+                  </div> -->
                   <!-- <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('meter_no', 'Meter No') }}
@@ -178,7 +189,9 @@
                         {{ Form::text('meter_or_no', $sco_cm->{'Meter OR#'}, array('class' => 'form-control')) }}
                     </div>
                   </div>
-                  <div class="col-lg-5">
+                </div>
+                <div class="row">
+                  <div class="col-lg-8">
                     <div class="mb-2">
                         {{ Form::label('meter_code_no', 'Type Of Meter*') }}
                         <select id="meter_code_no" class="form-control" name="meter_code_no" required>

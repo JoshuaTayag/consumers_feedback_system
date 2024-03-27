@@ -423,13 +423,13 @@ class LifelineController extends Controller
         $accounts = DB::connection('sqlSrvBilling')
         ->table('Consumers Table')
         // ->whereNotIn('Accnt No', $lifeline_data)
-        ->select('Accnt No as id', 'Name', 'Address', 'OR No', 'Date', 'Prev Reading');
+        ->select('Accnt No as id', 'Name', 'Address', 'OR No', 'Date', 'Prev Reading', 'Serial No');
         }else{
         $accounts = DB::connection('sqlSrvBilling')
         ->table('Consumers Table')
         ->where('Accnt No', 'like', '%' .$search . '%')
         // ->whereNotIn('Accnt No', $lifeline_data)
-        ->select('Accnt No as id', 'Name', 'Address', 'OR No', 'Date', 'Prev Reading');
+        ->select('Accnt No as id', 'Name', 'Address', 'OR No', 'Date', 'Prev Reading', 'Serial No');
         }
         $data = $accounts->paginate(10, ['*'], 'page', $request->page);
         return response()->json($data); 

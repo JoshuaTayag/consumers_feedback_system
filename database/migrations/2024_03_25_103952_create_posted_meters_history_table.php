@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('sco_no');
             $table->string('old_meter_no');
             $table->string('new_meter_no');
+            $table->string('area');
             $table->date('process_date');
             $table->date('date_installed');
             $table->string('action_status');

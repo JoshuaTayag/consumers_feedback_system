@@ -83,6 +83,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('service-connect-order-cm-edit/{id}', [App\Http\Controllers\ServiceConnectOrderController::class, 'editCM'])->name('editCM');
     Route::put('service-connect-order-cm-update/{id}', [App\Http\Controllers\ServiceConnectOrderController::class, 'updateCM'])->name('updateCM');
     Route::post('service-connect-order-post-meter', [App\Http\Controllers\ServiceConnectOrderController::class, 'meterPostingCM'])->name('meterPostingCM');
+    Route::post('validate-meter-no', [App\Http\Controllers\ServiceConnectOrderController::class, 'validateMeterNo'])->name('validateMeterNo');
+    Route::get('pdf-sco-cm/{id}', [App\Http\Controllers\ServiceConnectOrderController::class, 'printChangeMeterRequest'])->name('printChangeMeterRequest');
 
     // lifeline
     Route::resource('lifeline', App\Http\Controllers\LifelineController::class);

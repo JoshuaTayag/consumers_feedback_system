@@ -33,12 +33,13 @@
                                 <!-- <a class="btn btn-sm btn-secondary rounded-pill" href="{{ route('editCM',$sco->application_id) }}">
                                     <i class="bi bi-gear"></i> Meter Posting
                                 </a> -->
-                                <button type="button" class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="modal" data-bs-target="#exampleModal" data-name="{{$sco->Lastname.', '.$sco->Firstname}}" data-sco="{{$sco->SCONo}}" data-process-date="{{ date('F d, Y', strtotime($sco->ProcessDate)) }}">
+                                <button type="button" class="btn btn-sm btn-secondary rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#exampleModal" data-name="{{$sco->Lastname.', '.$sco->Firstname}}" data-sco="{{$sco->SCONo}}" data-process-date="{{ date('F d, Y', strtotime($sco->ProcessDate)) }}">
                                   Meter Posting
                                 </button>
                             @endif
+                            <a href="{{route('printChangeMeterRequest',$sco->application_id)}}" target="_blank" class="btn btn-sm btn-success"><i class="fa fa-print"></i></a>
                         </div>
-                        <div class="col d-flex align-items-center">
+                        <div class="col-lg-3 d-flex align-items-center">
                             <div class="mx-end ms-auto"> <!-- Add mx-auto to horizontally center the content -->
                                 <p class="badge rounded-pill bg-{{ $sco->Dispatch2 ? 'success' : 'danger' }} p-2 mb-0">{{ $sco->Dispatch2 ? 'Acted' : 'Not Acted' }}</p>
                             </div>
@@ -167,5 +168,41 @@
         time.value = '';
       }
   });
+
+  $('#meter_no').blur(function(){
+  var error_email = '';
+  var meter_no = $(this).val();
+  if (meter_no) {
+    $.ajax({
+      url:"{{ route('validateMeterNo') }}",
+      method:"POST",
+      data:{
+        meter_no: meter_no, 
+        _token: '{{csrf_token()}}'
+      },
+      success:function(result)
+      {
+        if(result[0] == 'unique') {
+          $('#error_email').html('<label class="text-success">Meter No Available</label>');
+          $('#meter_no').removeClass('is-invalid');
+          $('#meter_no').addClass('is-valid');
+          $('#submit_meter_posting').attr('disabled', false);
+        }
+        else {
+          $('#error_email').html('<label class="text-danger">Meter No not Available! Pls refer to SCO NO '+ result[1] +'</label>');
+          $('#meter_no').removeClass('is-valid');
+          $('#meter_no').addClass('is-invalid');
+          $('#submit_meter_posting').attr('disabled', 'disabled');
+        }
+      }
+    })
+  }
+  else{
+    $('#meter_no').removeClass('is-invalid');
+    $('#meter_no').removeClass('is-valid');
+    $('#error_email').html('');
+    $('#submit_meter_posting').attr('disabled', false);
+  }
+ });
 </script>
 @endsection

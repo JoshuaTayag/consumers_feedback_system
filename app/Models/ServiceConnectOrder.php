@@ -44,7 +44,10 @@ class ServiceConnectOrder extends Model implements Auditable
                         "LineType",
                         "Meter OR#",
                         "Rdg initial",
-                        "Location"
+                        "Location",
+                        "Feeder",
+                        "Spouse",
+                        "keyoff"
                     ];
 
 }

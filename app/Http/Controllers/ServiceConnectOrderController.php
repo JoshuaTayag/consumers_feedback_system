@@ -8,6 +8,7 @@ use DB;
 use App\Helpers\Helper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use PDF;
 
 class ServiceConnectOrderController extends Controller
 {
@@ -150,11 +151,14 @@ class ServiceConnectOrderController extends Controller
                 "ContactNo" => $request->contact_no,
                 "LastRdg" => $request->last_reading,
                 "OldMtr" => $request->old_meter,
-                "TurnOffOn" => $request->occupancy_type,
-                "LineType" => $request->line_type,
+                // "TurnOffOn" => $request->occupancy_type,
+                // "LineType" => $request->line_type,
                 "Meter OR#" => $request->meter_or_no,
                 "Rdg initial" => $request->reading_initial,
                 "Location" => $request->location,
+                "Feeder" => $request->feeder,
+                "Spouse" => $request->care_of,
+                "keyoff" => $request->care_of ? true : false,
             ]);
 
             // dd($sco->SCONo);
@@ -287,6 +291,7 @@ class ServiceConnectOrderController extends Controller
                     "ERC Seal#" => $request->erc_seal,
                     "Spouse" => $request->care_of,
                     "Feeder" => $request->feeder,
+                    "Area" => $request->area,
                     "LastRdg" => $request->last_reading,
                     "Rdg Initial" => $request->reading_initial,
                     "Crew" => $request->crew,
@@ -296,15 +301,16 @@ class ServiceConnectOrderController extends Controller
                     "CrewRemarks" => $request->crew_remarks,
                     "Acted" => 1,
                 ]);
-                // dd($sco->first()->NextAcctNo);
+                // dd($sco->first()->OldMtr);
                 DB::table('posted_meters_history')
                 ->insert([
                     "sco_no" => $request->sco,
-                    "old_meter_no" => $request->meter_no,
+                    "old_meter_no" => $sco->first()->OldMtr,
                     "new_meter_no" => $request->meter_no,
                     "process_date" => $sco->first()->ProcessDate,
                     "date_installed" => date('Y-m-d H:i:s', strtotime($request->date_installed)),
                     "action_status" => $request->status,
+                    "area" => $request->area,
                     "posted_by" => Auth::id(),
                     "created_at" => Carbon::now(),
                 ]);
@@ -376,11 +382,14 @@ class ServiceConnectOrderController extends Controller
                     "ContactNo" => $request->contact_no,
                     "LastRdg" => $request->last_reading,
                     "OldMtr" => $request->old_meter,
-                    "TurnOffOn" => $request->occupancy_type,
-                    "LineType" => $request->line_type,
+                    // "TurnOffOn" => $request->occupancy_type,
+                    // "LineType" => $request->line_type,
                     "Meter OR#" => $request->meter_or_no,
                     "Rdg initial" => $request->reading_initial,
                     "Location" => $request->location,
+                    "Feeder" => $request->feeder,
+                    "Spouse" => $request->care_of,
+                    "keyoff" => $request->care_of ? true : false,
                 ]);
             } else {
                 return redirect(route('indexCM'))->withError('No Record Found!');
@@ -433,5 +442,33 @@ class ServiceConnectOrderController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function printChangeMeterRequest(Request $request, string $id)
+    {
+        $sco = ServiceConnectOrder::find($id);
+        // dd($sco->SCONo);
+        view()->share('data', $sco);
+        $pdf = PDF::loadView('service_connect_order.change_meter.print_cm_request_pdf');
+        return $pdf->stream();
+    }
+
+    function validateMeterNo(Request $request)
+    {
+        if($request->get('meter_no'))
+        {
+            $meter_no = $request->get('meter_no');
+            $data = DB::connection('sqlSrvHousewiring')->table('Service Connect Table')
+                    ->where('MeterNo', $meter_no);
+            if($data->count() > 0)
+            {
+            $sco_no = $data->first()->SCONo;
+            return ['not_unique', $sco_no];
+            }
+            else
+            {
+            return ['unique', null];
+            }
+        }
     }
 }

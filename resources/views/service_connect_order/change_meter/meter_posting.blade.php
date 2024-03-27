@@ -1,5 +1,5 @@
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Meter Posting</h5>
@@ -23,9 +23,10 @@
           </div>
           <hr>
           <div class="row">
-            <div class="col">
+            <div class="col-lg-4">
               <label for="meter_no">Meter No:</label>
               <input type="text" value="" id="meter_no" name="meter_no" class="form-control">
+              <span id="error_email"></span>
             </div>
             <div class="col">
               <label for="date_installed">Date Installed:</label>
@@ -45,9 +46,22 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-lg-5">
+            <div class="col-lg-4">
               <label for="care_of">C/O:</label>
               <input type="text" value="" id="care_of" name="care_of" class="form-control">
+            </div>
+            <div class="col-lg-1">
+              <div class="mb-2">
+                  {{ Form::label('area', 'Area *') }}
+                  <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
+                    <option value=""></option>
+                    <option value="A1" {{ old('area') == "A1" ? 'selected' : ''}} >A1</option>
+                    <option value="A2" {{ old('area') == "A2" ? 'selected' : ''}} >A2</option>
+                    <option value="A3" {{ old('area') == "A3" ? 'selected' : ''}} >A3</option>
+                    <option value="A4" {{ old('area') == "A4" ? 'selected' : ''}} >A4</option>
+                    <option value="A5" {{ old('area') == "A5" ? 'selected' : ''}} >A5</option>
+                  </select>
+              </div>
             </div>
             <div class="col-lg-3">
               <label for="feeder">Feeder:</label>
@@ -102,10 +116,10 @@
               <textarea name="crew_remarks" id="crew_remarks" class="form-control" ></textarea>
             </div>
           </div>
-        </div>=
+        </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Save changes</button>
+          <button type="submit" class="btn btn-primary" id="submit_meter_posting" >Save changes</button>
         </div>
       {!! Form::close() !!}
     </div>
