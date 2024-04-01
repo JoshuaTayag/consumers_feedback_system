@@ -453,6 +453,34 @@ class ServiceConnectOrderController extends Controller
         return $pdf->stream();
     }
 
+    public function fetchServiceConnectApplications(Request $request)
+    {
+        $scos = ServiceConnectOrder::orderBy('SCONo','DESC')->where('SCONo', 'like', 'CM%')->paginate(12);
+
+        $ref_employees = DB::table('ref_employees')
+        ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
+        ->where('department', 'TSD')
+        ->orderBy('last_name', 'ASC')
+        ->get();
+
+        // $lifeline_datas = Lifeline::orderBy('id', 'desc')->paginate(10);
+        
+        if($request->ajax() && ($request->sco_no || $request->f_name || $request->meter_no) ){
+            
+            $scos = ServiceConnectOrder::where('SCONo', 'LIKE', ''.$request->sco_no.'%')
+            ->where('Firstname', 'LIKE', '%'.$request->f_name.'%')
+            ->where('MeterNo', 'LIKE', '%'.$request->meter_no.'%')
+            ->orderBy('SCONo','DESC')
+            ->paginate(12);
+            // dd('sample');
+            return view('service_connect_order.change_meter.search')->with(compact('scos','ref_employees'))->render();
+        }
+
+        // return view('lifeline.index')->with(compact('scos'));
+        return view('service_connect_order.change_meter.search')->with(compact('scos','ref_employees'))->render();
+        // return view('service_connect_order.change_meter.search',compact('scos','ref_employees'));
+    }
+
     function validateMeterNo(Request $request)
     {
         if($request->get('meter_no'))

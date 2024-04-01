@@ -85,6 +85,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('service-connect-order-post-meter', [App\Http\Controllers\ServiceConnectOrderController::class, 'meterPostingCM'])->name('meterPostingCM');
     Route::post('validate-meter-no', [App\Http\Controllers\ServiceConnectOrderController::class, 'validateMeterNo'])->name('validateMeterNo');
     Route::get('pdf-sco-cm/{id}', [App\Http\Controllers\ServiceConnectOrderController::class, 'printChangeMeterRequest'])->name('printChangeMeterRequest');
+    Route::get('fetch-applications', [App\Http\Controllers\ServiceConnectOrderController::class, 'fetchServiceConnectApplications'])->name('fetchServiceConnectApplications');
 
     // lifeline
     Route::resource('lifeline', App\Http\Controllers\LifelineController::class);

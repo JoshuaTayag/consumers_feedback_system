@@ -17,8 +17,19 @@
                   </div>
               </div>
             </div>
+            <div class="row p-3">
+              <div class="col-lg-4">
+                  <input type="text" placeholder="Search by SCO No." id="search_sco_no" name="search_sco_no" class="form-control">
+              </div>
+              <div class="col-lg-4">
+                  <input type="text" placeholder="Search by Name" id="search_first_name" name="search_first_name" class="form-control">
+              </div>
+              <div class="col-lg-4">
+                  <input type="text" placeholder="Search by Meter No" id="search_meter_no" name="search_meter_no" class="form-control">
+              </div>
+            </div>
             <div class="card-body d-flex flex-wrap">
-              <div class="row">
+              <div class="row" id="show_data">
               @foreach ($scos as $key => $sco)
                 <div class="col-lg-4 mb-4">
                   <div class="card h-100">
@@ -170,39 +181,65 @@
   });
 
   $('#meter_no').blur(function(){
-  var error_email = '';
-  var meter_no = $(this).val();
-  if (meter_no) {
-    $.ajax({
-      url:"{{ route('validateMeterNo') }}",
-      method:"POST",
-      data:{
-        meter_no: meter_no, 
-        _token: '{{csrf_token()}}'
-      },
-      success:function(result)
-      {
-        if(result[0] == 'unique') {
-          $('#error_email').html('<label class="text-success">Meter No Available</label>');
-          $('#meter_no').removeClass('is-invalid');
-          $('#meter_no').addClass('is-valid');
-          $('#submit_meter_posting').attr('disabled', false);
+    var error_email = '';
+    var meter_no = $(this).val();
+    if (meter_no) {
+      $.ajax({
+        url:"{{ route('validateMeterNo') }}",
+        method:"POST",
+        data:{
+          meter_no: meter_no, 
+          _token: '{{csrf_token()}}'
+        },
+        success:function(result)
+        {
+          if(result[0] == 'unique') {
+            $('#error_email').html('<label class="text-success">Meter No Available</label>');
+            $('#meter_no').removeClass('is-invalid');
+            $('#meter_no').addClass('is-valid');
+            $('#submit_meter_posting').attr('disabled', false);
+          }
+          else {
+            $('#error_email').html('<label class="text-danger">Meter No not Available! Pls refer to SCO NO '+ result[1] +'</label>');
+            $('#meter_no').removeClass('is-valid');
+            $('#meter_no').addClass('is-invalid');
+            $('#submit_meter_posting').attr('disabled', 'disabled');
+          }
         }
-        else {
-          $('#error_email').html('<label class="text-danger">Meter No not Available! Pls refer to SCO NO '+ result[1] +'</label>');
-          $('#meter_no').removeClass('is-valid');
-          $('#meter_no').addClass('is-invalid');
-          $('#submit_meter_posting').attr('disabled', 'disabled');
-        }
-      }
-    })
-  }
-  else{
-    $('#meter_no').removeClass('is-invalid');
-    $('#meter_no').removeClass('is-valid');
-    $('#error_email').html('');
-    $('#submit_meter_posting').attr('disabled', false);
-  }
- });
+      })
+    }
+    else{
+      $('#meter_no').removeClass('is-invalid');
+      $('#meter_no').removeClass('is-valid');
+      $('#error_email').html('');
+      $('#submit_meter_posting').attr('disabled', false);
+    }
+  });
+
+  $(document).ready(function () {
+    var timeout = null;
+    $('#search_sco_no').blur(function() {
+      var getFirstName = $('#search_first_name').val();
+      var getMeterNo = $('#search_meter_no').val();
+      var sco_no = $(this).val();
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+          $.ajax({
+          method: 'GET',
+          url: "{{route('fetchServiceConnectApplications')}}",
+          data: {
+              f_name:getFirstName,
+              meter_no:getMeterNo,
+              sco_no:sco_no
+          },
+          success:function(response){
+            console.log(response)
+              $("#show_data").html(response);
+              $('#pagination').delay(500).fadeOut('fast');
+          }
+          });
+      }, 200);
+    });
+  });
 </script>
 @endsection
