@@ -18,4 +18,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::middleware('auth:sanctum')->post('register', [App\Http\Controllers\AgmmController::class, 'agmmRegister']);
+Route::get('account/{id}', [App\Http\Controllers\AgmmController::class, 'validateAccount'])->middleware('auth:sanctum');
+
 Route::get('fetch-members/', [App\Http\Controllers\MembershipController::class, 'getMembers']);
