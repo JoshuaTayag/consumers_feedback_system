@@ -14,13 +14,17 @@ return new class extends Migration
         Schema::create('posted_meters_history', function (Blueprint $table) {
             $table->id();
             $table->string('sco_no');
-            $table->string('old_meter_no');
-            $table->string('new_meter_no');
-            $table->string('area');
+            $table->string('old_meter_no')->nullable();
+            $table->string('new_meter_no')->nullable();
+            $table->string('area')->nullable();
             $table->date('process_date');
-            $table->date('date_installed');
+            $table->date('date_installed')->nullable();
             $table->string('action_status');
             $table->integer('posted_by');
+            $table->string('feeder')->nullable();
+            $table->string('leyeco_seal_no')->nullable();
+            $table->string('serial_no')->nullable();
+            $table->string('erc_seal_no')->nullable();
             $table->timestamps();
         });
     }

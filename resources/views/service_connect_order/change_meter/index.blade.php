@@ -17,18 +17,27 @@
                   </div>
               </div>
             </div>
-            <div class="row p-3">
-              <div class="col-lg-4">
-                  <input type="text" placeholder="Search by SCO No." id="search_sco_no" name="search_sco_no" class="form-control">
+            <form action="{{ route('cm.search') }}" method="GET">
+              <div class="row p-3">
+                <div class="col-lg-2">
+                    <input type="text" placeholder="Search by SCO No." id="search_sco_no" name="sco_no" class="form-control" value="{{ request('sco_no') }}">
+                </div>
+                <div class="col-lg-2">
+                    <input type="text" placeholder="Search by First Name" id="search_first_name" name="first_name" class="form-control" value="{{ request('first_name') }}">
+                </div>
+                <div class="col-lg-2">
+                    <input type="text" placeholder="Search by Last Name" id="search_last_name" name="last_name" class="form-control" value="{{ request('last_name') }}">
+                </div>
+                <div class="col-lg-2">
+                    <input type="text" placeholder="Search by Meter No" id="search_meter_no" name="meter_no" class="form-control" value="{{ request('meter_no') }}">
+                </div>
+                <div class="col-lg-2">
+                  <button type="submit" class="btn btn-info"><i class="fa fa-search"></i></button>
+                  <button type="button" class="btn btn-info" onclick="clearSearch()">Clear</button>
+                </div>
               </div>
-              <div class="col-lg-4">
-                  <input type="text" placeholder="Search by Name" id="search_first_name" name="search_first_name" class="form-control">
-              </div>
-              <div class="col-lg-4">
-                  <input type="text" placeholder="Search by Meter No" id="search_meter_no" name="search_meter_no" class="form-control">
-              </div>
-            </div>
-            <div class="card-body d-flex flex-wrap">
+            </form>
+            <div class="card-body {{ count($scos) == 3 ? 'd-flex flex-wrap' : '' }}">
               <div class="row" id="show_data">
               @foreach ($scos as $key => $sco)
                 <div class="col-lg-4 mb-4">
@@ -44,7 +53,7 @@
                                 <!-- <a class="btn btn-sm btn-secondary rounded-pill" href="{{ route('editCM',$sco->application_id) }}">
                                     <i class="bi bi-gear"></i> Meter Posting
                                 </a> -->
-                                <button type="button" class="btn btn-sm btn-secondary rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#exampleModal" data-name="{{$sco->Lastname.', '.$sco->Firstname}}" data-sco="{{$sco->SCONo}}" data-process-date="{{ date('F d, Y', strtotime($sco->ProcessDate)) }}">
+                                <button type="button" class="btn btn-sm btn-secondary rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#exampleModal" data-name="{{$sco->Lastname.', '.$sco->Firstname}}" data-sco="{{$sco->SCONo}}" data-area="{{$sco->Area}}" data-feeder="{{$sco->Feeder}}" data-process-date="{{ date('F d, Y', strtotime($sco->ProcessDate)) }}">
                                   Meter Posting
                                 </button>
                             @endif
@@ -63,6 +72,10 @@
                       <div class="row">
                         <div class="col ">Name:</div>
                         <div class="col ">{{$sco->Lastname.', '.$sco->Firstname}}</div>
+                      </div>
+                      <div class="row">
+                        <div class="col ">Account:</div>
+                        <div class="col ">{{ substr($sco->NextAcctNo, 0, 2) }}-{{ substr($sco->NextAcctNo, 2, 4) }}-{{ substr($sco->NextAcctNo, 6, 4) }} </div>
                       </div>
                       <div class="row">
                         <div class="col ">Process Date:</div>
@@ -118,74 +131,78 @@
     var sco = button.getAttribute('data-sco');
     var full_name = button.getAttribute('data-name');
     var process_date = button.getAttribute('data-process-date');
+    var area = button.getAttribute('data-area');
+    var feeder = button.getAttribute('data-feeder');
 
+    // console.log(feeder)
     var modal_sco = myModal.querySelector('#sco');
     var modal_name = myModal.querySelector('#full_name');
     var modal_process_date = myModal.querySelector('#process_date');
+    var modal_area = myModal.querySelector('#area');
+    var modal_feeder = myModal.querySelector('#feeder');
 
     modal_sco.value = sco;
     modal_name.value = full_name;
     modal_process_date.value = process_date;
+    modal_area.value = area;
+    modal_feeder.value = feeder;
   });
 
   const application_status = document.getElementById('status');
-  const meter_no = document.getElementById('meter_no');
-  const date_installed = document.getElementById('date_installed');
-  const seal_no = document.getElementById('seal_no');
-  const serial_no = document.getElementById('serial_no');
-  const erc_seal = document.getElementById('erc_seal');
-  const feeder = document.getElementById('feeder');
-  const last_reading = document.getElementById('last_reading');
-  const reading_initial = document.getElementById('reading_initial');
-  const crew = document.getElementById('crew');
   const time = document.getElementById('time');
+
+  // Get the row element
+  var meter_details_row = document.getElementById('meter_details');
+  var address_details_row = document.getElementById('address_details');
+
+  // Get all input elements inside the row
+  var meter_details = meter_details_row.querySelectorAll('input, select');
+  var address_details = address_details_row.querySelectorAll('input, select');
 
   // Add event listener to dropdown
   application_status.addEventListener('change', function() {
       // Toggle visibility of text field based on selected option
       if (application_status.value == 'INSTALLED') {
-        // console.log(meter_no)
-        meter_no.setAttribute('required', 'required');
-        date_installed.setAttribute('required', 'required');
-        seal_no.setAttribute('required', 'required');
-        serial_no.setAttribute('required', 'required');
-        erc_seal.setAttribute('required', 'required');
-        feeder.setAttribute('required', 'required');
-        last_reading.setAttribute('required', 'required');
-        reading_initial.setAttribute('required', 'required');
         crew.setAttribute('required', 'required');
         time.setAttribute('required', 'required');
+
+        meter_details.forEach(function(input) {
+            input.disabled = false;
+            input.setAttribute('required', 'required');
+        });
+        address_details.forEach(function(input) {
+            input.disabled = false;
+            if(input.id !== 'care_of' && input.id !== 'last_reading' && input.id !== 'reading_initial'){
+              input.setAttribute('required', 'required');
+            }
+        });
+
       } else {
-        meter_no.removeAttribute('required');
-        date_installed.removeAttribute('required');
-        seal_no.removeAttribute('required');
-        serial_no.removeAttribute('required');
-        erc_seal.removeAttribute('required');
-        feeder.removeAttribute('required');
-        last_reading.removeAttribute('required');
-        reading_initial.removeAttribute('required');
+        // Iterate through each input element and disable it
+        meter_details.forEach(function(input) {
+            input.disabled = true;
+            input.value = '';
+        });
+        address_details.forEach(function(input) {
+            input.disabled = true;
+            input.value = '';
+        });
         crew.removeAttribute('required');
         time.removeAttribute('required');
 
-        meter_no.value = '';
-        date_installed.value = '';
-        seal_no.value = '';
-        serial_no.value = '';
-        erc_seal.value = '';
-        feeder.value = '';
-        last_reading.value = '';
-        reading_initial.value = '';
-        crew.value = '';
-        time.value = '';
+        $('#meter_no').removeClass('is-valid');
+        $('#meter_no').removeClass('is-invalid');
+        $('#error_meter').html('');
+        $('#submit_meter_posting').attr('disabled', false);
       }
   });
 
   $('#meter_no').blur(function(){
-    var error_email = '';
+    var error_meter = '';
     var meter_no = $(this).val();
     if (meter_no) {
       $.ajax({
-        url:"{{ route('validateMeterNo') }}",
+        url:"{{ route('validateMeterPosting') }}",
         method:"POST",
         data:{
           meter_no: meter_no, 
@@ -194,13 +211,26 @@
         success:function(result)
         {
           if(result[0] == 'unique') {
-            $('#error_email').html('<label class="text-success">Meter No Available</label>');
+            $('#error_meter').html('<label class="text-success">Meter No. Available</label>');
             $('#meter_no').removeClass('is-invalid');
             $('#meter_no').addClass('is-valid');
-            $('#submit_meter_posting').attr('disabled', false);
+
+            var hasInvalidField = false;
+            meter_details.forEach(function(input) {
+                if (input.classList.contains('is-invalid')) {
+                    hasInvalidField = true;
+                    return; // Exit the loop early if an invalid field is found
+                }
+            });
+
+            if (hasInvalidField) {
+                $('#submit_meter_posting').attr('disabled', 'disabled');
+            } else {
+                $('#submit_meter_posting').attr('disabled', false);
+            }
           }
           else {
-            $('#error_email').html('<label class="text-danger">Meter No not Available! Pls refer to SCO NO '+ result[1] +'</label>');
+            $('#error_meter').html('<label class="text-danger">Meter No. not Available! Pls refer to SCO NO '+ result[1] +'</label>');
             $('#meter_no').removeClass('is-valid');
             $('#meter_no').addClass('is-invalid');
             $('#submit_meter_posting').attr('disabled', 'disabled');
@@ -211,35 +241,125 @@
     else{
       $('#meter_no').removeClass('is-invalid');
       $('#meter_no').removeClass('is-valid');
-      $('#error_email').html('');
+      $('#error_meter').html('');
       $('#submit_meter_posting').attr('disabled', false);
     }
   });
 
-  $(document).ready(function () {
-    var timeout = null;
-    $('#search_sco_no').blur(function() {
-      var getFirstName = $('#search_first_name').val();
-      var getMeterNo = $('#search_meter_no').val();
-      var sco_no = $(this).val();
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-          $.ajax({
-          method: 'GET',
-          url: "{{route('fetchServiceConnectApplications')}}",
-          data: {
-              f_name:getFirstName,
-              meter_no:getMeterNo,
-              sco_no:sco_no
-          },
-          success:function(response){
-            console.log(response)
-              $("#show_data").html(response);
-              $('#pagination').delay(500).fadeOut('fast');
+  $('#seal_no').blur(function(){
+    var error_seal = '';
+    var seal_no = $(this).val();
+    if (seal_no) {
+      $.ajax({
+        url:"{{ route('validateMeterPosting') }}",
+        method:"POST",
+        data:{
+          seal_no: seal_no, 
+          _token: '{{csrf_token()}}'
+        },
+        success:function(result)
+        {
+          if(result[0] == 'unique') {
+            $('#error_seal').html('<label class="text-success">Seal No. Available</label>');
+            $('#seal_no').removeClass('is-invalid');
+            $('#seal_no').addClass('is-valid');
+
+            var hasInvalidField = false;
+            meter_details.forEach(function(input) {
+                if (input.classList.contains('is-invalid')) {
+                    hasInvalidField = true;
+                    return; // Exit the loop early if an invalid field is found
+                }
+            });
+
+            if (hasInvalidField) {
+                $('#submit_meter_posting').attr('disabled', 'disabled');
+            } else {
+                $('#submit_meter_posting').attr('disabled', false);
+            }
           }
-          });
-      }, 200);
-    });
+          else {
+            $('#error_seal').html('<label class="text-danger">Seal No. not Available! Pls refer to SCO NO '+ result[1] +'</label>');
+            $('#seal_no').removeClass('is-valid');
+            $('#seal_no').addClass('is-invalid');
+            $('#submit_meter_posting').attr('disabled', 'disabled');
+          }
+        }
+      })
+    }
+    else{
+      $('#seal_no').removeClass('is-invalid');
+      $('#seal_no').removeClass('is-valid');
+      $('#error_seal').html('');
+      $('#submit_meter_posting').attr('disabled', false);
+    }
+  });
+
+  $('#erc_seal').blur(function(){
+    var error_erc_seal = '';
+    var erc_seal_no = $(this).val();
+    if (erc_seal_no) {
+      $.ajax({
+        url:"{{ route('validateMeterPosting') }}",
+        method:"POST",
+        data:{
+          erc_seal: erc_seal_no, 
+          _token: '{{csrf_token()}}'
+        },
+        success:function(result)
+        {
+          if(result[0] == 'unique') {
+            $('#error_erc_seal').html('<label class="text-success">ERC Seal No. Available</label>');
+            $('#erc_seal').removeClass('is-invalid');
+            $('#erc_seal').addClass('is-valid');
+            // $('#submit_meter_posting').attr('disabled', false);
+            var hasInvalidField = false;
+            meter_details.forEach(function(input) {
+                if (input.classList.contains('is-invalid')) {
+                    hasInvalidField = true;
+                    return; // Exit the loop early if an invalid field is found
+                }
+            });
+
+            if (hasInvalidField) {
+                $('#submit_meter_posting').attr('disabled', 'disabled');
+            } else {
+                $('#submit_meter_posting').attr('disabled', false);
+            }
+          }
+          else {
+            $('#error_erc_seal').html('<label class="text-danger">ERC Seal No. not Available! Pls refer to SCO NO '+ result[1] +'</label>');
+            $('#erc_seal').removeClass('is-valid');
+            $('#erc_seal').addClass('is-invalid');
+            $('#submit_meter_posting').attr('disabled', 'disabled');
+          }
+        }
+      })
+    }
+    else{
+      $('#erc_seal').removeClass('is-invalid');
+      $('#erc_seal').removeClass('is-valid');
+      $('#error_seal').html('');
+      
+      
+    }
+  });
+
+  function clearSearch() {
+    $('#search_sco_no').val('');
+    $('#search_first_name').val('');
+    $('#search_last_name').val('');
+    $('#search_meter_no').val('');
+  }
+
+  document.getElementById('myForm').addEventListener('submit', function(event) {
+      // Check if any form field is invalid
+      if (!this.checkValidity()) {
+          // If any field is invalid, prevent form submission
+          event.preventDefault();
+          // Optionally, you can display an error message or perform other actions
+          alert('Please fill in all required fields correctly.');
+      }
   });
 </script>
 @endsection

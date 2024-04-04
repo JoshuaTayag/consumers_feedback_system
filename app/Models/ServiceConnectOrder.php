@@ -47,7 +47,8 @@ class ServiceConnectOrder extends Model implements Auditable
                         "Location",
                         "Feeder",
                         "Spouse",
-                        "keyoff"
+                        "keyoff",
+                        "application_type"
                     ];
 
 }

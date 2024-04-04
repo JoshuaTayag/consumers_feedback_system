@@ -6,7 +6,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        {!! Form::open(array('route' => 'meterPostingCM','method'=>'POST')) !!}
+        {!! Form::open(array('route' => 'meterPostingCM','method'=>'POST', 'id' => 'myForm')) !!}
           <div class="row">
             <div class="col">
               <label for="sco">SCO No:</label>
@@ -22,11 +22,11 @@
             </div>
           </div>
           <hr>
-          <div class="row">
+          <div class="row" id="meter_details">
             <div class="col-lg-4">
               <label for="meter_no">Meter No:</label>
               <input type="text" value="" id="meter_no" name="meter_no" class="form-control">
-              <span id="error_email"></span>
+              <span id="error_meter"></span>
             </div>
             <div class="col">
               <label for="date_installed">Date Installed:</label>
@@ -35,17 +35,19 @@
             <div class="col">
               <label for="seal_no">L5 Seal No. :</label>
               <input type="text" value="" id="seal_no" name="seal_no" class="form-control">
+              <span id="error_seal"></span>
             </div>
-            <div class="col">
+            <!-- <div class="col">
               <label for="serial_no">Serial No. :</label>
               <input type="text" value="" id="serial_no" name="serial_no" class="form-control">
-            </div>
+            </div> -->
             <div class="col">
               <label for="erc_seal">ERC Seal No. :</label>
               <input type="text" value="" id="erc_seal" name="erc_seal" class="form-control">
+              <span id="error_erc_seal"></span>
             </div>
           </div>
-          <div class="row">
+          <div class="row" id="address_details">
             <div class="col-lg-4">
               <label for="care_of">C/O:</label>
               <input type="text" value="" id="care_of" name="care_of" class="form-control">

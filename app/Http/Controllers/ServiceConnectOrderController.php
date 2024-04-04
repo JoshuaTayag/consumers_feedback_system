@@ -25,13 +25,13 @@ class ServiceConnectOrderController extends Controller
      */
     public function index()
     {
-        $scos = ServiceConnectOrder::orderBy('application_id','asc')->where('SCONo', 'like', 'h%')->orderBy('SCONo', 'asc')->paginate(12);
+        $scos = ServiceConnectOrder::orderBy('application_id','asc')->where('SCONo', 'like', 'h%')->orderBy('SCONo', 'asc')->paginate(9);
         return view('service_connect_order.index',compact('scos'));
     }
 
     public function indexCM()
     {
-        $scos = ServiceConnectOrder::orderBy('SCONo','DESC')->where('SCONo', 'like', 'CM%')->paginate(12);
+        $scos = ServiceConnectOrder::orderBy('SCONo','DESC')->where('application_type', 'CHANGE METER')->paginate(9);
         $ref_employees = DB::table('ref_employees')
         ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
         ->where('department', 'TSD')
@@ -159,6 +159,7 @@ class ServiceConnectOrderController extends Controller
                 "Feeder" => $request->feeder,
                 "Spouse" => $request->care_of,
                 "keyoff" => $request->care_of ? true : false,
+                "application_type" => 'CHANGE METER'
             ]);
 
             // dd($sco->SCONo);
@@ -285,9 +286,9 @@ class ServiceConnectOrderController extends Controller
             if ($sco) {
                 $sco->update([
                     "MeterNo" => $request->meter_no,
-                    "Date Installed" => date('Y-m-d H:i:s', strtotime($request->date_installed)),
+                    "Date Installed" => $request->date_installed ? date('Y-m-d H:i:s', strtotime($request->date_installed)) : null,
                     "SealNo" => $request->seal_no,
-                    "SerialNo" => $request->serial_no,
+                    "SerialNo" => $request->meter_no,
                     "ERC Seal#" => $request->erc_seal,
                     "Spouse" => $request->care_of,
                     "Feeder" => $request->feeder,
@@ -308,19 +309,23 @@ class ServiceConnectOrderController extends Controller
                     "old_meter_no" => $sco->first()->OldMtr,
                     "new_meter_no" => $request->meter_no,
                     "process_date" => $sco->first()->ProcessDate,
-                    "date_installed" => date('Y-m-d H:i:s', strtotime($request->date_installed)),
+                    "date_installed" => $request->date_installed ? date('Y-m-d H:i:s', strtotime($request->date_installed)) : null,
                     "action_status" => $request->status,
                     "area" => $request->area,
+                    "feeder" => $request->feeder,
+                    "leyeco_seal_no" => $request->seal_no,
+                    "serial_no" => $request->meter_no,
+                    "erc_seal_no" => $request->erc_seal,
                     "posted_by" => Auth::id(),
                     "created_at" => Carbon::now(),
                 ]);
 
-                // $billing = DB::connection('sqlSrvBilling')
-                //     ->table('Consumers Table')
-                //     ->where('Accnt No', $sco->first()->NextAcctNo)
-                //     ->update([
-                //         'Serial No' => $request->meter_no,
-                //     ]);
+                $billing = DB::connection('sqlSrvBilling')
+                    ->table('Consumers Table')
+                    ->where('Accnt No', $sco->first()->NextAcctNo)
+                    ->update([
+                        'Serial No' => $request->meter_no,
+                    ]);
             } else {
                 return redirect(route('indexCM'))->withError('No Record Found!');
             }
@@ -455,7 +460,7 @@ class ServiceConnectOrderController extends Controller
 
     public function fetchServiceConnectApplications(Request $request)
     {
-        $scos = ServiceConnectOrder::orderBy('SCONo','DESC')->where('SCONo', 'like', 'CM%')->paginate(12);
+        $scos = ServiceConnectOrder::orderBy('SCONo','DESC')->where('SCONo', 'like', 'CM%')->paginate(9);
 
         $ref_employees = DB::table('ref_employees')
         ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
@@ -471,7 +476,7 @@ class ServiceConnectOrderController extends Controller
             ->where('Firstname', 'LIKE', '%'.$request->f_name.'%')
             ->where('MeterNo', 'LIKE', '%'.$request->meter_no.'%')
             ->orderBy('SCONo','DESC')
-            ->paginate(12);
+            ->paginate(9);
             // dd('sample');
             return view('service_connect_order.change_meter.search')->with(compact('scos','ref_employees'))->render();
         }
@@ -481,10 +486,9 @@ class ServiceConnectOrderController extends Controller
         // return view('service_connect_order.change_meter.search',compact('scos','ref_employees'));
     }
 
-    function validateMeterNo(Request $request)
+    function validateMeterPosting(Request $request)
     {
-        if($request->get('meter_no'))
-        {
+        if($request->get('meter_no')) {
             $meter_no = $request->get('meter_no');
             $data = DB::connection('sqlSrvHousewiring')->table('Service Connect Table')
                     ->where('MeterNo', $meter_no);
@@ -498,5 +502,73 @@ class ServiceConnectOrderController extends Controller
             return ['unique', null];
             }
         }
+
+        if($request->get('seal_no')) {
+            $seal_no = $request->get('seal_no');
+            $data = DB::connection('sqlSrvHousewiring')->table('Service Connect Table')
+                    ->where('SealNo', $seal_no);
+            if($data->count() > 0)
+            {
+            $sco_no = $data->first()->SCONo;
+            return ['not_unique', $sco_no];
+            }
+            else
+            {
+            return ['unique', null];
+            }
+        }
+
+        if($request->get('erc_seal'))
+        {
+            $erc_seal = $request->get('erc_seal');
+            $data = DB::connection('sqlSrvHousewiring')->table('Service Connect Table')
+                    ->where('ERC Seal#', $erc_seal);
+            if($data->count() > 0)
+            {
+            $sco_no = $data->first()->SCONo;
+            return ['not_unique', $sco_no];
+            }
+            else
+            {
+            return ['unique', null];
+            }
+        }
+    }
+
+    public function searchCM(Request $request)
+    {
+        $sco_no = $request->input('sco_no');
+        $f_name = $request->input('first_name');
+        $l_name = $request->input('last_name');
+        $meter_no = $request->input('meter_no');
+        // $products = Product::where('name', 'like', "%$query%")->get();
+        $scos = ServiceConnectOrder::query()
+        ->where('application_type', 'CHANGE METER');
+
+        if ($sco_no !== null && $sco_no !== '') {
+            $scos->where('SCONo', 'like', "%$sco_no%");
+        }
+
+        if ($f_name !== null && $f_name !== '') {
+            $scos->where('Firstname', 'like', "%$f_name%");
+        }
+
+        if ($l_name !== null && $l_name !== '') {
+            $scos->where('Lastname', 'like', "%$l_name%");
+        }
+
+        if ($meter_no !== null && $meter_no !== '') {
+            $scos->where('MeterNo', 'like', "%$meter_no%");
+        }
+        $scos = $scos->orderBy('SCONo','DESC')->paginate(9);
+
+        // dd($scos);
+        $ref_employees = DB::table('ref_employees')
+        ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
+        ->where('department', 'TSD')
+        ->orderBy('last_name', 'ASC')
+        ->get();
+        // return view('products.index', compact('products'));
+        return view('service_connect_order.change_meter.index',compact('scos','ref_employees'));
     }
 }
