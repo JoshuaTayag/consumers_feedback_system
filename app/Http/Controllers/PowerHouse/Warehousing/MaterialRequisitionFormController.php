@@ -221,6 +221,14 @@ class MaterialRequisitionFormController extends Controller
 
     public function mrfLiquidationCreate(Request $request, string $id)
     {
+        $images_path = $request->file('image_path');
+        if($images_path){
+
+            // validate requests
+            $this->validate($request, [
+                'image_path' => 'array|max:3'
+            ]);
+        }
         if($request->has('assigning')){
             // dd($request);
             if($request->mrvs){
@@ -305,23 +313,30 @@ class MaterialRequisitionFormController extends Controller
             
             
             $input = $request->all();
-            $image_path = $request->file('image_path');
-            if($image_path){
-                // dd('test');
-                $resize = Image::make($image_path)
-                ->resize(600, null, function ($constraint) { $constraint->aspectRatio(); } )
-                ->encode('jpg',80);
+            if($images_path){
+                // Handle each uploaded file
+                foreach ($images_path as $image_path) {
+                    $resize = Image::make($image_path)
+                    ->resize(600, null, function ($constraint) { $constraint->aspectRatio(); } )
+                    ->encode('jpg',80);
 
-                // calculate md5 hash of encoded image
-                $hash = md5($resize->__toString());
+                    // calculate md5 hash of encoded image
+                    $hash = md5($resize->__toString());
 
-                // use hash as a name
-                $path = "images/mrf_images/{$hash}.jpg";
+                    // use hash as a name
+                    $path = "images/mrf_images/{$hash}.jpg";
 
-                // save it locally to ~/public/images/{$hash}.jpg
-                $resize->save(public_path($path));
+                    // save it locally to ~/public/images/{$hash}.jpg
+                    $resize->save(public_path($path));
 
-                $input['image_path'] = $path;
+                    DB::table('material_requisition_form_liquidation_images')->insert(
+                        array("user_id" => Auth::id(),
+                                "material_requisition_form_id" => $id,
+                                "image_path" => $path,
+                                )
+                    );
+
+                }
             }
             
 
@@ -381,9 +396,9 @@ class MaterialRequisitionFormController extends Controller
                             "type_number" => $request->mcrt_no,
                             "date_acted" => $request->date_acted,
                             "date_finished" => $request->date_finished,
-                            "image_path" => $image_path ? $input['image_path'] : null,
-                            "remarks" => $request->remarks,
-                            "lineman" => $request->lineman,
+                            "image_path" => null,
+                            "remarks" => null,
+                            "lineman" => null,
                             "created_at" => Carbon::now(),
                             )
                 );
@@ -397,9 +412,9 @@ class MaterialRequisitionFormController extends Controller
                             "type_number" => $request->mst_no,
                             "date_acted" => $request->date_acted,
                             "date_finished" => $request->date_finished,
-                            "image_path" => $image_path ? $input['image_path'] : null,
-                            "remarks" => $request->remarks,
-                            "lineman" => $request->lineman,
+                            "image_path" => null,
+                            "remarks" => null,
+                            "lineman" => null,
                             "created_at" => Carbon::now(),
                             )
                 );
@@ -418,6 +433,10 @@ class MaterialRequisitionFormController extends Controller
             $material_requisition_form->status = 3;
             $material_requisition_form->liquidated_id = Auth::id();
             $material_requisition_form->liquidated_by = Carbon::now();
+            $material_requisition_form->date_acted = $request->date_acted;
+            $material_requisition_form->date_finished = $request->date_finished;
+            $material_requisition_form->linemans = $request->lineman;
+            $material_requisition_form->liquidation_remarks = $request->remarks;
             // $material_requisition_form->with_wo = $request->filled('wo_no');
             $material_requisition_form->save();
             

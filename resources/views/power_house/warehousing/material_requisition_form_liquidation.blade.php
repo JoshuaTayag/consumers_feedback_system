@@ -149,8 +149,8 @@
                       </div>
                       <div class="col-lg-3">
                         <div class="mb-2">
-                          <label for="image_path" class="form-label mb-1">Upload Image</label>
-                          <input type="file" class="form-control" id="image_path" name="image_path">
+                          <label for="image_path" class="form-label mb-1">Upload Image (Maximum of 3 images only)</label>
+                          <input type="file" class="form-control" id="image_path" name="image_path[]" multiple>
                         </div>
                       </div>
                     </div>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class MaterialRequisitionForm extends Model
 {
@@ -46,6 +47,20 @@ class MaterialRequisitionForm extends Model
     {
         $user = User::where('id', $this->req_type_assignee)
             ->get();
+        $employee = $user[0]->employee;
+        if($employee){
+            return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
+        }
+        return $user[0]->name;
+    }
+
+    public function getImageNameAttribute()
+    {
+        $images = DB::table('material_requisition_form_liquidation_images')->where(
+                'material_requisition_form_id',  $this->id
+            )->get();
+        return $images;
+
         $employee = $user[0]->employee;
         if($employee){
             return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
@@ -116,5 +131,9 @@ class MaterialRequisitionForm extends Model
                             'substation_id',
                             'feeder_id',
                             'cetd_remarks',
+                            'date_acted',
+                            'date_finished',
+                            'linemans',
+                            'liquidation_remarks',
                           ];
 }

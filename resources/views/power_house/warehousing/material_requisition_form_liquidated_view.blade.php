@@ -135,7 +135,7 @@
                           Date Acted :
                         </div>
                         <div class="col-lg-8">
-                          <input type="text" class="form-control" value="{{ date('F d, Y', strtotime($mrf_liquidation[0]->date_acted)) }}" readonly>
+                          <input type="text" class="form-control" value="{{ date('F d, Y', strtotime($mrf->date_acted)) }}" readonly>
                         </div>
                       </div>
                       <div class="row mb-2">
@@ -143,7 +143,7 @@
                           Date Finished :
                         </div>
                         <div class="col-lg-8">
-                          <input type="text" class="form-control" value="{{ date('F d, Y', strtotime($mrf_liquidation[0]->date_finished)) }}" readonly>
+                          <input type="text" class="form-control" value="{{ date('F d, Y', strtotime($mrf->date_finished)) }}" readonly>
                         </div>
                       </div>
 
@@ -152,7 +152,7 @@
                           Linemans :
                         </div>
                         <div class="col-lg-8">
-                          <input type="text" class="form-control" value="{{$mrf_liquidation->last()->lineman}}" readonly>
+                          <input type="text" class="form-control" value="{{$mrf->linemans}}" readonly>
                         </div>
                       </div>
                       <div class="row mb-2">
@@ -160,19 +160,40 @@
                           Remarks :
                         </div>
                         <div class="col-lg-8">
-                          <textarea class="form-control" readonly >{{ $mrf_liquidation->last()->remarks}} </textarea>
+                          <textarea class="form-control" readonly >{{ $mrf->liquidation_remarks }} </textarea>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="col-lg-5">
+
                   <div class="card w-100">
                     <div class="card-header bg-info">
                       Image
                     </div>
                     <div class="card-body fs-5">
-                      <img src="{{ asset($mrf_liquidation->last()->image_path)}}" class="img-fluid pt-2" style="max-height: 40vh;" alt="...">
+
+                      <div id="carouselExampleFade" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                          @foreach($mrf->image_name as $key => $image)
+                            <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
+                              <img src="{{ asset($image->image_path)}}" class="d-block w-100" alt="...">
+                            </div>
+                          @endforeach
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Next</span>
+                        </button>
+                      </div>
+                      
+                    <!-- {{$mrf->image_name}} -->
+                      <!-- <img src="{{ asset($mrf_liquidation->last()->image_path)}}" class="img-fluid pt-2" style="max-height: 40vh;" alt="..."> -->
                     </div>
                   </div>
                 </div>
