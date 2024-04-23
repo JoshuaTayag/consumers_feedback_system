@@ -151,6 +151,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('fetch-electrician', [App\Http\Controllers\ElectricianController::class, 'fetchElectricianApplication'])->name('fetchElectricianApplication');
     // Strucutures
     // Route::resource('signatory', App\Http\Controllers\SignatoryController::class);
+
+    // LEDGER
+    Route::get('ledger', [App\Http\Controllers\AccountLedgerController::class, 'indexLedger'])->name('ledger.index');
+    Route::get('ledger/search', [App\Http\Controllers\AccountLedgerController::class, 'searchLedger'])->name('ledger.search');
 });
 
 Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])->name('online.pms')->middleware(['auth', 'verified']);

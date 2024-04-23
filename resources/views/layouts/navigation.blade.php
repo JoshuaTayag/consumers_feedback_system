@@ -74,7 +74,7 @@
         </a>
         <ul class="dropdown-menu dropdown-submenu">
           <li>
-            <a class="dropdown-item" href="{{ route('pre_membership_index') }}">LEDGER</a>
+            <a class="dropdown-item" href="{{ route('ledger.index') }}">LEDGER</a>
           </li>
         </ul>
       </li>
