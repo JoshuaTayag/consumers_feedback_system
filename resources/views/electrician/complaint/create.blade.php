@@ -10,7 +10,7 @@
         <div class="card-header">
           <div class="row align-items-center">
               <div class="col-lg-6">
-                  <span class="mb-0 align-middle fs-3">Electrician Complaint</span>
+                  <span class="mb-0 align-middle fs-3">Create Complaint</span>
               </div>
               <div class="col-lg-6 text-end">
                 <a class="btn btn-primary" href="{{ route('electricianComplaintIndex') }}"> Back </a>
@@ -20,19 +20,55 @@
         <div class="card-body">
           {!! Form::open(array('route' => 'electricianComplaintStore','method'=>'POST', 'enctype' => 'multipart/form-data')) !!}
             <div class="row">
-              <h5 class="styled-heading">Basic Information</h5>
+              <h5 class="styled-heading">Complainant Basic Information</h5>
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="control_number" class="form-label mb-1">Complaint No. *</label>
                     <input type="text" class="form-control" id="control_number" name="control_number" value="{{$control_id}}" disabled>
                 </div>
               </div>
-              <div class="col-lg-3">
+              <div class="col-lg-4">
                 <div class="mb-2">
                   <label for="complainant" class="form-label mb-1">Name of Complainant *</label>
                   <input type="text" class="form-control" id="complainant" name="complainant" value="{{old('complainant')}}" required>
                 </div>
               </div>
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <label for="contact_no" class="form-label">Contact No (Ex: 09*********)</label>
+                  <input type="text" class="form-control" value="{{ old('contact_no') }}" id="contact_no" pattern="^((09))[0-9]{9}" name="contact_no" maxlength="11">
+                </div>
+              </div>
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <label for="district" class="form-label mb-1">District *</label>
+                  <select id="district" class="form-control" name="district" required>
+                      <option value="">Choose...</option>
+                      @foreach ($districts as $district)                        
+                          <option value="{{ $district->id }}" id="{{ $district->id }}">{{$district->district_name}}</option>
+                      @endforeach 
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <label for="municipality" class="form-label mb-1">Municipality *</label>
+                  <select id="municipality" class="form-control" name="municipality" required></select>
+                </div>
+              </div>
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <label for="barangay" class="form-label mb-1">Barangay *</label>
+                  <select id="barangay" class="form-control" name="barangay" required></select>
+                </div>
+              </div>
+            </div>
+            
+            <hr>
+
+            <div class="row">
               <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="electrician" class="form-label mb-1">Electrician *</label>
@@ -45,11 +81,6 @@
                   <!-- <input type="text" class="form-control" id="electrician" name="electrician" value="{{old('electrician')}}" required> -->
                 </div>
               </div>
-            </div>
-            
-            <hr>
-
-            <div class="row">
               <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="nature_of_complaint" class="form-label mb-1">Nature of Complaint *</label>
@@ -254,6 +285,51 @@
         status_explanation.value = '';
       }
   });
+
+  $('#district').on('change', function () {
+      var id = $(this).children(":selected").attr("id");
+      $("#municipality").html('');
+      $.ajax({
+          url: "{{url('api/fetch-municipalities')}}",
+          type: "POST",
+          data: {
+              district_id: id,
+              _token: '{{csrf_token()}}'
+          },
+          dataType: 'json',
+          success: function (result) {
+              $('#municipality').html('<option value="">-- Select Municipality --</option>');
+              
+              $.each(result.municipalities, function (key, value) {
+                    $("#municipality").append('<option value="' + value
+                        .id + '" id="'+ value.id +'">' + value.municipality_name + '</option>');
+                });
+              $('#barangay').html('<option value="">-- Select Barangay --</option>');
+          }
+      });
+  });
+
+  $('#municipality').on('change', function () {
+      var id = $(this).children(":selected").attr("id");
+      $("#barangay").html('');
+      $.ajax({
+          url: "{{url('api/fetch-barangays')}}",
+          type: "POST",
+          data: {
+              municipality_id: id,
+              _token: '{{csrf_token()}}'
+          },
+          dataType: 'json',
+          success: function (res) {
+              $('#barangay').html('<option value="">-- Select Barangay --</option>');
+              $.each(res.barangays, function (key, value) {
+                    $("#barangay").append('<option value="' + value
+                        .id + '" id="'+ value.id +'">' + value.barangay_name + '</option>');
+              });
+          }
+      });
+  });
+
 </script>
 @endsection
 @section('style')

@@ -491,11 +491,27 @@
             ],
             [
                 "id" => 4,
-                "name" => "(Major Offense) Willful deceit of applicant"
+                "name" => "(Minor Offense) Unauthorized reconnection"
             ],
             [
                 "id" => 5,
+                "name" => "(Minor Offense) Unauthorized transfer of kWh meter"
+            ],
+            [
+                "id" => 6,
+                "name" => "(Minor Offense) Unauthorized installation of kWh meter"
+            ],
+            [
+                "id" => 7,
+                "name" => "(Major Offense) Willful deceit of applicant"
+            ],
+            [
+                "id" => 8,
                 "name" => "(Major Offense) Acts in relation to RA 9136, 7832, and/or 11361"
+            ],
+            [
+                "id" => 9,
+                "name" => "(Major Offense) Unauthorized & sign from the banned Electrician"
             ]
         ],
 

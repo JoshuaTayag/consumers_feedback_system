@@ -23,16 +23,16 @@
                     <div class="card-header p-1 bg-info"></div>
                     <div class="card-body">
                       <div class="row">
-                        <div class="col fs-4">Application No. :</div>
-                        <div class="col fs-4">{{$electrician->control_number}}</div>
+                        <div class="col fs-4 border ms-2 rounded">Application No. :</div>
+                        <div class="col fs-4 border me-2">{{$electrician->control_number}}</div>
                       </div>
                       <div class="row">
-                        <div class="col fs-4">Full Name:</div>
-                        <div class="col fs-4">{{$electrician->last_name.', '.$electrician->first_name.', '. $electrician->middle_name}}</div>
+                        <div class="col fs-4 border ms-2">Full Name:</div>
+                        <div class="col fs-4 border me-2">{{$electrician->last_name.', '.$electrician->first_name.', '. $electrician->middle_name}}</div>
                       </div>
                       <div class="row">
-                        <div class="col fs-4">Address:</div>
-                        <div class="col fs-4">
+                        <div class="col fs-4 border ms-2">Address:</div>
+                        <div class="col fs-4 border me-2">
                           @php
                             if(count($electrician->electrician_addresses) != 0 ){
                               echo($electrician->electrician_addresses[0]->district->district_name.', ');
@@ -43,12 +43,12 @@
                         </div>
                       </div>
                       <div class="row">
-                        <div class="col fs-4">Date of Birth:</div>
-                        <div class="col fs-4">{{ date('M d, Y', strtotime($electrician->date_of_birth)) }}</div>
+                        <div class="col fs-4 border ms-2">Date of Birth:</div>
+                        <div class="col fs-4 border me-2">{{ date('M d, Y', strtotime($electrician->date_of_birth)) }}</div>
                       </div>
                       <div class="row">
-                        <div class="col fs-4">Contact Number's:</div>
-                        <div class="col fs-4">
+                        <div class="col fs-4 border ms-2">Contact Number's:</div>
+                        <div class="col fs-4 border me-2">
                           @foreach ($electrician->electrician_contact_numbers as $index => $contact) 
                             {{$contact->contact_no}} <br>
                           @endforeach
@@ -65,30 +65,30 @@
                           <div class="card-header p-1 bg-{{ $electrician_complaint->act_of_misconduct == 1 ? 'primary' : ($electrician_complaint->act_of_misconduct == 2 ? 'warning' : 'danger')  }}"></div>
                           <div class="card-body">
                             <div class="row">
-                              <div class="col fs-5">Complaint No. :</div>
-                              <div class="col fs-5">{{$electrician_complaint->id}}</div>
+                              <div class="col fs-5 border ms-2">Complaint No. :</div>
+                              <div class="col fs-5 border me-2">{{$electrician_complaint->id}}</div>
                             </div>
                             <div class="row">
-                              <div class="col fs-5">Complainant Name:</div>
-                              <div class="col fs-5">{{$electrician_complaint->complainant_name}}</div>
+                              <div class="col fs-5 border ms-2">Complainant Name:</div>
+                              <div class="col fs-5 border me-2">{{$electrician_complaint->complainant_name}}</div>
                             </div>
                             <div class="row">
-                              <div class="col fs-5">Date of Complaint:</div>
-                              <div class="col fs-5">{{ date('M d, Y', strtotime($electrician_complaint->date)) }}</div>
+                              <div class="col fs-5 border ms-2">Date of Complaint:</div>
+                              <div class="col fs-5 border me-2">{{ date('M d, Y', strtotime($electrician_complaint->date)) }}</div>
                             </div>
                             <div class="row">
-                              <div class="col fs-5">Nature Of Complaint:</div>
-                              <div class="col fs-5">{{Config::get('constants.nature_of_complaint_barangay_electrician.'.($electrician_complaint->nature_of_complaint-1).'.name')}}</div>
+                              <div class="col fs-5 border ms-2">Nature Of Complaint:</div>
+                              <div class="col fs-5 border me-2">{{Config::get('constants.nature_of_complaint_barangay_electrician.'.($electrician_complaint->nature_of_complaint-1).'.name')}}</div>
                             </div>
                             <div class="row">
-                              <div class="col fs-5">Act of misconduct:</div>
-                              <div class="col fs-5">
+                              <div class="col fs-5 border ms-2">Act of misconduct:</div>
+                              <div class="col fs-5 border me-2">
                               <p class="badge rounded-pill bg-{{ $electrician_complaint->act_of_misconduct == 1 ? 'primary' : ($electrician_complaint->act_of_misconduct == 2 ? 'warning' : 'danger')  }} p-2"  >{{ Config::get('constants.act_of_misconduct.'.($electrician_complaint->act_of_misconduct - 1).'.name') }}</p>
                                 </div>
                             </div>
                             <div class="row">
-                              <div class="col fs-5">Attached File:</div>
-                              <div class="col fs-5">
+                              <div class="col fs-5 border ms-2">Attached File:</div>
+                              <div class="col fs-5 border me-2">
                                 @if($electrician_complaint->file_path)
                                   <a href="{{ asset($electrician_complaint->file_path) }}" target="_blank" style="text-decoration: none"><i class="fa fa-search"></i> View PDF File</a>
                                 @else
@@ -98,8 +98,8 @@
                               </div>
                             </div>
                             <div class="row">
-                              <div class="col fs-5">Remarks:</div>
-                              <div class="col fs-5">{{$electrician_complaint->remarks}}</div>
+                              <div class="col fs-5 border ms-2">Remarks:</div>
+                              <div class="col fs-5 border me-2">{{$electrician_complaint->remarks}}</div>
                             </div>
                           </div>
                         </div>

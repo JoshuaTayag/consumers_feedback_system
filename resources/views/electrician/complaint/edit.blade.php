@@ -10,7 +10,7 @@
         <div class="card-header">
           <div class="row align-items-center">
               <div class="col-lg-6">
-                  <span class="mb-0 align-middle fs-3">Electrician Complaint</span>
+                  <span class="mb-0 align-middle fs-3">Edit Complaint</span>
               </div>
               <div class="col-lg-6 text-end">
                 <a class="btn btn-primary" href="{{ route('electricianComplaintIndex') }}"> Back </a>
@@ -33,6 +33,45 @@
                   <input type="text" class="form-control" id="complainant" name="complainant" value="{{$complaint->complainant_name}}" required>
                 </div>
               </div>
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <label for="contact_no" class="form-label">Contact No (Ex: 09*********)</label>
+                  <input type="text" class="form-control" value="{{$complaint->complainant_contact_no}}" id="contact_no" pattern="^((09))[0-9]{9}" name="contact_no" maxlength="11">
+                </div>
+              </div>
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <label for="district" class="form-label mb-1">District *</label>
+                  <select id="district" class="form-control" name="district" required>
+                      <option value="">Choose...</option>
+                      @foreach ($districts as $district)                        
+                          <option value="{{ $district->id }}" id="{{ $district->id }}" @selected( $complaint->complainant_district_id == $district->id) >{{$district->district_name}}</option>
+                      @endforeach 
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <input type="hidden" id="hidden_municipality" value="{{ $complaint->complainant_municipality_id }}">
+                  <label for="municipality" class="form-label mb-1">Municipality *</label>
+                  <select id="municipality" class="form-control" name="municipality">
+                  </select>
+                </div>
+              </div>
+              <div class="col-lg-2">
+                <div class="mb-2">
+                  <input type="hidden" id="hidden_barangay" value="{{ $complaint->complainant_barangay_id }}">
+                  <label for="barangay" class="form-label mb-1">Barangay</label>
+                  <select id="barangay" class="form-control" name="barangay"></select>
+                </div>
+              </div>
+            </div>
+            
+            <hr>
+
+            <div class="row">
               <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="electrician" class="form-label mb-1">Electrician *</label>
@@ -45,11 +84,6 @@
                   <!-- <input type="text" class="form-control" id="electrician" name="electrician" value="{{old('electrician')}}" required> -->
                 </div>
               </div>
-            </div>
-            
-            <hr>
-
-            <div class="row">
               <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="nature_of_complaint" class="form-label mb-1">Nature of Complaint *</label>
@@ -143,7 +177,7 @@
               <div class="col-lg-4">
                 <div class="mb-2">
                   <label for="attached_file" class="form-label mb-1">Attach File</label>
-                    <input type="text" value="{{$complaint->file_path}}" name="old_file">
+                    <input type="hidden" value="{{$complaint->file_path}}" name="old_file_path">
                     <input type="file" class="form-control border border-default" id="attached_file" name="attached_file">
                 </div>
               </div>
@@ -167,28 +201,6 @@
 @endsection
 @section('script')
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-      // Get references to the textboxes
-      const textbox1 = document.getElementById('nature_of_complaint');
-      const textbox2 = document.getElementById('other_complaint');
-      
-      // Add event listener to textbox1
-      textbox1.addEventListener('input', function () {
-          // Check if textbox1 has a value
-          // console.log(textbox1.value.trim());
-          if (textbox1.value.trim() == 'others') {
-              // Enable textbox2 if textbox1 has a value
-              textbox2.disabled = false;
-              textbox2.required = true;
-          } else {
-              // Otherwise, disable textbox2
-              textbox2.disabled = true;
-              textbox2.value = "";
-              textbox2.required = false;
-          }
-      });
-  });
-
   // Get dropdown and text field elements
   const sanction = document.getElementById('sanction_type');
   const revocation_date_col = document.getElementById('revocation_date_col');
@@ -203,6 +215,8 @@
   const explanation_col = document.getElementById('explanation_col');
   const status_explanation = document.getElementById('status_explanation');
   
+  const selected_municipality = document.getElementById('hidden_municipality').value;
+  const selected_barangay = document.getElementById('hidden_barangay').value;
 
   // Add event listener to dropdown
   sanction.addEventListener('change', function() {
@@ -257,6 +271,26 @@
   });
 
   $(document).ready(function () {
+    // Get references to the textboxes
+    const textbox1 = document.getElementById('nature_of_complaint');
+    const textbox2 = document.getElementById('other_complaint');
+    
+    // Add event listener to textbox1
+    textbox1.addEventListener('input', function () {
+        // Check if textbox1 has a value
+        // console.log(textbox1.value.trim());
+        if (textbox1.value.trim() == 'others') {
+            // Enable textbox2 if textbox1 has a value
+            textbox2.disabled = false;
+            textbox2.required = true;
+        } else {
+            // Otherwise, disable textbox2
+            textbox2.disabled = true;
+            textbox2.value = "";
+            textbox2.required = false;
+        }
+    });
+
     if (sanction.value == 2) {
       suspension_from_col.classList.remove('d-none');
       suspension_to_col.classList.remove('d-none');
@@ -300,7 +334,85 @@
       status_explanation.removeAttribute('required');
       status_explanation.value = '';
     }
+
+    $('#district').change(function() {
+      fetchMunicipalities();
+    });
+    $('#municipality').change(function() {
+      var municipality_id = $('#municipality').children(":selected").attr("id");
+      fetchBarangay(municipality_id);
+    });
+
+    fetchMunicipalities();
   });
+
+  function fetchMunicipalities() {
+      var id = $('#district').children(":selected").attr("id");
+      $("#municipality").html('');
+      const selected_municipality = document.getElementById('hidden_municipality').value;
+      $.ajax({
+          url: "{{ url('api/fetch-municipalities') }}",
+          type: "POST",
+          data: {
+              district_id: id,
+              _token: '{{ csrf_token() }}'
+          },
+          dataType: 'json',
+          success: function(result) {
+              $('#municipality').html('<option value="">-- Select Municipality --</option>');
+              // console.log(selected_municipality);
+              $.each(result.municipalities, function(key, value) {
+                var isSelected = (value.id == selected_municipality) ? 'selected="selected"' : '';
+                $("#municipality").append('<option value="' + value.id + '" id="' + value.id + '" '+ isSelected +'>' + value.municipality_name + '</option>');
+              });
+              fetchBarangay(selected_municipality);
+          }
+      });
+  }
+
+  function fetchBarangay(id) {
+      $("#barangay").html('');
+      console.log(id);
+      $.ajax({
+          url: "{{url('api/fetch-barangays')}}",
+          type: "POST",
+          data: {
+              municipality_id: id,
+              _token: '{{csrf_token()}}'
+          },
+          dataType: 'json',
+          success: function (res) {
+            
+              $('#barangay').html('<option value="">-- Select Barangay --</option>');
+              $.each(res.barangays, function (key, value) {
+                var isSelected = (value.id == selected_barangay) ? 'selected="selected"' : '';
+                $("#barangay").append('<option value="' + value
+                        .id + '" id="'+ value.id +'" '+ isSelected +'>' + value.barangay_name + '</option>');
+              });
+          }
+      });
+  }
+
+  // $('#municipality').on('change', function () {
+  //     var id = $(this).children(":selected").attr("id");
+  //     $("#barangay").html('');
+  //     $.ajax({
+  //         url: "{{url('api/fetch-barangays')}}",
+  //         type: "POST",
+  //         data: {
+  //             municipality_id: id,
+  //             _token: '{{csrf_token()}}'
+  //         },
+  //         dataType: 'json',
+  //         success: function (res) {
+  //             $('#barangay').html('<option value="">-- Select Barangay --</option>');
+  //             $.each(res.barangays, function (key, value) {
+  //                   $("#barangay").append('<option value="' + value
+  //                       .id + '" id="'+ value.id +'">' + value.barangay_name + '</option>');
+  //             });
+  //         }
+  //     });
+  // });
 </script>
 @endsection
 @section('style')

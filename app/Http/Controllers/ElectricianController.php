@@ -394,15 +394,18 @@ class ElectricianController extends Controller
     public function electricianComplaintIndex()
     {
         $data = ElectricianComplaint::with('electrician')->orderBy('id', 'asc')->paginate(10);
-        // dd($data[0]->electrician);
         return view('electrician.complaint.index')->with(compact('data'));
     }
 
     public function electricianComplaintCreate()
     {
-        $electricians = Electrician::orderBy('id', 'desc')->get();
+        $electricians = Electrician::orderBy('last_name', 'asc')->get();
         $control_id = Helper::IDGeneratorQueryBuilder(DB::table('barangay_electrician_complaints'), 'control_number', 4, date('Y'));
-        return view('electrician.complaint.create')->with(compact('electricians','control_id'));
+        $districts = DB::connection('sqlSrvMembership')
+        ->table('districts')
+        ->select('*')
+        ->get();
+        return view('electrician.complaint.create')->with(compact('electricians','control_id', 'districts'));
     }
 
     public function electricianComplaintStore(Request $request)
@@ -417,6 +420,9 @@ class ElectricianController extends Controller
             'sanction_type' => ['required'],
             'status_of_complaint' => ['required'],
             'attached_file' => 'mimes:pdf|max:10000',
+            'district' => ['required'],
+            'municipality' => ['required'],
+            'barangay' => ['required'],
         ]);
 
         $attached_file = $request->file('attached_file');
@@ -469,6 +475,10 @@ class ElectricianController extends Controller
 
                     'sanction_remarks' => $request->sanction_remarks,
                     'file_path' => $path,
+                    'complainant_contact_no' => $request->contact_no,
+                    'complainant_district_id' => $request->district,
+                    'complainant_municipality_id' => $request->municipality,
+                    'complainant_barangay_id' => $request->barangay,
                     'created_at' => $now
                 )
             );
@@ -482,8 +492,12 @@ class ElectricianController extends Controller
     {
         $complaint = ElectricianComplaint::find($id);
         $electricians = Electrician::orderBy('id', 'desc')->get();
+        $districts = DB::connection('sqlSrvMembership')
+        ->table('districts')
+        ->select('*')
+        ->get();
         // dd($complaint->other_nature_of_complaint);
-        return view('electrician.complaint.edit')->with(compact('complaint','electricians'));
+        return view('electrician.complaint.edit')->with(compact('complaint','electricians', 'districts'));
         // return redirect(route('electricianComplaintIndex'))->withSuccess('Record Successfully updated!');
     }
 
@@ -498,15 +512,16 @@ class ElectricianController extends Controller
             'sanction_type' => ['required'],
             'status_of_complaint' => ['required'],
             'attached_file' => 'mimes:pdf|max:10000',
+            'district' => ['required'],
+            'municipality' => ['required'],
+            'barangay' => ['required'],
         ]);
-
-        $attached_file = $request->file('attached_file');
         
-        if($attached_file){
+        if($request->hasFile('attached_file')){
 
-            $fileToDelete = $request->old_file;
+            $fileToDelete = $request->old_file_path;
 
-            if (File::exists(public_path($fileToDelete)) || $fileToDelete) {
+            if ($fileToDelete && File::exists(public_path($fileToDelete))) {
                 // Delete the file
                 File::delete(public_path($fileToDelete));
             }
@@ -519,7 +534,7 @@ class ElectricianController extends Controller
             $path = 'pdf/complaints/'.$filename;
         }
         else{
-            $path = null;
+            $path = $request->old_file_path;
         }
 
         DB::transaction(function () use ($request, $id, $path) {
@@ -545,6 +560,10 @@ class ElectricianController extends Controller
 
                     'sanction_remarks' => $request->sanction_remarks,
                     'file_path' => $path,
+                    'complainant_contact_no' => $request->contact_no,
+                    'complainant_district_id' => $request->district,
+                    'complainant_municipality_id' => $request->municipality,
+                    'complainant_barangay_id' => $request->barangay,
 
                     'created_at' => DB::raw('CURRENT_TIMESTAMP')
                 )
