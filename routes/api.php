@@ -20,5 +20,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->post('register', [App\Http\Controllers\AgmmController::class, 'agmmRegister']);
 Route::get('account/{id}', [App\Http\Controllers\AgmmController::class, 'validateAccount'])->middleware('auth:sanctum');
+Route::get('agmm-registration/{id}', [App\Http\Controllers\AgmmController::class, 'getRegistration'])->middleware('auth:sanctum');
+Route::get('agmm-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'getAllowance'])->middleware('auth:sanctum');
+Route::get('agmm-issue-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'issueAllowance'])->middleware('auth:sanctum');
 
 Route::get('fetch-members/', [App\Http\Controllers\MembershipController::class, 'getMembers']);

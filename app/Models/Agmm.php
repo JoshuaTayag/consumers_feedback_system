@@ -16,5 +16,8 @@ class Agmm extends Model
                         'contact_no',
                         'membership_or',
                         'registration_type',
-                        'qr_code_value'];
+                        'qr_code_value',
+                        'transpo_allowance',
+                        'allowance_status',
+                    ];
 }
