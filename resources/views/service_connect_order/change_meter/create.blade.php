@@ -102,35 +102,19 @@
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('municipality', 'Municipality *') }}
-                        <select id="municipality" class="form-control" name="municipality" value="{{ old('municipality')}}" required>
-                          <option value=""></option>
-                          @foreach ($municipalities as $municipality)          
-                            <option value="{{ $municipality->Municipality }}" {{ old('municipality') == $municipality->Municipality ? 'selected' : ''}}>{{ $municipality->Municipality }}</option>
-                          @endforeach 
-                        </select>
+                      <label for="municipality" class="form-label mb-1">Municipality *</label>
+                      <select id="municipality" class="form-control" name="municipality" required>
+                        <option value="" id=""></option>
+                        @foreach ($municipalities as $municipality)                        
+                            <option value="{{ $municipality->id }}" id="{{ $municipality->id }}">{{$municipality->municipality_name}}</option>
+                        @endforeach 
+                      </select>
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('barangay', 'Barangay *') }}
-                        <select id="barangay" class="form-control" name="barangay" required>
-                          <option value=""></option>
-                          @foreach ($barangays as $barangay)          
-                            <option value="{{ $barangay->Brgy }}" {{ old('barangay') == $barangay->Brgy ? 'selected' : ''}}>{{ $barangay->Brgy }}</option>
-                          @endforeach 
-                        </select>
-                    </div>
-                  </div>
-                  <div class="col-lg-3">
-                    <div class="mb-2">
-                        {{ Form::label('sitio', 'Sitio') }}
-                        <select id="sitio" class="form-control" name="sitio">
-                          <option value=""></option>
-                          @foreach ($sitios as $sitio)          
-                            <option value="{{ $sitio->Sitio }}" {{ old('sitio') == $sitio->Sitio ? 'selected' : ''}}>{{ $sitio->Sitio }}</option>
-                          @endforeach 
-                        </select>
+                      <label for="barangay" class="form-label mb-1">Barangay</label>
+                      <select id="barangay" class="form-control" name="barangay"></select>
                     </div>
                   </div>
                 </div>
@@ -305,38 +289,59 @@
   }
 
   function templateSelection(data){
+    // Assuming data.Name contains a full name
+    var fullName = data.Name;
+    // Split the full name into parts using a space delimiter
+    var partsOfFullName = fullName.split(',');
+    // Extract the first name and last name
+    var l_name = partsOfFullName[0];
+    var f_name = partsOfFullName[1];
 
-  // Assuming data.Name contains a full name
-  var fullName = data.Name;
-  // Split the full name into parts using a space delimiter
-  var partsOfFullName = fullName.split(',');
-  // Extract the first name and last name
-  var l_name = partsOfFullName[0];
-  var f_name = partsOfFullName[1];
+    // Assuming data.Date contains the datetime string "1999-08-05 00:00:00"
+    var dateTimeString = data.Date;
+    var dateOnlyString = dateTimeString.split(' ')[0]; // Extract date part
 
-  // Assuming data.Date contains the datetime string "1999-08-05 00:00:00"
-  var dateTimeString = data.Date;
-  var dateOnlyString = dateTimeString.split(' ')[0]; // Extract date part
+    var trimmedFirstName = f_name.replace(/\s+$/g, '');
+    var trimmedLastName = l_name.replace(/\s+$/g, '');
+    var trimmedSerialNo = data['Serial No'].replace(/\s+$/g, '');
 
-  var trimmedFirstName = f_name.replace(/\s+$/g, '');
-  var trimmedLastName = l_name.replace(/\s+$/g, '');
-  var trimmedSerialNo = data['Serial No'].replace(/\s+$/g, '');
+    document.getElementById('last_name').value = trimmedLastName;
+    document.getElementById('first_name').value = trimmedFirstName;
+    document.getElementById('membership_or').value = data['OR No'];
+    document.getElementById('membership_date').value = dateOnlyString;
+    // document.getElementById('last_reading').value = parseFloat(data['Prev Reading'].toFixed(0));
+    var prevReading = parseFloat(data['Prev Reading']);
+    if (!isNaN(prevReading)) {
+        document.getElementById('last_reading').value = prevReading.toFixed(0);
+    }
+    document.getElementById('old_meter').value = trimmedSerialNo;
 
-  document.getElementById('last_name').value = trimmedLastName;
-  document.getElementById('first_name').value = trimmedFirstName;
-  document.getElementById('membership_or').value = data['OR No'];
-  document.getElementById('membership_date').value = dateOnlyString;
-  // document.getElementById('last_reading').value = parseFloat(data['Prev Reading'].toFixed(0));
-  var prevReading = parseFloat(data['Prev Reading']);
-  if (!isNaN(prevReading)) {
-      document.getElementById('last_reading').value = prevReading.toFixed(0);
+
+    return data.id + " | " +data.Name + " | " + data.Address
+
   }
-  document.getElementById('old_meter').value = trimmedSerialNo;
 
-
-  return data.id + " | " +data.Name + " | " + data.Address
-  
-  }
+  $('#municipality').on('change', function () {
+      var id = $(this).children(":selected").attr("id");
+      $("#barangay").html('');
+      console.log(id);
+      $.ajax({
+          url: "{{url('api/fetch-barangays')}}",
+          type: "POST",
+          data: {
+              municipality_id: id,
+              _token: '{{csrf_token()}}'
+          },
+          dataType: 'json',
+          success: function (res) {
+              $('#barangay').html('<option value="">-- Select Barangay --</option>');
+              $.each(res.barangays, function (key, value) {
+                    $("#barangay").append('<option value="' + value
+                        .id + '" id="'+ value.id +'">' + value.barangay_name + '</option>');
+              });
+          }
+      });
+  });
 </script>
 @endsection
 @section('style')

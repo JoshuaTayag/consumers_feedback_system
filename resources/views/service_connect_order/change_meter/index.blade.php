@@ -12,7 +12,7 @@
                   </div>
                   <div class="col-lg-6 text-end">
                     @can('service-connect-order-create')
-                      <a class="btn btn-sm btn-success" href="{{ route('createCM') }}"> Create New SCO </a>
+                      <a class="btn btn-sm btn-success" href="{{ route('change-meter-request.create') }}"> Create New SCO </a>
                     @endcan
                   </div>
               </div>
@@ -37,9 +37,9 @@
                 </div>
               </div>
             </form>
-            <div class="card-body {{ count($scos) == 3 ? 'd-flex flex-wrap' : '' }}">
+            <div class="card-body {{ count($cm_requests) == 3 ? 'd-flex flex-wrap' : '' }}">
               <div class="row" id="show_data">
-              @foreach ($scos as $key => $sco)
+              @foreach ($cm_requests as $key => $sco)
                 <div class="col-lg-4 mb-4">
                   <div class="card h-100">
                     <div class="card-header p-1 bg-{{ $sco->Dispatch2 ? 'success' : 'danger' }}"></div>
@@ -114,7 +114,7 @@
                 </div>
               @endforeach
               </div>
-              <div id="pagination">{{ $scos->links() }}</div>
+              <div id="pagination">{{ $cm_requests->links() }}</div>
             </div>
               @include('service_connect_order.change_meter.meter_posting')
           </div>

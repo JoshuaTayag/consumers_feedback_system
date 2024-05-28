@@ -64,7 +64,7 @@
                 <a class="dropdown-item" href="{{ route('electricianComplaintIndex') }}">COMPLAINTS</a>
               </li>
               <li>
-                <a class="dropdown-item" href="#">ACTIVITIES / MEETING</a>
+                <a class="dropdown-item" href="{{ route('electricianActivityIndex') }}">ACTIVITIES / MEETING</a>
               </li>
             </ul>
           </li>

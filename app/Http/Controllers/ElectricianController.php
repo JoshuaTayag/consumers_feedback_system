@@ -605,5 +605,119 @@ class ElectricianController extends Controller
         return view('electrician.index')->with(compact('data'));
     }
     
+    public function electricianActivityIndex()
+    {
+        $activities = DB::table('electrician_activities')->orderBy('id', 'desc')->paginate(10);
+        return view('electrician.activity.index')->with(compact('activities'));
+    }
+
+    public function electricianActivityCreate()
+    {
+        $districts = DB::connection('sqlSrvMembership')
+        ->table('districts')
+        ->select('*')
+        ->get();
+        return view('electrician.activity.create')->with(compact('districts'));
+    }
+
+    public function fetchElectricians(Request $request)
+    {
+            $search = $request->search;
+            
+            if($search == ''){
+                $electricians = Electrician::orderBy('last_name','desc');
+            }else{
+                $electricians = Electrician::where('last_name', $search)->orderBy('last_name','desc');
+            }
+            // dd($electricians);
+            $data = $electricians->paginate(10, ['*'], 'page', $request->page);
+            return response()->json($data); 
+    }
+
+    public function electricianActivityStore(Request $request)
+    {
+        // validate requests
+        $this->validate($request, [
+            'name_of_activity' => ['required', 'string', 'max:255'],
+            'conducted_by' => ['required', 'string', 'max:255'],
+            'date_of_activity' => ['required'],
+            'time_conducted' => ['required'],
+            'venue' => ['required'],
+            'participants' => ['required'],
+            'attendees' => ['required'],
+        ]);
+        $now = DB::raw('CURRENT_TIMESTAMP');
+        $attendees = $request->attendees;
+        try {
+            // Start a database transaction
+            DB::beginTransaction();
+
+            // INSERT ELECTRICIAN COMPLAINT
+            $activityId = DB::table('electrician_activities')->insertGetId(
+                array(
+                    'activity_name' => $request->name_of_activity,
+                    'facilited_by' => $request->conducted_by,
+                    'date_conducted' => $request->date_of_activity,
+                    'time_conducted' => $request->time_conducted,
+                    'venue' => $request->venue,
+                    'target_participants' => $request->participants,
+                    'status' => 0,
+                    'created_at' => $now
+                )
+            );
+            
+            foreach ($attendees as $key => $value) {
+                DB::table('electrician_attendance')->insert(
+                    array(
+                        'electrician_id' => $value,
+                        'activity_id' => $activityId,
+                    )
+                );
+            }
+            DB::commit();
+            return redirect(route('electricianActivityIndex'))->withSuccess('Record successfully created!');
+            
+        } catch (\Throwable $e) {
+            // If an exception occurs, rollback the database transaction
+            DB::rollBack();
+
+            // You can log the exception for further investigation if needed
+            \Log::error($e);
+
+            // Return an error response or redirect to an error page
+            return response()->json(['error' => $e], 500);
+
+        }
+    }
+
+    public function electricianActivityEdit($id)
+    {
+        $activity = DB::table('electrician_activities')->where('id', $id)->first();
+        $electricians = DB::table('electrician_attendance')->where('activity_id', $id)->pluck('electrician_id');
+        // $electricians = Electrician::whereIn('id', $electricians)
+        // ->orderBy('last_name','desc')
+        // ->select('id','first_name','last_name')
+        // ->get()
+        // ->map(function ($electrician) {
+        //     return $electrician->getAttributes();
+        // });
+
+        $electricians = Electrician::whereIn('id', $electricians)->orderBy('last_name','desc')->paginate(10);
+        // return response()->json($electricians); 
+
+    //     $data = Electrician::whereIn('id', $electricians)
+    // ->orderBy('last_name', 'desc')
+    // ->select('id', 'first_name', 'last_name')
+    // ->get();
+
+
+        $districts = DB::connection('sqlSrvMembership')
+        ->table('districts')
+        ->select('*')
+        ->get();
+        //  dd($electricians);
+        //  return($electricians);
+        return view('electrician.activity.edit')->with(compact('activity','districts','electricians'));
+    }
     
 }

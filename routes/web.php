@@ -88,6 +88,8 @@ Route::group(['middleware' => 'auth'], function () {
     // Route::get('fetch-applications', [App\Http\Controllers\ServiceConnectOrderController::class, 'fetchServiceConnectApplications'])->name('fetchServiceConnectApplications');
     Route::get('service-connect-order-cm/search', [App\Http\Controllers\ServiceConnectOrderController::class, 'searchCM'])->name('cm.search');
 
+    Route::resource('change-meter-request', App\Http\Controllers\ChangeMeterRequestController::class);
+
     // lifeline
     Route::resource('lifeline', App\Http\Controllers\LifelineController::class);
     Route::post('lifeline-store-non-poor', [App\Http\Controllers\LifelineController::class, 'storeNonPoor'])->name('lifeline.store.non_poor');
@@ -149,6 +151,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('electrician-complaint-update/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintUpdate'])->name('electricianComplaintUpdate');
     Route::get('electrician-complaint-view/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintView'])->name('electricianComplaintView');
     Route::get('fetch-electrician', [App\Http\Controllers\ElectricianController::class, 'fetchElectricianApplication'])->name('fetchElectricianApplication');
+    Route::get('electrician-activities', [App\Http\Controllers\ElectricianController::class, 'electricianActivityIndex'])->name('electricianActivityIndex');
+    Route::get('electrician-activities/create', [App\Http\Controllers\ElectricianController::class, 'electricianActivityCreate'])->name('electricianActivityCreate');
+    Route::get('fetch-electricians', [App\Http\Controllers\ElectricianController::class, 'fetchElectricians'])->name('fetchElectricians');
+    Route::post('electrician-activity-store', [App\Http\Controllers\ElectricianController::class, 'electricianActivityStore'])->name('electricianActivityStore');
+    Route::get('electrician-activity-edit/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianActivityEdit'])->name('electricianActivityEdit');
     // Strucutures
     // Route::resource('signatory', App\Http\Controllers\SignatoryController::class);
 
