@@ -21,7 +21,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->post('register', [App\Http\Controllers\AgmmController::class, 'agmmRegister']);
 Route::get('account/{id}', [App\Http\Controllers\AgmmController::class, 'validateAccount'])->middleware('auth:sanctum');
 Route::get('agmm-registration/{id}', [App\Http\Controllers\AgmmController::class, 'getRegistration'])->middleware('auth:sanctum');
-Route::get('agmm-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'getAllowance'])->middleware('auth:sanctum');
-Route::get('agmm-issue-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'issueAllowance'])->middleware('auth:sanctum');
+Route::get('agmm-registration/qr/{id}', [App\Http\Controllers\AgmmController::class, 'getRegistrationByQr'])->middleware('auth:sanctum')->name('checkRegistration');
+Route::get('agmm-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'getAllowance'])->middleware('auth:sanctum')->name('transpoAllowance');
+Route::get('agmm-issue-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'issueAllowance'])->middleware('auth:sanctum')->name('issueTranspoAllowance');
+Route::get('agmm-registration/from-preregistration/{id}', [App\Http\Controllers\AgmmController::class, 'agmmVerifyAccountFromPreReg'])->middleware('auth:sanctum')->name('verifyPreRegistration');
+Route::get('agmm-verified-registration/{id}', [App\Http\Controllers\AgmmController::class, 'getVerifiedRegistration'])->middleware('auth:sanctum')->name('getVerifiedRegistration');
 
 Route::get('fetch-members/', [App\Http\Controllers\MembershipController::class, 'getMembers']);

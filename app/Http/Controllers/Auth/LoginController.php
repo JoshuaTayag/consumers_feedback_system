@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
+use Illuminate\Support\Facades\Auth;
+
 class LoginController extends Controller
 {
     /*
@@ -28,6 +30,16 @@ class LoginController extends Controller
      */
     protected $redirectTo = RouteServiceProvider::HOME;
 
+    protected function authenticated()
+    {
+        if (Auth::user()->hasRole('AGMM VERIFIER')) {
+            return redirect()->route('agmmAccounts');
+        } else if (Auth::user()->hasRole('AGMM ALLOWANCE DISBURSER')) {
+            return redirect()->route('scanAllowanceQR');
+        } else{
+            return redirect()->route('home');
+        }
+    }
     /**
      * Create a new controller instance.
      *

@@ -29,7 +29,12 @@ Route::group(['middleware' => 'auth'], function () {
     });
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     
-
+    Route::get('agmm/verify', [App\Http\Controllers\AgmmController::class, 'agmmAccounts'])->name('agmmAccounts');
+    Route::post('agmm/verify/{id}', [App\Http\Controllers\AgmmController::class, 'agmmVerifyAccount'])->name('agmmVerifyAccount');
+    Route::get('agmm/qr-print/{id}', [App\Http\Controllers\AgmmController::class, 'printRegistrationQR'])->name('printRegistrationQR');
+    Route::get('agmm/scanner', [App\Http\Controllers\AgmmController::class, 'scanQR'])->name('scanAllowanceQR');
+    Route::get('agmm/status', [App\Http\Controllers\AgmmController::class, 'statusCount'])->name('agmmStatus');
+    
     // membership
     Route::resource('membership', 'App\Http\Controllers\MembershipController');
     Route::get('fetch-pre-members', [App\Http\Controllers\MembershipController::class, 'fetchPreMembers'])->name('fetchPreMembers');

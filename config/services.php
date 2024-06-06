@@ -31,4 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'auth' => [
+        'bearer_token' => env('AUTH_BEARER_TOKEN'),
+    ],
+
 ];
