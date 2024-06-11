@@ -67,7 +67,7 @@ class AgmmController extends Controller
                             'name' => $request->last_name.', '.$request->first_name.' '.$request->middle_name,
                             'contact_no' => $request->contact_no,
                             'membership_or' => $validatedData['membership_or'],
-                            'registration_type' => 'ON-SITE REGISTRATION',
+                            'registration_type' => $request->type,
                             'qr_code_value' => $uuid,
                             'transpo_allowance' => $validatedData['transpo_allowance'],
                             'claimed_by' => "", 
@@ -111,6 +111,61 @@ class AgmmController extends Controller
         }
         
         
+    }
+
+    public function agmmRegistration(){
+        return view('agmm.agmm_onsite_registration');
+    }
+
+    // public function agmmRegisterPost(Request $request){
+    //     return view('agmm.agmm_onsite_registration');
+    // }
+
+    public function agmmRegisterPost(Request $request)
+    {
+        $request->validate([
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'account_no' => 'required',
+            'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11']
+        ]);
+        $account_no = $request->account_no;
+        // Modify account_no to remove hyphens
+        $request->merge(['account_no' => str_replace('-', '', $request->account_no)]);
+
+        // no data for membership
+        $request->merge(['membership_or' => '']);
+        $request->merge(['type' => 'ON-SITE REGISTRATION']);
+
+        // Make a POST request to another API
+        try {
+            // dd($request);
+            $response = $this->agmmRegister($request);
+            // Get the response body
+            $responseData = $response->getData(true);
+            // dd($response);
+            // Decode the JSON response
+        // $responseData = $response;
+        // dd($responseData['status_message']);
+            // Check the status message received from the API
+            if ($responseData['status_message'] == 'success') {
+                $qr_data = [
+                    'AccountNumberWithoutHypens' => $request->account_no,
+                ];
+                // dd($qr_data);
+                // return view('new_homepage.agmm_registration')->with('successMessage', $responseData['message']);
+                return redirect()->back()->with(['successMessage' => $responseData['message'], 'data' => $qr_data]);
+            } else {
+                // return view('new_homepage.agmm_registration')->with('errorMessage', $responseData['message']);
+                
+                // dd($qr_data);
+                
+                return redirect()->back()->with(['errorMessage' => $responseData['message']])->withInput();
+            }
+        } catch (RequestException $e) {
+            // Log or handle the exception
+            return $e->getMessage();
+        }
     }
 
     public function validateAccount($id)
@@ -192,8 +247,10 @@ class AgmmController extends Controller
         // Retrieve the account from the database
         // $registration = Agmm::where('qr_code_value', $qr);
 
+        $separatedArray = explode("|", $qr);
+
         // Retrieve the account from the database
-        $registration = DB::table('agmm_verified_accounts')->where('qr_code_value', $qr);
+        $registration = DB::table('agmm_verified_accounts')->where('qr_code_value', $separatedArray[0]);
 
         // get the memmership
         $membership = $registration->first()->membership_or;
@@ -207,7 +264,7 @@ class AgmmController extends Controller
             if ($registration->first()->allowance_status == true || $claimed_registration_allowance->count() > 0) {
                 return response()->json(['message' => 'Allowance already claimed!', 'status_message' => 'error'], 201);
             } else{
-                $registration->update(['allowance_status' => true]);
+                $registration->update(['allowance_status' => true, 'remarks' => $separatedArray[1]]);
                 return response()->json(['message' => 'Allowance successfully claimed!', 'status_message' => 'success'], 201);
             }
             
@@ -273,7 +330,7 @@ class AgmmController extends Controller
                     'name' => $account->{'Name'},
                     'contact_no' => $account->MobileNo,
                     'membership_or' => $account->{'OR No'},
-                    'registration_type' => 'ON-SITE VERIFIED',
+                    'registration_type' => 'ON-SITE REGISTRATION',
                     'qr_code_value' => $uuid,
                     'transpo_allowance' => $allowance ? $allowance : 0,
                     'claimed_by' => "", 
@@ -311,8 +368,20 @@ class AgmmController extends Controller
         else{
             $verifier = "GUEST";
         }
-        
+
         return view('agmm.agmm_qr_code_print')->with(compact('details','verifier'));
+    }
+
+    public function printRegistrationQRGuest($id){
+        $details = DB::table('agmm_verified_accounts')->select('*')->where('account_no', $id)->first();
+        if($details->verified_by != 0){
+            $verifier = DB::table('users')->where('id', $details->verified_by)->value('name');
+        }
+        else{
+            $verifier = "GUEST";
+        }
+        
+        return view('agmm.agmm_onsite_qr_code_print')->with(compact('details','verifier'));
     }
 
     public function scanQR(){

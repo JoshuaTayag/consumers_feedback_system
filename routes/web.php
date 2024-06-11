@@ -18,6 +18,10 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Auth::routes(['verify' => true]);
 
+Route::get('agmm/on-site/registration', [App\Http\Controllers\AgmmController::class, 'agmmRegistration'])->name('agmmRegistration');
+Route::post('agmm/register', [App\Http\Controllers\AgmmController::class, 'agmmRegisterPost'])->name('agmmRegisterPost');
+Route::get('agmm/qr-print/guest/{id}', [App\Http\Controllers\AgmmController::class, 'printRegistrationQRGuest'])->name('printRegistrationQRGuest');
+
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', function () {
         if(Auth::user()->hasRole('Consumer')){

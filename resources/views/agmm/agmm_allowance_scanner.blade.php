@@ -118,7 +118,7 @@
         fetch(url, requestOptions)
             .then((response) => response.json()) // Parse response as JSON
             .then((result) => {
-              console.log(result)
+            //   console.log(result)
               // Extract account number from result
               var accountNo = result.registration[0].account_no;
               // Format account number
@@ -133,7 +133,8 @@
                       html:
                               '<div>Name: ' + result.registration[0].name +  '</div>' + 
                               '<div>Account Number: ' + formattedAccountNo  + '</div>' +
-                              '<div>Transpo Allowance: ₱' + result.registration[0].transpo_allowance + '.00</div>',
+                              '<div>Transpo Allowance: ₱' + result.registration[0].transpo_allowance + '.00</div>' +
+                              '<div><div class="m-2"><label for="remarks" class="form-label">Remarks: (Optional) </label><input type="text" class="form-control" id="remarks" name="remarks"></div></div>',
                       confirmButtonText: 'Confirm',
                       showCancelButton: true,
                       cancelButtonText: 'Cancel'
@@ -145,6 +146,9 @@
                         //   myHeaders.append("Authorization", "Bearer HdSQxFktaKelqX3AC9HbEJfHiGxYaapchoUxpEGr");
                           myHeaders.append("Authorization", "Bearer {{ config('services.auth.bearer_token') }}");
 
+                          const remarks = document.getElementById('remarks').value;
+                          const qr_with_remarks = qrCode+"|"+remarks;
+                          console.log(qr_with_remarks);
                           const requestOptions = {
                           method: "GET",
                           headers: myHeaders,
@@ -152,7 +156,7 @@
                           };
 
                           // Construct the URL dynamically
-                          var url = "{{ route('issueTranspoAllowance', ':qrCode') }}".replace(':qrCode', qrCode);
+                          var url = "{{ route('issueTranspoAllowance', ':qrCode') }}".replace(':qrCode', qr_with_remarks);
 
                           fetch(url, requestOptions)
                           .then((response) => response.json())
@@ -199,9 +203,7 @@
                         html5QrcodeScanner.render(onScanSuccess);
                     }
                 });
-            });
-
-            
+            });     
     }
 
 

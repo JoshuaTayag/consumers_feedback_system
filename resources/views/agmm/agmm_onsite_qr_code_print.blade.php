@@ -67,54 +67,37 @@
                 display: none;
             }
             #heading{
-                font-size: 15px;
+                font-size: 8px;
                 text-align: center;
-                padding-top: 10px;
-            }
-            #details, #footer{
-                font-size: 10px;
+                padding-top: 0px;
             }
             #qrcode > img{
-                width: 110px;
-                height: 110px;
+                width: 150px;
+                height: 150px;
                 /* padding: 30px; */
             }
             #qrcode1 > img{
-                width: 110px;
-                height: 110px;
+                width: 150px;
+                height: 150px;
                 /* padding: 30px; */
-            }
-            .card-body{
-                padding: 1px;
-            }
-            #print-container{
-                padding: 7px !important;
-            }
-            #main-card{
-                padding-top: 1px !important;
             }
         }
 
         @media print, (max-width: 600px) {
             #heading {
-                font-size: 12px;
+                font-size: 10px;
                 text-align: left !important;
             }
             #qrcode > img {
                 border: 2px solid black !important;
-                width: 90px !important;
-                height: 90px !important;
+                width: 150px !important;
+                height: 150px !important;
             }
             #qrcode1 > img {
                 border: 2px solid black !important;
-                width: 90px !important;
-                height: 90px !important;
-            }
-            #details, #footer{
-                font-size: 10px !important;
-                text-align: left !important;
-            }
-            
+                width: 150px !important;
+                height: 150px !important;
+            }         
         }
     </style>
 </head>
@@ -125,7 +108,7 @@
             <div class="card-body">
                 <div class="h4 mb-3 text-center" id="heading">LEYECO V 43rd AGMM REGISTRATION DETAILS</div>
                 <div class="row my-2">
-                    <div class="col-4 col-md-6 justify-content-center align-items-center">
+                    <div class="col justify-content-center align-items-center">
                         <div id="qrcode" class="img-auto"></div>
                     </div>
                     <div class="col mt-2" id="details">
@@ -139,7 +122,7 @@
                 <hr class="my-4">
                 <div class="h4 mb-3 text-center" id="heading">TRANSPORTATION ALLOWANCE</div>
                 <div class="row my-2">
-                    <div class="col-4 col-md-6 justify-content-center align-items-center">
+                    <div class="col justify-content-center align-items-center">
                         <div id="qrcode1" class="mx-auto"></div>
                     </div>
                     <div class="col mt-2" id="details">
@@ -171,8 +154,8 @@
 <script>
     const qrcode = new QRCode(document.getElementById('qrcode'), {
         text: "{{ $details->qr_code_value }}",
-        width: 110,
-        height: 110,
+        width: 150,
+        height: 150,
         colorDark: '#000',
         colorLight: '#fff',
         // correctLevel: QRCode.CorrectLevel.M
@@ -180,8 +163,8 @@
 
     const qrcode1 = new QRCode(document.getElementById('qrcode1'), {
         text: "{{ $details->qr_code_value }}",
-        width: 110,
-        height: 110,
+        width: 150,
+        height: 150,
         colorDark: '#000',
         colorLight: '#fff',
         // correctLevel: QRCode.CorrectLevel.M
@@ -193,7 +176,9 @@
     }
 
     function closeTab() {
-        window.location.href = "{{ route('agmmAccounts') }}";
+        if (confirm("Are you sure you want to close this window?")) {
+            window.close();
+        }
     }
 
     function downloadTab() {
