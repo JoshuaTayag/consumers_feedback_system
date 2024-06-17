@@ -34,26 +34,26 @@
             padding: 3px;
             border-radius: 10px;
         }
-
-        #qrcode1, img{
-            /* display: none; */
-            margin: 0 auto;
-        }
-
-        #qrcode1 > img{
-            border: 2px solid black;
-            padding: 3px;
-            border-radius: 10px;
-        }
         
-        @media screen and (min-width: 768px) {
-            #qrcode{
-                float: right; /* Float the QR code to the right */
-                margin: 0; /* Remove margin for mobile screens */
+        @media (max-width: 600px) { 
+
+            .qr-container {
+                display: flex;
+                justify-content: center; /* Center horizontally */
+                align-items: center;     /* Center vertically */
+                flex-direction: column;  /* Ensure flex direction is column */
             }
-            #qrcode1{
-                float: right; /* Float the QR code to the right */
-                margin: 0; /* Remove margin for mobile screens */
+            
+            /* Center the QR code itself */
+            #qrcode {
+                float: none;    /* Remove float */
+                margin: 0 auto; /* Center the QR code horizontally */
+            }
+            
+            #heading{
+                font-size: 11px !important;
+                text-align: center;
+                padding-top: 0px;
             }
         }
         
@@ -76,11 +76,6 @@
                 height: 150px;
                 /* padding: 30px; */
             }
-            #qrcode1 > img{
-                width: 150px;
-                height: 150px;
-                /* padding: 30px; */
-            }
         }
 
         @media print, (max-width: 600px) {
@@ -92,12 +87,7 @@
                 border: 2px solid black !important;
                 width: 150px !important;
                 height: 150px !important;
-            }
-            #qrcode1 > img {
-                border: 2px solid black !important;
-                width: 150px !important;
-                height: 150px !important;
-            }         
+            }      
         }
     </style>
 </head>
@@ -106,34 +96,30 @@
     <div id="dataToDownload" >
         <div class="card col-lg-6 p-3 mx-auto" id="main-card">
             <div class="card-body">
-                <div class="h4 mb-3 text-center" id="heading">LEYECO V 43rd AGMM REGISTRATION DETAILS</div>
+                <div class="d-flex justify-content-center">
+                    <img src="{{asset('images/logo.png')}}" style="width: 50px" alt="..." class="text-center">
+                </div>
+                <div class="h4 mb-1 text-center">LEYECO V 43rd AGMM</div>
+                <div class="mb-3 text-center">(PRE-REGISTRATION SLIP)</div>
                 <div class="row my-2">
-                    <div class="col justify-content-center align-items-center">
+                    <div class="col justify-content-center align-items-center qr-container">
                         <div id="qrcode" class="img-auto"></div>
                     </div>
-                    <div class="col mt-2" id="details">
-                        <strong>Name: <br>{{ $details->name }}</strong><br>
+                    <!-- <div class="col mt-2" id="details">
+                        <strong>Name: {{ $details->last_name.', '.$details->first_name.' '.$details->middle_name }}</strong><br>
                         <strong>Account No. : {{ substr_replace(substr_replace($details->account_no, '-', 2, 0), '-', 7, 0) }}</strong><br>
                         <strong>Contact No. : {{ $details->contact_no ? $details->contact_no : 'None' }}</strong><br>
                         <strong>Membership OR: {{ $details->membership_or }}</strong><br>
                         <strong>Date: {{ \Carbon\Carbon::parse($details->created_at)->format('m/d/Y h:i A') }}</strong>
-                    </div>
+                    </div> -->
                 </div>
-                <hr class="my-4">
-                <div class="h4 mb-3 text-center" id="heading">TRANSPORTATION ALLOWANCE</div>
-                <div class="row my-2">
-                    <div class="col justify-content-center align-items-center">
-                        <div id="qrcode1" class="mx-auto"></div>
-                    </div>
-                    <div class="col mt-2" id="details">
-                        <strong>Name: <br>{{ $details->name }}</strong><br>
-                        <strong>Account No. : {{ substr_replace(substr_replace($details->account_no, '-', 2, 0), '-', 7, 0) }}</strong><br>
-                        <strong>Contact No. : {{ $details->contact_no ? $details->contact_no : 'None' }}</strong><br>
-                        <strong>Membership OR: {{ $details->membership_or }}</strong><br>
-                        <strong>Date: {{ \Carbon\Carbon::parse($details->created_at)->format('m/d/Y h:i A') }}</strong>
-                    </div>
+                <div class="row justify-content-center" style="font-size:13px">
+                    <div class="col-auto">
+                        <p class="mb-1">Registration Date: {{ \Carbon\Carbon::parse($details->created_at)->format('m/d/Y h:i A') }}</p>
+                        <p class="mb-1">Registered By: {{ strtoupper($verifier) }}</p>
+                    <div>
                 </div>
-                <div class=" mb-3 text-end mt-4" id="footer">VERIFIED BY: {{ strtoupper($verifier) }}</div>
+                
                 <div class="row justify-content-center" id="buttons">
                     <div class="col-auto">
                         <button class="btn btn-sm btn-secondary my-1" id="download"  onclick="downloadData()"><i class="fas fa-download"></i> Download</button>
@@ -153,15 +139,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
 <script>
     const qrcode = new QRCode(document.getElementById('qrcode'), {
-        text: "{{ $details->qr_code_value }}",
-        width: 150,
-        height: 150,
-        colorDark: '#000',
-        colorLight: '#fff',
-        // correctLevel: QRCode.CorrectLevel.M
-    });
-
-    const qrcode1 = new QRCode(document.getElementById('qrcode1'), {
         text: "{{ $details->qr_code_value }}",
         width: 150,
         height: 150,

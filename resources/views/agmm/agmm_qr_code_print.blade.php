@@ -35,23 +35,12 @@
             border-radius: 10px;
         }
 
-        #qrcode1, img{
-            /* display: none; */
-            margin: 0 auto;
-        }
-
-        #qrcode1 > img{
-            border: 2px solid black;
-            padding: 3px;
-            border-radius: 10px;
+        #footer {
+            font-size: 12px;
         }
         
         @media screen and (min-width: 768px) {
             #qrcode{
-                float: right; /* Float the QR code to the right */
-                margin: 0; /* Remove margin for mobile screens */
-            }
-            #qrcode1{
                 float: right; /* Float the QR code to the right */
                 margin: 0; /* Remove margin for mobile screens */
             }
@@ -79,11 +68,6 @@
                 height: 110px;
                 /* padding: 30px; */
             }
-            #qrcode1 > img{
-                width: 110px;
-                height: 110px;
-                /* padding: 30px; */
-            }
             .card-body{
                 padding: 1px;
             }
@@ -101,11 +85,6 @@
                 text-align: left !important;
             }
             #qrcode > img {
-                border: 2px solid black !important;
-                width: 90px !important;
-                height: 90px !important;
-            }
-            #qrcode1 > img {
                 border: 2px solid black !important;
                 width: 90px !important;
                 height: 90px !important;
@@ -136,21 +115,8 @@
                         <strong>Date: {{ \Carbon\Carbon::parse($details->created_at)->format('m/d/Y h:i A') }}</strong>
                     </div>
                 </div>
-                <hr class="my-4">
-                <div class="h4 mb-3 text-center" id="heading">TRANSPORTATION ALLOWANCE</div>
-                <div class="row my-2">
-                    <div class="col-4 col-md-6 justify-content-center align-items-center">
-                        <div id="qrcode1" class="mx-auto"></div>
-                    </div>
-                    <div class="col mt-2" id="details">
-                        <strong>Name: <br>{{ $details->name }}</strong><br>
-                        <strong>Account No. : {{ substr_replace(substr_replace($details->account_no, '-', 2, 0), '-', 7, 0) }}</strong><br>
-                        <strong>Contact No. : {{ $details->contact_no ? $details->contact_no : 'None' }}</strong><br>
-                        <strong>Membership OR: {{ $details->membership_or }}</strong><br>
-                        <strong>Date: {{ \Carbon\Carbon::parse($details->created_at)->format('m/d/Y h:i A') }}</strong>
-                    </div>
-                </div>
-                <div class=" mb-3 text-end mt-4" id="footer">VERIFIED BY: {{ strtoupper($verifier) }}</div>
+                <div class="text-end mt-4" id="footer">Consumer Type: {{ $details->registration_type }}</div>
+                <div class="mb-3 text-end" id="footer">Verified By: {{ strtoupper($verifier) }}</div>
                 <div class="row justify-content-center" id="buttons">
                     <div class="col-auto">
                         <button class="btn btn-sm btn-secondary my-1" id="download"  onclick="downloadData()"><i class="fas fa-download"></i> Download</button>
@@ -178,22 +144,15 @@
         // correctLevel: QRCode.CorrectLevel.M
     });
 
-    const qrcode1 = new QRCode(document.getElementById('qrcode1'), {
-        text: "{{ $details->qr_code_value }}",
-        width: 110,
-        height: 110,
-        colorDark: '#000',
-        colorLight: '#fff',
-        // correctLevel: QRCode.CorrectLevel.M
-    });
-
     // Function to automatically trigger printing
     function printTab() {
         window.print(); // Automatically print
     }
 
     function closeTab() {
-        window.location.href = "{{ route('agmmAccounts') }}";
+        if (confirm("Are you sure you want to close this window?")) {
+            window.location.href = "{{ route('agmmAccounts') }}";
+        }
     }
 
     function downloadTab() {

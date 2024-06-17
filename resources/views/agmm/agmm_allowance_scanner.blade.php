@@ -61,24 +61,42 @@
 </head>
 <body>
 <div class="container p-5" id="print-container">
-    <div id="dataToDownload" >
-        <div class="card col-lg-6 p-3 mx-auto">
-            <div class="card-body">
-                <div class="h4 mb-3" id="heading">LEYECO V 43rd AGMM Transportation Allowance</div>
-                <div class="row my-2">
-                    <div class="col">
-                        <div id="qr-reader" class="mx-auto"></div>
-                    </div>
+    <div class="card col-lg-6 p-3 mx-auto">
+        <div class="card-body">
+            <div class="h4 mb-3" id="heading">LEYECO V 43rd AGMM Transportation Allowance</div>
+            <div class="row my-2">
+                <div class="col">
+                    <div id="qr-reader" class="mx-auto"></div>
                 </div>
-                <!-- <div class="row justify-content-center" id="buttons">
-                    <div class="col-auto">
-                        <button class="btn btn-sm btn-secondary my-1" id="download"  onclick="downloadData()"><i class="fas fa-download"></i> Scan QR</button>
-                    </div>
-                    <div class="col-auto">
-                        <a href="#" class="btn btn-sm btn-warning my-1" id="close" onclick="closeTab()"><i class="fas fa-times"></i> Close</a>
-                    </div>
-                </div> -->
             </div>
+            <!-- <div class="row justify-content-center" id="buttons">
+                <div class="col-auto">
+                    <button class="btn btn-sm btn-secondary my-1" id="download"  onclick="downloadData()"><i class="fas fa-download"></i> Scan QR</button>
+                </div>
+                <div class="col-auto">
+                    <a href="#" class="btn btn-sm btn-warning my-1" id="close" onclick="closeTab()"><i class="fas fa-times"></i> Close</a>
+                </div>
+            </div> -->
+        </div>
+    </div>
+    <div class="card col-lg-6 p-3 mt-3 mx-auto">
+        <div class="card-body">
+            <div class="h4 mb-3" id="heading">DASHBOARD</div>
+            <div class="row my-2">
+                <div class="col">
+                    <p>Total consumers claimed: {{ $total_scanned_consumers }}</p>
+                    <p>Total allowance disbursed: ₱{{ number_format($total_disbursed_money, 0) }}
+</p>
+                </div>
+            </div>
+            <!-- <div class="row justify-content-center" id="buttons">
+                <div class="col-auto">
+                    <button class="btn btn-sm btn-secondary my-1" id="download"  onclick="downloadData()"><i class="fas fa-download"></i> Scan QR</button>
+                </div>
+                <div class="col-auto">
+                    <a href="#" class="btn btn-sm btn-warning my-1" id="close" onclick="closeTab()"><i class="fas fa-times"></i> Close</a>
+                </div>
+            </div> -->
         </div>
     </div>
 </div>
@@ -100,6 +118,8 @@
 
     function fetchAllowance(qrCode) {
         const myHeaders = new Headers();
+        // const token = getAuthToken();
+        // console.log(token);
         myHeaders.append("Accept", "application/json");
         // myHeaders.append("Authorization", "Bearer HdSQxFktaKelqX3AC9HbEJfHiGxYaapchoUxpEGr");
 
@@ -144,7 +164,7 @@
                           const myHeaders = new Headers();
                           myHeaders.append("Accept", "application/json");
                         //   myHeaders.append("Authorization", "Bearer HdSQxFktaKelqX3AC9HbEJfHiGxYaapchoUxpEGr");
-                          myHeaders.append("Authorization", "Bearer {{ config('services.auth.bearer_token') }}");
+                        //   myHeaders.append("Authorization", "Bearer {{ config('services.auth.bearer_token') }}");
 
                           const remarks = document.getElementById('remarks').value;
                           const qr_with_remarks = qrCode+"|"+remarks;
@@ -167,7 +187,8 @@
                                       confirmButtonText: 'OK'
                                   }).then((result) => {
                                       if (result.isConfirmed) {
-                                          html5QrcodeScanner.render(onScanSuccess);
+                                        //   html5QrcodeScanner.render(onScanSuccess);
+                                        location.reload(true);
                                       }
                                   });
                           })

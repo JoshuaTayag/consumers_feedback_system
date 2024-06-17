@@ -38,6 +38,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('agmm/qr-print/{id}', [App\Http\Controllers\AgmmController::class, 'printRegistrationQR'])->name('printRegistrationQR');
     Route::get('agmm/scanner', [App\Http\Controllers\AgmmController::class, 'scanQR'])->name('scanAllowanceQR');
     Route::get('agmm/status', [App\Http\Controllers\AgmmController::class, 'statusCount'])->name('agmmStatus');
+    Route::get('agmm/raffle', [App\Http\Controllers\AgmmController::class, 'agmmRaffle'])->name('agmmRaffle');
+    Route::get('agmm-issue-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'issueAllowance'])->name('issueTranspoAllowance');
     
     // membership
     Route::resource('membership', 'App\Http\Controllers\MembershipController');

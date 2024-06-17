@@ -22,45 +22,57 @@
               </div>
             </div>
             <div class="card-body">
-              <div class="row pb-2">
-                <form action="{{ route('agmmAccounts') }}" method="GET">
-                  <div class="col-lg-4 pb-2">
+              <form action="{{ route('agmmAccounts') }}" method="GET">
+                <div class="row pb-2">
+                  <div class="col-sm-12 pb-2">
                       <input type="text" placeholder="Search by Name" id="account_name" name="account_name" value="{{ request('account_name') }}" class="form-control">
                   </div>
-                  <div class="col-lg-4 pb-2">
+                  <div class="col-sm-12 pb-2">
                       <input type="text" placeholder="Search by Account" id="account_no" name="account_no" maxlength="10" value="{{ request('account_no') }}" class="form-control">
                   </div>
-                  <div class="col-lg-4 pb-2">
+                  <div class="col pb-2 text-end">
                       <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> SEARCH</button>
                   </div>
-                </form>
-              </div>
+                </div>
+              </form>
               <div class="table-responsive">
-              <table class="table table-striped table-bordered ">
-                <thead>
-                  <tr class="text-center">
-                    <th>Account</th>
-                    <th>Name</th>
-                    <th>Address</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="show_data">
-                  @foreach ($accounts as $index => $account)               
+                <table class="table table-striped table-bordered ">
+                  <thead>
                     <tr class="text-center">
-                      <th>{{ substr($account->id, 0, 2) }}-{{ substr($account->id, 2, 4) }}-{{ substr($account->id, 6, 4) }}</th>
-                      <th>{{ $account->Name }}</th>
-                      <th>{{ $account->Address }}</th>
-                      <th>
-                        <form id="confirmationForm" method="POST" action="{{ route('agmmVerifyAccount', $account->id) }}">
-                          @csrf
-                          <button class="btn btn-success btn-sm" type="submit"><i class="fa fa-check"></i></button>
-                        </form>
-                      </th>
+                      <th>Account</th>
+                      <th>Name</th>
+                      <th>Address</th>
+                      <th></th>
                     </tr>
-                  @endforeach 
-                </tbody>
-               </table>
+                  </thead>
+                  <tbody id="show_data">
+                    @foreach ($accounts as $index => $account)               
+                      <tr class="text-center">
+                        <th>{{ substr($account->id, 0, 2) }}-{{ substr($account->id, 2, 4) }}-{{ substr($account->id, 6, 4) }}</th>
+                        <th>{{ $account->Name }}</th>
+                        <th>{{ $account->Address }}</th>
+                        <th>
+                          <form id="confirmationForm" method="POST" action="{{ route('agmmVerifyAccount', $account->id) }}">
+                            <input type="hidden" id="swalValue" name="swalValue">
+                            @csrf
+                            <button class="btn btn-success btn-sm" type="submit"><i class="fa fa-check"></i></button>
+                          </form>
+                        </th>
+                      </tr>
+                    @endforeach 
+                  </tbody>
+                </table>
+              </div>
+              <div class="row text-end bg-dark text-white">
+                  <div class="col">
+                      <p class="mb-1 fw-bold">Verified Guest: {{ $total_verified_guest_per_user }}</p>
+                  </div>
+                  <div class="col">
+                      <p class="mb-1 fw-bold">Verified MCO: {{ $total_verified_mco_per_user }}</p>
+                  </div>
+                  <div class="col">
+                      <p class="mb-1 fw-bold">Total Verified Consumer: {{ $total_verified_per_user }}</p>
+                  </div>
               </div>
             </div>
           </div>
@@ -91,7 +103,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="staticBackdropLabel">Scan QR Code</h5>
+        <h5 class="modal-title" id="staticBackdropLabel">Reprint QR Code</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -114,17 +126,46 @@
               event.preventDefault(); // Prevent the form from submitting immediately
 
               Swal.fire({
-                  title: 'Are you sure?',
-                  text: "Do you really want to submit this form?",
+                  title: 'Do you really want to verify this consumer?',
+                  // text: "Do you really want to verify this consumer?",
+                  html:
+                              '' + 
+                              `<div>
+                                <div class="form-check">
+                                  <input class="form-check-input" type="radio" name="flexRadioDefault" value="MCO" id="mco">
+                                  <label class="form-check-label" for="mco">
+                                    MCO
+                                  </label>
+                                </div>
+                                <div class="form-check">
+                                  <input class="form-check-input" type="radio" name="flexRadioDefault" value="Guest" id="guest">
+                                  <label class="form-check-label" for="guest">
+                                    Guest
+                                  </label>
+                                </div>
+                              </div>`,
                   icon: 'warning',
                   showCancelButton: true,
                   confirmButtonColor: '#3085d6',
                   cancelButtonColor: '#d33',
-                  confirmButtonText: 'Confirm'
-              }).then((result) => {
-                  if (result.isConfirmed) {
-                      event.target.submit(); // If confirmed, submit the form
+                  confirmButtonText: 'Confirm',
+                  preConfirm: () => {
+                      const selectedRadio = document.querySelector('input[name="flexRadioDefault"]:checked');
+                      if (!selectedRadio) {
+                          Swal.showValidationMessage('Please select a type of consumer');
+                          return false; // Return false to prevent SweetAlert from closing
+                      }
+                      return selectedRadio.value; // Return the value to be used in the next `.then()`
                   }
+              }).then((result) => {
+                if (result.isConfirmed) {
+                    // Get the selected radio button value
+                    const selectedValue = result.value;
+                    // Set the selected value to the hidden input field
+                    document.getElementById('swalValue').value = selectedValue;
+                    // Submit the form
+                    event.target.submit();
+                }
               });
           }
       });
@@ -191,14 +232,43 @@
                   Swal.fire({
                       icon: 'question',
                       title: 'Confirm Registration?',
-                      html:
-                              '<div>Name: '+ result.registration[0].first_name + ' ' + result.registration[0].last_name +'</div>' + 
-                              '<div>Account Number: ' + formattedAccountNo + '</div>',
+                      // html:
+                      //         '<div>Name: '+ result.registration[0].first_name + ' ' + result.registration[0].last_name +'</div>' + 
+                      //         '<div>Account Number: ' + formattedAccountNo + '</div>',
+
+                              html:
+                              '' + 
+                              `<div>
+                                <div>Name: `+ result.registration[0].first_name + ' ' + result.registration[0].last_name +`</div>
+                                <div class="pb-2" >Account Number: ` + formattedAccountNo + `</div>
+                                <div class="form-check">
+                                  <input class="form-check-input" type="radio" name="radio" value="MCO" id="mco">
+                                  <label class="form-check-label" for="mco">
+                                    MCO
+                                  </label>
+                                </div>
+                                <div class="form-check">
+                                  <input class="form-check-input" type="radio" name="radio" value="Guest" id="guest">
+                                  <label class="form-check-label" for="guest">
+                                    Guest
+                                  </label>
+                                </div>
+                              </div>`,
                       confirmButtonText: 'Confirm',
                       showCancelButton: true,
-                      cancelButtonText: 'Cancel'
+                      cancelButtonText: 'Cancel',
+                      preConfirm: () => {
+                          const selectedRadio = document.querySelector('input[name="radio"]:checked');
+                          if (!selectedRadio) {
+                              Swal.showValidationMessage('Please select a type of consumer');
+                              return false; // Return false to prevent SweetAlert from closing
+                          }
+                          return selectedRadio.value; // Return the value to be used in the next `.then()`
+                      }
                   }).then((result) => {
                       if (result.isConfirmed) {
+                        
+                          const selectedConsumerType = result.value; // Capture the selected radio button value
                         
                           const myHeaders = new Headers();
                           myHeaders.append("Accept", "application/json");
@@ -214,6 +284,9 @@
                           // Construct the URL dynamically
                           var url = "{{ route('verifyPreRegistration', ':qrCode') }}".replace(':qrCode', qrCode);
 
+                          // Include selectedConsumerType in the API request if needed (e.g., as a query parameter)
+                          url += `?consumerType=${selectedConsumerType}`;
+
                           fetch(url, requestOptions)
                           .then((response) => response.json())
                           .then((result) => {
@@ -222,9 +295,14 @@
                                       icon: result.status_message,
                                       title: result.message,
                                       confirmButtonText: 'OK'
-                                  }).then((result) => {
-                                      if (result.isConfirmed) {
-                                          html5QrcodeScanner.render(onScanSuccess);
+                                  }).then((result1) => {
+                                      if (result1.isConfirmed && result.status_message === 'success') {
+                                          // html5QrcodeScanner.render(onScanSuccess);
+                                        var url = "{{ route('printRegistrationQR', ':accountNo') }}".replace(':accountNo', accountNo); // Specify your URL here
+                                        window.location.href = url;
+                                      }
+                                      else{
+                                        html5QrcodeScanner.render(onScanSuccess);
                                       }
                                   });
                           })

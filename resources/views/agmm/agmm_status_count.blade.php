@@ -30,70 +30,132 @@
     <div id="dataToDownload" >
         <div class="card col-lg-12 p-3 mx-auto" id="main-card">
             <div class="card-body">
-                <div class="h2 mb-4 text-center" id="heading">LEYECO V 43rd AGMM MONITORING DASHBOARD</div>
-                <div class="row my-3">
-                    <div class="col">
-                      <table class="table table-striped">
-                        <thead>
-                          <tr class="text-center">
-                            <th>Area Code</th>
-                            <th>Area Name</th>
-                            <th>Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @foreach ($registered_accounts_per_area as $index => $registered_account)               
-                            <tr class="text-center">
-                              <td>{{ $registered_account->area_code }}</td>
-                              <td>{{ $registered_account->area }}</td>
-                              <td>{{ $registered_account->count }}</td>
-                            </tr>
-                          @endforeach 
-                          <tr class="text-center">
-                            <th colspan="2" class="text-end">Total registered accounts:</th>
-                            <th>{{$total_verified_accounts}}</th>
-                          </tr>
-                        </tbody>
-                      </table>
+              <div class="h2 mb-4 text-center" id="heading">LEYECO V 43rd AGMM MONITORING DASHBOARD</div>
+              <div class="row my-3">
+                <div class="col border mt-3">
+                  <div class="row pt-2 bg-dark">
+                    <div class="col text-center text-white">
+                      <h4 class>Verifiers</h4>
                     </div>
-                    <div class="col justify-content-center align-items-center">
-                      <table class="table table-striped">
-                        <thead>
-                          <tr>
-                            <td>&nbsp;</td>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr class="text-center">
-                            <th>Total pre-registered accounts:</th>
-                            <th>{{$total_pre_registered_accounts}}</th>
-                          </tr>
-                          <tr class="text-center">
-                            <th>Total claimed allowances counter:</th>
-                            <th>{{$total_allowance_count}}</th>
-                          </tr>
-                          <tr class="text-center">
-                            <th>Total allowance disbursed:</th>
-                            <th>₱{{ number_format($total_allowance_disbursed) }}</th>
-                          </tr>
-                        </tbody>
-                      </table>
-                        <h4> </h4>
-                        <h4> </h4>
-                        <h4> </h4>
-                    </div>
+                  </div>
+                  <table class="table table-striped">
+                    <thead>
+                      <tr class="text-center">
+                        <th>Name</th>
+                        <th>Verified Consumers</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($total_verified_consumers_per_user as $index => $total_consumer)               
+                        <tr class="text-center">
+                          <td>{{ $total_consumer->name }}</td>
+                          <td>{{ $total_consumer->count }}</td>
+                        </tr>
+                      @endforeach 
+                      <tr class="text-center">
+                        <th colspan="1" class="text-end">Total registered accounts:</th>
+                        <th>{{$total_verified_accounts}}</th>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
-                <!-- <div class="row justify-content-center" id="buttons">
-                    <div class="col-auto">
-                        <button class="btn btn-sm btn-secondary my-1" id="download"  onclick="downloadData()"><i class="fas fa-download"></i> Download</button>
+                <div class="col justify-content-center align-items-center border mt-3">
+                  <div class="row pt-2 bg-dark">
+                    <div class="col text-center text-white">
+                      <h4 class>Disbursers</h4>
                     </div>
-                    <div class="col-auto">
-                        <a href="#" class="btn btn-sm btn-success my-1" id="print" onclick="printTab()"><i class="fas fa-print"></i> Print</a>
+                  </div>
+                  <table class="table table-striped">
+                    <thead>
+                      <tr class="text-center">
+                        <th>Name</th>
+                        <th>Counter</th>
+                        <th>Total disbursed allowance</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($total_disbursed_allowances_per_user as $index => $total_allowance)               
+                        <tr class="text-center">
+                          <td>{{ $total_allowance->name }}</td>
+                          <td>{{ $total_allowance->count }}</td>
+                          <td>{{ number_format($total_allowance->total_allowance) }}</td>
+                        </tr>
+                      @endforeach 
+                      <tr class="text-center">
+                        <th>Total:</th>
+                        <th>{{$total_allowance_count}}</th>
+                        <th>₱{{ number_format($total_allowance_disbursed) }}</th>
+                      </tr>
+                    </tbody>
+                  </table>
+                    <h4> </h4>
+                    <h4> </h4>
+                    <h4> </h4>
+                </div>
+              </div>
+
+              <div class="row my-3">
+                <div class="col border mt-3">
+                  <div class="row pt-2 bg-dark">
+                    <div class="col text-center text-white">
+                      <h4 class>Verified accounts per municipality</h4>
                     </div>
-                    <div class="col-auto">
-                        <a href="#" class="btn btn-sm btn-warning my-1" id="close" onclick="closeTab()"><i class="fas fa-times"></i> Close</a>
+                  </div>
+                  <table class="table table-striped">
+                    <thead>
+                      <tr class="text-center">
+                        <th>Area Code</th>
+                        <th>Area Name</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($registered_accounts_per_area as $index => $registered_account)               
+                        <tr class="text-center">
+                          <td>{{ $registered_account->area_code }}</td>
+                          <td>{{ $registered_account->area }}</td>
+                          <td>{{ $registered_account->count }}</td>
+                        </tr>
+                      @endforeach 
+                      <tr class="text-center">
+                        <th colspan="2" class="text-end">Total registered accounts:</th>
+                        <th>{{$total_verified_accounts}}</th>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="col justify-content-center align-items-center border mt-3">
+                  <div class="row pt-2 bg-dark">
+                    <div class="col text-center text-white">
+                      <h4 class>Pre-registered accounts</h4>
                     </div>
-                </div> -->
+                  </div>
+                  <table class="table table-striped">
+                    <!-- <thead>
+                      <tr>
+                        <td>&nbsp;</td>
+                      </tr>
+                    </thead> -->
+                    <tbody>
+                      <tr class="text-center">
+                        <th>Pre-registered accounts (Online):</th>
+                        <th>{{$total_pre_registered_accounts_online}}</th>
+                      </tr>
+                      <tr class="text-center">
+                        <th>Pre-registered accounts (Offline):</th>
+                        <th>{{$total_pre_registered_accounts_offline}}</th>
+                      </tr>
+                      <tr class="text-center">
+                        <th>Total:</th>
+                        <th>{{ $total_pre_registered_accounts }}</th>
+                      </tr>
+                    </tbody>
+                  </table>
+                    <h4> </h4>
+                    <h4> </h4>
+                    <h4> </h4>
+                </div>
+              </div>
             </div>
         </div>
     </div>
