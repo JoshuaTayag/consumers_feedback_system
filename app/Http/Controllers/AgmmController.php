@@ -138,7 +138,7 @@ class AgmmController extends Controller
 
         // no data for membership
         $request->merge(['membership_or' => '']);
-        $request->merge(['type' => 'ONLINE-PRE-REGISTRATION']);
+        $request->merge(['type' => $request->registration_type]);
 
         // Make a POST request to another API
         try {
@@ -499,38 +499,68 @@ class AgmmController extends Controller
         $ref_areas = DB::table('agmm_ref_allowance')->get();
 
         // Check if request has values for 'municipality' and 'winners_count'
-        if ($request->has(['municipality', 'winners_count'])) {
+        if ($request->has(['municipality', 'winners_count', 'reg_type'])) {
 
             $validated = $request->validate([
                 'municipality' => 'nullable',
                 'winners_count' => 'required|integer',
+                'reg_type' => 'required',
             ]);
             
             $municipality = $validated['municipality'];
             $winnersCount = $validated['winners_count'];
-            
-            // Fetch the winners based on the first two digits of account_no
-            $winners = DB::table('agmm_verified_accounts as va')
-            ->leftJoin('Consumers Table as ct', 'ct.Accnt No', '=', 'va.account_no')
-            ->where('raffle_draw', null);
+            $reg_type = $validated['reg_type'];
 
-            if ($municipality) {
-                // Fetch the winners based on the first two digits of account_no
-                $winners->where(DB::raw('LEFT(account_no, 2)'), $municipality);
+            if($reg_type == 1) {
+                $winners = DB::table('agmms as va')
+                ->leftJoin('Consumers Table as ct', 'ct.Accnt No', '=', 'va.account_no')
+                ->where('allowance_status', false)
+                ->where('registration_type', 'ONLINE-PRE-REGISTRATION')
+                ->select('va.id', 'ct.Name as name','va.account_no', 'va.contact_no', 'va.membership_or', 'ct.Address');
+
+                if ($municipality) {
+                    // Fetch the winners based on the first two digits of account_no
+                    $winners->where(DB::raw('LEFT(account_no, 2)'), $municipality);
+                }
+    
+                $winners = $winners->inRandomOrder()
+                ->take($winnersCount)
+                ->get();
+
+                // dd($winners);
+    
+                $winnerIds = $winners->pluck('id');
+    
+                DB::transaction(function () use ($winnerIds) {
+                    DB::table('agmms')
+                        ->whereIn('id', $winnerIds)
+                        ->update(['allowance_status' => true]);
+                });
             }
+            if($reg_type == 2) {
+                // Fetch the winners based on the first two digits of account_no
+                $winners = DB::table('agmm_verified_accounts as va')
+                ->leftJoin('Consumers Table as ct', 'ct.Accnt No', '=', 'va.account_no')
+                ->where('raffle_draw', null)
+                ->where('registration_type', 'MCO');
 
-            $winners = $winners->inRandomOrder()
-            ->take($winnersCount)
-            ->get();
-
-            $winnerIds = $winners->pluck('id');
-
-            DB::transaction(function () use ($winnerIds) {
-                DB::table('agmm_verified_accounts')
-                    ->whereIn('id', $winnerIds)
-                    ->update(['raffle_draw' => true]);
-            });
-
+                if ($municipality) {
+                    // Fetch the winners based on the first two digits of account_no
+                    $winners->where(DB::raw('LEFT(account_no, 2)'), $municipality);
+                }
+    
+                $winners = $winners->inRandomOrder()
+                ->take($winnersCount)
+                ->get();
+    
+                $winnerIds = $winners->pluck('id');
+    
+                DB::transaction(function () use ($winnerIds) {
+                    DB::table('agmm_verified_accounts')
+                        ->whereIn('id', $winnerIds)
+                        ->update(['raffle_draw' => true]);
+                });
+            }
 
         } else {
             $winners = collect();

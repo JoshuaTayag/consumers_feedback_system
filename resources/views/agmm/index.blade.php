@@ -270,14 +270,14 @@
                         
                           const selectedConsumerType = result.value; // Capture the selected radio button value
                         
-                          const myHeaders = new Headers();
-                          myHeaders.append("Accept", "application/json");
+                          const myHeaders1 = new Headers();
+                          myHeaders1.append("Accept", "application/json");
                           // myHeaders.append("Authorization", "Bearer HdSQxFktaKelqX3AC9HbEJfHiGxYaapchoUxpEGr");
-                          myHeaders.append("Authorization", "Bearer {{ config('services.auth.bearer_token') }}");
+                          myHeaders1.append("Authorization", "Bearer {{ config('services.auth.bearer_token') }}");
 
                           const requestOptions = {
                           method: "GET",
-                          headers: myHeaders,
+                          headers: myHeaders1,
                           redirect: "follow"
                           };
 

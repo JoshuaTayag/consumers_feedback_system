@@ -61,7 +61,7 @@
                 padding-top: 10px;
             }
             #details, #footer{
-                font-size: 10px;
+                font-size: 15px;
             }
             #qrcode > img{
                 width: 110px;
@@ -81,8 +81,9 @@
 
         @media print, (max-width: 600px) {
             #heading {
-                font-size: 12px;
-                text-align: left !important;
+                font-size: 15px;
+                text-align: center !important;
+                font-weight: bold;
             }
             #qrcode > img {
                 border: 2px solid black !important;
@@ -93,6 +94,11 @@
                 font-size: 10px !important;
                 text-align: left !important;
             }
+            #footer{
+                font-size: 15px !important;
+                text-align: left !important;
+                font-weight: bold;
+            }
             
         }
     </style>
@@ -102,7 +108,7 @@
     <div id="dataToDownload" >
         <div class="card col-lg-6 p-3 mx-auto" id="main-card">
             <div class="card-body">
-                <div class="h4 mb-3 text-center" id="heading">LEYECO V 43rd AGMM REGISTRATION DETAILS</div>
+                <div class="h4 mb-3 text-center" id="heading">LEYECO V 43rd <br>AGMM REGISTRATION DETAILS</div>
                 <div class="row my-2">
                     <div class="col-4 col-md-6 justify-content-center align-items-center">
                         <div id="qrcode" class="img-auto"></div>
@@ -116,7 +122,7 @@
                     </div>
                 </div>
                 <div class="text-end mt-4" id="footer">Consumer Type: {{ $details->registration_type }}</div>
-                <div class="mb-3 text-end" id="footer">Verified By: {{ strtoupper($verifier) }}</div>
+                <div class="mb-3 text-end" id="details">Verified By: {{ strtoupper($verifier) }}</div>
                 <div class="row justify-content-center" id="buttons">
                     <div class="col-auto">
                         <button class="btn btn-sm btn-secondary my-1" id="download"  onclick="downloadData()"><i class="fas fa-download"></i> Download</button>

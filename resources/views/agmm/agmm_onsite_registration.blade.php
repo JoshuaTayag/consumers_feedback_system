@@ -125,6 +125,9 @@
                         <label for="contact_no" class="form-label">Contact No (Ex: 09*********) <span class="text-danger fw-bold"> *</span></label>
                         <input type="text" class="form-control @error('contact_no') is-invalid @enderror" value="{{ old('contact_no') }}" id="contact_no" pattern="^((09))[0-9]{9}" name="contact_no" maxlength="11" required>
                     </div>
+                    <div class="mb-2">
+                        <input type="hidden" class="form-control" id="registration_type" name="registration_type" value="ON-SITE-PRE-REGISTRATION">
+                    </div>
                     <hr class="my-3">
                     <div class="mb-2 text-center">
                         <button type="submit" class="btn custom-primary rounded px-4">REGISTER</button>

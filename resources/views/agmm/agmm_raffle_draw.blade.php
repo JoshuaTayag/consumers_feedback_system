@@ -36,27 +36,54 @@
 <body>
 <div class="container pt-5">
   <div class="card col-lg-12 p-3 mx-auto">
+    <form method="GET" action="{{ route('agmmRaffle') }}">
       <div class="card-body">
         <div class="container">
           <h1 class="my-4">43rd AGMM Raffle Draw</h1>
-          <form method="GET" action="{{ route('agmmRaffle') }}">
-              <div class="form-group my-3">
-                  <label for="municipality">Municipality</label>
-                  <select name="municipality" id="municipality" name="municipality" class="form-control">
-                    <option value="" @selected(request('municipality') == '')>ALL</option>
-                      @foreach($ref_areas as $ref_area)
-                          <option value="{{ $ref_area->area_code }}" @selected( $ref_area->area_code == request('municipality') ) >{{ $ref_area->area }}</option>
-                      @endforeach
-                  </select>
+          
+          <div class="row">
+            <div class="col">
+              <div class="row justify-content-center align-items-center g-2">
+
+                <div class="col">
+                  <div class="mb-2">
+                      <label for="reg_type" class="form-label mb-1">Registration Type</label>
+                      <select id="reg_type" name="reg_type" class="form-control" required>
+                        <option value="" @selected(request('reg_type') == '')></option>
+                        <option value="1" @selected(request('reg_type') == 1)>ONLINE REGISTRATION</option>
+                        <option value="2" @selected(request('reg_type') == 2)>VERIFIED REGISTRATION</option>
+                      </select>
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="mb-2">
+                      <label for="municipality" class="form-label mb-1">Municipality</label>
+                      <select id="municipality" name="municipality" class="form-control">
+                        <option value="" @selected(request('municipality') == '')>ALL</option>
+                          @foreach($ref_areas as $ref_area)
+                              <option value="{{ $ref_area->area_code }}" @selected( $ref_area->area_code == request('municipality') ) >{{ $ref_area->area }}</option>
+                          @endforeach
+                      </select>
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="mb-2">
+                    <label for="winners_count" class="form-label mb-1">Number of Winners</label>
+                    <input type="number" name="winners_count" id="winners_count" value="{{ request('winners_count') }}" class="form-control" required min="1">
+                  </div>
+                </div>
+
+                <div class="col">
+                  <button type="submit" id="submit_button" name="submit_button" class="btn btn-primary mt-3">Draw Winners</button>
+                </div>
               </div>
-              <div class="form-group my-3">
-                  <label for="winners_count">Number of Winners</label>
-                  <input type="number" name="winners_count" id="winners_count" value="{{ request('winners_count') }}" class="form-control" required min="1">
-              </div>
-              <button type="submit" class="btn btn-primary">Draw Winners</button>
-          </form>
+            </div>
+          </div>
         </div>
       </div>
+    </form>
   </div>
 </div>
 
@@ -77,7 +104,7 @@
                 <th>Name</th>
                 <th>Contact No.</th>
                 <th>Membership OR</th>
-                <th>Address <span class="text-danger">(Based on Membership Record)</span></th>
+                <th>Address</th>
               </tr>
             </thead>
             <tbody>
