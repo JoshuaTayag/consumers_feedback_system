@@ -21,7 +21,7 @@
             background: -o-linear-gradient(bottom, #b9e0ff 0%, #30a3ff 100%);
             background: linear-gradient(to top, #b9e0ff 0%, #30a3ff 100%);
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            /* font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; */
         }
 
         #qrcode, img{
@@ -48,18 +48,18 @@
         
         @media print {
             @page {
-                size: 80mm 100%; /* Set paper size */
+                size: 80mm; /* Set paper size */
                 margin: 0; /* Remove default margins */
             }
 
             #download, #print, #close {
                 display: none;
             }
-            #heading{
-                font-size: 15px;
+            /* #heading{
+                font-size: 17px;
                 text-align: center;
                 padding-top: 10px;
-            }
+            } */
             #details, #footer{
                 font-size: 15px;
             }
@@ -81,8 +81,10 @@
 
         @media print, (max-width: 600px) {
             #heading {
-                font-size: 15px;
+                padding-top: 5px;
+                font-size: 17px;
                 text-align: center !important;
+                font-family: 'Roboto', sans-serif;
                 font-weight: bold;
             }
             #qrcode > img {
@@ -104,20 +106,21 @@
     </style>
 </head>
 <body>
-<div class="container p-5" id="print-container">
+<div class="container p-3" id="print-container">
     <div id="dataToDownload" >
-        <div class="card col-lg-6 p-3 mx-auto" id="main-card">
+        <div class="card col-lg-6 p-2 mx-auto" id="main-card">
             <div class="card-body">
-                <div class="h4 mb-3 text-center" id="heading">LEYECO V 43rd <br>AGMM REGISTRATION DETAILS</div>
+                <div class="h4 mb-3 text-center" id="heading"><strong>LEYECO V 43rd <br>AGMM REGISTRATION DETAILS</strong></div>
                 <div class="row my-2">
-                    <div class="col-4 col-md-6 justify-content-center align-items-center">
+                    <div class="col-5 col-md-6 justify-content-center align-items-center">
                         <div id="qrcode" class="img-auto"></div>
                     </div>
-                    <div class="col mt-2" id="details">
+                    <div class="col-7 mt-2" id="details">
                         <strong>Name: <br>{{ $details->name }}</strong><br>
                         <strong>Account No. : {{ substr_replace(substr_replace($details->account_no, '-', 2, 0), '-', 7, 0) }}</strong><br>
                         <strong>Contact No. : {{ $details->contact_no ? $details->contact_no : 'None' }}</strong><br>
-                        <strong>Membership OR: {{ $details->membership_or }}</strong><br>
+                        <strong>Membership: {{ $details->last_name . ', ' . $details->first_name . ' ' . $details->middle_name }}</strong><br>
+                        <strong>Joint Name: {{ $details->joint_name }}</strong><br>
                         <strong>Date: {{ \Carbon\Carbon::parse($details->created_at)->format('m/d/Y h:i A') }}</strong>
                     </div>
                 </div>
@@ -141,6 +144,11 @@
 <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
 <script>
+    
+    window.addEventListener('load', function() {
+        window.print();
+    });
+
     const qrcode = new QRCode(document.getElementById('qrcode'), {
         text: "{{ $details->qr_code_value }}",
         width: 110,

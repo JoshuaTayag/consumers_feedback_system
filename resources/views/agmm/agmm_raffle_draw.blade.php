@@ -34,98 +34,152 @@
 
 </head>
 <body>
-<div class="container pt-5">
-  <div class="card col-lg-12 p-3 mx-auto">
-    <form method="GET" action="{{ route('agmmRaffle') }}">
-      <div class="card-body">
-        <div class="container">
-          <h1 class="my-4">43rd AGMM Raffle Draw</h1>
-          
-          <div class="row">
-            <div class="col">
-              <div class="row justify-content-center align-items-center g-2">
+<div class="m-5 pt-5">
+  <div class="row">
+    <div class="col-lg-7">
+      <div class="card mx-auto">
+        <form method="GET" action="{{ route('agmmRaffle') }}">
+          <div class="card-body">
+            <div class="container">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <a href="{{route('home')}}" class="pr-3">
+                    <img src="{{asset('images/logo.png')}}" style="width: 70px" alt="...">
+                </a>
+                <h1 class="my-4" style="margin: 0; padding-left: 15px;">43rd AGMM Raffle Draw</h1>
+            </div>
 
+              
+              <div class="row">
                 <div class="col">
-                  <div class="mb-2">
-                      <label for="reg_type" class="form-label mb-1">Registration Type</label>
-                      <select id="reg_type" name="reg_type" class="form-control" required>
-                        <option value="" @selected(request('reg_type') == '')></option>
-                        <option value="1" @selected(request('reg_type') == 1)>ONLINE REGISTRATION</option>
-                        <option value="2" @selected(request('reg_type') == 2)>VERIFIED REGISTRATION</option>
-                      </select>
+                  <div class="row justify-content-center align-items-center g-2">
+
+                    <div class="col">
+                      <div class="mb-2">
+                          <label for="reg_type" class="form-label mb-1">Registration Type</label>
+                          <select id="reg_type" name="reg_type" class="form-control" required>
+                            <option value="" @selected(request('reg_type') == '')></option>
+                            <option value="1" @selected(request('reg_type') == 1)>ONLINE REGISTRATION</option>
+                            <option value="2" @selected(request('reg_type') == 2)>VERIFIED REGISTRATION</option>
+                          </select>
+                      </div>
+                    </div>
+
+                    <div class="col">
+                      <div class="mb-2">
+                          <label for="municipality" class="form-label mb-1">Municipality</label>
+                          <select id="municipality" name="municipality" class="form-control">
+                            <option value="" @selected(request('municipality') == '')>ALL</option>
+                              @foreach($ref_areas as $ref_area)
+                                  <option value="{{ $ref_area->area_code }}" @selected( $ref_area->area_code == request('municipality') ) >{{ $ref_area->area }} ({{ $ref_area->area_code }})</option>
+                              @endforeach
+                          </select>
+                      </div>
+                    </div>
+
+                    <div class="col">
+                      <div class="mb-2">
+                        <label for="winners_count" class="form-label mb-1">Number of Winners</label>
+                        <input type="number" name="winners_count" id="winners_count" value="{{ request('winners_count') }}" class="form-control" required min="1">
+                      </div>
+                    </div>
+
+                    <div class="col">
+                      <button type="submit" id="submit_button" name="submit_button" class="btn btn-primary mt-3">Draw Winner's</button>
+                      <a href="{{ route('agmmRaffle') }}" class="btn btn-warning mt-3"><i class="fa fa-eraser"></i> Clear</a>
+                    </div>
                   </div>
-                </div>
+                  <div class="row">
+                    <div class="col p-0">
+                      <div class="container">
+                        <h1 class="my-5 py-2 text-center bg-dark text-white">Winners</h1>
 
-                <div class="col">
-                  <div class="mb-2">
-                      <label for="municipality" class="form-label mb-1">Municipality</label>
-                      <select id="municipality" name="municipality" class="form-control">
-                        <option value="" @selected(request('municipality') == '')>ALL</option>
-                          @foreach($ref_areas as $ref_area)
-                              <option value="{{ $ref_area->area_code }}" @selected( $ref_area->area_code == request('municipality') ) >{{ $ref_area->area }}</option>
-                          @endforeach
-                      </select>
+                        @if($winners->isEmpty())
+                          <p>No participants found for the selected municipality.</p>
+                        @else
+                          <table class="table table-striped">
+                            <thead>
+                              <tr>
+                                <th>#</th>
+                                <th>Account No.</th>
+                                <th>Name</th>
+                                <th>Contact No.</th>
+                                <th>Membership OR</th>
+                                <th>Address</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @foreach($winners as $winner)
+                              <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ substr_replace(substr_replace($winner->account_no, '-', 2, 0), '-', 7, 0) }}</td>
+                                <td>{{ $winner->name }}</td>
+                                <td>{{ $winner->contact_no ? $winner->contact_no : 'NONE'}}</td>
+                                <td>{{ $winner->membership_or }}</td>
+                                <td>{{ $winner->Address }}</td>
+                              </tr>
+                              @endforeach
+                            </tbody>
+                          </table>
+                        @endif
+                      </div>
+                    </div>
                   </div>
-                </div>
-
-                <div class="col">
-                  <div class="mb-2">
-                    <label for="winners_count" class="form-label mb-1">Number of Winners</label>
-                    <input type="number" name="winners_count" id="winners_count" value="{{ request('winners_count') }}" class="form-control" required min="1">
-                  </div>
-                </div>
-
-                <div class="col">
-                  <button type="submit" id="submit_button" name="submit_button" class="btn btn-primary mt-3">Draw Winners</button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </form>
       </div>
-    </form>
-  </div>
-</div>
+    </div>
 
-<div class="container pt-5">
-  <div class="card col-lg-12 p-3 mx-auto">
-    <div class="card-body">
-      <div class="container">
-      <h1 class="my-4">Winners</h1>
-
-        @if($winners->isEmpty())
-          <p>No participants found for the selected municipality.</p>
-        @else
+    <div class="col">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="text-center">Municipality</h3>
+          <hr>
           <table class="table table-striped">
             <thead>
-              <tr>
-                <th>#</th>
-                <th>Account No.</th>
-                <th>Name</th>
-                <th>Contact No.</th>
-                <th>Membership OR</th>
-                <th>Address</th>
+              <tr class="text-center">
+                <th>Account #</th>
+                <th>Account Name</th>
+                <th>Mem OR</th>
+                <th>Municipality</th>
+                <th><i class="fa fa-gear"></i></th>
               </tr>
             </thead>
             <tbody>
-              @foreach($winners as $winner)
-              <tr>
-                <td>{{ $loop->iteration }}</td>
-                <td>{{ substr_replace(substr_replace($winner->account_no, '-', 2, 0), '-', 7, 0) }}</td>
-                <td>{{ $winner->name }}</td>
-                <td>{{ $winner->contact_no ? $winner->contact_no : 'NONE'}}</td>
-                <td>{{ $winner->membership_or }}</td>
-                <td>{{ $winner->Address }}</td>
-              </tr>
+              @foreach($all_winners as $all_winner)
+                <tr class="text-center">
+                  <td>{{ $all_winner->name }}</td>
+                  <td>{{ substr_replace(substr_replace($all_winner->account_no, '-', 2, 0), '-', 7, 0) }}</td>
+                  <td>{{ $all_winner->membership_or }}</td>
+                  <td>{{ $all_winner->area }}</td>
+                  <td>
+                    <a href="{{ route('agmmRaffleRemove', $all_winner->id) }}" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
+                  </td>
+                </tr>
               @endforeach
             </tbody>
           </table>
-        @endif
+        </div>
       </div>
-      
     </div>
   </div>
+  
+  
 </div>
+@if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: 'Success',
+                text: '{{ session('success') }}',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        });
+    </script>
+@endif
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.querySelector('form[action="{{ route('agmmRaffle') }}"]');

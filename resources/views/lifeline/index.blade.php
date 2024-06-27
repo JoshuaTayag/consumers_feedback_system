@@ -12,7 +12,7 @@
                       <span class="mb-0 align-middle fs-3">Lifeline </span>
                   </div>
                   <div class="col-lg-6 text-end">
-                    <a class="btn btn-secondary btn-md text-end" href="{{ date('d') >= 7 && date('d') <= 10 ? route('lifeline.index') : '#' }}" id="{{ date('d') >= 7 && date('d') <= 10 ? '' : 'disabled' }}">
+                    <a class="btn btn-secondary btn-md text-end" href="{{ date('d') >= 7 && date('d') <= 10 ? route('uploadLifeline') : '#' }}" id="{{ date('d') >= 7 && date('d') <= 10 ? '' : 'disabled' }}">
                       <i class="fa fa-upload"></i> Updload
                     </a>
                     <a class="btn btn-secondary btn-md text-end" href="{{ route('lifeline.create') }}">

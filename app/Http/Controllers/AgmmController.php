@@ -206,11 +206,20 @@ class AgmmController extends Controller
     public function getRegistrationByQr($id)
     {
         // Retrieve the account from the database
-        $registration = Agmm::where('qr_code_value', $id)->get();
+        $registration = DB::table('agmms as agmm_accounts')
+        ->leftjoin('Consumer Masterdatabase Table as membership', 'membership.OR No', '=', 'agmm_accounts.membership_or')
+        ->select(
+            'agmm_accounts.*', // Select all columns from agmms table
+            DB::raw("REPLACE(membership.[last Name], ' ', '') as mem_last_name"),
+            DB::raw("REPLACE(membership.[First Name], ' ', '') as mem_first_name"),
+            DB::raw("REPLACE(membership.[Middle Name], ' ', '') as mem_middle_name"),
+        )
+        ->where('qr_code_value', $id)->get();
 
         // Check if the account exists
         if ($registration->count() > 0) {
             // return ['message' => 'Account exists', 'account' => $account, 'status_message' => 'success'];
+            // dd($registration);
             return response()->json(['message' => 'Registration Exist', 'registration' => $registration, 'status_message' => 'success'], 201);
         } else {
             return response()->json(['message' => 'Registration does not exist', 'status_message' => 'error']);
@@ -226,7 +235,11 @@ class AgmmController extends Controller
         if ($registration->count() > 0 && $registration->value('registration_type') == "MCO") {
             // return ['message' => 'Account exists', 'account' => $account, 'status_message' => 'success'];
             return response()->json(['message' => 'Registration Exist', 'registration' => $registration, 'status_message' => 'success'], 201);
-        } else {
+        } 
+        else if($registration->count() > 0 && $registration->value('registration_type') == "Guest"){
+            return response()->json(['message' => 'Not eligible for transportation allowance; customer type needs to be MCO.', 'status_message' => 'error'], 201);
+        }
+        else {
             return response()->json(['message' => 'Registration does not exist', 'status_message' => 'error']);
         }
     }
@@ -255,20 +268,28 @@ class AgmmController extends Controller
         // Retrieve the account from the database
         $registration = DB::table('agmm_verified_accounts')->where('qr_code_value', $separatedArray[0]);
 
-        // get the memmership
-        $membership = $registration->first()->membership_or;
-
-        $claimed_registration_allowance = DB::table('agmm_verified_accounts')->where('membership_or', $membership)->where('allowance_status', true);
-
         // Check if the account exists
         if ($registration->count() > 0) {
 
-            // Check if the status is already claimed
-            if ($registration->first()->allowance_status == true || $claimed_registration_allowance->count() > 0) {
-                return response()->json(['message' => 'Allowance already claimed!', 'status_message' => 'error'], 201);
-            } else{
-                $registration->update(['allowance_status' => true, 'remarks' => $separatedArray[1],  'claimed_by' => Auth::id()]);
-                return response()->json(['message' => 'Allowance successfully claimed!', 'status_message' => 'success'], 201);
+            // get the memmership
+            $membership = $registration->first()->membership_or;
+
+            // remove white spaces in membership
+            $trimmedValue = trim($membership);
+
+            $claimed_registration_allowance = DB::table('agmm_verified_accounts')->where('membership_or', $membership)->where('allowance_status', true);
+
+            if (preg_match('/^0+$/', $trimmedValue) || $trimmedValue == null) {
+                return response()->json(['message' => 'This is a temporary account; please refer it to the help desk.', 'status_message' => 'error']);
+            }
+            else{
+                // Check if the status is already claimed
+                if ($registration->first()->allowance_status == true || $claimed_registration_allowance->count() > 0) {
+                    return response()->json(['message' => 'Allowance already claimed!', 'status_message' => 'error'], 201);
+                } else{
+                    $registration->update(['allowance_status' => true, 'remarks' => $separatedArray[1],  'claimed_by' => Auth::id()]);
+                    return response()->json(['message' => 'Allowance successfully claimed!', 'status_message' => 'success'], 201);
+                }
             }
             
         } else {
@@ -286,10 +307,20 @@ class AgmmController extends Controller
         $account_name = $request->input('account_name');
 
         $accountsQuery = DB::table('Consumers Table as ct')
-        ->leftJoin('agmm_verified_accounts as ava', 'ct.Accnt No', '=', 'ava.account_no')
-        ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No as membership_or')
-        ->whereNull('ava.account_no') // Ensures only non-existing accounts are selected
-        ->whereRaw('LEN(ct.[Accnt No]) = 10');
+        ->leftjoin('agmm_verified_accounts as ava', 'ct.Accnt No', '=', 'ava.account_no')
+        ->leftjoin('Consumer Masterdatabase Table as membership', 'membership.OR No', '=', 'ct.OR No')
+        ->select('ct.Accnt No as id',
+            'ct.Name',
+            'ct.Address',
+            'ct.OR No as membership_or',
+            DB::raw("REPLACE(membership.[last Name], ' ', '') as last_name"),
+            DB::raw("REPLACE(membership.[First Name], ' ', '') as first_name"),
+            DB::raw("REPLACE(membership.[Middle Name], ' ', '') as middle_name"),
+            DB::raw("REPLACE(membership.[Joint Name], ' ', '') as joint_name"),
+            DB::raw("CASE WHEN ava.account_no IS NOT NULL THEN 1 ELSE 0 END as account_exists"))
+        // ->whereNull('ava.account_no') // Ensures only non-existing accounts are selected
+        ->whereRaw('LEN(ct.[Accnt No]) = 10')
+        ->orderBy('id', 'asc');
 
         // Add conditions based on the request input
         if ($request->filled('account_name')) {
@@ -311,8 +342,7 @@ class AgmmController extends Controller
     public function agmmVerifyAccount($id, Request $request){
         // dd($request);
         try {
-            $account = DB::connection('sqlSrvBilling')
-            ->table('Consumers Table')
+            $account = DB::table('Consumers Table')
             ->where('Accnt No', $id)
             ->first();
 
@@ -324,12 +354,24 @@ class AgmmController extends Controller
             $uuid = Uuid::uuid4()->toString();
 
             // Get the first two digit of the account_no
-            $first_two_digits = substr($account->{'Accnt No'}, 0, 2);
+            $area_code = substr($account->{'Accnt No'}, 0, 2);
+
+            // extract the 4 digits starting from the second character
+            $route = substr($account->{'Accnt No'}, 2, 4);
                 
-            // Get reference allowance from the table
-            $allowance = DB::table('agmm_ref_allowance')
-            ->where('area_code', $first_two_digits)
-            ->value('allowance');
+            if ($area_code == '21' || $area_code == '22' || $area_code == '23' || $area_code == '24') { 
+                // Get reference allowance from the table for route
+                $allowance = DB::table('agmm_ref_route_allowance')
+                ->where('route', $route)
+                ->value('allowance');
+            } else {
+                // Get reference allowance from the table area
+                $allowance = DB::table('agmm_ref_allowance')
+                ->where('area_code', $area_code)
+                ->value('allowance');
+            }
+
+            
 
             // INSERT ELECTRICIAN COMPLAINT
             $activityId = DB::table('agmm_verified_accounts')->insert(
@@ -340,11 +382,13 @@ class AgmmController extends Controller
                     'membership_or' => $account->{'OR No'},
                     'registration_type' => $request->swalValue,
                     'qr_code_value' => $uuid,
-                    'transpo_allowance' => $allowance ? $allowance : 0,
+                    // 'transpo_allowance' => $request->hidden_amount === null ? $allowance : $request->hidden_amount,
+                    'transpo_allowance' => $allowance,
                     'claimed_by' => "", 
                     'allowance_status' => false,
                     'verified_by' => Auth::id(),
                     'remarks' => "",
+                    'guest_remarks' => $request->hidden_remarks,
                     'created_at' => now()
                 )
             );
@@ -362,14 +406,23 @@ class AgmmController extends Controller
             DB::rollBack();
 
             // Return an error response or redirect to an error page
-            return $e;
+            // return $e;
+            dd($e);
+            if ($e->getCode() == 23000) {
+                return redirect()->back()->withError('This account is already registered! Try reprinting the account number.');
+            } else {
+                return $e;
+            }
+            
 
         }
-        return redirect()->back()->withSuccess('Applications Successfully Uploaded!');
     }
 
     public function printRegistrationQR($id){
-        $details = DB::table('agmm_verified_accounts')->select('*')->where('account_no', $id)->first();
+        $details = DB::table('agmm_verified_accounts as verified_accounts')
+        ->leftjoin('Consumer Masterdatabase Table as membership', 'membership.OR No', '=', 'verified_accounts.membership_or')
+        ->select('verified_accounts.name', 'verified_accounts.account_no', 'verified_accounts.contact_no', 'verified_accounts.created_at', 'verified_accounts.verified_by', DB::raw("REPLACE(membership.[last Name], ' ', '') as last_name"), DB::raw("REPLACE(membership.[First Name], ' ', '') as first_name"), DB::raw("REPLACE(membership.[Middle Name], ' ', '') as middle_name"), 'membership.Joint Name as joint_name', 'verified_accounts.membership_or', 'verified_accounts.registration_type', 'verified_accounts.qr_code_value')
+        ->where('account_no', $id)->first();
         if($details->verified_by != 0){
             $verifier = DB::table('users')->where('id', $details->verified_by)->value('name');
         }
@@ -565,9 +618,21 @@ class AgmmController extends Controller
         } else {
             $winners = collect();
         }
-
-        // dd($winners);
-        return view('agmm.agmm_raffle_draw')->with(compact('ref_areas', 'winners'));
+        $all_winners = DB::table('agmm_verified_accounts as verified_acc')
+        ->leftjoin('agmm_ref_allowance as ref_all',  DB::raw('LEFT(verified_acc.account_no, 2)'), '=', 'ref_all.area_code')
+        ->where('raffle_draw', true)
+        ->select('verified_acc.id', 'verified_acc.account_no', 'verified_acc.name', 'verified_acc.membership_or', 'ref_all.area', 'ref_all.area_code')
+        ->orderBy('ref_all.area_code', 'asc')
+        ->get();
+        // dd($all_winners);
+        return view('agmm.agmm_raffle_draw')->with(compact('ref_areas', 'winners', 'all_winners'));
         
+    }
+
+    public function agmmRaffleRemove($id){
+        DB::table('agmm_verified_accounts')
+        ->where('id', $id)
+        ->update(['raffle_draw' => null]);
+        return redirect()->route('agmmRaffle')->with('success', 'Successfully Removed!');
     }
 }

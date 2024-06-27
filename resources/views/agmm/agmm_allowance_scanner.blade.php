@@ -25,10 +25,14 @@
         }
 
 
-        
+
         #qr-reader{
             width: 300px; 
             height: 300px;
+        }
+
+        .full-width-button {
+            width: 100%;
         }
 
         
@@ -85,10 +89,22 @@
             <div class="row my-2">
                 <div class="col">
                     <p>Total consumers claimed: {{ $total_scanned_consumers }}</p>
-                    <p>Total allowance disbursed: ₱{{ number_format($total_disbursed_money, 0) }}
-</p>
+                    <p>Total allowance disbursed: ₱{{ number_format($total_disbursed_money, 0) }}</p>
                 </div>
             </div>
+            
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <a href="{{ route('home') }}" class="btn btn-sm btn-warning full-width-button"> <i class="fa fa-home me-2"></i>Home</a>
+                </div>
+                <div class="col-6">
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-danger full-width-button">Logout</button>
+                    </form>
+                </div>
+            </div>
+
             <!-- <div class="row justify-content-center" id="buttons">
                 <div class="col-auto">
                     <button class="btn btn-sm btn-secondary my-1" id="download"  onclick="downloadData()"><i class="fas fa-download"></i> Scan QR</button>
@@ -138,92 +154,97 @@
         fetch(url, requestOptions)
             .then((response) => response.json()) // Parse response as JSON
             .then((result) => {
-            //   console.log(result)
-              // Extract account number from result
-              var accountNo = result.registration[0].account_no;
-              // Format account number
-              var formattedAccountNo = accountNo.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
+            //   console.log(result.status_message);
+              
+                //   check if it has error
+                if(result.status_message == "success"){
 
-              // check if the qrcode is used
-              if(result.registration[0].allowance_status == 0){
-                  // Display allowance data in SweetAlert popup
-                  Swal.fire({
-                      icon: 'question',
-                      title: 'Confirm Registration?',
-                      html:
-                              '<div>Name: ' + result.registration[0].name +  '</div>' + 
-                              '<div>Account Number: ' + formattedAccountNo  + '</div>' +
-                              '<div>Transpo Allowance: ₱' + result.registration[0].transpo_allowance + '.00</div>' +
-                              '<div><div class="m-2"><label for="remarks" class="form-label">Remarks: (Optional) </label><input type="text" class="form-control" id="remarks" name="remarks"></div></div>',
-                      confirmButtonText: 'Confirm',
-                      showCancelButton: true,
-                      cancelButtonText: 'Cancel'
-                  }).then((result) => {
-                      if (result.isConfirmed) {
+                // Extract account number from result
+                var accountNo = result.registration[0].account_no;
+                // Format account number
+                var formattedAccountNo = accountNo.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
+                
+                    // check if the qrcode is used
+                    if(result.registration[0].allowance_status == 0){
+                        // Display allowance data in SweetAlert popup
+                        Swal.fire({
+                            icon: 'question',
+                            title: 'Confirm Registration?',
+                            html:
+                                    '<div>Name: ' + result.registration[0].name +  '</div>' + 
+                                    '<div>Account Number: ' + formattedAccountNo  + '</div>' +
+                                    '<div>Transpo Allowance: ₱' + result.registration[0].transpo_allowance + '.00</div>' +
+                                    '<div><div class="m-2"><label for="remarks" class="form-label">Remarks: (Optional) </label><input type="text" class="form-control" id="remarks" name="remarks"></div></div>',
+                            confirmButtonText: 'Confirm',
+                            showCancelButton: true,
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
 
-                          const myHeaders = new Headers();
-                          myHeaders.append("Accept", "application/json");
-                        //   myHeaders.append("Authorization", "Bearer HdSQxFktaKelqX3AC9HbEJfHiGxYaapchoUxpEGr");
-                        //   myHeaders.append("Authorization", "Bearer {{ config('services.auth.bearer_token') }}");
+                                const myHeaders = new Headers();
+                                myHeaders.append("Accept", "application/json");
+                                //   myHeaders.append("Authorization", "Bearer HdSQxFktaKelqX3AC9HbEJfHiGxYaapchoUxpEGr");
+                                //   myHeaders.append("Authorization", "Bearer {{ config('services.auth.bearer_token') }}");
 
-                          const remarks = document.getElementById('remarks').value;
-                          const qr_with_remarks = qrCode+"|"+remarks;
-                          console.log(qr_with_remarks);
-                          const requestOptions = {
-                          method: "GET",
-                          headers: myHeaders,
-                          redirect: "follow"
-                          };
+                                const remarks = document.getElementById('remarks').value;
+                                const qr_with_remarks = qrCode+"|"+remarks;
+                                console.log(qr_with_remarks);
+                                const requestOptions = {
+                                method: "GET",
+                                headers: myHeaders,
+                                redirect: "follow"
+                                };
 
-                          // Construct the URL dynamically
-                          var url = "{{ route('issueTranspoAllowance', ':qrCode') }}".replace(':qrCode', qr_with_remarks);
+                                // Construct the URL dynamically
+                                var url = "{{ route('issueTranspoAllowance', ':qrCode') }}".replace(':qrCode', qr_with_remarks);
 
-                          fetch(url, requestOptions)
-                          .then((response) => response.json())
-                          .then((result) => {
-                                  Swal.fire({
-                                      icon: result.status_message,
-                                      title: result.message,
-                                      confirmButtonText: 'OK'
-                                  }).then((result) => {
-                                      if (result.isConfirmed) {
-                                        //   html5QrcodeScanner.render(onScanSuccess);
-                                        location.reload(true);
-                                      }
-                                  });
-                          })
-                          .catch((error) => console.error(error));
-                      } else {
-                          // If user clicks "No", restart the QR code scanner
-                          html5QrcodeScanner.render(onScanSuccess);
-                      }
-                  });
-              }
-              else{
-                  Swal.fire({
-                      icon: 'error',
-                      title: 'QR code already used!',
-                      confirmButtonText: 'OK'
-                  }).then((result) => {
-                      if (result.isConfirmed) {
-                          html5QrcodeScanner.render(onScanSuccess);
-                      }
-                  });
-              }
-            })
-            .catch((error) => {
-                // Show error message in SweetAlert popup
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error QR Code Value!',
-                    confirmButtonText: 'OK'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // If user clicks "OK", restart the QR code scanner
-                        html5QrcodeScanner.render(onScanSuccess);
+                                fetch(url, requestOptions)
+                                .then((response) => response.json())
+                                .then((result) => {
+                                        Swal.fire({
+                                            icon: result.status_message,
+                                            title: result.message,
+                                            confirmButtonText: 'OK'
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                //   html5QrcodeScanner.render(onScanSuccess);
+                                                location.reload(true);
+                                            }
+                                        });
+                                })
+                                .catch((error) => console.error(error));
+                            } else {
+                                // If user clicks "No", restart the QR code scanner
+                                html5QrcodeScanner.render(onScanSuccess);
+                            }
+                        });
                     }
-                });
+                    else{
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'QR code already used!',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                html5QrcodeScanner.render(onScanSuccess);
+                            }
+                        });
+                    }
+
+                }
+                else{
+                    Swal.fire({
+                    icon: result.status_message,
+                    title: result.message,
+                    confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // If user clicks "OK", restart the QR code scanner
+                            html5QrcodeScanner.render(onScanSuccess);
+                        }
+                    });
+                }
+              
             });     
     }
 
@@ -233,8 +254,3 @@
 </script>
 </body>
 </html>
-
-
-<style>
-    
-</style>
