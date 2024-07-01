@@ -203,6 +203,21 @@ class AgmmController extends Controller
         }
     }
 
+    public function getPreRegistration($id)
+    {
+        // Retrieve the account from the database
+        // $registration = Agmm::where('account_no', $id)->get();
+        $registration = DB::table('agmms')->where('account_no', $id)->get();
+
+        // Check if the account exists
+        if ($registration->count() > 0) {
+            // return ['message' => 'Account exists', 'account' => $account, 'status_message' => 'success'];
+            return response()->json(['message' => 'Registration Exist', 'registration' => $registration, 'status_message' => 'success'], 201);
+        } else {
+            return response()->json(['message' => 'Registration does not exist', 'status_message' => 'error']);
+        }
+    }
+
     public function getRegistrationByQr($id)
     {
         // Retrieve the account from the database
@@ -493,7 +508,8 @@ class AgmmController extends Controller
                         'allowance_status' => false,
                         'verified_by' => Auth::id(),
                         'remarks' => "",
-                        'created_at' => now()
+                        'created_at' => now(),
+                        'guest_remarks' => $request->remarks
                     )
                 );
                 DB::commit();
@@ -566,16 +582,18 @@ class AgmmController extends Controller
 
             if($reg_type == 1) {
                 $winners = DB::table('agmms as va')
+                ->leftjoin('agmm_verified_accounts as vt', 'vt.account_no', '=', 'va.account_no')
                 ->leftJoin('Consumers Table as ct', 'ct.Accnt No', '=', 'va.account_no')
-                ->where('allowance_status', false)
-                ->where('registration_type', 'ONLINE-PRE-REGISTRATION')
+                ->whereNull('vt.account_no')
+                ->where('va.allowance_status', false)
+                ->where('va.registration_type', 'ONLINE-PRE-REGISTRATION')
                 ->select('va.id', 'ct.Name as name','va.account_no', 'va.contact_no', 'va.membership_or', 'ct.Address');
 
                 if ($municipality) {
                     // Fetch the winners based on the first two digits of account_no
                     $winners->where(DB::raw('LEFT(account_no, 2)'), $municipality);
                 }
-    
+                // dd($winners->get());
                 $winners = $winners->inRandomOrder()
                 ->take($winnersCount)
                 ->get();
@@ -624,8 +642,15 @@ class AgmmController extends Controller
         ->select('verified_acc.id', 'verified_acc.account_no', 'verified_acc.name', 'verified_acc.membership_or', 'ref_all.area', 'ref_all.area_code')
         ->orderBy('ref_all.area_code', 'asc')
         ->get();
+
+        $all_online_winners = DB::table('agmms as pre_reg')
+        ->leftjoin('agmm_ref_allowance as ref_all',  DB::raw('LEFT(pre_reg.account_no, 2)'), '=', 'ref_all.area_code')
+        ->where('allowance_status', true)
+        ->select('pre_reg.id', 'pre_reg.account_no', 'pre_reg.last_name', 'pre_reg.first_name', 'pre_reg.middle_name', 'pre_reg.membership_or', 'ref_all.area', 'ref_all.area_code')
+        ->orderBy('ref_all.area_code', 'asc')
+        ->get();
         // dd($all_winners);
-        return view('agmm.agmm_raffle_draw')->with(compact('ref_areas', 'winners', 'all_winners'));
+        return view('agmm.agmm_raffle_draw')->with(compact('ref_areas', 'winners', 'all_winners', 'all_online_winners'));
         
     }
 
@@ -633,6 +658,13 @@ class AgmmController extends Controller
         DB::table('agmm_verified_accounts')
         ->where('id', $id)
         ->update(['raffle_draw' => null]);
+        return redirect()->route('agmmRaffle')->with('success', 'Successfully Removed!');
+    }
+
+    public function agmmOnlineRaffleRemove($id){
+        DB::table('agmms')
+        ->where('id', $id)
+        ->update(['allowance_status' => false]);
         return redirect()->route('agmmRaffle')->with('success', 'Successfully Removed!');
     }
 }

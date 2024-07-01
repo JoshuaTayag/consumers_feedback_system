@@ -43,6 +43,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('agmm-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'getAllowance'])->middleware('auth:sanctum')->name('transpoAllowance');
     Route::get('agmm-registration/from-preregistration/{id}', [App\Http\Controllers\AgmmController::class, 'agmmVerifyAccountFromPreReg'])->middleware('auth:sanctum')->name('verifyPreRegistration');
     Route::get('agmm/raffle/remove/{id}', [App\Http\Controllers\AgmmController::class, 'agmmRaffleRemove'])->name('agmmRaffleRemove');
+    Route::get('agmm/online-raffle/remove/{id}', [App\Http\Controllers\AgmmController::class, 'agmmOnlineRaffleRemove'])->name('agmmOnlineRaffleRemove');
     
     // membership
     Route::resource('membership', 'App\Http\Controllers\MembershipController');

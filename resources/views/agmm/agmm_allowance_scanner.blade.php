@@ -95,13 +95,13 @@
             
             <div class="row align-items-center">
                 <div class="col-6">
-                    <a href="{{ route('home') }}" class="btn btn-sm btn-warning full-width-button"> <i class="fa fa-home me-2"></i>Home</a>
-                </div>
-                <div class="col-6">
                     <form id="logout-form" action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-danger full-width-button">Logout</button>
                     </form>
+                </div>
+                <div class="col-6">
+                    <a href="{{ route('home') }}" class="btn btn-sm btn-warning full-width-button"> <i class="fa fa-home me-2"></i>Home</a>
                 </div>
             </div>
 

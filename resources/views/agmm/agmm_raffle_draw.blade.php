@@ -101,7 +101,7 @@
                               <tr>
                                 <th>#</th>
                                 <th>Account No.</th>
-                                <th>Name</th>
+                                <th>Account Name</th>
                                 <th>Contact No.</th>
                                 <th>Membership OR</th>
                                 <th>Address</th>
@@ -135,13 +135,13 @@
     <div class="col">
       <div class="card">
         <div class="card-body">
-          <h3 class="text-center">Municipality</h3>
+          <h3 class="text-center">Onsite Raffle Winners</h3>
           <hr>
           <table class="table table-striped">
             <thead>
               <tr class="text-center">
                 <th>Account #</th>
-                <th>Account Name</th>
+                <th>Registered Name</th>
                 <th>Mem OR</th>
                 <th>Municipality</th>
                 <th><i class="fa fa-gear"></i></th>
@@ -150,12 +150,43 @@
             <tbody>
               @foreach($all_winners as $all_winner)
                 <tr class="text-center">
-                  <td>{{ $all_winner->name }}</td>
                   <td>{{ substr_replace(substr_replace($all_winner->account_no, '-', 2, 0), '-', 7, 0) }}</td>
+                  <td>{{ $all_winner->name }}</td>
                   <td>{{ $all_winner->membership_or }}</td>
                   <td>{{ $all_winner->area }}</td>
                   <td>
                     <a href="{{ route('agmmRaffleRemove', $all_winner->id) }}" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
+                  </td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <div class="card-body">
+          <h3 class="text-center">Online Viewer Raffle Winners</h3>
+          <hr>
+          <table class="table table-striped">
+            <thead>
+              <tr class="text-center">
+                <th>Account #</th>
+                <th>Registered Name</th>
+                <th>Mem OR</th>
+                <th>Municipality</th>
+                <th><i class="fa fa-gear"></i></th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($all_online_winners as $all_online_winner)
+                <tr class="text-center">
+                  <td>{{ substr_replace(substr_replace($all_online_winner->account_no, '-', 2, 0), '-', 7, 0) }}</td>
+                  <td>{{ $all_online_winner->last_name.', '.$all_online_winner->first_name.' '.$all_online_winner->middle_name }}</td>
+                  <td>{{ $all_online_winner->membership_or }}</td>
+                  <td>{{ $all_online_winner->area }}</td>
+                  <td>
+                    <a href="{{ route('agmmOnlineRaffleRemove', $all_online_winner->id) }}" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
                   </td>
                 </tr>
               @endforeach

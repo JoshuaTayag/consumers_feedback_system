@@ -48,7 +48,7 @@
         
         @media print {
             @page {
-                size: 80mm; /* Set paper size */
+                size: 80mm 100%; /* Set paper size */
                 margin: 0; /* Remove default margins */
             }
 
@@ -64,8 +64,8 @@
                 font-size: 15px;
             }
             #qrcode > img{
-                width: 110px;
-                height: 110px;
+                width: 210px;
+                height: 210px;
                 /* padding: 30px; */
             }
             .card-body{
@@ -89,8 +89,8 @@
             }
             #qrcode > img {
                 border: 2px solid black !important;
-                width: 90px !important;
-                height: 90px !important;
+                width: 115px !important;
+                height: 115px !important;
             }
             #details, #footer{
                 font-size: 10px !important;

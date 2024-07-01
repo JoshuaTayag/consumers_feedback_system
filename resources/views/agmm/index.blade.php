@@ -263,41 +263,41 @@
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Confirm',
-            didOpen: () => {
-                const updateRemarksVisibility = () => {
-                    const guestRadio = document.getElementById('guest_' + accountId);
-                    const remarksContainer = document.getElementById('remarks-container_' + accountId);
-                    const remarksInput = document.getElementById('remarks_' + accountId);
-                    if (guestRadio.checked) {
-                        remarksContainer.style.display = 'block';
-                        remarksInput.required = true;
-                    } else {
-                        remarksContainer.style.display = 'none';
-                        remarksInput.required = false;
-                    }
-                    // Clear validation message if MCO is selected
-                    if (document.getElementById('mco_' + accountId).checked) {
-                        Swal.resetValidationMessage();
-                    }
-                };
+            // didOpen: () => {
+            //     const updateRemarksVisibility = () => {
+            //         const guestRadio = document.getElementById('guest_' + accountId);
+            //         const remarksContainer = document.getElementById('remarks-container_' + accountId);
+            //         const remarksInput = document.getElementById('remarks_' + accountId);
+            //         if (guestRadio.checked) {
+            //             remarksContainer.style.display = 'block';
+            //             remarksInput.required = true;
+            //         } else {
+            //             remarksContainer.style.display = 'none';
+            //             remarksInput.required = false;
+            //         }
+            //         // Clear validation message if MCO is selected
+            //         if (document.getElementById('mco_' + accountId).checked) {
+            //             Swal.resetValidationMessage();
+            //         }
+            //     };
                 
-                document.querySelectorAll(`input[name="flexRadioDefault_${accountId}"]`).forEach(radio => {
-                    radio.addEventListener('change', updateRemarksVisibility);
-                });
+            //     document.querySelectorAll(`input[name="flexRadioDefault_${accountId}"]`).forEach(radio => {
+            //         radio.addEventListener('change', updateRemarksVisibility);
+            //     });
                 
-                // Initial call to set the correct state
-                updateRemarksVisibility();
-            },
+            //     // Initial call to set the correct state
+            //     updateRemarksVisibility();
+            // },
             preConfirm: () => {
                 const selectedRadio = document.querySelector(`input[name="flexRadioDefault_${accountId}"]:checked`);
                 if (!selectedRadio) {
                     Swal.showValidationMessage('Please select a type of consumer');
                     return false; // Return false to prevent SweetAlert from closing
                 }
-                if (selectedRadio.value === 'Guest' && !document.getElementById('remarks_' + accountId).value) {
-                    Swal.showValidationMessage('Remarks are required for Guest');
-                    return false; // Return false to prevent SweetAlert from closing
-                }
+                // if (selectedRadio.value === 'Guest' && !document.getElementById('remarks_' + accountId).value) {
+                //     Swal.showValidationMessage('Remarks are required for Guest');
+                //     return false; // Return false to prevent SweetAlert from closing
+                // }
                 return {
                     consumerType: selectedRadio.value,
                     remarks: document.getElementById('remarks_' + accountId).value
@@ -402,6 +402,12 @@
                                     Guest
                                   </label>
                                 </div>
+                                <div>
+                                    <div class="m-2" id="remarks-container">
+                                        <label for="pre_reg_remarks" class="form-label">Remarks: (Optional)</label>
+                                        <input type="text" class="form-control" id="pre_reg_remarks" name="pre_reg_remarks">
+                                    </div>
+                                </div>
                               </div>`,
                       confirmButtonText: 'Confirm',
                       showCancelButton: true,
@@ -412,12 +418,20 @@
                               Swal.showValidationMessage('Please select a type of consumer');
                               return false; // Return false to prevent SweetAlert from closing
                           }
-                          return selectedRadio.value; // Return the value to be used in the next `.then()`
+                          // return selectedRadio.value; // Return the value to be used in the next `.then()`
+
+                          return {
+                              consumerType: selectedRadio.value,
+                              remarks: document.getElementById('pre_reg_remarks').value
+                          };
+
                       }
                   }).then((result) => {
                       if (result.isConfirmed) {
+                          const selectedConsumerType = result.value.consumerType;
+                          const remarksValue = result.value.remarks;
                         
-                          const selectedConsumerType = result.value; // Capture the selected radio button value
+                          // const selectedConsumerType = result.value; // Capture the selected radio button value
                         
                           const myHeaders1 = new Headers();
                           myHeaders1.append("Accept", "application/json");
@@ -434,7 +448,7 @@
                           var url = "{{ route('verifyPreRegistration', ':qrCode') }}".replace(':qrCode', qrCode);
 
                           // Include selectedConsumerType in the API request if needed (e.g., as a query parameter)
-                          url += `?consumerType=${selectedConsumerType}`;
+                          url += `?consumerType=${selectedConsumerType}?remarks=${remarksValue}`;
 
                           fetch(url, requestOptions)
                           .then((response) => response.json())
