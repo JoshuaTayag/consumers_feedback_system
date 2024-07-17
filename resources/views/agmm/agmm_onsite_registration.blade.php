@@ -154,6 +154,7 @@
             icon: 'success',
             showCloseButton: true,
             allowOutsideClick: false,
+            showConfirmButton: false,
             showCancelButton: true,
             cancelButtonText: 'View Details',
         }).then((result) => {

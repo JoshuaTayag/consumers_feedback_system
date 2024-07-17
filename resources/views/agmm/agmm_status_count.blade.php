@@ -118,6 +118,14 @@
                         </tr>
                       @endforeach 
                       <tr class="text-center">
+                        <th colspan="2" class="text-end">Total MCO:</th>
+                        <th>{{$total_mco}}</th>
+                      </tr>
+                      <tr class="text-center">
+                        <th colspan="2" class="text-end">Total Guest:</th>
+                        <th>{{$total_guest}}</th>
+                      </tr>
+                      <tr class="text-center">
                         <th colspan="2" class="text-end">Total registered accounts:</th>
                         <th>{{$total_verified_accounts}}</th>
                       </tr>

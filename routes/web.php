@@ -44,7 +44,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('agmm-registration/from-preregistration/{id}', [App\Http\Controllers\AgmmController::class, 'agmmVerifyAccountFromPreReg'])->middleware('auth:sanctum')->name('verifyPreRegistration');
     Route::get('agmm/raffle/remove/{id}', [App\Http\Controllers\AgmmController::class, 'agmmRaffleRemove'])->name('agmmRaffleRemove');
     Route::get('agmm/online-raffle/remove/{id}', [App\Http\Controllers\AgmmController::class, 'agmmOnlineRaffleRemove'])->name('agmmOnlineRaffleRemove');
-    
+    Route::get('/export-onsite-winners', [App\Http\Controllers\AgmmController::class, 'exportOsiteWinners']);
+    Route::get('/export-online-winners', [App\Http\Controllers\AgmmController::class, 'exportOnlineWinners']);
+
     // membership
     Route::resource('membership', 'App\Http\Controllers\MembershipController');
     Route::get('fetch-pre-members', [App\Http\Controllers\MembershipController::class, 'fetchPreMembers'])->name('fetchPreMembers');

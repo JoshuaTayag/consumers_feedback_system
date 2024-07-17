@@ -88,8 +88,9 @@
             <div class="h4 mb-3" id="heading">DASHBOARD</div>
             <div class="row my-2">
                 <div class="col">
-                    <p>Total consumers claimed: {{ $total_scanned_consumers }}</p>
-                    <p>Total allowance disbursed: ₱{{ number_format($total_disbursed_money, 0) }}</p>
+                    <p class="mb-2">Verifier Name: {{ Auth::user()->name }}</p>
+                    <p class="mb-2">Total consumers claimed: {{ $total_scanned_consumers }}</p>
+                    <p class="mb-2">Total allowance disbursed: ₱{{ number_format($total_disbursed_money, 0) }}</p>
                 </div>
             </div>
             
@@ -173,7 +174,7 @@
                             html:
                                     '<div>Name: ' + result.registration[0].name +  '</div>' + 
                                     '<div>Account Number: ' + formattedAccountNo  + '</div>' +
-                                    '<div>Transpo Allowance: ₱' + result.registration[0].transpo_allowance + '.00</div>' +
+                                    '<div>Transpo Allowance: <div class="text-danger fw-bold"> ₱' + result.registration[0].transpo_allowance + '.00 </div></div>' +
                                     '<div><div class="m-2"><label for="remarks" class="form-label">Remarks: (Optional) </label><input type="text" class="form-control" id="remarks" name="remarks"></div></div>',
                             confirmButtonText: 'Confirm',
                             showCancelButton: true,

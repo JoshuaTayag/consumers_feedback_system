@@ -14,6 +14,11 @@
               </div>
             </div>
             <div class="card-body">
+              <div class="row text-center bg-secondary rounded text-white mb-2 py-1">
+                  <div class="col">
+                      <p class="mb-1 fw-bold">Verifier Name: {{ Auth::user()->name }}</p>
+                  </div>
+              </div>
               <form action="{{ route('agmmAccounts') }}" method="GET">
                 <div class="row pb-2">
                   <div class="col-sm-12 pb-2">
@@ -144,100 +149,6 @@
 @section('script')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script>
-    // document.addEventListener('DOMContentLoaded', function () {
-    //   document.body.addEventListener('submit', function (event) {
-    //       if (event.target.matches('#confirmationForm')) {
-    //           event.preventDefault(); // Prevent the form from submitting immediately
-
-    //           Swal.fire({
-    //               title: 'Do you really want to verify this consumer?',
-    //               // text: "Do you really want to verify this consumer?",
-    //               html:
-    //                           '' + 
-    //                           `<div>
-    //                             <div class="form-check">
-    //                               <input class="form-check-input" type="radio" name="flexRadioDefault" value="MCO" id="mco">
-    //                               <label class="form-check-label" for="mco">
-    //                                 MCO
-    //                               </label>
-    //                             </div>
-    //                             <div class="form-check">
-    //                               <input class="form-check-input" type="radio" name="flexRadioDefault" value="Guest" id="guest">
-    //                               <label class="form-check-label" for="guest">
-    //                                 Guest
-    //                               </label>
-    //                             </div>
-    //                             <div>
-    //                               <div class="m-2" id="remarks-container">
-    //                                 <label for="remarks" class="form-label">Remarks: </label>
-    //                                 <input type="text" class="form-control" id="remarks" name="remarks">
-    //                               </div>
-    //                             </div>
-    //                           </div>`,
-    //               icon: 'warning',
-    //               showCancelButton: true,
-    //               confirmButtonColor: '#3085d6',
-    //               cancelButtonColor: '#d33',
-    //               confirmButtonText: 'Confirm',
-    //               didOpen: () => {
-    //                   const mcoRadio = document.getElementById('mco');
-    //                   const guestRadio = document.getElementById('guest');
-    //                   const remarksContainer = document.getElementById('remarks-container');
-    //                   const remarksInput = document.getElementById('remarks');
-                      
-    //                   const updateRemarksVisibility = () => {
-    //                       if (guestRadio.checked) {
-    //                           remarksContainer.style.display = 'block';
-    //                           remarksInput.required = true;
-    //                       } else {
-    //                           remarksContainer.style.display = 'none';
-    //                           remarksInput.required = false;
-    //                       }
-    //                       // Clear validation message if MCO is selected
-    //                       if (mcoRadio.checked) {
-    //                           Swal.resetValidationMessage();
-    //                       }
-    //                   };
-                      
-    //                   mcoRadio.addEventListener('change', updateRemarksVisibility);
-    //                   guestRadio.addEventListener('change', updateRemarksVisibility);
-                      
-    //                   // Initial call to set the correct state
-    //                   updateRemarksVisibility();
-    //               },
-    //               preConfirm: () => {
-    //                   const selectedRadio = document.querySelector('input[name="flexRadioDefault"]:checked');
-    //                   if (!selectedRadio) {
-    //                       Swal.showValidationMessage('Please select a type of consumer');
-    //                       return false; // Return false to prevent SweetAlert from closing
-    //                   }
-    //                   if (selectedRadio.value === 'Guest' && !document.getElementById('remarks').value) {
-    //                       Swal.showValidationMessage('Remarks are required for Guest');
-    //                       return false; // Return false to prevent SweetAlert from closing
-    //                   }
-    //                   return {
-    //                       consumerType: selectedRadio.value,
-    //                       remarks: document.getElementById('remarks').value
-    //                   }; // Return an object with the selected value and remarks to be used in the next `.then()`
-    //               }
-    //           }).then((result) => {
-    //             if (result.isConfirmed) {
-    //                 const selectedValue = result.value.consumerType;
-    //                 const remarksValue = result.value.remarks;
-    //                 const account_no = document.getElementById('hidden_id').value;
-    //                 console.log(account_no);
-    //                 // Set the selected value to the hidden input field
-    //                 document.getElementById('swalValue').value = selectedValue;
-    //                 // Set the remarks value to the hidden remarks field
-    //                 document.getElementById('hidden_remarks').value = remarksValue;
-    //                 // Submit the form
-    //                 // event.target.submit();
-    //             }
-    //           });
-    //       }
-    //   });
-    // });
-
     function showConfirmationDialog(accountId) {
         Swal.fire({
             title: 'Do you really want to verify this consumer?',
@@ -333,22 +244,6 @@
     }
 
     function verifyAccount(qrCode){
-      // Swal.fire({
-      //     title: 'Are you sure?',
-      //     text: "Do you want to verify ",
-      //     icon: 'warning',
-      //     showCancelButton: true,
-      //     confirmButtonColor: '#3085d6',
-      //     cancelButtonColor: '#d33',
-      //     confirmButtonText: 'Confirm'
-      // }).then((result) => {
-      //     if (result.isConfirmed) {
-      //       event.target.submit(); // If confirmed, submit the form
-      //     }
-      //     else{
-      //       html5QrcodeScanner.render(onScanSuccess);
-      //     }
-      // });
 
       const myHeaders = new Headers();
       myHeaders.append("Accept", "application/json");
@@ -367,11 +262,13 @@
       fetch(url, requestOptions)
             .then((response) => response.json()) // Parse response as JSON
             .then((result) => {
+              $('#scanner').modal('hide');
                 // Extract account number from result
                 var accountNo = result.registration[0].account_no;
+
                 // Format account number
                 var formattedAccountNo = accountNo.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
-                // console.log(result);
+
                 // check if the qrcode is used
                 const registration = result.registration[0];
                 const membershipName = `${registration.mem_last_name}, ${registration.mem_first_name} ${registration.mem_middle_name}`;
@@ -385,7 +282,6 @@
                       //         '<div>Account Number: ' + formattedAccountNo + '</div>',
 
                               html:
-                              '' + 
                               `<div>
                                 <div>Account Name: `+ result.registration[0].last_name + ', ' + result.registration[0].first_name +`</div>
                                 <div class="pb-2" >Account #: ` + formattedAccountNo + `</div>
@@ -402,11 +298,9 @@
                                     Guest
                                   </label>
                                 </div>
-                                <div>
-                                    <div class="m-2" id="remarks-container">
-                                        <label for="pre_reg_remarks" class="form-label">Remarks: (Optional)</label>
-                                        <input type="text" class="form-control" id="pre_reg_remarks" name="pre_reg_remarks">
-                                    </div>
+                                <div class="m-2" id="remarks-container">
+                                    <label for="pre_reg_remarks" class="form-label">Remarks: (Optional)</label>
+                                    <input type="text" class="form-control" id="pre_reg_remarks" name="pre_reg_remarks">
                                 </div>
                               </div>`,
                       confirmButtonText: 'Confirm',
@@ -448,7 +342,7 @@
                           var url = "{{ route('verifyPreRegistration', ':qrCode') }}".replace(':qrCode', qrCode);
 
                           // Include selectedConsumerType in the API request if needed (e.g., as a query parameter)
-                          url += `?consumerType=${selectedConsumerType}?remarks=${remarksValue}`;
+                          url += `?consumerType=${selectedConsumerType}&remarks=${remarksValue}`;
 
                           fetch(url, requestOptions)
                           .then((response) => response.json())

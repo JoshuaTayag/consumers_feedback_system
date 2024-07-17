@@ -23,6 +23,27 @@
             height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
         }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px; /* Adjust as needed */
+            position: relative;
+        }
+
+        .title-container {
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .header-container h3 {
+            margin: 0; /* Remove default margin */
+        }
+
+        .header-container button {
+            position: absolute;
+            right: 0;
+        }
     </style>
 
     <!-- Include SweetAlert CSS and JS -->
@@ -135,7 +156,12 @@
     <div class="col">
       <div class="card">
         <div class="card-body">
-          <h3 class="text-center">Onsite Raffle Winners</h3>
+          <div class="header-container">
+              <div class="title-container">
+                <h3>Onsite Raffle Winners</h3>
+              </div>
+              <button onclick="exportOnsiteToExcel()" class="btn btn-success">Export</button>
+          </div>
           <hr>
           <table class="table table-striped">
             <thead>
@@ -166,7 +192,12 @@
 
       <div class="card mt-4">
         <div class="card-body">
-          <h3 class="text-center">Online Viewer Raffle Winners</h3>
+          <div class="header-container">
+              <div class="title-container">
+                <h3>Online Viewer Raffle Winners</h3>
+              </div>
+              <button onclick="exportOnlineToExcel()" class="btn btn-success">Export</button>
+          </div>
           <hr>
           <table class="table table-striped">
             <thead>
@@ -211,6 +242,30 @@
         });
     </script>
 @endif
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+  function exportOnsiteToExcel() {
+      fetch('/export-onsite-winners')
+          .then(response => response.json())
+          .then(data => {
+              const worksheet = XLSX.utils.json_to_sheet(data);
+              const workbook = XLSX.utils.book_new();
+              XLSX.utils.book_append_sheet(workbook, worksheet, "Verified Accounts");
+              XLSX.writeFile(workbook, "onsite_raffle_winners.xlsx");
+          });
+  }
+  function exportOnlineToExcel() {
+      fetch('/export-online-winners')
+          .then(response => response.json())
+          .then(data => {
+              const worksheet = XLSX.utils.json_to_sheet(data);
+              const workbook = XLSX.utils.book_new();
+              XLSX.utils.book_append_sheet(workbook, worksheet, "Verified Accounts");
+              XLSX.writeFile(workbook, "online_raffle_winners.xlsx");
+          });
+  }
+</script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.querySelector('form[action="{{ route('agmmRaffle') }}"]');

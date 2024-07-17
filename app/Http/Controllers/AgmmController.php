@@ -50,11 +50,22 @@ class AgmmController extends Controller
                     
                     // Get the first two digit of the account_no
                     $first_two_digits = substr($validatedData['account_no'], 0, 2);
+
+                    // extract the 4 digits starting from the second character
+                    $route = substr($validatedData['account_no'], 2, 4);
                 
-                    // Get reference allowance from the table
-                    $allowance = DB::table('agmm_ref_allowance')
-                    ->where('area_code', $first_two_digits)
-                    ->value('allowance');
+                    if ($first_two_digits == '21' || $first_two_digits == '22' || $first_two_digits == '23' || $first_two_digits == '24') {
+                        // Get reference allowance from the table for route
+                        $allowance = DB::table('agmm_ref_route_allowance')
+                        ->where('route', $route)
+                        ->value('allowance');
+                    } else {
+                        // Get reference allowance from the table area
+                        $allowance = DB::table('agmm_ref_allowance')
+                        ->where('area_code', $first_two_digits)
+                        ->value('allowance');
+                    }
+
                     $validatedData['transpo_allowance'] = $allowance ? $allowance : 0;
                     $validatedData['allowance_status'] = false;
 
@@ -119,10 +130,6 @@ class AgmmController extends Controller
     public function agmmRegistration(){
         return view('agmm.agmm_onsite_registration');
     }
-
-    // public function agmmRegisterPost(Request $request){
-    //     return view('agmm.agmm_onsite_registration');
-    // }
 
     public function agmmRegisterPost(Request $request)
     {
@@ -559,9 +566,11 @@ class AgmmController extends Controller
         ->groupBy('verified_account.claimed_by', 'user.name')
         ->get();
 
-        // dd($total_disbursed_allowances_per_user);
+        $total_guest = DB::table('agmm_verified_accounts')->select('*')->where('registration_type', 'Guest')->count();
+        $total_mco = DB::table('agmm_verified_accounts')->select('*')->where('registration_type', 'MCO')->count();
+        // dd($total_mco);
 
-        return view('agmm.agmm_status_count')->with(compact('total_verified_accounts','total_pre_registered_accounts','total_allowance_count', 'total_allowance_disbursed', 'registered_accounts_per_area', 'total_verified_consumers_per_user', 'total_disbursed_allowances_per_user', 'total_pre_registered_accounts_online', 'total_pre_registered_accounts_offline'));
+        return view('agmm.agmm_status_count')->with(compact('total_guest', 'total_mco', 'total_verified_accounts','total_pre_registered_accounts','total_allowance_count', 'total_allowance_disbursed', 'registered_accounts_per_area', 'total_verified_consumers_per_user', 'total_disbursed_allowances_per_user', 'total_pre_registered_accounts_online', 'total_pre_registered_accounts_offline'));
     }
 
     public function agmmRaffle(Request $request){
@@ -587,11 +596,15 @@ class AgmmController extends Controller
                 ->whereNull('vt.account_no')
                 ->where('va.allowance_status', false)
                 ->where('va.registration_type', 'ONLINE-PRE-REGISTRATION')
+                ->where(function($query) {
+                    $query->whereRaw("va.membership_or <> '' AND va.membership_or IS NOT NULL")
+                          ->whereRaw("va.membership_or <> REPLICATE('0', LEN(va.membership_or))");
+                })
                 ->select('va.id', 'ct.Name as name','va.account_no', 'va.contact_no', 'va.membership_or', 'ct.Address');
 
                 if ($municipality) {
                     // Fetch the winners based on the first two digits of account_no
-                    $winners->where(DB::raw('LEFT(account_no, 2)'), $municipality);
+                    $winners->where(DB::raw('LEFT(va.account_no, 2)'), $municipality);
                 }
                 // dd($winners->get());
                 $winners = $winners->inRandomOrder()
@@ -613,7 +626,11 @@ class AgmmController extends Controller
                 $winners = DB::table('agmm_verified_accounts as va')
                 ->leftJoin('Consumers Table as ct', 'ct.Accnt No', '=', 'va.account_no')
                 ->where('raffle_draw', null)
-                ->where('registration_type', 'MCO');
+                ->where('registration_type', 'MCO')
+                ->where(function($query) {
+                    $query->whereRaw("va.membership_or <> '' AND va.membership_or IS NOT NULL")
+                          ->whereRaw("va.membership_or <> REPLICATE('0', LEN(va.membership_or))");
+                });
 
                 if ($municipality) {
                     // Fetch the winners based on the first two digits of account_no
@@ -666,5 +683,31 @@ class AgmmController extends Controller
         ->where('id', $id)
         ->update(['allowance_status' => false]);
         return redirect()->route('agmmRaffle')->with('success', 'Successfully Removed!');
+    }
+
+    public function exportOsiteWinners()
+    {
+        $users = DB::table('agmm_verified_accounts as verified_acc')
+        ->leftjoin('agmm_ref_allowance as ref_all',  DB::raw('LEFT(verified_acc.account_no, 2)'), '=', 'ref_all.area_code')
+        ->where('raffle_draw', true)
+        ->select('verified_acc.account_no', 'verified_acc.name', 'verified_acc.membership_or', 'ref_all.area as municipality', 'ref_all.area_code')
+        ->orderBy('ref_all.area_code', 'asc')
+        ->get();
+
+        // dd(response()->json($users));
+        return response()->json($users);
+    }
+
+    public function exportOnlineWinners()
+    {
+        $users = DB::table('agmms as pre_reg')
+        ->leftjoin('agmm_ref_allowance as ref_all',  DB::raw('LEFT(pre_reg.account_no, 2)'), '=', 'ref_all.area_code')
+        ->where('allowance_status', true)
+        ->select('pre_reg.account_no', 'pre_reg.last_name', 'pre_reg.first_name', 'pre_reg.middle_name', 'pre_reg.membership_or', 'ref_all.area as municipality', 'ref_all.area_code')
+        ->orderBy('ref_all.area_code', 'asc')
+        ->get();
+
+        // dd(response()->json($users));
+        return response()->json($users);
     }
 }

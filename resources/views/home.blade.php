@@ -40,6 +40,18 @@
                                     </a>
                                 </div>
                                 <div class="col-lg-3 my-1">
+                                    <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('agmmStatus') }}">
+                                        <img src="{{asset('images/icons/report.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
+                                        <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">AGMM REPORT</p>
+                                    </a>
+                                </div>
+                                <div class="col-lg-3 my-1">
+                                    <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('agmmRaffle') }}">
+                                        <img src="{{asset('images/icons/raffle.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
+                                        <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">AGMM RAFFLE</p>
+                                    </a>
+                                </div>
+                                <div class="col-lg-3 my-1">
                                     <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('scanAllowanceQR') }}">
                                         <img src="{{asset('images/icons/cash-payment.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
                                         <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">AGMM DISBURSER</p>
