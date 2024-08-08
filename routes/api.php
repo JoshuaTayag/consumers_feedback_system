@@ -29,3 +29,5 @@ Route::get('agmm-registration/from-preregistration/{id}', [App\Http\Controllers\
 Route::get('agmm-verified-registration/{id}', [App\Http\Controllers\AgmmController::class, 'getVerifiedRegistration'])->middleware('auth:sanctum')->name('getVerifiedRegistration');
 
 Route::get('fetch-members/', [App\Http\Controllers\MembershipController::class, 'getMembers']);
+Route::get('fetch-mcrt/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getMcrt']);
+Route::get('fetch-mst/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getMst']);

@@ -42,6 +42,10 @@
     <th>
       <a href="" class="updateCost form-control" data-name="cost" data-type="number" data-pk="{{ $mrf_item->id }}" data-title="Enter unit cost" disabled>{{ $mrf_item->unit_cost }}</a>
     </th>
+    @elseif(isset($liquidation))
+      <th>
+        <input type="number" class="form-control" min="0" max="{{ $mrf_item->quantity }}" name="used_quantity[]" required>
+      </th>
     @else
       <th>
         <input type="number" class="form-control" value="{{ $mrf_item->unit_cost }}" readonly>

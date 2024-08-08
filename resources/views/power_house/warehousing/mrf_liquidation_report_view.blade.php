@@ -192,8 +192,8 @@
           <tr>
             <td>{{ $data->user_requested->name }}</td>
             <td>{{ $all_request = $data->total_pending }}</td>
-            <td>{{ $all_liquidated = $data->user_requested->requested_mrf->where('status', 3)->where('with_wo', '<>', null)->count() }}</td>
-            <td>{{ $all_unliquidated = $data->user_requested->requested_mrf->where('status', '<', 3)->where('with_wo', '<>', null)->count() }}</td>
+            <td>{{ $all_liquidated = $data->user_requested->requested_mrf->where('status', 11)->where('with_wo', '<>', null)->count() }}</td>
+            <td>{{ $all_unliquidated = $data->user_requested->requested_mrf->where('status', '<', 11)->where('with_wo', '<>', null)->count() }}</td>
             <td>{{ $all_cancelled = $data->user_requested->requested_mrf->where('status', 4)->where('with_wo', '<>', null)->count() }}</td>
             <td>{{ round(($all_request - ($all_liquidated + $all_cancelled)) / $all_request * 100) }}</td>
           </tr>

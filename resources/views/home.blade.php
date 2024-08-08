@@ -4,8 +4,10 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
-            @if(Auth::user()->hasRole('ISD Manager'))
-                <a href="{{ route('approvedLifelineIndex') }}"><span>lifeline applicants are pending</span></a>
+            @if(Auth::user()->hasRole('Supply Custodian'))
+                <a href="{{ route('mrfLiquidationApprovalIndex') }}" type="button" class="btn btn-outline-warning mb-4" ><span><label class="badge bg-danger">{{ $pending_liquidation_count_custodian }}</label> MER Liquidations <i class="fa fa-arrow-right" > </i></span></a>
+            @elseif(Auth::user()->hasRole('IAD Manager'))
+                <a href="{{ route('mrfLiquidationApprovalIndex') }}" type="button" class="btn btn-outline-warning mb-4" ><span><label class="badge bg-danger">{{ $pending_liquidation_count_iad }}</label> MER Liquidations <i class="fa fa-arrow-right" > </i></span></a>
             @elseif(Auth::user()->hasRole('TSD Manager'))
                 <a href="{{ route('mrfApprovalIndex') }}" type="button" class="btn btn-outline-warning mb-4" ><span>Pending MER <i class="fa fa-arrow-right" > </i></span></a>
             @endif

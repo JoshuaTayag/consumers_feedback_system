@@ -60,7 +60,19 @@
                           @endif
                           
                         </th>
-                        <th class="badge rounded-pill text-white bg-{{ $mrf->status == 0 ? 'secondary' : ($mrf->status == 1 && $liquidation == 0 ? 'success' : ($mrf->status == 2 && $liquidation != 0 ? 'primary' : ($mrf->status == 3 ? 'warning' : 'danger'))) }}"  >{{ $mrf->status == 0 ? "Pending" : ($mrf->status == 1 && $liquidation == 0 ? 'Approved'  : ($mrf->status == 2 && $liquidation != 0 ? 'Processed' : ($mrf->status == 3 ? 'Liquidated' : "DisApproved"))) }}</th>
+                        <th class="badge rounded-pill text-white 
+                        bg-{{ $mrf->status == 0 ? 'secondary' 
+                        : ($mrf->status == 1 ? 'success'
+                        : ($mrf->status == 2 ? 'success'
+                        : ($mrf->status == 3 || $mrf->status == 10 ? 'primary' 
+                        : ($mrf->status == 11 ? 'warning' 
+                        : 'danger')))) }}"  >
+                        {{ $mrf->status == 0 ? "Pending" 
+                          : ($mrf->status == 1 ? 'Approved' 
+                          : ($mrf->status == 2 ? 'For Liquidation' 
+                          : ($mrf->status == 3 || $mrf->status == 10 ? 'Pending Liquidation' 
+                          : ($mrf->status == 11 ? 'Liquidated' 
+                          : "DisApproved")))) }}</th>
                         <th>
                           <!-- {{$liquidations->where('material_requisition_form_id', $mrf->id)->count()}} -->
                           <div class="row p-1">
@@ -70,7 +82,28 @@
                                   Action
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                  @if($mrf->status == 0)
+                                @if($mrf->requested_id == auth()->user()->id)
+                                <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>
+                                @endif
+                                @if($mrf->status == 0 && $mrf->requested_id == auth()->user()->id)
+                                  <li>
+                                    <form method="POST" action="{{ route('material-requisition-form.destroy', $mrf->id) }}">
+                                      @method('DELETE')
+                                      @csrf
+                                      <a class="confirm-button dropdown-item" type="submit" style="text-decoration: none;" href="#"><i class="fa fa-trash"></i> Delete</a>
+                                    </form>
+                                  </li>
+                                @endif
+                                @if($mrf->status == 1)
+                                  @if(Auth::user()->hasRole('CETD') || Auth::user()->hasRole('CETD SPRC'))
+                                    <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-gear"></i> Process</a></li>
+                                  @endif
+                                @endif
+                                @if($mrf->status == 2 && $mrf->requested_id == auth()->user()->id)
+                                  <li><a href="{{ route('mrfLiquidate', $mrf->id) }}" target="_blank" class="dropdown-item"><i class="fa fa-pencil"></i> Liquidate</a></li>
+                                  <li><a href="{{ route('mrfPrintPdf', $mrf->id) }}" target="_blank" class="dropdown-item"><i class="fa fa-print"></i> Print MRF</a></li>
+                                @endif
+                                  <!-- @if($mrf->status == 0)
                                     @if($mrf->requested_id == auth()->user()->id)
                                       <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>
                                     @endif
@@ -91,7 +124,7 @@
                                     <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>
                                   @endif
                                   @if($mrf->status == 2)
-                                    <!-- <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li> -->
+                                    <li><a href="{{route('material-requisition-form.edit', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>
                                     <li><a href="{{ route('mrfPrintPdf', $mrf->id) }}" target="_blank" class="dropdown-item"><i class="fa fa-print"></i> Print MRF</a></li>
                                     
                                     @if($mrf->requested_id == auth()->user()->id)
@@ -100,7 +133,7 @@
                                   @endif
                                   @if($mrf->status == 3)
                                     <li><a href="{{route('viewLiquidatedMrf', $mrf->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> View</a></li>
-                                  @endif
+                                  @endif -->
                                 </ul>
                               </div>
                             </div>

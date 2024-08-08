@@ -29,8 +29,9 @@ class HomeController extends Controller
             return view('consumer.dashboard');
         }
         else{
-            $pending_count = DB::table('lifelines')->where('application_status', 0)->count();    
-            return view('home')->with(compact('pending_count'));
+            $pending_liquidation_count_custodian = DB::table('material_requisition_forms')->where('status', 3)->count();    
+            $pending_liquidation_count_iad = DB::table('material_requisition_forms')->where('status', 10)->count();  
+            return view('home')->with(compact('pending_liquidation_count_custodian', 'pending_liquidation_count_iad'));
         }
         
     }

@@ -108,7 +108,25 @@ class MaterialRequisitionForm extends Model
         return $this->hasMany('App\Models\MaterialRequisitionFormLiquidation');
     }
 
+    public function user_confirmed()
+    {
+        return $this->belongsTo('App\Models\User', 'confirmed_by', 'id');
+    }
+
+    public function user_audited()
+    {
+        return $this->belongsTo('App\Models\User', 'audit_by', 'id');
+    }
     
+    public function mcrt_items()
+    {
+        return $this->hasMany('App\Models\MaterialRequisitionFormMcrtDetails', 'MCRTNo', 'MCRTNo');
+    }
+
+    public function mst_items()
+    {
+        return $this->hasMany('App\Models\MaterialRequisitionFormMstDetails', 'MSTNo', 'MSTNo');
+    }
     
     protected $fillable = [ 'project_name', 
                             'district_id', 

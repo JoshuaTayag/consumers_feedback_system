@@ -137,7 +137,7 @@
                     <div class="col-lg-12">
                       <div class="mb-3">
                         <label for="structure" class="form-label mb-1">
-                          {{$mrf->status == 0 ? 'Approved By: ': ($mrf->status == 1 || $mrf->status == 2 ? 'Approved Date: ' : 'Disapproved Date: ') }}
+                          {{$mrf->status == 4 ? 'Disapproved By: ' :  'Approved By:' }}
                           <span class="text-danger fw-bold">{{ $mrf->approved_by ? date('F d, Y  h:i A', strtotime($mrf->approved_by)) : null }}</span></label>
                           <select id="approved_by" class="form-control" name="approved_by" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                             @foreach ($users as $user)          
@@ -153,12 +153,24 @@
                           </select>
                       </div>
                     </div>
+                    <div class="col-lg-12 {{ $mrf->status == 0 ? 'd-none': 'd-block'}}">
+                      <div class="mb-3">
+                        <label for="requested_by" class="form-label mb-1">Confirmed By:  <span class="text-danger fw-bold">{{ $mrf->confirmed_date ? date('F d, Y  h:i A', strtotime($mrf->confirmed_date)) : null }}</span></label>
+                        <input type="text" class="form-control" value="{{ $mrf->confirmed_by ? $mrf->user_confirmed->name : '' }}" disabled required>
+                      </div>
+                    </div>
+                    <div class="col-lg-12 {{ $mrf->status == 0 ? 'd-none': 'd-block'}}">
+                      <div class="mb-3">
+                        <label for="requested_by" class="form-label mb-1">Audited by  <span class="text-danger fw-bold">{{ $mrf->audited_date ? date('F d, Y  h:i A', strtotime($mrf->audited_date)) : null }}</span></label>
+                        <input type="text" class="form-control" value="{{ $mrf->audit_by ? $mrf->user_audited->name : '' }}" disabled required>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-lg-6">
-              <div class="card">
+              <div class="card {{ $mrf->status != 0 ? 'd-none': 'd-block'}}">
                 <div class="card-header">
                   <h4>Add Item</h4>
                 </div>
@@ -200,7 +212,28 @@
                   </div>
                 </div>
               </div>
-                
+              <div class="card {{ $mrf->status == 0 ? 'd-none': 'd-block'}}">
+                <div class="card-header">
+                  <h4>References</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-lg-12">
+                      <div class="mb-3">
+                        <label for="req_type" class="form-label mb-1">Request Type</label>
+                        <input type="text" class="form-control" value="{{ $mrf->req_type ? Config::get('constants.mer_request_type.'.$mrf->req_type.'.name') : 'None' }}" disabled>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mx-1">
+                    @foreach ($mrf->mrf_liquidations as $liquidations)    
+                      <div class="col-lg-6 mb-1 border">
+                        <span class="fw-bold">{{ $liquidations->type }}# {{ $liquidations->type_number }}</span>
+                      </div>  
+                    @endforeach
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="row mt-4">
@@ -245,7 +278,7 @@
                       <div class="mb-3">
                         <label for="barangay" class="form-label mb-1">Barangay</label>
                         <select id="barangay" class="form-control" name="barangay" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id) required>
-                          <option value="{{ $mrf->barangay_id }}" id="{{ $mrf->barangay_id }}">{{$mrf->barangay->barangay_name }}</option>
+                          <option value="{{ $mrf->barangay_id }}" id="{{ $mrf->barangay_id }}">{{$mrf->barangay ? $mrf->barangay->barangay_name : null }}</option>
                         </select>
                       </div>
                     </div>
@@ -331,16 +364,16 @@
               <table>
                 <tr>
                   <td>
-                    <input type="submit" class="btn btn-primary btn-sm fa fa-trash" value="Save" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                    <input type="submit" class="btn btn-primary btn-sm fa fa-trash {{$mrf->status != 0 || $mrf->requested_id != auth()->user()->id ? 'd-none' : 'd-block' }}" value="Save" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                     {!! Form::close() !!} 
                   </td>
-                  <td>
+                  <!-- <td>
                     <form method="POST" action="{{ route('material-requisition-form.destroy', $mrf->id) }}">
                       @method('DELETE')
                       @csrf
                       <button class="btn btn-danger btn-sm confirm-button" type="submit" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)><i class="fa fa-trash"></i> Delete</button>
                     </form>
-                  </td>
+                  </td> -->
                 </tr>
               </table>
             </div>
