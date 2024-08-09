@@ -51,6 +51,7 @@ return new class extends Migration
             $table->integer('status')->nullable();
             $table->string('damage_cause')->nullable();
             $table->string('crew_remarks')->nullable();
+            $table->string('created_by')->nullable();
 
             $table->timestamps();
         });
