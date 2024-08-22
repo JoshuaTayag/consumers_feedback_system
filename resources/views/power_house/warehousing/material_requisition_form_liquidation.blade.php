@@ -5,6 +5,22 @@
 
 <div class="container">
   <div class="row justify-content-center">
+    @if($mrf->iad_remarks)
+      <div class="col-lg-12">
+          <div class="alert alert-danger" role="alert">
+              IAD Remarks: {{ $mrf->iad_remarks }}
+          </div>
+      </div>
+    @endif
+
+    @if($mrf->warehouse_remarks)
+      <div class="col-lg-12">
+          <div class="alert alert-danger" role="alert">
+              Warehouse Remarks: {{ $mrf->warehouse_remarks }}
+          </div>
+      </div>
+    @endif
+
     <div class="col-lg-12">
       <div class="card">
         <div class="card-header">
@@ -84,13 +100,33 @@
                   </div>
                 </div>
               </div>
-              <div class="col-lg-8 d-flex">
+              <div class="col-lg-4 d-flex">
+                <div class="card w-100" style="height:auto;">
+                  <div class="card-header bg-info">
+                    References
+                  </div>
+                  <div class="card-body text-left">
+                    @if(count($mrf->mrf_liquidations) != 0)
+                      @foreach($mrf->mrf_liquidations as $index => $mrvs)
+                          <div class="row">
+                            <div class="col-lg-12 fs-5 fw-bold">
+                              {{$mrvs->type. '# '.$mrvs->type_number }}
+                            </div>
+                          </div>
+                      @endforeach
+                    @else
+                      None
+                    @endif
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 d-flex">
                 <div class="card w-100">
                   <div class="card-header bg-info">
                     Remarks
                   </div>
                   <div class="card-body fs-5">
-                    {{$mrf->remarks}}
+                    <textarea name="remarks" id="remarks" class="form-control" disabled>{{$mrf->remarks}}</textarea>
                   </div>
                 </div>
               </div>
@@ -236,6 +272,7 @@
                             <thead>
                               <tr>
                                 <th>Code No</th>
+                                <th>Item Description</th>
                                 <th>Quantity</th>
                               </tr>
                             </thead>
@@ -291,6 +328,7 @@
                             <thead>
                               <tr>
                                 <th>Code No</th>
+                                <th>Item Description</th>
                                 <th>Quantity</th>
                               </tr>
                             </thead>
@@ -457,6 +495,7 @@
               result.forEach(function(item) {
                   var row = '<tr>' +
                       '<td>' + item.CodeNo + '</td>' +
+                      '<td>' + item.Description + '</td>' +
                       '<td>' + parseInt(item.MCRTQty) + '</td>' +
                       '</tr>';
                   $('#mcrt_table tbody').append(row);
@@ -492,6 +531,7 @@
               result.forEach(function(item) {
                   var row = '<tr>' +
                       '<td>' + item.CodeNo + '</td>' +
+                      '<td>' + item.Description + '</td>' +
                       '<td>' + parseInt(item.MSTQty) + '</td>' +
                       '</tr>';
                   $('#mst_table tbody').append(row);

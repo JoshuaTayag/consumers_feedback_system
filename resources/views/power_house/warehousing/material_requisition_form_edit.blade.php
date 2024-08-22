@@ -224,6 +224,12 @@
                         <input type="text" class="form-control" value="{{ $mrf->req_type ? Config::get('constants.mer_request_type.'.$mrf->req_type.'.name') : 'None' }}" disabled>
                       </div>
                     </div>
+                    <div class="col-lg-12">
+                      <div class="mb-3">
+                        <label for="req_type" class="form-label mb-1">CETD Remarks</label>
+                        <input type="text" class="form-control" value="{{ $mrf->cetd_remarks }}" disabled>
+                      </div>
+                    </div>
                   </div>
                   <div class="row mx-1">
                     @foreach ($mrf->mrf_liquidations as $liquidations)    

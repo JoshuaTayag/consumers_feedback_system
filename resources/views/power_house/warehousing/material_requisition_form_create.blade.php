@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="card-body">
-          {!! Form::open(array('route' => 'material-requisition-form.store','method'=>'POST')) !!}
+          {!! Form::open(array('route' => 'material-requisition-form.store','method'=>'POST', 'enctype' => 'multipart/form-data')) !!}
             <div class="row">
               <div class="col-lg-6">
                 <div class="mb-2">
@@ -89,7 +89,7 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-lg-4">
+              <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="area" class="form-label mb-1">Area *</label>
                   <select id="area" class="form-control" name="area_id" required>
@@ -100,7 +100,7 @@
                   </select>
                 </div>
               </div>
-              <div class="col-lg-4">
+              <div class="col-lg-3">
                 <div class="mb-3">
                   <label for="district" class="form-label mb-1">District *</label>
                   <select id="district" class="form-control" name="district" required>
@@ -111,7 +111,7 @@
                   </select>
                 </div>
               </div>
-              <div class="col-lg-4">
+              <div class="col-lg-3">
                 <div class="mb-3">
                   <label for="municipality" class="form-label mb-1">Municipality *</label>
                   <select id="municipality" class="form-control" name="municipality">
@@ -119,7 +119,7 @@
                   </select>
                 </div>
               </div>
-              <div class="col-lg-4">
+              <div class="col-lg-3">
                 <div class="mb-3">
                   <label for="barangay" class="form-label mb-1">Barangay</label>
                   <select id="barangay" class="form-control" name="barangay">
@@ -153,6 +153,12 @@
                         <option value="{{ $feeder['id'] }}" id="" {{ old('feeder') ? 'selected' : '' }}>{{ $feeder['name'] }}</option>
                       @endforeach -->
                   </select>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-3">
+                  <label for="image_path" class="form-label mb-1">Upload Image (Maximum of 3 images only)</label>
+                  <input type="file" class="form-control" id="image_path" name="image_path[]" multiple>
                 </div>
               </div>
               <div class="col-lg-12">

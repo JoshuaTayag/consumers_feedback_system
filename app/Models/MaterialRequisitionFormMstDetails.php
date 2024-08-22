@@ -15,4 +15,9 @@ class MaterialRequisitionFormMstDetails extends Model
     {
         return $this->belongsTo('App\Models\MaterialRequisitionForm',  'mst_no', 'MSTNo');
     }
+
+    public function stock_item()
+    {
+        return $this->hasOne('App\Models\Datamanagement\StockedItem', 'ItemCode', 'CodeNo');
+    }
 }
