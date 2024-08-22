@@ -34,7 +34,8 @@
                           <th>{{ $data->requested_name }}</th>
                           <th>{{ date('F d, Y', strtotime($data->requested_by)) }}</th>
                           <th>
-                              <div class="row">
+                            <a href="{{route('mrfLiquidationApprovalView', $data->id)}}" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-eye"></i></a>
+                              <!-- <div class="row">
                                   <div class="col-lg-6 p-1 text-center">
                                     {{-- <a href="{{route('LifelineUpdate', $data->id)}}" class="btn btn-success btn-sm"><i class="fa fa-check"></i></a> --}}
                                     <form method="POST" action="{{ route('mrfLiquidationApprovalUpdate', $data->id) }}">
@@ -68,15 +69,7 @@
                                     <i class="fa fa-eye"></i></button>
 
                                   </div>
-                                  <!-- <div class="col-lg-4 p-1 text-center">
-                                    <form method="POST" action="{{ route('mrfApprovalUpdate', $data->id) }}">
-                                      @method('PUT')
-                                      @csrf
-                                      {!! Form::hidden('disapproved', true )!!}
-                                      <button class="btn btn-danger btn-sm confirm-button" type="submit"><i class="fa fa-times"></i></button>
-                                    </form>
-                                  </div> -->
-                              </div>
+                              </div> -->
                           </th>
                       </tr>
                   @endforeach
@@ -90,25 +83,6 @@
                </div>
             </div>
           </div>
-          <!-- Modal -->
-          <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  ...
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary">Understood</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
 
     <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="applianceCalculator" aria-hidden="true">
       <div class="modal-dialog modal-lg">

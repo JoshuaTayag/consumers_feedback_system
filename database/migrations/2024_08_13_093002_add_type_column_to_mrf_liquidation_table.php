@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('material_requisition_forms', function (Blueprint $table) {
-            $table->string('mcrt_no')->nullable();
-            $table->string('mst_no')->nullable();
+        Schema::table('material_requisition_form_liquidation_images', function (Blueprint $table) {
+            $table->string('type')->nullable();
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('material_requisition_forms');
+        Schema::table('material_requisition_form_liquidation_images', function (Blueprint $table) {
+            //
+        });
     }
 };

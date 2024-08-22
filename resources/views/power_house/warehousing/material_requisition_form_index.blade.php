@@ -4,6 +4,16 @@
 @section('content')
 <div class="container">
   <div class="row justify-content-center">
+    @if($daysPassed >= 30)
+      <div class="col-lg-12">
+          <div class="alert alert-danger" role="alert">
+            Note: Requests older than 30 days must be liquidated before submitting a new request.<br>
+            @foreach ($old_unliquidated_mrf as $index => $old_mrf) 
+              <strong>* <span>{{  date('y', strtotime($old_mrf->created_at)). "-". str_pad($old_mrf->id,5,'0',STR_PAD_LEFT) }}</span></strong><br>
+            @endforeach
+          </div>
+      </div>
+    @endif
       <div class="col-lg-12">
           <div class="card">
             <div class="card-header">
@@ -13,7 +23,7 @@
                   </div>
                   <div class="col-lg-6 text-end">
                     <a class="btn btn-success" href="{{ route('mrfLiquidationReport') }}" target="_blank"> <i class="fa fa-eye"></i> Liquidation Report </a>
-                    @if($unliquidated_mrf < 10)
+                    @if($unliquidated_mrf < 10 && $daysPassed <= 30)
                       <a class="btn btn-success" href="{{ route('material-requisition-form.create') }}"> Create New Request </a>
                     @endif
                   </div>

@@ -150,6 +150,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('mrf-liquidation-report-pdf', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationReport'])->name('mrfLiquidationReport');
     Route::get('mrf-approval/liquidation', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationApprovalIndex'])->name('mrfLiquidationApprovalIndex');
     Route::put('mrf-approval/liquidation/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationApprovalUpdate'])->name('mrfLiquidationApprovalUpdate');
+    Route::get('mrf-approval/liquidation/view/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationApprovalView'])->name('mrfLiquidationApprovalView');
+    Route::put('mrf-approval/liquidation/disapproved/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationIadDisapproved'])->name('mrfLiquidationIadDisapproved');
 
     //TEMP MRF
     Route::post('edit-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItems'])->name('updateItems');

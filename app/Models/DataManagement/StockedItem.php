@@ -30,6 +30,16 @@ class StockedItem extends Model
         return $this->belongsTo('App\Models\MaterialRequisitionFormItems');
     }
 
+    public function mcrt_item()
+    {
+        return $this->belongsTo('App\Models\MaterialRequisitionFormMcrtDetails');
+    }
+
+    public function mst_item()
+    {
+        return $this->belongsTo('App\Models\MaterialRequisitionFormMstDetails');
+    }
+
     public function getUnitNameAttribute()
     {
 
