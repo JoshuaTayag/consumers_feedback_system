@@ -59,10 +59,15 @@ class PermissionTableSeeder extends Seeder
             // 'lifeline-edit',
             // 'lifeline-delete',
 
-            'cashier-transaction-list',
-            'cashier-transaction-create',
-            'cashier-transaction-edit',
-            'cashier-transaction-delete',
+            // 'cashier-transaction-list',
+            // 'cashier-transaction-create',
+            // 'cashier-transaction-edit',
+            // 'cashier-transaction-delete',
+
+            // 'change-meter-request-list',
+            // 'change-meter-request-create',
+            // 'change-meter-request-edit',
+            // 'change-meter-request-delete',
          ];
       
          foreach ($permissions as $permission) {
