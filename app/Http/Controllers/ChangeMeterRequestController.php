@@ -15,6 +15,14 @@ use PDO;
 
 class ChangeMeterRequestController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:change-meter-request-list|change-meter-request-create|change-meter-request-edit|change-meter-request-delete', ['only' => ['index']]);
+         $this->middleware('permission:change-meter-request-create', ['only' => ['create','store']]);
+         $this->middleware('permission:change-meter-request-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:change-meter-request-delete', ['only' => ['destroy']]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -466,23 +474,6 @@ class ChangeMeterRequestController extends Controller
 
             // Update the existing record with new data
             $change_meter_request->update($dataToUpdate);
-            // dd($change_meter_request);
-            // DB::table('posted_meters_history')
-            //     ->insert([
-            //         "sco_no" => $change_meter_request->control_no,
-            //         "old_meter_no" => $change_meter_request->old_meter_no,
-            //         "new_meter_no" => $change_meter_request->new_meter_no,
-            //         "process_date" => date('Y-m-d', strtotime($change_meter_request->created_at)),
-            //         "date_installed" => $request->date_acted ? date('Y-m-d H:i:s', strtotime($request->date_acted)) : null,
-            //         "action_status" => $change_meter_request->status,
-            //         "area" => $change_meter_request->area,
-            //         "feeder" => $change_meter_request->feeder,
-            //         "leyeco_seal_no" => $request->seal_no,
-            //         "serial_no" => null,
-            //         "erc_seal_no" => $request->erc_seal,
-            //         "posted_by" => Auth::id(),
-            //         "created_at" => Carbon::now(),
-            // ]);
 
             $change_meter_request_history = ChangeMeterRequestPostingHistory::create([
                 "sco_no" => $change_meter_request->control_no,
@@ -561,13 +552,6 @@ class ChangeMeterRequestController extends Controller
     public function view(string $id)
     {
         $cm_request = ChangeMeterRequest::find($id);
-
-        // $cm_request = DB::table('change_meter_requests as cmr')
-        // ->select('*')
-        // ->leftJoin('posted_meters_history as his', 'cmr.control_no', '=', 'his.sco_no')
-        // ->where('cmr.id', $id)
-        // ->first();
-
 
         $ref_employees = DB::table('ref_employees')
         ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))

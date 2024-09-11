@@ -12,7 +12,7 @@
                   </div>
                   <div class="col-lg-6 text-end">
                     <a class="btn btn-sm btn-success" href="{{ route('viewReport') }}" target="_blank"><i class="fa fa-download"></i> Generate Report</a>
-                    @can('service-connect-order-create')
+                    @can('change-meter-request-create')
                       <a class="btn btn-sm btn-success" href="{{ route('createCM') }}"> Create New Request </a>
                     @endcan
                   </div>
@@ -57,27 +57,19 @@
                                 Action
                               </button>
                               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                <li><a class="dropdown-item" href="{{ route('editCM',$cm_request->id) }}"><i class="fa fa-pencil"></i> Update</a></li>
+                                @can('change-meter-request-edit')
+                                  <li><a class="dropdown-item" href="{{ route('editCM',$cm_request->id) }}"><i class="fa fa-pencil"></i> Update</a></li>
+                                @endcan
                                 <li><a class="dropdown-item" href="{{route('printChangeMeterRequest',$cm_request->id)}}" target="_blank"><i class="fa fa-print"></i> Print</a></li>
                                 <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-area="{{$cm_request->area}}" data-feeder="{{$cm_request->feeder}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
-                                <li><a class="dropdown-item" href="{{route('deleteCM',$cm_request->id)}}"><i class="fa fa-trash"></i> Delete</a></li>
+                                @can('change-meter-request-delete')
+                                  <li><a class="dropdown-item" href="{{route('deleteCM',$cm_request->id)}}"><i class="fa fa-trash"></i> Delete</a></li>
+                                @endcan 
                               </ul>
                             </div>
                           @else
                             <a href="{{ route('viewCM', $cm_request->id) }}" type="submit" target="_blank" class="btn btn-info btn-sm"><i class="fa fa-eye"></i></a>
                           @endif
-                            <!-- @if($cm_request->Acted == 0 || $cm_request->Dispatch2 == 'NOT COMPLETED') -->
-                                <!-- <a class="btn btn-sm btn-secondary rounded-pill me-2" href="{{ route('editCM',$cm_request->id) }}">
-                                    <i class="bi bi-gear"></i> Update
-                                </a> -->
-                                <!-- <a class="btn btn-sm btn-secondary rounded-pill" href="{{ route('editCM',$cm_request->id) }}">
-                                    <i class="bi bi-gear"></i> Meter Posting
-                                </a> -->
-                                <!-- <button type="button" class="btn btn-sm btn-secondary rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#exampleModal" data-name="{{$cm_request->Lastname.', '.$cm_request->Firstname}}" data-sco="{{$cm_request->SCONo}}" data-area="{{$cm_request->Area}}" data-feeder="{{$cm_request->Feeder}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->ProcessDate)) }}">
-                                  Meter Posting
-                                </button> -->
-                            <!-- @endif -->
-                            <!-- <a href="{{route('printChangeMeterRequest',$cm_request->id)}}" target="_blank" class="btn btn-sm btn-success"><i class="fa fa-print"></i></a> -->
                         </div>
                         <div class="col-lg-3 d-flex align-items-center">
                             <div class="mx-end ms-auto"> <!-- Add mx-auto to horizontally center the content -->
