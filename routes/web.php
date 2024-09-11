@@ -94,16 +94,20 @@ Route::group(['middleware' => 'auth'], function () {
 
     // roles and permissions
     Route::resource('service-connect-order', App\Http\Controllers\ServiceConnectOrderController::class);
-    Route::get('service-connect-order-cm', [App\Http\Controllers\ChangeMeterRequestController::class, 'index'])->name('indexCM');
-    Route::get('service-connect-order-cm-create', [App\Http\Controllers\ChangeMeterRequestController::class, 'create'])->name('createCM');
-    Route::post('service-connect-order-cm-store', [App\Http\Controllers\ChangeMeterRequestController::class, 'store'])->name('storeCM');
-    Route::get('service-connect-order-cm-edit/{id}', [App\Http\Controllers\ServiceConnectOrderController::class, 'editCM'])->name('editCM');
-    Route::put('service-connect-order-cm-update/{id}', [App\Http\Controllers\ServiceConnectOrderController::class, 'updateCM'])->name('updateCM');
-    Route::post('service-connect-order-post-meter', [App\Http\Controllers\ServiceConnectOrderController::class, 'meterPostingCM'])->name('meterPostingCM');
-    Route::post('validate-meter-no', [App\Http\Controllers\ServiceConnectOrderController::class, 'validateMeterPosting'])->name('validateMeterPosting');
-    Route::get('pdf-sco-cm/{id}', [App\Http\Controllers\ServiceConnectOrderController::class, 'printChangeMeterRequest'])->name('printChangeMeterRequest');
+    Route::get('change-meter-request-index', [App\Http\Controllers\ChangeMeterRequestController::class, 'index'])->name('indexCM');
+    Route::get('change-meter-request-create', [App\Http\Controllers\ChangeMeterRequestController::class, 'create'])->name('createCM');
+    Route::post('change-meter-request-store', [App\Http\Controllers\ChangeMeterRequestController::class, 'store'])->name('storeCM');
+    Route::get('change-meter-request-edit/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'edit'])->name('editCM');
+    Route::put('change-meter-request-update/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'update'])->name('updateCM');
+    Route::post('change-meter-request-posting', [App\Http\Controllers\ChangeMeterRequestController::class, 'meterPosting'])->name('meterPostingCM');
+    Route::post('validate-meter-no', [App\Http\Controllers\ChangeMeterRequestController::class, 'validateMeterPosting'])->name('validateMeterPosting');
+    Route::get('pdf-sco-cm/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'printChangeMeterRequest'])->name('printChangeMeterRequest');
     // Route::get('fetch-applications', [App\Http\Controllers\ServiceConnectOrderController::class, 'fetchServiceConnectApplications'])->name('fetchServiceConnectApplications');
-    Route::get('service-connect-order-cm/search', [App\Http\Controllers\ServiceConnectOrderController::class, 'searchCM'])->name('cm.search');
+    Route::get('change-meter-request/search', [App\Http\Controllers\ChangeMeterRequestController::class, 'search'])->name('cm.search');
+    Route::get('change-meter-request/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'destroy'])->name('deleteCM');
+    Route::get('change-meter-request-view/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'view'])->name('viewCM');
+    Route::get('change-meter-request-report', [App\Http\Controllers\ChangeMeterRequestController::class, 'viewReport'])->name('viewReport');
+    Route::get('change-meter-request-report/pdf', [App\Http\Controllers\ChangeMeterRequestController::class, 'generateReport'])->name('generateReport');
 
     Route::resource('change-meter-request', App\Http\Controllers\ChangeMeterRequestController::class);
 
@@ -182,6 +186,10 @@ Route::group(['middleware' => 'auth'], function () {
     // LEDGER
     Route::get('ledger', [App\Http\Controllers\AccountLedgerController::class, 'indexLedger'])->name('ledger.index');
     Route::get('ledger/search', [App\Http\Controllers\AccountLedgerController::class, 'searchLedger'])->name('ledger.search');
+
+    // POWER BILL
+    Route::resource('change-meter-request-transact', App\Http\Controllers\ChangeMeterRequestTransactionController::class);
+    Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
 });
 
 Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])->name('online.pms')->middleware(['auth', 'verified']);

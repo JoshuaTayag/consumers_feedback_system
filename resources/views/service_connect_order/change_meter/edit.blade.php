@@ -16,25 +16,25 @@
           </div>
         </div>
         <div class="card-body" style="background-color: #fafafa">
-          {!! Form::open(array('route' => ['updateCM', $sco_cm->application_id],'method'=>'PUT')) !!}
+          {!! Form::open(array('route' => ['updateCM', $change_meter_request->id],'method'=>'PUT')) !!}
             <div class="row">
               <div class="col-lg-8">
                 <div class="row">
                   <div class="col-lg-12 mb-3">
-                    <span class="fs-4 fw-bold">SCO #: <span class="text-danger">{{$sco_cm->SCONo}}</span></span>
+                    <span class="fs-4 fw-bold">Control #: <span class="text-danger">{{$change_meter_request->control_no}}</span></span>
                   </div>
                   <div class="col-lg-6">
                     <div class="mb-2">
                         <!-- {{ Form::label('account_no', 'Account No') }}
                         {{ Form::text('account_no', null, array('placeholder' => 'Ex: 0111111','class' => 'form-control')) }} -->
                         {{ Form::label('electric_service_details', 'Account Number') }}
-                        {{ Form::text('electric_service_details', $sco_cm->NextAcctNo, array('class' => 'form-control', 'disabled')) }}
+                        {{ Form::text('electric_service_details', $change_meter_request->account_number, array('class' => 'form-control', 'disabled')) }}
                     </div>
                   </div>
                   <div class="col-lg-4">
                     <div class="mb-2">
                         {{ Form::label('old_meter', 'Old Meter') }}
-                        {{ Form::text('old_meter', $sco_cm->OldMtr, array('class' => 'form-control')) }}
+                        {{ Form::text('old_meter', $change_meter_request->old_meter_no, array('class' => 'form-control')) }}
                     </div>
                   </div>
                 </div>
@@ -45,25 +45,25 @@
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('last_name', 'Last Name') }}
-                        {{ Form::text('last_name', $sco_cm->Lastname, array('class' => 'form-control', 'readonly', 'required')) }}
+                        {{ Form::text('last_name', $change_meter_request->last_name, array('class' => 'form-control', 'readonly', 'required')) }}
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('first_name', 'First Name') }}
-                        {{ Form::text('first_name', $sco_cm->Firstname, array('class' => 'form-control', 'required')) }}
+                        {{ Form::text('first_name', $change_meter_request->first_name, array('class' => 'form-control', 'required')) }}
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('contact_no', 'Contact No.') }}
-                        {{ Form::text('contact_no', $sco_cm->ContactNo, array('class' => 'form-control')) }}
+                        {{ Form::text('contact_no', $change_meter_request->contact_no, array('class' => 'form-control')) }}
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('care_of', 'Care of') }}
-                        {{ Form::text('care_of', $sco_cm->Spouse, array('class' => 'form-control')) }}
+                        {{ Form::text('care_of', $change_meter_request->care_of, array('class' => 'form-control')) }}
                     </div>
                   </div>
                 </div>
@@ -74,7 +74,7 @@
                     <select id="feeder" class="form-control" name="feeder" required>
                       <option value=""></option>
                       @foreach (Config::get('constants.feeders') as $feeder)          
-                        <option value="{{ $feeder['name'] }}" id="" {{ $sco_cm->Feeder == $feeder['name'] ? 'selected' : ''}}>{{ $feeder['name'] }}</option>
+                        <option value="{{ $feeder['name'] }}" id="" {{ $change_meter_request->feeder == $feeder['name'] ? 'selected' : ''}}>{{ $feeder['name'] }}</option>
                       @endforeach 
                     </select>
                   </div>
@@ -83,11 +83,11 @@
                         {{ Form::label('area', 'Area *') }}
                         <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
                           <option value=""></option>
-                          <option value="A1" {{ $sco_cm->Area == "A1" ? 'selected' : ''}} >A1</option>
-                          <option value="A2" {{ $sco_cm->Area == "A2" ? 'selected' : ''}} >A2</option>
-                          <option value="A3" {{ $sco_cm->Area == "A3" ? 'selected' : ''}} >A3</option>
-                          <option value="A4" {{ $sco_cm->Area == "A4" ? 'selected' : ''}} >A4</option>
-                          <option value="A5" {{ $sco_cm->Area == "A5" ? 'selected' : ''}} >A5</option>
+                          <option value="1" {{ $change_meter_request->area == "1" ? 'selected' : ''}} >A1</option>
+                          <option value="2" {{ $change_meter_request->area == "2" ? 'selected' : ''}} >A2</option>
+                          <option value="3" {{ $change_meter_request->area == "3" ? 'selected' : ''}} >A3</option>
+                          <option value="4" {{ $change_meter_request->area == "4" ? 'selected' : ''}} >A4</option>
+                          <option value="5" {{ $change_meter_request->area == "5" ? 'selected' : ''}} >A5</option>
                         </select>
                     </div>
                   </div>
@@ -97,31 +97,27 @@
                         <select id="municipality" class="form-control" name="municipality" value="{{ old('municipality')}}" required>
                           <option value=""></option>
                           @foreach ($municipalities as $municipality)          
-                            <option value="{{ $municipality->Municipality }}" {{ $sco_cm->Municipality == $municipality->Municipality ? 'selected' : ''}}>{{ $municipality->Municipality }}</option>
-                          @endforeach 
+                            <option value="{{ $municipality->id }}" id="{{ $municipality->id }}" {{ $change_meter_request->municipality_id == $municipality->id ? 'selected' : ''}}>{{ $municipality->municipality_name }}</option>
+                          @endforeach
                         </select>
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('barangay', 'Barangay *') }}
+                        {{ Form::label('barangay', 'Barangays *') }}
                         <select id="barangay" class="form-control" name="barangay" required>
-                          <option value=""></option>
-                          @foreach ($barangays as $barangay)        
-                            <option value="{{ $barangay->Brgy }}" {{ $sco_cm->Brgy == rtrim($barangay->Brgy) ? 'selected' : ''}}>{{ $barangay->Brgy }}</option>
-                          @endforeach 
+                          <!-- <option value=""></option> -->
+                          <option value="{{ $change_meter_request->barangay_id }}" id="{{ $change_meter_request->barangay_id }}">{{$change_meter_request->barangay_id ? $change_meter_request->barangay->barangay_name : null }}</option>
+                          <!-- @foreach ($barangays as $barangay)        
+                            <option value="{{ $barangay->Brgy }}" {{ $change_meter_request->Brgy == rtrim($barangay->Brgy) ? 'selected' : ''}}>{{ $barangay->Brgy }}</option>
+                          @endforeach  -->
                         </select>
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('sitio', 'Sitio') }}
-                        <select id="sitio" class="form-control" name="sitio">
-                          <option value=""></option>
-                          @foreach ($sitios as $sitio)          
-                            <option value="{{ $sitio->Sitio }}" {{ $sco_cm->Sitio == $sitio->Sitio ? 'selected' : ''}}>{{ $sitio->Sitio }}</option>
-                          @endforeach 
-                        </select>
+                        {{ Form::text('sitio', $change_meter_request->sitio, array('class' => 'form-control')) }}
                     </div>
                   </div>
                 </div>
@@ -129,22 +125,22 @@
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('membership_or', 'Membership OR *') }}
-                        {{ Form::text('membership_or', $sco_cm->{'Membership OR#'}, array('class' => 'form-control', 'readonly')) }}
+                        {{ Form::text('membership_or', $change_meter_request->membership_or, array('class' => 'form-control', 'readonly')) }}
                     </div>
                   </div>
-                  <div class="col-lg-3">
+                  <!-- <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('membership_date', 'Membership Date *') }}
-                        {{ Form::date('membership_date', date('Y-m-d', strtotime($sco_cm->{'Membership Date'})) , array('class' => 'form-control', 'readonly')) }}
+                        {{ Form::date('membership_date', date('Y-m-d', strtotime($change_meter_request->{'Membership Date'})) , array('class' => 'form-control', 'readonly')) }}
                     </div>
-                  </div>
+                  </div> -->
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('consumer_type', 'Consumer Type *') }}
                         <select id="consumer_type" class="form-control" name="consumer_type" value="{{ old('consumer_type')}}" required>
                           <option value=""></option>
-                          @foreach ($consumer_types as $consumer_type)          
-                            <option value="{{ $consumer_type->name_type }}" {{ $sco_cm->ConsumerType == $consumer_type->name_type ? 'selected' : ''}} >{{ $consumer_type->name_type }}</option>
+                          @foreach (Config::get('constants.consumer_types') as $consumer_type)          
+                            <option value="{{ $consumer_type['id'] }}" id="" {{ $change_meter_request->consumer_type == $consumer_type['id'] ? 'selected' : ''}}>{{ $consumer_type['name'] }}</option>
                           @endforeach 
                         </select>
                     </div>
@@ -155,7 +151,7 @@
                         <select id="occupancy_type" class="form-control" name="occupancy_type">
                           <option value=""></option>
                           @foreach ($occupancy_types as $occupancy_type)          
-                            <option value="{{ $occupancy_type->occupancy_name }}" {{ $sco_cm->TurnOffOn == $occupancy_type->occupancy_name ? 'selected' : ''}} >{{ $occupancy_type->occupancy_name }}</option>
+                            <option value="{{ $occupancy_type->occupancy_name }}" {{ $change_meter_request->TurnOffOn == $occupancy_type->occupancy_name ? 'selected' : ''}} >{{ $occupancy_type->occupancy_name }}</option>
                           @endforeach 
                         </select>
                     </div>
@@ -166,7 +162,7 @@
                         <select id="line_type" class="form-control" name="line_type">
                           <option value=""></option>
                           @foreach (Config::get('constants.line_types') as $line_type)          
-                            <option value="{{ $line_type['name'] }}" {{ $sco_cm->LineType == $line_type['name'] ? 'selected' : ''}} id="">{{ $line_type['name'] }}</option>
+                            <option value="{{ $line_type['name'] }}" {{ $change_meter_request->LineType == $line_type['name'] ? 'selected' : ''}} id="">{{ $line_type['name'] }}</option>
                           @endforeach 
                         </select>
                     </div>
@@ -186,7 +182,7 @@
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('meter_or_no', 'Meter OR #') }}
-                        {{ Form::text('meter_or_no', $sco_cm->{'Meter OR#'}, array('class' => 'form-control')) }}
+                        {{ Form::text('meter_or_no', $change_meter_request->meter_or_number, array('class' => 'form-control')) }}
                     </div>
                   </div>
                 </div>
@@ -197,11 +193,11 @@
                         <select id="meter_code_no" class="form-control" name="meter_code_no" required>
                           <option value=""></option>
                           @foreach ($type_of_meters as $type_of_meter)          
-                            <option value="{{ $type_of_meter->meter_code }}" id="" {{ $sco_cm->CodeNo == $type_of_meter->meter_code ? 'selected' : ''}}>
+                            <option value="{{ $type_of_meter->meter_code }}" id="" {{ $change_meter_request->type_of_meter == $type_of_meter->meter_code ? 'selected' : ''}}>
                               <div class="row">
                                 <div class="form-group">
-                                  <label class="col-xs-6">{{ $type_of_meter->meter_code  }} <span class="fw-bold">|</span></label>
-                                  <label class="col-xs-6">{{ $type_of_meter->meter_description  }}</label>
+                                  <label class="col-xs-6">Code: {{ $type_of_meter->meter_code  }} <span class="fw-bold">|</span></label>
+                                  <label class="col-xs-6">Desc: {{ $type_of_meter->meter_description  }}</label>
                                 </div>
                               </div> 
                             </option>
@@ -212,13 +208,13 @@
                   <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('last_reading', 'Last Reading') }}
-                        {{ Form::number('last_reading', $sco_cm->LastRdg, array('class' => 'form-control', 'readonly')) }}
+                        {{ Form::number('last_reading', $change_meter_request->last_reading, array('class' => 'form-control', 'readonly')) }}
                     </div>
                   </div>
                   <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('reading_initial', 'Initial Reading') }}
-                        {{ Form::number('reading_initial', $sco_cm->{'Rdg Initial'}, array('class' => 'form-control')) }}
+                        {{ Form::number('reading_initial', $change_meter_request->initial_reading, array('class' => 'form-control')) }}
                     </div>
                   </div>
                 </div>
@@ -226,13 +222,13 @@
                   <div class="col-lg-6">
                     <div class="mb-2">
                       <label class="form-label mb-1">Remarks </label>
-                      <textarea class="form-control" name="remarks" id="remarks">{{ $sco_cm->Remarks }}</textarea>
+                      <textarea class="form-control" name="remarks" id="remarks">{{ $change_meter_request->remarks }}</textarea>
                     </div>
                   </div>
                   <div class="col-lg-6">
                     <div class="mb-2">
                       <label class="form-label mb-1">Location </label>
-                      <textarea class="form-control" name="location" id="location">{{ $sco_cm->Location }}</textarea>
+                      <textarea class="form-control" name="location" id="location">{{ $change_meter_request->location }}</textarea>
                     </div>
                   </div>
                 </div>
@@ -327,6 +323,28 @@
   return data.id + " | " +data.Name + " | " + data.Address
   
   }
+
+  $('#municipality').on('change', function () {
+      var id = $(this).children(":selected").attr("id");
+      $("#barangay").html('');
+      console.log(id);
+      $.ajax({
+          url: "{{url('api/fetch-barangays')}}",
+          type: "POST",
+          data: {
+              municipality_id: id,
+              _token: '{{csrf_token()}}'
+          },
+          dataType: 'json',
+          success: function (res) {
+              $('#barangay').html('<option value="">-- Select Barangay --</option>');
+              $.each(res.barangays, function (key, value) {
+                    $("#barangay").append('<option value="' + value
+                        .id + '" id="'+ value.id +'">' + value.barangay_name + '</option>');
+              });
+          }
+      });
+  });
 </script>
 @endsection
 @section('style')

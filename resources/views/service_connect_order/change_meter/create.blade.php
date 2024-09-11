@@ -8,7 +8,7 @@
         <div class="card-header">
           <div class="row align-items-center">
               <div class="col-lg-6">
-                  <span class="mb-0 align-middle fs-3">Insert Change Meter</span>
+                  <span class="mb-0 align-middle fs-3">Change Meter</span>
               </div>
               <div class="col-lg-6 text-end">
                 <a class="btn btn-sm btn-primary" href="{{ route('indexCM') }}"> Back </a>
@@ -92,11 +92,11 @@
                         {{ Form::label('area', 'Area *') }}
                         <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
                           <option value=""></option>
-                          <option value="A1" {{ old('area') == "A1" ? 'selected' : ''}} >A1</option>
-                          <option value="A2" {{ old('area') == "A2" ? 'selected' : ''}} >A2</option>
-                          <option value="A3" {{ old('area') == "A3" ? 'selected' : ''}} >A3</option>
-                          <option value="A4" {{ old('area') == "A4" ? 'selected' : ''}} >A4</option>
-                          <option value="A5" {{ old('area') == "A5" ? 'selected' : ''}} >A5</option>
+                          <option value="1" {{ old('area') == "A1" ? 'selected' : ''}} >A1</option>
+                          <option value="2" {{ old('area') == "A2" ? 'selected' : ''}} >A2</option>
+                          <option value="3" {{ old('area') == "A3" ? 'selected' : ''}} >A3</option>
+                          <option value="4" {{ old('area') == "A4" ? 'selected' : ''}} >A4</option>
+                          <option value="5" {{ old('area') == "A5" ? 'selected' : ''}} >A5</option>
                         </select>
                     </div>
                   </div>
@@ -113,8 +113,14 @@
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                      <label for="barangay" class="form-label mb-1">Barangay</label>
-                      <select id="barangay" class="form-control" name="barangay"></select>
+                      <label for="barangay" class="form-label mb-1">Barangay *</label>
+                      <select id="barangay" class="form-control" name="barangay" required></select>
+                    </div>
+                  </div>
+                  <div class="col-lg-3">
+                    <div class="mb-2">
+                      {{ Form::label('sitio', 'Sitio') }}
+                      {{ Form::text('sitio', null, array('class' => 'form-control')) }}
                     </div>
                   </div>
                 </div>
@@ -136,8 +142,8 @@
                         {{ Form::label('consumer_type', 'Consumer Type *') }}
                         <select id="consumer_type" class="form-control" name="consumer_type" value="{{ old('consumer_type')}}" required>
                           <option value=""></option>
-                          @foreach ($consumer_types as $consumer_type)          
-                            <option value="{{ $consumer_type->name_type }}" {{ old('consumer_type') == $consumer_type->name_type ? 'selected' : ''}} >{{ $consumer_type->name_type }}</option>
+                          @foreach (Config::get('constants.consumer_types') as $consumer_type)          
+                            <option value="{{ $consumer_type['id'] }}" id="">{{ $consumer_type['name'] }}</option>
                           @endforeach 
                         </select>
                     </div>
@@ -256,7 +262,7 @@
       url: "{{route('fetchAccounts')}}",
       type: "get",
       dataType: 'json',
-      delay: 250,
+      // delay: 100,
       data: function (params) {
         return {
             // _token: '{{csrf_token()}}',

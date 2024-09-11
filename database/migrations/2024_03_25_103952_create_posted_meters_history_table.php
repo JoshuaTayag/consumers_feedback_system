@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('serial_no')->nullable();
             $table->string('erc_seal_no')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

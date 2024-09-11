@@ -24,14 +24,13 @@ return new class extends Migration
             $table->integer('area');
             $table->integer('municipality_id');
             $table->integer('barangay_id');
-            $table->integer('sitio')->nullable();
+            $table->string('sitio')->nullable();
 
             // electric details
             $table->string('account_number');
             $table->string('care_of')->nullable();
             $table->string('feeder');
             $table->string('membership_or')->nullable();
-            $table->string('membership_date')->nullable();
             $table->integer('consumer_type');
 
             $table->string('old_meter_no');
@@ -47,13 +46,15 @@ return new class extends Migration
 
             // posting details
             $table->string('crew')->nullable();
-            $table->time('time_acted')->nullable();
+            // $table->time('time_acted')->nullable();
             $table->integer('status')->nullable();
             $table->string('damage_cause')->nullable();
             $table->string('crew_remarks')->nullable();
             $table->string('created_by')->nullable();
+            $table->timestamp('date_time_acted')->nullable();
 
             $table->timestamps();
+            $table->softDeletes(); 
         });
     }
 

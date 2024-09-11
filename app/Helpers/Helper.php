@@ -45,7 +45,7 @@ class Helper
     }
 
     public static function IDGeneratorChangeMeter($model, $trow, $length = 4, $prefix){
-        $data = $model::where('SCONo', 'LIKE', '%'.$prefix.'%')->orderBy('application_id','desc')->first();
+        $data = $model::where($trow, 'LIKE', '%'.$prefix.'%')->orderBy('id','desc')->first();
         if(!$data){
             $og_length = $length;
             $last_number = 1;

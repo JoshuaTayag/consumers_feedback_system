@@ -8,11 +8,12 @@
             <div class="card-header">
               <div class="row align-items-center">
                   <div class="col-lg-6">
-                      <span class="mb-0 align-middle fs-3">Service Connect Order</span>
+                      <span class="mb-0 align-middle fs-3">Change Meter Request</span>
                   </div>
                   <div class="col-lg-6 text-end">
+                    <a class="btn btn-sm btn-success" href="{{ route('viewReport') }}" target="_blank"><i class="fa fa-download"></i> Generate Report</a>
                     @can('service-connect-order-create')
-                      <a class="btn btn-sm btn-success" href="{{ route('change-meter-request.create') }}"> Create New SCO </a>
+                      <a class="btn btn-sm btn-success" href="{{ route('createCM') }}"> Create New Request </a>
                     @endcan
                   </div>
               </div>
@@ -20,7 +21,7 @@
             <form action="{{ route('cm.search') }}" method="GET">
               <div class="row p-3">
                 <div class="col-lg-2">
-                    <input type="text" placeholder="Search by SCO No." id="search_sco_no" name="sco_no" class="form-control" value="{{ request('sco_no') }}">
+                    <input type="date" placeholder="Search by Control No." id="search_sco_no" name="control_no" class="form-control" value="{{ request('control_no') }}">
                 </div>
                 <div class="col-lg-2">
                     <input type="text" placeholder="Search by First Name" id="search_first_name" name="first_name" class="form-control" value="{{ request('first_name') }}">
@@ -37,77 +38,104 @@
                 </div>
               </div>
             </form>
-            <div class="card-body {{ count($cm_requests) == 3 ? 'd-flex flex-wrap' : '' }}">
+            <div class="card-body">
               <div class="row" id="show_data">
-              @foreach ($cm_requests as $key => $sco)
+              @foreach ($cm_requests as $key => $cm_request)
+                @php
+                  $consumerTypes = collect(Config::get('constants.consumer_types'));
+                  $consumerType = $consumerTypes->firstWhere('id', $cm_request->consumer_type);
+                @endphp
                 <div class="col-lg-4 mb-4">
                   <div class="card h-100">
-                    <div class="card-header p-1 bg-{{ $sco->Dispatch2 ? 'success' : 'danger' }}"></div>
+                    <div class="card-header p-1 bg-{{ $cm_request->status ? 'success' : 'danger' }}"></div>
                     <div class="card-body">
                       <div class="row mb-3">
                         <div class="col d-flex align-items-center">
-                            @if($sco->Acted == 0 || $sco->Dispatch2 == 'NOT COMPLETED')
-                                <a class="btn btn-sm btn-secondary rounded-pill me-2" href="{{ route('editCM',$sco->application_id) }}">
+                          @if($cm_request->status == null)
+                            <div class="dropdown">
+                              <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                Action
+                              </button>
+                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                <li><a class="dropdown-item" href="{{ route('editCM',$cm_request->id) }}"><i class="fa fa-pencil"></i> Update</a></li>
+                                <li><a class="dropdown-item" href="{{route('printChangeMeterRequest',$cm_request->id)}}" target="_blank"><i class="fa fa-print"></i> Print</a></li>
+                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-area="{{$cm_request->area}}" data-feeder="{{$cm_request->feeder}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
+                                <li><a class="dropdown-item" href="{{route('deleteCM',$cm_request->id)}}"><i class="fa fa-trash"></i> Delete</a></li>
+                              </ul>
+                            </div>
+                          @else
+                            <a href="{{ route('viewCM', $cm_request->id) }}" type="submit" target="_blank" class="btn btn-info btn-sm"><i class="fa fa-eye"></i></a>
+                          @endif
+                            <!-- @if($cm_request->Acted == 0 || $cm_request->Dispatch2 == 'NOT COMPLETED') -->
+                                <!-- <a class="btn btn-sm btn-secondary rounded-pill me-2" href="{{ route('editCM',$cm_request->id) }}">
                                     <i class="bi bi-gear"></i> Update
-                                </a>
-                                <!-- <a class="btn btn-sm btn-secondary rounded-pill" href="{{ route('editCM',$sco->application_id) }}">
+                                </a> -->
+                                <!-- <a class="btn btn-sm btn-secondary rounded-pill" href="{{ route('editCM',$cm_request->id) }}">
                                     <i class="bi bi-gear"></i> Meter Posting
                                 </a> -->
-                                <button type="button" class="btn btn-sm btn-secondary rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#exampleModal" data-name="{{$sco->Lastname.', '.$sco->Firstname}}" data-sco="{{$sco->SCONo}}" data-area="{{$sco->Area}}" data-feeder="{{$sco->Feeder}}" data-process-date="{{ date('F d, Y', strtotime($sco->ProcessDate)) }}">
+                                <!-- <button type="button" class="btn btn-sm btn-secondary rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#exampleModal" data-name="{{$cm_request->Lastname.', '.$cm_request->Firstname}}" data-sco="{{$cm_request->SCONo}}" data-area="{{$cm_request->Area}}" data-feeder="{{$cm_request->Feeder}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->ProcessDate)) }}">
                                   Meter Posting
-                                </button>
-                            @endif
-                            <a href="{{route('printChangeMeterRequest',$sco->application_id)}}" target="_blank" class="btn btn-sm btn-success"><i class="fa fa-print"></i></a>
+                                </button> -->
+                            <!-- @endif -->
+                            <!-- <a href="{{route('printChangeMeterRequest',$cm_request->id)}}" target="_blank" class="btn btn-sm btn-success"><i class="fa fa-print"></i></a> -->
                         </div>
                         <div class="col-lg-3 d-flex align-items-center">
                             <div class="mx-end ms-auto"> <!-- Add mx-auto to horizontally center the content -->
-                                <p class="badge rounded-pill bg-{{ $sco->Dispatch2 ? 'success' : 'danger' }} p-2 mb-0">{{ $sco->Dispatch2 ? 'Acted' : 'Not Acted' }}</p>
+                                <p class="badge rounded-pill bg-{{ $cm_request->status ? 'success' : 'danger' }} p-2 mb-0">{{ $cm_request->status ? 'Acted' : 'Not Acted' }}</p>
                             </div>
                         </div>
                       </div>
                       <div class="row">
-                        <div class="col ">SCO No. :</div>
-                        <div class="col fw-bold">{{$sco->SCONo}}</div>
+                        <div class="col-lg-5">Control No. :</div>
+                        <div class="col-lg-7 fw-bold">{{$cm_request->control_no}}</div>
                       </div>
                       <div class="row">
-                        <div class="col ">Name:</div>
-                        <div class="col ">{{$sco->Lastname.', '.$sco->Firstname}}</div>
+                        <div class="col-lg-5 ">Name:</div>
+                        <div class="col-lg-7 ">{{$cm_request->last_name.', '.$cm_request->first_name}}</div>
                       </div>
                       <div class="row">
-                        <div class="col ">Account:</div>
-                        <div class="col ">{{ substr($sco->NextAcctNo, 0, 2) }}-{{ substr($sco->NextAcctNo, 2, 4) }}-{{ substr($sco->NextAcctNo, 6, 4) }} </div>
+                        <div class="col-lg-5 ">Account:</div>
+                        <div class="col-lg-7 ">{{ substr($cm_request->account_number, 0, 2) }}-{{ substr($cm_request->account_number, 2, 4) }}-{{ substr($cm_request->account_number, 6, 4) }} </div>
                       </div>
                       <div class="row">
-                        <div class="col ">Process Date:</div>
-                        <div class="col ">{{ date('F d, Y', strtotime($sco->ProcessDate)) }}</div>
+                        <div class="col-lg-5 ">Process Date:</div>
+                        <div class="col-lg-7 ">{{ date('F d, Y', strtotime($cm_request->created_at)) }}</div>
                       </div>
                       <div class="row">
-                        <div class="col ">Area:</div>
-                        <div class="col ">{{$sco->Area}}</div>
+                        <div class="col-lg-5 ">Area:</div>
+                        <div class="col-lg-7 ">A{{$cm_request->area}}</div>
                       </div>
                       <div class="row">
-                        <div class="col ">Address:</div>
-                        <div class="col ">{{$sco->Sitio.', '.$sco->Brgy.', '. $sco->Municipality}}</div>
+                        <div class="col-lg-5 ">Address:</div>
+                        <div class="col-lg-7 ">{{$cm_request->sitio.', '.$cm_request->barangay->barangay_name.', '. $cm_request->municipality->municipality_name}}</div>
                       </div>
                       <div class="row">
-                        <div class="col ">Consumer Type:</div>
-                        <div class="col ">{{$sco->ConsumerType}}</div>
+                        <div class="col-lg-5 ">Consumer Type:</div>
+                        <div class="col-lg-7 ">{{ $consumerType['name'] ?? 'Unknown Type'}}</div>
                       </div>
                       <div class="row">
-                        <div class="col ">Application Status:</div>
-                        <div class="col "><p class="badge rounded-pill bg-{{ $sco->Dispatch2 == 'INSTALLED' && $sco->MeterNo ? 'success' : ($sco->Dispatch2 == 'REJECTED' && !$sco->MeterNo ? 'danger' : 'warning')}} p-2 fs-6" >{{$sco->Dispatch2}}</p></div>
+                        <div class="col-lg-5 ">Application Status:</div>
+                        <!-- 1 = installed, 2 = rejected -->
+                        <div class="col-lg-7 {{ $cm_request->status == null ? 'd-none' : 'd-block'}}"><p class="badge rounded-pill bg-{{$cm_request->status == 1 ? 'warning' : ($cm_request->status == 2 ? 'success' : 'danger') }} p-2 fs-6" >{{$cm_request->status == 1 ? 'NOT COMPLETED' : ($cm_request->status == 2 ? 'INSTALLED' : 'REJECTED') }}</p></div>
                       </div>
                       <div class="row">
-                        <div class="col ">Meter No.:</div>
-                        <div class="col ">{{$sco->MeterNo}}</div>
+                        <div class="col-lg-5 ">Old Meter No.:</div>
+                        <div class="col-lg-7 ">{{$cm_request->old_meter_no}}</div>
                       </div>
                       <div class="row">
-                        <div class="col ">Date Installed:</div>
-                        <div class="col ">{{ $sco->{'Date Installed'} ? date('F d, Y', strtotime($sco->{'Date Installed'})) : 'NONE' }}</div>
+                        <div class="col-lg-5 ">New Meter No.:</div>
+                        <div class="col-lg-7 text-{{$cm_request->new_meter_no ? '' : 'danger'}} ">{{$cm_request->new_meter_no ? $cm_request->new_meter_no : "N/A"}}</div>
                       </div>
                       <div class="row">
-                        <div class="col-lg-6">Remarks:</div>
-                        <div class="col-lg-6">{{$sco->Remarks}}</div>
+                        <div class="col-lg-5 ">Date Installed:</div>
+                        <div class="col-lg-7 text-{{$cm_request->date_time_acted ? '' : 'danger'}}">{{ $cm_request->date_time_acted ? date('F d, Y h:i A', strtotime($cm_request->date_time_acted)) : 'N/A' }}</div>
+                      </div>
+                      <div class="row">
+                        <div class="col-lg-5">Remarks:</div>
+                        <div class="col-lg-7">{{$cm_request->remarks}}</div>
+                      </div>
+                      <div class="row pt-3 text-muted">
+                        <div class="col text-end">created by: {{$cm_request->created_name}}</div>
                       </div>
                     </div>
                   </div>
@@ -133,6 +161,7 @@
     var process_date = button.getAttribute('data-process-date');
     var area = button.getAttribute('data-area');
     var feeder = button.getAttribute('data-feeder');
+    var cm_id = button.getAttribute('data-id');
 
     // console.log(feeder)
     var modal_sco = myModal.querySelector('#sco');
@@ -140,12 +169,14 @@
     var modal_process_date = myModal.querySelector('#process_date');
     var modal_area = myModal.querySelector('#area');
     var modal_feeder = myModal.querySelector('#feeder');
+    var modal_cm_id = myModal.querySelector('#cm_id');
 
     modal_sco.value = sco;
     modal_name.value = full_name;
     modal_process_date.value = process_date;
     modal_area.value = area;
     modal_feeder.value = feeder;
+    modal_cm_id.value = cm_id;
   });
 
   const application_status = document.getElementById('status');
@@ -162,7 +193,7 @@
   // Add event listener to dropdown
   application_status.addEventListener('change', function() {
       // Toggle visibility of text field based on selected option
-      if (application_status.value == 'INSTALLED') {
+      if (application_status.value == 2) {
         crew.setAttribute('required', 'required');
         time.setAttribute('required', 'required');
 
@@ -193,6 +224,14 @@
         $('#meter_no').removeClass('is-valid');
         $('#meter_no').removeClass('is-invalid');
         $('#error_meter').html('');
+
+        $('#seal_no').removeClass('is-valid');
+        $('#seal_no').removeClass('is-invalid');
+        $('#error_seal').html('');
+
+        $('#erc_seal').removeClass('is-valid');
+        $('#erc_seal').removeClass('is-invalid');
+        $('#error_erc_seal').html('');
         $('#submit_meter_posting').attr('disabled', false);
       }
   });
@@ -230,7 +269,7 @@
             }
           }
           else {
-            $('#error_meter').html('<label class="text-danger">Meter No. not Available! Pls refer to SCO NO '+ result[1] +'</label>');
+            $('#error_meter').html('<label class="text-danger">Meter No. not Available! Pls refer to '+ result[1] +'</label>');
             $('#meter_no').removeClass('is-valid');
             $('#meter_no').addClass('is-invalid');
             $('#submit_meter_posting').attr('disabled', 'disabled');

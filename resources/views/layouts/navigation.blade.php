@@ -110,38 +110,38 @@
     </ul>
   </li> --}}
 
-  {{-- <li class="nav-item dropdown">
+  <li class="nav-item dropdown">
     <a id="navbarPowerBill" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
       POWER BILL
     </a>
     <ul class="dropdown-menu" aria-labelledby="navbarPowerBill">
-      <li>
+      <!-- <li>
         <a class="dropdown-item" href="{{ route('teller.index') }}">TELLER</a>
-      </li>
+      </li> -->
       <li>
         <a class="dropdown-item" href="#">
-          BILLING&raquo;
+          TELLER&raquo;
         </a>
         <ul class="dropdown-menu dropdown-submenu">
           <li>
-            <a class="dropdown-item" href="{{ route('pre_membership_index') }}">PRE-MEMBERSHIP</a>
+            <a class="dropdown-item" href="{{ route('change-meter-request-transact.create') }}">CHANGE METER PAYMENT</a>
           </li>
-          <li>
+          <!-- <li>
             <a class="dropdown-item" href="#">Submenu item 3 &raquo; </a>
             <ul class="dropdown-menu dropdown-submenu">
               <li>
                 <a class="dropdown-item" href="#">Multi level 1</a>
               </li>
             </ul>
-          </li>
+          </li> -->
           
-          <li>
+          <!-- <li>
             <a class="dropdown-item" href="#">Submenu item 5</a>
-          </li>
+          </li> -->
         </ul>
       </li>
     </ul>
-  </li> --}}
+  </li>
 
   <li class="nav-item dropdown">
     <a id="navbarPowerBill" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>

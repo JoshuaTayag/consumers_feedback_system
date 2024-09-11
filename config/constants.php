@@ -780,15 +780,30 @@
         'action_status_change_meter' => [
             [
                 "id" => 1,
-                "name" => "INSTALLED"
+                "name" => "NOT COMPLETED"
             ],
             [
                 "id" => 2,
-                "name" => "REJECTED"
+                "name" => "INSTALLED"
+            ],
+            // [
+            //     "id" => 3,
+            //     "name" => "REJECTED"
+            // ]
+        ],
+
+        'consumer_types' => [
+            [
+                "id" => 1,
+                "name" => "Commercial/Change Meter"
+            ],
+            [
+                "id" => 2,
+                "name" => "Replacement of busted transformer"
             ],
             [
                 "id" => 3,
-                "name" => "NOT COMPLETED"
+                "name" => "Residential/Change Meter"
             ]
         ],
     ];

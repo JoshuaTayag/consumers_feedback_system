@@ -109,21 +109,21 @@
 
     <table class="styled-table" style="font-size: 14px; width: 100%; padding-top: 25px; padding-bottom: 0px;">
       <tbody>
-        <tr><td>SCO #: {{$data->SCONo}}</td></tr>
+        <tr><td>Control No. : {{$data->control_no}}</td></tr>
         <tr>
-          <td>Account #: {{$data->NextAcctNo}}</td>
-          <td>Old Meter #: {{$data->OldMtr}}</td>
+          <td>Account #: {{ substr($data->account_number, 0, 2) }}-{{ substr($data->account_number, 2, 4) }}-{{ substr($data->account_number, 6, 4) }}</td>
+          <td>Old Meter #: {{$data->old_meter_no}}</td>
         </tr>
         <tr>
-          <td>Name: {{$data->Lastname.', '.$data->Firstname}}</td>
-          <td>C/O: {{$data->Spouse}}</td>
+          <td>Name: {{$data->last_name.', '.$data->first_name}}</td>
+          <td>C/O: {{$data->care_of}}</td>
         </tr>
-        <tr><td>Contact #: {{$data->ContactNo}}</td></tr>
-        <tr><td>Address: {{$data->Sitio.', '.$data->Brgy.', '.$data->Municipality}}</td></tr>
+        <tr><td>Contact #: {{$data->contact_no}}</td></tr>
+        <tr><td>Address: {{$data->sitio.', '.$data->barangay->barangay_name.', '.$data->municipality->municipality_name}}</td></tr>
         <tr><td>Consumer Type: {{$data->ConsumerType}}</td></tr>
-        <tr><td>Meter OR #: {{$data->{'Meter OR#'} }}</td></tr>
-        <tr><td>Remarks: {{$data->Remarks}}</td></tr>
-        <tr><td>Reference/Landmark: {{$data->Location}}</td></tr>
+        <tr><td>Meter OR #: {{$data->meter_or_number }}</td></tr>
+        <tr><td>Remarks: {{$data->remarks}}</td></tr>
+        <tr><td>Reference/Landmark: {{$data->location}}</td></tr>
       </tbody>
     </table>
 

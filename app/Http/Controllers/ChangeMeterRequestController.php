@@ -4,7 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ChangeMeterRequest;
+use App\Models\ChangeMeterRequestFees;
+use App\Models\ChangeMeterRequestPostingHistory;
 use DB;
+use App\Helpers\Helper;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use PDF;
+use PDO;
 
 class ChangeMeterRequestController extends Controller
 {
@@ -13,7 +20,7 @@ class ChangeMeterRequestController extends Controller
      */
     public function index()
     {
-        $cm_requests = ChangeMeterRequest::orderBy('id','asc')->paginate(9);
+        $cm_requests = ChangeMeterRequest::with('municipality', 'barangay')->orderBy('id','desc')->paginate(9);
         $ref_employees = DB::table('ref_employees')
         ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
         ->where('department', 'TSD')
@@ -62,101 +69,105 @@ class ChangeMeterRequestController extends Controller
      */
     public function store(Request $request)
     {
-        // validate requests
-        $this->validate($request, [
-            'electric_service_detail' => ['required', 'string', 'max:255'],
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'area' => ['required'],
-            'barangay' => ['required'],
-            'municipality' => ['required'],
-            'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
-            'membership_or' => ['required'],
-            'membership_date' => ['required'],
-            'consumer_type' => ['required'],
-            'meter_code_no' => ['required'],
-            'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo'],
-        ]);
+        $change_meter_request_exists = ChangeMeterRequest::where('account_number', $request->electric_service_detail)
+        ->where('status', null);
+        // dd($change_meter_request_exists->first('control_no')->control_no);
 
-        // $year = date("Y");
-        $control_id = Helper::IDGeneratorChangeMeter(new ChangeMeterRequest, 'control_number', 5, 'CM');
-        // dd($request);
-        DB::beginTransaction();
-        try {
-            // Perform the first operation (creating a record in ServiceConnectOrder)
-            $sco = ServiceConnectOrder::create([
-                "SCONo" => $control_id,
-                "Lastname" => $request->last_name,
-                "Firstname" => $request->first_name,
-                "ProcessDate" => Carbon::today(),
-                "Membership OR#" => $request->membership_or,
-                "Membership Date" => $request->membership_date,
-                // "MeterNo" => $request->meter_no,
-                "Date Installed" => $request->date_installed,
-                "Area" => $request->area,
-                "Brgy" => $request->barangay,
-                "Municipality" => $request->municipality,
-                "Sitio" => $request->sitio,
-                "ConsumerType" => $request->consumer_type,
-                "CodeNo" => $request->meter_code_no,
-                "Remarks" => $request->remarks,
-                "Location" => $request->location,
-                "LogName" => Auth::user()->name,
-                "NextAcctNo" => $request->electric_service_detail,
-                "ContactNo" => $request->contact_no,
-                "LastRdg" => $request->last_reading,
-                "OldMtr" => $request->old_meter,
-                // "TurnOffOn" => $request->occupancy_type,
-                // "LineType" => $request->line_type,
-                "Meter OR#" => $request->meter_or_no,
-                "Rdg initial" => $request->reading_initial,
-                "Location" => $request->location,
-                "Feeder" => $request->feeder,
-                "Spouse" => $request->care_of,
-                "keyoff" => $request->care_of ? true : false,
-                "application_type" => 'CHANGE METER'
+        if ($change_meter_request_exists->exists()) {
+            // Record exists
+            return redirect(route('indexCM'))->withWarning('This account has pending request! </br> Control No:'.$change_meter_request_exists->first('control_no')->control_no);
+        } else { 
+
+            // validate requests
+            $this->validate($request, [
+                'electric_service_detail' => ['required', 'string', 'max:255'],
+                'first_name' => ['required', 'string', 'max:255'],
+                'last_name' => ['required', 'string', 'max:255'],
+                'area' => ['required'],
+                'barangay' => ['required'],
+                'municipality' => ['required'],
+                'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
+                'membership_or' => ['required'],
+                // 'membership_date' => ['required'],
+                'consumer_type' => ['required'],
+                'meter_code_no' => ['required'],
+                'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo'],
             ]);
 
-            // dd($sco->SCONo);
-            DB::connection('sqlSrvHousewiring')->table('Transaction Table')->insert(
-                array("SCONo" => $sco->SCONo,
-                        "Membership Fee" => $request->membership ? $request->membership : 0.00,
-                        "Energy Conmp Deposit" => $request->energy_deposit ? $request->energy_deposit : 0.00,
-                        "Connection Fee" => $request->conn_fee ? $request->conn_fee : 0.00,
-                        "Xformer Rental" => $request->xformer_rental ? $request->xformer_rental : 0.00,
-                        "Xformer Test" => $request->xformer_test ? $request->xformer_test : 0.00,
-                        "Xformer Installation" => $request->xformer_installation ? $request->xformer_installation : 0.00,
-                        "Xformer Removal" => $request->xformer_removal ? $request->xformer_removal : 0.00,
-                        "Cons Xformer" => $request->consumer_xfmr ? $request->consumer_xfmr : 0.00,
-                        "Cons XPole" => $request->consumer_pole ? $request->consumer_pole : 0.00,
-                        "Grounding Clamp" => $request->grounding_clamp ? $request->grounding_clamp : 0.00,
-                        "Grounding Rod" => $request->grounding_rod ? $request->grounding_rod : 0.00,
-                        "MeterSeal" => $request->meter_seal ? $request->meter_seal : 0.00,
-                        "Hotline Clamp" => $request->hotline_clamp ? $request->hotline_clamp : 0.00,
-                        "Kwhm Deposit" => $request->meter_accessories ? $request->meter_accessories : 0.00,
-                        "RejectionFee" => $request->discredit_fee ? $request->discredit_fee : 0.00,
-                        "Calibration" => $request->calibration_fee ? $request->calibration_fee : 0.00,
-                        "Others IDLamination" => $request->others ? $request->others : 0.00,
-                        "HousewringKit" => $request->housewiring_kit ? $request->housewiring_kit : 0.00,
-                        "ExcessWire" => $request->excess_conductor ? $request->excess_conductor : 0.00,
-                        // "WireExcess" => $request->conductor_duplex ? $request->conductor_duplex : 0.00,
-                        "circuit_breaker" => $request->circuit_breaker ? $request->circuit_breaker : 0.00,
-                        )
-            );
+            // $year = date("Y");
+            $control_id = Helper::IDGeneratorChangeMeter(new ChangeMeterRequest, 'control_no', 4, 'CM');
+            // dd($request);
+            DB::beginTransaction();
+            try {
+                // Perform the first operation (creating a record in ServiceConnectOrder)
+                $change_meter_request = ChangeMeterRequest::create([
+                    "control_no" => $control_id,
+                    "first_name" => $request->first_name,
+                    "middle_name" => null,
+                    "last_name" => $request->last_name,
+                    "contact_no" => $request->contact_no,
+                    "area" => $request->area,
+                    "municipality_id" => $request->municipality,
+                    "barangay_id" => $request->barangay,
+                    "sitio" => $request->sitio,
+                    "account_number" => $request->electric_service_detail,
+                    "care_of" => $request->care_of,
+                    "feeder" => $request->feeder,
+                    "membership_or" => $request->membership_or,
+                    "consumer_type" => $request->consumer_type,
+                    "old_meter_no" => $request->old_meter,
+                    "meter_or_number" => $request->meter_or_no,
+                    "meter_or_date" => null,
+                    "new_meter_no" => null,
+                    "type_of_meter" => $request->meter_code_no,
+                    "last_reading" => $request->last_reading,
+                    "initial_reading" => $request->reading_initial,
+                    "remarks" => $request->remarks,
+                    "location" => $request->location,
+                    "crew" => null,
+                    "date_time_acted" => null,
+                    "status" => null,
+                    "damage_cause" => null,
+                    "crew_remarks" => null,
+                    "created_by" => Auth::id(),
+                    "created_at" => Carbon::today(),
+                ]);
 
-            DB::commit();
+                
+                $feeFields = [
+                    'membership', 'energy_deposit', 'conn_fee', 'xformer_rental', 'xformer_test',
+                    'xformer_installation', 'xformer_removal', 'consumer_xfmr', 'consumer_pole',
+                    'grounding_clamp', 'grounding_rod', 'meter_seal', 'hotline_clamp',
+                    'meter_accessories', 'discredit_fee', 'calibration_fee', 'others',
+                    'housewiring_kit', 'excess_conductor', 'conductor_duplex', 'circuit_breaker'
+                ];
 
-            return redirect(route('indexCM'))->withSuccess('Record Successfully Created! </br> SCO No:'.$sco->SCONo);
+                foreach ($feeFields as $feeField) {
+                    if ($request->$feeField > 0) {
+                        ChangeMeterRequestFees::create([
+                            'cm_control_no' => $change_meter_request->id,
+                            'fees' => $feeField,
+                            'amount' => $request->$feeField
+                        ]);
+                    }
+                }
 
-        } catch (\Exception $e) {
-            // If an exception occurs during the transaction, rollback all changes
-            DB::rollback();
-            
-            // Optionally, handle the exception (log it, display an error message, etc.)
-            // For example:
-            // Log::error($e->getMessage());
-            return response()->json(['error' => $e], 500);
+                DB::commit();
+
+                return redirect(route('indexCM'))->withSuccess('Record Successfully Created! </br> SCO No:'.$control_id);
+
+            } catch (\Exception $e) {
+                // If an exception occurs during the transaction, rollback all changes
+                DB::rollback();
+                
+                // Optionally, handle the exception (log it, display an error message, etc.)
+                // For example:
+                // Log::error($e->getMessage());
+                return response()->$e;
+            }
         }
+
+        
     }
 
     /**
@@ -172,7 +183,43 @@ class ChangeMeterRequestController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $change_meter_request = ChangeMeterRequest::with('cmr_fees')->find($id);
+        
+        if ($change_meter_request->date_time_acted) {
+            return redirect(route('indexCM'))->withWarning("Can't Update Record!");
+        } else {
+            $barangays = DB::connection('sqlSrvMembership')
+            ->table('Barangay Table')
+            ->select('*')
+            ->orderBy('Brgy', 'asc')
+            ->get();
+
+            $municipalities = DB::connection('sqlSrvMembership')
+            ->table('municipalities')
+            ->select('*')
+            ->orderBy('municipality_name', 'asc')
+            ->get();
+
+            $consumer_types = DB::connection('sqlSrvHousewiring')
+            ->table('consumer_types')
+            ->select('*')
+            ->orderBy('name_type', 'asc')
+            ->get();
+
+            $occupancy_types = DB::connection('sqlSrvHousewiring')
+            ->table('occupancy_types')
+            ->select('*')
+            ->orderBy('occupancy_name', 'asc')
+            ->get();
+
+            $type_of_meters = DB::connection('sqlSrvHousewiring')
+            ->table('khw_meter_types')
+            ->select('*')
+            ->orderBy('meter_code', 'asc')
+            ->get();
+            
+            return view('service_connect_order.change_meter.edit')->with(compact('change_meter_request', 'barangays', 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters'));
+        }
     }
 
     /**
@@ -180,14 +227,391 @@ class ChangeMeterRequestController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // Validate requests
+        $this->validate($request, [
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'area' => ['required'],
+            'barangay' => ['required'],
+            'municipality' => ['required'],
+            'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
+            'membership_or' => ['required'],
+            // 'membership_date' => ['required'],
+            'consumer_type' => ['required'],
+            'meter_code_no' => ['required'],
+            'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo,' . $id . ',id'], // Ensure uniqueness except for the current record
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Find the existing record
+            $change_meter_request = ChangeMeterRequest::findOrFail($id);
+
+            // Update the existing record with new data
+            $change_meter_request->update([
+                "first_name" => $request->first_name,
+                "middle_name" => null,
+                "last_name" => $request->last_name,
+                "contact_no" => $request->contact_no,
+                "area" => $request->area,
+                "municipality_id" => $request->municipality,
+                "barangay_id" => $request->barangay,
+                "sitio" => $request->sitio,
+                // "account_number" => $request->electric_service_details,
+                "care_of" => $request->care_of,
+                "feeder" => $request->feeder,
+                "membership_or" => $request->membership_or,
+                "consumer_type" => $request->consumer_type,
+                "old_meter_no" => $request->old_meter,
+                "meter_or_number" => $request->meter_or_no,
+                "meter_or_date" => null,
+                "new_meter_no" => null,
+                "type_of_meter" => $request->meter_code_no,
+                "last_reading" => $request->last_reading,
+                "initial_reading" => $request->reading_initial,
+                "remarks" => $request->remarks,
+                "location" => $request->location,
+                "crew" => null,
+                "date_time_acted" => null,
+                "status" => null,
+                "damage_cause" => null,
+                "crew_remarks" => null,
+                "created_by" => Auth::id(),
+                "created_at" => Carbon::today(),
+            ]);
+
+            // Delete existing fees and re-add them
+            // ChangeMeterRequestFees::where('cm_control_no', $change_meter_request->id)->delete();
+
+            // Fetch existing fees for this change meter request
+            $existingFees = ChangeMeterRequestFees::where('cm_control_no', $change_meter_request->id)->get()->keyBy('fees');
+
+            // Define fee fields
+            $feeFields = [
+                'membership', 'energy_deposit', 'conn_fee', 'xformer_rental', 'xformer_test',
+                'xformer_installation', 'xformer_removal', 'consumer_xfmr', 'consumer_pole',
+                'grounding_clamp', 'grounding_rod', 'meter_seal', 'hotline_clamp',
+                'meter_accessories', 'discredit_fee', 'calibration_fee', 'others',
+                'housewiring_kit', 'excess_conductor', 'conductor_duplex', 'circuit_breaker'
+            ];
+
+            // Loop through fee fields and create new records
+            foreach ($feeFields as $feeField) {
+                $newAmount = $request->$feeField;
+                if ($newAmount > 0) {
+                    // dd($newAmount.$feeField);
+                    // dd('the membership is greater than 0'.$request->$feeField.'-'.$newAmount);
+                    if ($existingFees->has($feeField)) {
+                        // Update existing fee
+                        $existingFee = $existingFees->get($feeField);
+                        if ($existingFee->amount != $newAmount) {
+                            // Update only if the amount has changed
+                            $existingFee->update(['amount' => $newAmount]);
+                        }
+                    } else {
+                        // Create a new fee if it doesn't exist
+                        ChangeMeterRequestFees::create([
+                            'cm_control_no' => $change_meter_request->id,
+                            'fees' => $feeField,
+                            'amount' => $newAmount
+                        ]);
+                    }
+                } else {
+                    // If the new amount is zero, delete the fee if it exists
+                    if ($existingFees->has($feeField) && $newAmount !== null) {
+                        $existingFees->get($feeField)->delete();
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return redirect(route('indexCM'))->withSuccess('Record Successfully Updated! </br> SCO No:' . $change_meter_request->control_no);
+
+        } catch (\Exception $e) {
+            // If an exception occurs during the transaction, rollback all changes
+            DB::rollback();
+
+            // Optionally, handle the exception (log it, display an error message, etc.)
+            // For example:
+            // Log::error($e->getMessage());
+            return response()->$e;
+        }
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $change_meter_request = ChangeMeterRequest::find($id);
+            $change_meter_request->delete();
+
+            $change_meter_request_fees = ChangeMeterRequestFees::where('cm_control_no', $id);
+            $change_meter_request_fees->delete();
+
+            DB::commit();
+            
+            return redirect(route('indexCM'))->withSuccess('Record Successfully Archived!');
+
+        } catch (\Exception $e) {
+            // If an exception occurs during the transaction, rollback all changes
+            DB::rollback();
+
+            // Optionally, handle the exception (log it, display an error message, etc.)
+            // For example:
+            // Log::error($e->getMessage());
+            return response()->$e;
+        }
+        
     }
+
+    public function printChangeMeterRequest(Request $request, string $id)
+    {
+        $change_meter_request = ChangeMeterRequest::find($id);
+        // dd($change_meter_request);
+        view()->share('data', $change_meter_request);
+        $pdf = PDF::loadView('service_connect_order.change_meter.print_cm_request_pdf');
+        return $pdf->stream();
+    }
+
+    function validateMeterPosting(Request $request)
+    {
+        if($request->get('meter_no')) {
+            $meter_no = $request->get('meter_no');
+            $change_meter = DB::table('change_meter_requests')
+                    ->where('new_meter_no', $meter_no);
+
+            $posted_history = DB::table('posted_meters_history')
+                    ->where('new_meter_no', $meter_no);
+            if($change_meter->count() > 0 && $posted_history->count() > 0)
+            {
+            $control_no = $change_meter->first()->control_no;
+            return ['not_unique', $control_no];
+            }
+            else
+            {
+            return ['unique', null];
+            }
+        }
+
+        if($request->get('seal_no')) {
+            $seal_no = $request->get('seal_no');
+            $data = DB::table('posted_meters_history')
+                    ->where('leyeco_seal_no', $seal_no);
+            if($data->count() > 0)
+            {
+            $control_no = $data->first()->sco_no;
+            return ['not_unique', $control_no];
+            }
+            else
+            {
+            return ['unique', null];
+            }
+        }
+
+        if($request->get('erc_seal'))
+        {
+            $erc_seal = $request->get('erc_seal');
+            $data = DB::table('posted_meters_history')
+                    ->where('erc_seal_no', $erc_seal);
+            if($data->count() > 0)
+            {
+            $control_no = $data->first()->sco_no;
+            return ['not_unique', $control_no];
+            }
+            else
+            {
+            return ['unique', null];
+            }
+        }
+    }
+
+    public function meterPosting(Request $request)
+    {
+        // dd($request->cm_id);
+        DB::beginTransaction();
+        try {
+            // Find the existing record
+            $change_meter_request = ChangeMeterRequest::findOrFail($request->cm_id);
+            
+            // Combine date and time
+            $dateTimeActed = null;
+            if ($request->date_acted && $request->time) {
+                $dateTimeActed = Carbon::createFromFormat('Y-m-d H:i', $request->date_acted . ' ' . $request->time)->format('Y-m-d H:i:s');
+            }
+
+            // Prepare the data for updating
+            $dataToUpdate = [
+                "new_meter_no" => $request->meter_no,
+                "date_time_acted" => $dateTimeActed,
+                "care_of" => $request->care_of,
+                "feeder" => $request->feeder,
+                "area" => $request->area,
+                "last_reading" => $request->last_reading,
+                "initial_reading" => $request->reading_initial,
+                "crew" => $request->crew,
+                "status" => $request->status,
+                "damage_cause" => $request->damage_cause,
+                "crew_remarks" => $request->crew_remarks
+            ];
+
+            // Remove any null values from the update array
+            $dataToUpdate = array_filter($dataToUpdate, function ($value) {
+                return !is_null($value);
+            });
+
+            // Update the existing record with new data
+            $change_meter_request->update($dataToUpdate);
+            // dd($change_meter_request);
+            // DB::table('posted_meters_history')
+            //     ->insert([
+            //         "sco_no" => $change_meter_request->control_no,
+            //         "old_meter_no" => $change_meter_request->old_meter_no,
+            //         "new_meter_no" => $change_meter_request->new_meter_no,
+            //         "process_date" => date('Y-m-d', strtotime($change_meter_request->created_at)),
+            //         "date_installed" => $request->date_acted ? date('Y-m-d H:i:s', strtotime($request->date_acted)) : null,
+            //         "action_status" => $change_meter_request->status,
+            //         "area" => $change_meter_request->area,
+            //         "feeder" => $change_meter_request->feeder,
+            //         "leyeco_seal_no" => $request->seal_no,
+            //         "serial_no" => null,
+            //         "erc_seal_no" => $request->erc_seal,
+            //         "posted_by" => Auth::id(),
+            //         "created_at" => Carbon::now(),
+            // ]);
+
+            $change_meter_request_history = ChangeMeterRequestPostingHistory::create([
+                "sco_no" => $change_meter_request->control_no,
+                "old_meter_no" => $change_meter_request->old_meter_no,
+                "new_meter_no" => $change_meter_request->new_meter_no,
+                "process_date" => date('Y-m-d', strtotime($change_meter_request->created_at)),
+                "date_installed" => $request->date_acted ? date('Y-m-d H:i:s', strtotime($request->date_acted)) : null,
+                "action_status" => $change_meter_request->status,
+                "area" => $change_meter_request->area,
+                "feeder" => $change_meter_request->feeder,
+                "leyeco_seal_no" => $request->seal_no,
+                "serial_no" => null,
+                "erc_seal_no" => $request->erc_seal,
+                "posted_by" => Auth::id(),
+                "created_at" => Carbon::now(),
+            ]);
+            $billing = DB::connection('sqlSrvBilling')
+                        ->table('Consumers Table')
+                        ->where('Accnt No', $change_meter_request->account_number)
+                        ->update([
+                            'Serial No' => $change_meter_request->new_meter_no,
+                        ]);
+
+            // dd($billing);      
+            DB::commit();
+
+            return redirect(route('indexCM'))->withSuccess('Successfully Posted!');
+
+        } catch (\Exception $e) {
+            // If an exception occurs during the transaction, rollback all changes
+            DB::rollback();
+            dd($e);
+            // Optionally, handle the exception (log it, display an error message, etc.)
+            // For example:
+            // Log::error($e->getMessage());
+            return response()->json(['error' => $e], 500);
+        }
+    }
+
+    public function search(Request $request)
+    {
+        $control_no = $request->input('control_no');
+        $f_name = $request->input('first_name');
+        $l_name = $request->input('last_name');
+        $meter_no = $request->input('meter_no');
+        // $products = Product::where('name', 'like', "%$query%")->get();
+        $cm_request = ChangeMeterRequest::query();
+
+        if ($control_no !== null && $control_no !== '') {
+            $cm_request->where('control_no', 'like', "%$control_no%");
+        }
+
+        if ($f_name !== null && $f_name !== '') {
+            $cm_request->where('first_name', 'like', "%$f_name%");
+        }
+
+        if ($l_name !== null && $l_name !== '') {
+            $cm_request->where('last_name', 'like', "%$l_name%");
+        }
+
+        if ($meter_no !== null && $meter_no !== '') {
+            $cm_request->where('new_meter_no', 'like', "%$meter_no%");
+        }
+        $cm_requests = $cm_request->orderBy('control_no','DESC')->paginate(9);
+
+        // dd($scos);
+        $ref_employees = DB::table('ref_employees')
+        ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
+        ->where('department', 'TSD')
+        ->orderBy('last_name', 'ASC')
+        ->get();
+        // return view('products.index', compact('products'));
+        return view('service_connect_order.change_meter.index',compact('cm_requests','ref_employees'));
+    }
+
+    public function view(string $id)
+    {
+        $cm_request = ChangeMeterRequest::find($id);
+
+        // $cm_request = DB::table('change_meter_requests as cmr')
+        // ->select('*')
+        // ->leftJoin('posted_meters_history as his', 'cmr.control_no', '=', 'his.sco_no')
+        // ->where('cmr.id', $id)
+        // ->first();
+
+
+        $ref_employees = DB::table('ref_employees')
+        ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
+        ->where('department', 'TSD')
+        ->orderBy('last_name', 'ASC')
+        ->get();
+        // dd($cm_request);
+        return view('service_connect_order.change_meter.view_acted_request',compact('cm_request', 'ref_employees'));
+    }
+
+    public function viewReport(Request $request)
+    {
+        return view('service_connect_order.change_meter.report');
+    }
+
+    public function generateReport(Request $request)
+    {
+        
+        // Start building the query
+        $query = ChangeMeterRequest::whereBetween('created_at', [$request->date_from, $request->date_to]);
+
+        // Add the app_status condition if it is set to 1
+        if ($request->app_status == 1) {
+            $query->where('status', 2); // installed
+        }
+
+        if ($request->app_status == 2) {
+            $query->whereNull('date_time_acted'); // unacted
+        }
+
+        if ($request->app_status == 3) {
+            $query->whereNotNull('date_time_acted'); // acted
+        }
+
+        if ($request->app_status == 4) {
+            $query->where('status', 1); // not completed
+        }
+
+        // Execute the query and get the results
+        $change_meter_requests = $query->get();
+
+        view()->share('datas', $change_meter_requests);
+        $pdf = PDF::loadView('service_connect_order.change_meter.pdf_reports')->setPaper('a4', 'landscape');
+        return $pdf->stream();
+    }
+
 }
