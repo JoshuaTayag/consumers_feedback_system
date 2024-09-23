@@ -48,17 +48,27 @@ class MaterialRequisitionFormController extends Controller
         }
         
         $unliquidated_mrf = MaterialRequisitionForm::where([['requested_id', Auth::id()], ['status', '<', 11]])->count();
-        $oldest_unliquidated_mrf = MaterialRequisitionForm::where('requested_id', Auth::id())->where('status', '<', 11)->select('created_at')->orderBy('created_at', 'asc')->first();
+        $oldest_unliquidated_mrf = MaterialRequisitionForm::where('requested_id', Auth::id())
+        ->whereIn('status', [1,2])
+        ->select('created_at')
+        ->orderBy('created_at', 'asc')
+        ->first();
+
         $liquidations = DB::table('material_requisition_form_liquidations')->get();
 
-        $createdAt = Carbon::parse($oldest_unliquidated_mrf->created_at);
-        $daysPassed = $createdAt->diffInDays(Carbon::now());
+        if ($oldest_unliquidated_mrf) {
+            $createdAt = Carbon::parse($oldest_unliquidated_mrf->created_at);
+            $daysPassed = $createdAt->diffInDays(Carbon::now());
+        } else {
+            $createdAt = null;
+            $daysPassed = null;
+        }
 
         $thirtyDaysAgo = Carbon::now()->subDays(30);
 
         $old_unliquidated_mrf = MaterialRequisitionForm::where('requested_id', Auth::id())
         ->where('created_at', '<', $thirtyDaysAgo)
-        ->where('status', '<', 11)
+        ->whereIn('status', [1,2])
         ->select('id', 'created_at', 'status')
         ->orderBy('created_at', 'asc')
         ->get();
@@ -116,9 +126,12 @@ class MaterialRequisitionFormController extends Controller
             'image_path.*' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048', // Validate each file in the array
         ]);
         
-
-        $oldest_unliquidated_mrf = MaterialRequisitionForm::where('requested_id', Auth::id())->select('created_at')->orderBy('created_at', 'asc')->first();
-        dd($oldest_unliquidated_mrf);
+        // dd($oldest_unliquidated_mrf);
+        $oldest_unliquidated_mrf = MaterialRequisitionForm::where('requested_id', Auth::id())
+        ->whereIn('status', [1,2])
+        ->select('created_at')
+        ->orderBy('created_at', 'asc')
+        ->first();
         $createdAt = Carbon::parse($oldest_unliquidated_mrf->created_at);
         $daysPassed = $createdAt->diffInDays(Carbon::now());
 
