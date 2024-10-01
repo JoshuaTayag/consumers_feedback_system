@@ -126,6 +126,10 @@
                         <div class="col-lg-5">Remarks:</div>
                         <div class="col-lg-7">{{$cm_request->remarks}}</div>
                       </div>
+                      <div class="row">
+                        <div class="col-lg-5">OR No.:</div>
+                        <div class="col-lg-7 {{$cm_request->changeMeterRequestTransaction ? 'fw-bold text-success' : ''}} ">{{$cm_request->changeMeterRequestTransaction ? $cm_request->changeMeterRequestTransaction->or_no : "None"}}</div>
+                      </div>
                       <div class="row pt-3 text-muted">
                         <div class="col text-end">created by: {{$cm_request->created_name}}</div>
                       </div>
