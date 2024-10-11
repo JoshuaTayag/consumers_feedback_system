@@ -6,6 +6,7 @@
     $consumerTypes = collect(Config::get('constants.consumer_types'));
     $consumerType = $consumerTypes->firstWhere('id', $cm_request->consumer_type);
     $total_fees = $total_fees ?? 0;
+    $distribution_charge = $distribution_charge ?? 0;
   }
 @endphp
 <div class="container">
@@ -28,19 +29,25 @@
               <div class="col-lg-3">
                   <div class="mb-2">
                       {{ Form::label('or_no', 'OR No.') }}
-                      {{ Form::text('or_no', request('or_no'), ['class' => 'form-control', 'required']) }}
+                      {{ Form::text('or_no', request('or_no'), ['class' => 'form-control', 'required', 'id' => 'or_no']) }}
                   </div>
               </div>
               <div class="col-lg-3">
                   <div class="mb-2">
                       {{ Form::label('control_no', 'Control Number') }}
-                      {{ Form::select('control_no', ['' => 'Please select Control Number'] + $control_numbers->toArray(), request('control_no'), ['class' => 'form-control', 'required']) }}
+                      {{ Form::select('control_no', ['' => 'Please select Control Number'] + $control_numbers->toArray(), request('control_no'), ['class' => 'form-control', 'required', 'id' => 'control_no']) }}
                   </div>
               </div>
-              <div class="col-lg-6 d-flex align-items-end">
+              <div class="col-lg-3 d-flex align-items-end">
                   <div class="mb-2">
-                    <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
+                    <button type="submit" class="btn btn-primary" id="search"><i class="fa fa-search"></i></button>
                   </div>
+              </div>
+              <div class="col-lg-3 d-flex align-items-end">
+                <div class="input-group mb-2">
+                  <input type="text" class="form-control" id="reprint_or" placeholder="Reprint OR: " aria-label="Recipient's username" aria-describedby="button-addon2">
+                  <button class="btn btn-outline-danger" type="button" id="button-addon2" onclick="reprintOR()"><i class="fa fa-print"></i></button>
+                </div>
               </div>
             </div>
           </form>
@@ -110,8 +117,22 @@
                       </div>
                       @php
                         $total_fees = $total_fees+$cm_fees->amount;
+                        if($cm_fees->fees == 'meter_accessories' || $cm_fees->fees == 'meter_seal' || $cm_fees->fees == 'calibration_fee'){
+                          $vat = $cm_fees->amount * .12;
+                          $distribution_charge =  $distribution_charge+$vat;
+                        }
                       @endphp
                     @endforeach
+                    <div class="row">
+                      <div class="col-lg-6 mb-1">
+                        <div class="d-flex justify-content-between text-capitalize">
+                            <span class="">Distribution</span><span class="text-end">:</span>
+                        </div>
+                      </div>
+                      <div class="col-lg-6 mb-1">
+                        <span class=""><span class="">{{ number_format($distribution_charge, 2, '.', ',') }}</span></span>
+                      </div>
+                    </div>
                     <hr>
                     <form action="{{ route('change-meter-request-transact.store') }}" method="POST">
                       @csrf
@@ -133,7 +154,8 @@
                         </div>
                         <div class="col-lg-3 mb-1">
                           <!-- <span class=""><span class="">{{ number_format($total_fees, 2, '.', ',') }}</span></span> -->
-                          {{ Form::text('total_fees', number_format($total_fees, 2, '.', ','), ['class' => 'form-control form-control-sm', 'readonly', 'id' => 'total_fees']) }}
+                          {{ Form::text('total_fees', number_format($total_fees+$distribution_charge, 2, '.', ','), ['class' => 'form-control form-control-sm', 'readonly', 'id' => 'total_fees']) }}
+                          {{ Form::hidden('total_fees_without_vat', number_format($total_fees, 2, '.', ','), ['readonly']) }}
                         </div>
                       </div>
 
@@ -145,7 +167,7 @@
                         </div>
                         <div class="col-lg-3 mb-1">
                           <!-- {{ Form::text('amount_tendered', null, ['class' => 'form-control form-control-sm']) }} -->
-                          <input type="number" id="amount_tendered" name="amount_tendered" class="form-control form-control-sm" oninput="calculateChange()" required>
+                          <input type="number" step="0.01" id="amount_tendered" name="amount_tendered" class="form-control form-control-sm" oninput="calculateChange()" required>
                         </div>
                       </div>
 
@@ -200,6 +222,30 @@
     // Enable the button if change is greater than or equal to total
     var button = document.getElementById('submit_change_meter');
     button.disabled = !(total <= amount);  
+  }
+  $('#control_no').on('change', function () {
+    $('#search').click();
+  });
+  $('#or_no').on('change', function () {
+    $('#search').click();
+  });
+
+  function reprintOR() {
+    // Get the value from the input field
+    var inputValue = document.getElementById('reprint_or').value;
+
+    // Check if the input field is not empty
+    if (inputValue.trim() === "") {
+        // Alert if the input is blank
+        Swal.fire({
+            icon: 'warning',
+            title: 'Oops...',
+            text: 'Receipt OR field cannot be blank!',
+        });
+    } else {
+        // If not blank, redirect to another page
+        window.location.href = "{{ route('changeMeterReceipt', ':inputValue') }}".replace(':inputValue', inputValue);
+    }
   }
 </script>
 @endsection

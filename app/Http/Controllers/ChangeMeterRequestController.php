@@ -152,6 +152,8 @@ class ChangeMeterRequestController extends Controller
 
                 foreach ($feeFields as $feeField) {
                     if ($request->$feeField > 0) {
+                        // $vat = $request->$feeField * .12;
+                        // $vatable_value = $feeField == 'meter_accessories' ? $request->$feeField + $vat : $request->$feeField;
                         ChangeMeterRequestFees::create([
                             'cm_control_no' => $change_meter_request->id,
                             'fees' => $feeField,
@@ -307,6 +309,8 @@ class ChangeMeterRequestController extends Controller
             foreach ($feeFields as $feeField) {
                 $newAmount = $request->$feeField;
                 if ($newAmount > 0) {
+                    // $vat = $newAmount * .12;
+                    // $vatable_value = $feeField == 'meter_accessories' ? $newAmount + $vat : $newAmount;
                     // dd($newAmount.$feeField);
                     // dd('the membership is greater than 0'.$request->$feeField.'-'.$newAmount);
                     if ($existingFees->has($feeField)) {

@@ -190,6 +190,10 @@ Route::group(['middleware' => 'auth'], function () {
     // POWER BILL
     Route::resource('change-meter-request-transact', App\Http\Controllers\ChangeMeterRequestTransactionController::class);
     Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
+    Route::get('change-meter-request-pay/receipt/{id}', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'changeMeterReceipt'])->name('changeMeterReceipt');
+
+    Route::resource('payment-transact', App\Http\Controllers\PaymentTransactionController::class);
+    // Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
 });
 
 Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])->name('online.pms')->middleware(['auth', 'verified']);

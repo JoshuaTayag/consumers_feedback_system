@@ -112,7 +112,7 @@
 
   <li class="nav-item dropdown">
     <a id="navbarPowerBill" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-      POWER BILL
+      POWER PAY
     </a>
     <ul class="dropdown-menu" aria-labelledby="navbarPowerBill">
       <!-- <li>
@@ -125,6 +125,9 @@
         <ul class="dropdown-menu dropdown-submenu">
           <li>
             <a class="dropdown-item" href="{{ route('change-meter-request-transact.create') }}">CHANGE METER PAYMENT</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ route('payment-transact.create') }}">MANUAL TRANSACTION</a>
           </li>
           <!-- <li>
             <a class="dropdown-item" href="#">Submenu item 3 &raquo; </a>

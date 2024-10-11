@@ -1,5 +1,6 @@
 @php
     $isChangeMeterRoute = Route::currentRouteName() === 'createCM' || Route::currentRouteName() === 'editCM';
+    $isPaymentTransactRoute = Route::currentRouteName() === 'payment-transact.create';
 @endphp
 <div class="container border border-dark rounded-3 pe-0" style="box-shadow: 10px 5px 10px gray;">
   <div class="scrollbar" id= "scrollbar1">
@@ -90,7 +91,7 @@
       <div class="col-lg-6">
         <div class="mb-2">
           <label class="form-label mb-1">Meter Seal</label>
-          <input type="number"  name="meter_seal" class="form-control form-control-sm" {{ $isChangeMeterRoute ? '' : 'disabled' }}>
+          <input type="number"  name="meter_seal" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute || $isPaymentTransactRoute ? '' : 'disabled' }}>
         </div>
       </div>
       <div class="col-lg-6">
@@ -101,8 +102,8 @@
       </div>
       <div class="col-lg-6">
         <div class="mb-2">
-          <label class="form-label mb-1">Metering Accessories</label>
-          <input type="number"  name="meter_accessories" class="form-control form-control-sm" {{ $isChangeMeterRoute ? '' : 'disabled' }}>
+          <label class="form-label mb-1">Metering Accessories <text class="text-danger">(V)</text></label>
+          <input type="number"  name="meter_accessories" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute || $isPaymentTransactRoute ? '' : 'disabled' }}>
         </div>
       </div>
       <div class="col-lg-6">
@@ -114,7 +115,7 @@
       <div class="col-lg-6">
         <div class="mb-2">
           <label  class="form-label mb-1">Calibration Fee</label>
-          <input type="number"  name="calibration_fee" class="form-control form-control-sm" {{ $isChangeMeterRoute ? '' : 'disabled' }}>
+          <input type="number"  name="calibration_fee" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute || $isPaymentTransactRoute ? '' : 'disabled' }}>
         </div>
       </div>
       <div class="col-lg-6">

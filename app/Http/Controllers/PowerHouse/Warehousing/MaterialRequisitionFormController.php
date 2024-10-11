@@ -1143,6 +1143,8 @@ class MaterialRequisitionFormController extends Controller
             $material_requisition_form->audit_by = null;
             $material_requisition_form->audited_date = null;
             $material_requisition_form->warehouse_remarks = $request->remarks;
+            $material_requisition_form->mcrt_no = null;
+            $material_requisition_form->mst_no = null;
             $material_requisition_form->save();
 
             return redirect(route('mrfLiquidationApprovalIndex'))->withSuccess('Successfully Disapproved!');
@@ -1155,6 +1157,8 @@ class MaterialRequisitionFormController extends Controller
             $material_requisition_form->audit_by = null;
             $material_requisition_form->audited_date = null;
             $material_requisition_form->iad_remarks = $request->remarks;
+            $material_requisition_form->mcrt_no = null;
+            $material_requisition_form->mst_no = null;
             $material_requisition_form->save();
 
             return redirect(route('mrfLiquidationApprovalIndex'))->withSuccess('Successfully Disapproved!');

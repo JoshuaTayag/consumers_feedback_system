@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
-            @if(Auth::user()->hasRole('Supply Custodian'))
+            @if(Auth::user()->hasRole('Warehouse'))
                 <a href="{{ route('mrfLiquidationApprovalIndex') }}" type="button" class="btn btn-outline-warning mb-4" ><span><label class="badge bg-danger">{{ $pending_liquidation_count_custodian }}</label> MER Liquidations <i class="fa fa-arrow-right" > </i></span></a>
             @elseif(Auth::user()->hasRole('IAD'))
                 <a href="{{ route('mrfLiquidationApprovalIndex') }}" type="button" class="btn btn-outline-warning mb-4" ><span><label class="badge bg-danger">{{ $pending_liquidation_count_iad }}</label> MER Liquidations <i class="fa fa-arrow-right" > </i></span></a>
@@ -20,22 +20,22 @@
                 <div class="card-body">
                     <div class="row text-center">
                         @if(Auth::user()->hasRole('AGMM VERIFIER'))
-                            <div class="col-lg-3 my-1">
+                            <!-- <div class="col-lg-3 my-1">
                                 <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('agmmAccounts') }}">
                                     <img src="{{asset('images/icons/man.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
                                     <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">AGMM VERIFIER</p>
                                 </a>
-                            </div>
+                            </div> -->
                         @elseif(Auth::user()->hasRole('AGMM ALLOWANCE DISBURSER'))
-                            <div class="col-lg-3 my-1">
+                            <!-- <div class="col-lg-3 my-1">
                                 <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('scanAllowanceQR') }}">
                                     <img src="{{asset('images/icons/cash-payment.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
                                     <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">AGMM DISBURSER</p>
                                 </a>
-                            </div>
+                            </div> -->
                         @else
                             @if(Auth::user()->hasRole('Admin'))
-                                <div class="col-lg-3 my-1">
+                                <!-- <div class="col-lg-3 my-1">
                                     <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('agmmAccounts') }}">
                                         <img src="{{asset('images/icons/man.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
                                         <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">AGMM VERIFIER</p>
@@ -58,7 +58,7 @@
                                         <img src="{{asset('images/icons/cash-payment.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
                                         <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">AGMM DISBURSER</p>
                                     </a>
-                                </div>
+                                </div> -->
                             @endif
                             <div class="col-lg-3 my-1">
                                 <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('membership.index') }}">
@@ -105,10 +105,10 @@
             </div>
         </div>
     </div>
-    <div class="row my-3">
+    <!-- <div class="row my-3">
         <div class="col-md-12">
         <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1E4wRuSvtjfoMK?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
         </div>
-    </div>
+    </div> -->
 </div>
 @endsection

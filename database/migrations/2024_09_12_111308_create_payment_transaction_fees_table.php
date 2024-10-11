@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('change_meter_fees', function (Blueprint $table) {
+        Schema::create('payment_transaction_fees', function (Blueprint $table) {
             $table->id();
-            $table->integer('cm_control_no');
-            $table->string('fees');
-            $table->float('amount');
+            $table->string('payment_transaction_id');
+            $table->string('type_of_fees');
+            $table->float('amount_of_fees');
             $table->timestamps();
             $table->softDeletes(); 
         });
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('change_meter_fees');
+        Schema::dropIfExists('payment_transaction_fees');
     }
 };
