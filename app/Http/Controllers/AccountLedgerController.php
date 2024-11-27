@@ -17,12 +17,16 @@ class AccountLedgerController extends Controller
         $account_name = $request->input('account_name');
         $serial_no = $request->input('serial_no');
 
+        if ($account_no == null && $account_name == null && $serial_no == null) {
+            return redirect()->route('ledger.index')->with('error', 'No Record Found!');
+        }
+
         $account = DB::connection('sqlSrvBilling')
         ->table('Consumers Table')
         ->select('*');
 
         if ($account_no !== null && $account_no !== '') {
-            $account->where('Accnt No', 'like', "%$account_no%");
+            $account->where('Accnt No', 'like', "$account_no");
         }
 
         if ($account_name !== null && $account_name !== '') {
@@ -30,8 +34,13 @@ class AccountLedgerController extends Controller
         }
 
         if ($serial_no !== null && $serial_no !== '') {
-            $account->where('Serial No', 'like', "%$serial_no%");
+            $account->where('Serial No', 'like', "$serial_no");
         }
+        
+        
+        if ($account->get()->isEmpty()) {
+            return redirect()->route('ledger.index')->with('error', 'No Record Found!');
+        } 
 
         if ($account_no !== null || $account_name !== null || $serial_no !== null){
             $account = $account->first();
@@ -40,19 +49,12 @@ class AccountLedgerController extends Controller
             ->table('Ledger Table')
             ->select('*')
             ->where('Account No', 'like', "%$account_number%")->get();
+
+            return view('billing.ledger_index',compact('account', 'ledger_history'));
+
         } else{
-            $account = null;
-            $ledger_history = [];
+            return redirect()->route('ledger.index')->with('error', 'No Record Found!');
         }
-        
-        
-        
-
-        
-        // dd($ledger_history);
-
-        // return view('products.index', compact('products'));
-        return view('billing.ledger_index',compact('account', 'ledger_history'));
     }
 
 }

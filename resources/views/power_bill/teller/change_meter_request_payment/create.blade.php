@@ -134,7 +134,7 @@
                       </div>
                     </div>
                     <hr>
-                    <form action="{{ route('change-meter-request-transact.store') }}" method="POST">
+                    <form action="{{ route('change-meter-request-transact.store') }}" method="POST" id="paymentForm" onsubmit="return confirmSubmit(event)" >
                       @csrf
                       <div class="row">
                         <div class="col-lg-6 mb-1">
@@ -178,7 +178,7 @@
                           </div>
                         </div>
                         <div class="col-lg-3 mb-1">
-                          {{ Form::text('change', null, ['class' => 'form-control form-control-sm', 'readonly', 'id' => 'change']) }}
+                          {{ Form::text('change', null, ['class' => 'form-control form-control-sm fw-bold bg-dark text-white', 'readonly', 'id' => 'change']) }}
                         </div>
                       </div>
                       <hr>
@@ -223,6 +223,31 @@
     var button = document.getElementById('submit_change_meter');
     button.disabled = !(total <= amount);  
   }
+
+  function confirmSubmit(event) {
+    event.preventDefault(); // Prevent the form from submitting immediately
+    
+    // Show the SweetAlert confirmation dialog
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this transaction!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Submit!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // If confirmed, submit the form
+        document.getElementById("paymentForm").submit();
+      }
+    });
+    
+    // Return false to keep the form from submitting until user confirms
+    return false;
+  }
+
   $('#control_no').on('change', function () {
     $('#search').click();
   });

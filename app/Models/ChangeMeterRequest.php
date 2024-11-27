@@ -55,6 +55,6 @@ class ChangeMeterRequest extends Model implements Auditable
         'meter_or_number', 'meter_or_date', 'new_meter_no', 'type_of_meter',
         'last_reading', 'initial_reading', 'remarks', 'location', 'crew',
         'date_time_acted', 'status', 'damage_cause', 'crew_remarks', 'created_by',
-        'created_at'
+        'created_at', 'process_date', 'dispatched_date'
     ];
 }

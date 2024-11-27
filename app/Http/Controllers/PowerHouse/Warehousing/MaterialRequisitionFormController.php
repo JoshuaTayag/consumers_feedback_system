@@ -132,8 +132,8 @@ class MaterialRequisitionFormController extends Controller
         ->select('created_at')
         ->orderBy('created_at', 'asc')
         ->first();
-        $createdAt = Carbon::parse($oldest_unliquidated_mrf->created_at);
-        $daysPassed = $createdAt->diffInDays(Carbon::now());
+        // $createdAt = Carbon::parse($oldest_unliquidated_mrf->created_at);
+        // $daysPassed = $createdAt->diffInDays(Carbon::now());
 
         $unliquidated_mrf = MaterialRequisitionForm::where([['requested_id', Auth::id()], ['status', '<=', 2]])->count();
         // check if this user has unliquidated MRF's
@@ -351,7 +351,7 @@ class MaterialRequisitionFormController extends Controller
             }
             $material_requisition_form->save();
 
-            return redirect(route('material-requisition-form.index'))->withSuccess('MRV/SERIV Successfully Assign!');
+            return redirect(route('material-requisition-form.index'))->withSuccess('Successfully Assign!');
         }
 
         else{

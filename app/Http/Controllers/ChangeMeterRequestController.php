@@ -29,11 +29,49 @@ class ChangeMeterRequestController extends Controller
     public function index()
     {
         $cm_requests = ChangeMeterRequest::with('municipality', 'barangay')->orderBy('id','desc')->paginate(9);
-        $ref_employees = DB::table('ref_employees')
-        ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
-        ->where('department', 'TSD')
-        ->orderBy('last_name', 'ASC')
-        ->get();
+        // $ref_employees = DB::table('ref_employees')
+        // ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
+        // ->where('department', 'TSD')
+        // ->orderBy('last_name', 'ASC')
+        // ->get();
+
+        $dbPath = "\\\\sql02\\files\\Con_Or.mdb";
+
+        // Check if the file exists
+        if (!file_exists($dbPath)) {
+            throw new \Exception("Database file not found at: $dbPath");
+        }
+
+        // Connection string for MS Access
+        $connectionString = "Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=$dbPath;";
+        
+        // Attempt to connect
+        $connection = odbc_connect($connectionString, "", "");
+        if (!$connection) {
+            throw new \Exception("Failed to connect to the database. Error: " . odbc_errormsg());
+        }
+
+        // Directly construct the SQL query with values
+        $sql = "SELECT (LastName & ', ' & FirstName) AS full_name, Department 
+                FROM [Employee Masterlist Table] 
+                WHERE Department = 'TSD' 
+                ORDER BY Lastname ASC";
+        
+        // Execute the SQL statement
+        $result = odbc_exec($connection, $sql);
+        if (!$result) {
+            throw new \Exception("SQL error: " . odbc_errormsg($connection));
+        }
+
+        $ref_employees = [];
+
+        // Fetch results
+        while ($row = odbc_fetch_array($result)) {
+            $ref_employees[] = $row;
+        }
+        odbc_close($connection);
+        
+
         return view('service_connect_order.change_meter.index',compact('cm_requests', 'ref_employees'));
     }
 
@@ -99,6 +137,7 @@ class ChangeMeterRequestController extends Controller
                 // 'membership_date' => ['required'],
                 'consumer_type' => ['required'],
                 'meter_code_no' => ['required'],
+                'process_date' => ['required'],
                 'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo'],
             ]);
 
@@ -139,6 +178,7 @@ class ChangeMeterRequestController extends Controller
                     "crew_remarks" => null,
                     "created_by" => Auth::id(),
                     "created_at" => Carbon::today(),
+                    "process_date" => $request->process_date,
                 ]);
 
                 
@@ -194,7 +234,7 @@ class ChangeMeterRequestController extends Controller
     public function edit(string $id)
     {
         $change_meter_request = ChangeMeterRequest::with('cmr_fees')->find($id);
-        
+        dd($change_meter_request);
         if ($change_meter_request->date_time_acted) {
             return redirect(route('indexCM'))->withWarning("Can't Update Record!");
         } else {
@@ -476,6 +516,8 @@ class ChangeMeterRequestController extends Controller
                 return !is_null($value);
             });
 
+            // dd($change_meter_request->account_number);
+
             // Update the existing record with new data
             $change_meter_request->update($dataToUpdate);
 
@@ -493,13 +535,34 @@ class ChangeMeterRequestController extends Controller
                 "erc_seal_no" => $request->erc_seal,
                 "posted_by" => Auth::id(),
                 "created_at" => Carbon::now(),
+                "account_no" => $change_meter_request->account_number,
             ]);
-            $billing = DB::connection('sqlSrvBilling')
-                        ->table('Consumers Table')
-                        ->where('Accnt No', $change_meter_request->account_number)
-                        ->update([
-                            'Serial No' => $change_meter_request->new_meter_no,
-                        ]);
+
+            // check if posting is installed
+            if($change_meter_request->status == 2){
+
+                $existingRemarks = DB::connection('sqlSrvBilling')
+                ->table('Consumers Table')
+                ->where('Accnt No', $change_meter_request->account_number)
+                ->value('Remarks') ?? '';
+                
+                // Remove leading and trailing spaces
+                $existingRemarks = trim($existingRemarks);
+
+                $completeRemarks = ' OM: '.$change_meter_request->old_meter_no.' DI: '.date('m/d/y', strtotime($request->date_acted));
+
+                $newRemarks = substr($existingRemarks . $completeRemarks, 0);
+
+                $billing = DB::connection('sqlSrvBilling')
+                ->table('Consumers Table')
+                ->where('Accnt No', $change_meter_request->account_number)
+                ->update([
+                    'Serial No' => $change_meter_request->new_meter_no,
+                    'Remarks' => $newRemarks,
+                ]);
+
+            }
+            
 
             // dd($billing);      
             DB::commit();
@@ -515,6 +578,28 @@ class ChangeMeterRequestController extends Controller
             // Log::error($e->getMessage());
             return response()->json(['error' => $e], 500);
         }
+    }
+
+    public function cmDispatched(Request $request){
+
+        DB::beginTransaction();
+        try {
+            // Find the existing record
+            $change_meter_request = ChangeMeterRequest::findOrFail($request->cm_id);
+
+            // dd($change_meter_request);
+            $change_meter_request->update([
+                'status' => 3,
+                'crew' => $request->crew_dispatched,
+                'dispatched_date' => Carbon::now(),
+            ]);
+            DB::commit();
+            return redirect(route('indexCM'))->withSuccess('Successfully Dispatched!');
+        } catch (\Exception $e) {
+            //throw $th;
+            dd($e);
+        }
+
     }
 
     public function search(Request $request)
@@ -544,11 +629,48 @@ class ChangeMeterRequestController extends Controller
         $cm_requests = $cm_request->orderBy('control_no','DESC')->paginate(9);
 
         // dd($scos);
-        $ref_employees = DB::table('ref_employees')
-        ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
-        ->where('department', 'TSD')
-        ->orderBy('last_name', 'ASC')
-        ->get();
+        // $ref_employees = DB::table('ref_employees')
+        // ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
+        // ->where('department', 'TSD')
+        // ->orderBy('last_name', 'ASC')
+        // ->get();
+
+        $dbPath = "\\\\sql02\\files\\Con_Or.mdb";
+
+        // Check if the file exists
+        if (!file_exists($dbPath)) {
+            throw new \Exception("Database file not found at: $dbPath");
+        }
+
+        // Connection string for MS Access
+        $connectionString = "Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=$dbPath;";
+        
+        // Attempt to connect
+        $connection = odbc_connect($connectionString, "", "");
+        if (!$connection) {
+            throw new \Exception("Failed to connect to the database. Error: " . odbc_errormsg());
+        }
+
+        // Directly construct the SQL query with values
+        $sql = "SELECT (LastName & ', ' & FirstName) AS full_name, Department 
+                FROM [Employee Masterlist Table] 
+                WHERE Department = 'TSD' 
+                ORDER BY Lastname ASC";
+        
+        // Execute the SQL statement
+        $result = odbc_exec($connection, $sql);
+        if (!$result) {
+            throw new \Exception("SQL error: " . odbc_errormsg($connection));
+        }
+
+        $ref_employees = [];
+
+        // Fetch results
+        while ($row = odbc_fetch_array($result)) {
+            $ref_employees[] = $row;
+        }
+        odbc_close($connection);
+
         // return view('products.index', compact('products'));
         return view('service_connect_order.change_meter.index',compact('cm_requests','ref_employees'));
     }
@@ -557,18 +679,61 @@ class ChangeMeterRequestController extends Controller
     {
         $cm_request = ChangeMeterRequest::find($id);
 
-        $ref_employees = DB::table('ref_employees')
-        ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
-        ->where('department', 'TSD')
-        ->orderBy('last_name', 'ASC')
-        ->get();
+        // $ref_employees = DB::table('ref_employees')
+        // ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
+        // ->where('department', 'TSD')
+        // ->orderBy('last_name', 'ASC')
+        // ->get();
         // dd($cm_request);
+
+        $dbPath = "\\\\sql02\\files\\Con_Or.mdb";
+
+        // Check if the file exists
+        if (!file_exists($dbPath)) {
+            throw new \Exception("Database file not found at: $dbPath");
+        }
+
+        // Connection string for MS Access
+        $connectionString = "Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=$dbPath;";
+        
+        // Attempt to connect
+        $connection = odbc_connect($connectionString, "", "");
+        if (!$connection) {
+            throw new \Exception("Failed to connect to the database. Error: " . odbc_errormsg());
+        }
+
+        // Directly construct the SQL query with values
+        $sql = "SELECT (LastName & ', ' & FirstName) AS full_name, Department 
+                FROM [Employee Masterlist Table] 
+                WHERE Department = 'TSD' 
+                ORDER BY Lastname ASC";
+        
+        // Execute the SQL statement
+        $result = odbc_exec($connection, $sql);
+        if (!$result) {
+            throw new \Exception("SQL error: " . odbc_errormsg($connection));
+        }
+
+        $ref_employees = [];
+
+        // Fetch results
+        while ($row = odbc_fetch_array($result)) {
+            $ref_employees[] = $row;
+        }
+        odbc_close($connection);
+
         return view('service_connect_order.change_meter.view_acted_request',compact('cm_request', 'ref_employees'));
     }
 
     public function viewReport(Request $request)
     {
-        return view('service_connect_order.change_meter.report');
+        $municipalities = DB::connection('sqlSrvMembership')
+        ->table('municipalities')
+        ->select('*')
+        ->orderBy('municipality_name', 'asc')
+        ->get();
+
+        return view('service_connect_order.change_meter.report', compact('municipalities'));
     }
 
     public function generateReport(Request $request)
@@ -579,19 +744,27 @@ class ChangeMeterRequestController extends Controller
 
         // Add the app_status condition if it is set to 1
         if ($request->app_status == 1) {
-            $query->where('status', 2); // installed
+            $query->whereNull('status'); // unacted
         }
 
         if ($request->app_status == 2) {
-            $query->whereNull('date_time_acted'); // unacted
+            $query->where('status', 2); // acted - completed
         }
 
         if ($request->app_status == 3) {
-            $query->whereNotNull('date_time_acted'); // acted
+            $query->where('status', 1); // acted - not completed
         }
 
-        if ($request->app_status == 4) {
-            $query->where('status', 1); // not completed
+        if ($request->area) {
+            $query->where('area', $request->area);
+        }
+
+        if ($request->municipality) {
+            $query->where('municipality_id', $request->municipality);
+        }
+
+        if ($request->barangay) {
+            $query->where('barangay_id', $request->barangay);
         }
 
         // Execute the query and get the results
@@ -601,5 +774,23 @@ class ChangeMeterRequestController extends Controller
         $pdf = PDF::loadView('service_connect_order.change_meter.pdf_reports')->setPaper('a4', 'landscape');
         return $pdf->stream();
     }
+
+    public function getAccountDetails(Request $request){
+        $search = $request->search;
+
+            if($search == ''){
+                $accounts = DB::table('Consumers Table as ct')
+                ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No');
+
+            } else{
+                $accounts = DB::table('Consumers Table as ct')
+                ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No')
+                ->where('ct.Accnt No', 'like', '%' .$search . '%');
+            }
+
+        $data = $accounts->paginate(10, ['*'], 'page', $request->page);
+        // dd($data);
+        return response()->json($data); 
+    } 
 
 }

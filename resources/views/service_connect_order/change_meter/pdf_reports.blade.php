@@ -157,7 +157,7 @@
             <td>{{$data->new_meter_no}}</td>
             <td>A{{$data->area}}</td>
             <td>{{$data->sitio.', '.$data->barangay->barangay_name.', '. $data->municipality->municipality_name}}</td>
-            <td>{{$data->status == 1 ? 'NOT COMPLETED' : ($data->status == 2 ? 'INSTALLED' : 'UNACTED') }}</td>
+            <td>{{$data->status == 1 ? 'ACTED - NOT COMPLETED' : ($data->status == 2 ? 'ACTED - COMPLETED' : 'UNACTED') }}</td>
             <td>{{$data->damage_cause}}</td>
             <td>{{$data->crew_remarks}}</td>
             <td>{{ date('m/d/Y', strtotime($data->created_at)) }}</td>

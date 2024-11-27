@@ -116,24 +116,25 @@
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('sitio', 'Sitio') }}
-                        {{ Form::text('sitio', $change_meter_request->sitio, array('class' => 'form-control')) }}
+                        {{ Form::label('sitio', 'Sitio *') }}
+                        {{ Form::text('sitio', $change_meter_request->sitio, array('class' => 'form-control', 'required')) }}
                     </div>
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-lg-3">
+                  <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('membership_or', 'Membership OR *') }}
                         {{ Form::text('membership_or', $change_meter_request->membership_or, array('class' => 'form-control', 'readonly')) }}
                     </div>
                   </div>
-                  <!-- <div class="col-lg-3">
+                  <div class="col-lg-3">
                     <div class="mb-2">
+                      {{ $change_meter_request->{'Membership Date'} }}
                         {{ Form::label('membership_date', 'Membership Date *') }}
                         {{ Form::date('membership_date', date('Y-m-d', strtotime($change_meter_request->{'Membership Date'})) , array('class' => 'form-control', 'readonly')) }}
                     </div>
-                  </div> -->
+                  </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('consumer_type', 'Consumer Type *') }}
@@ -179,10 +180,16 @@
                         {{ Form::date('date_installed', null, array('class' => 'form-control')) }}
                     </div>
                   </div> -->
-                  <div class="col-lg-3">
+                  <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('meter_or_no', 'Meter OR #') }}
                         {{ Form::text('meter_or_no', $change_meter_request->meter_or_number, array('class' => 'form-control')) }}
+                    </div>
+                  </div>
+                  <div class="col-lg-2">
+                    <div class="mb-2">
+                        {{ Form::label('process_date', 'Process Date *') }}
+                        {{ Form::date('process_date', null, array('class' => 'form-control', 'required')) }}
                     </div>
                   </div>
                 </div>
@@ -227,7 +234,7 @@
                   </div>
                   <div class="col-lg-6">
                     <div class="mb-2">
-                      <label class="form-label mb-1">Location </label>
+                      <label class="form-label mb-1">Landmark </label>
                       <textarea class="form-control" name="location" id="location">{{ $change_meter_request->location }}</textarea>
                     </div>
                   </div>
@@ -236,7 +243,24 @@
 
               <div class="col-lg-4 mb-3" id="schedule_of_fees" >
               <div class="col text-center"><h2>Schedule of Fees</h2></div>
+              @if($change_meter_request->changeMeterRequestTransaction)
+                <span class="text-center fw-bold text-warning fs-3">OR: {{ $change_meter_request->changeMeterRequestTransaction->or_no }}</span>
+                
+                <ol class="list-group list-group-numbered">
+                  @if(isset($change_meter_request->cmr_fees) && $change_meter_request->cmr_fees->isNotEmpty())
+                      @foreach($change_meter_request->cmr_fees as $cm_fees)
+                          <li class="list-group-item bg-secondary text-white text-capitalize fw-bold">
+                              {{ str_replace('_', ' ', $cm_fees->fees) }} - ₱{{ number_format($cm_fees->amount, 2, '.', '') }}
+                          </li>
+                      @endforeach
+                  @else
+                      <!-- <li class="list-group-item bg-secondary text-white text-capitalize fw-bold">No fees available</li> -->
+                  @endif
+                </ol>
+
+              @else
                 @include('service_connect_order.schedule_of_fees')
+              @endif
               </div>
 
               <div class="col-xs-12 col-sm-12 col-md-12 text-end">

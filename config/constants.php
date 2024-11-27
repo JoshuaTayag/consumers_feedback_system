@@ -780,11 +780,11 @@
         'action_status_change_meter' => [
             [
                 "id" => 1,
-                "name" => "NOT COMPLETED"
+                "name" => "ACTED - NOT COMPLETED"
             ],
             [
                 "id" => 2,
-                "name" => "INSTALLED"
+                "name" => "ACTED - COMPLETED"
             ],
             // [
             //     "id" => 3,

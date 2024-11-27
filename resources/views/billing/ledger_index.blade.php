@@ -19,8 +19,14 @@
                     <div class="col-lg-3">
                         <input type="text" placeholder="Search by Account No." id="search_account_no" name="account_no" class="form-control" value="{{ request('account_no') }}">
                     </div>
+                    <!-- <div class="col-lg-3"> -->
+                        <input type="hidden" placeholder="Search by Name" id="search_name" name="account_name" class="form-control" value="{{ request('account_name') }}">
+                    <!-- </div> -->
                     <div class="col-lg-3">
-                        <input type="text" placeholder="Search by Name" id="search_name" name="account_name" class="form-control" value="{{ request('account_name') }}">
+                      <div class="mb-2">
+                        <select class="form-control" id="electric_service_details" name="electric_service_details">
+                        </select>
+                      </div>
                     </div>
                     <div class="col-lg-3">
                         <input type="text" placeholder="Search by Meter No" id="search_serial_no" name="serial_no" class="form-control" value="{{ request('serial_no') }}">
@@ -112,6 +118,12 @@
                     <input class="form-control form-control-sm" name="name" id="name" value="{{ isset($account) && $account->{'Acct Stat'} !== null ? 'Yes' : 'No'}}" readonly>
                   </div>
                 </div>
+                <div class="col-lg-12">
+                  <div class="mb-2">
+                    <label class="form-label mb-1">Remarks </label>
+                    <textarea class="form-control" name="remarks" id="remarks" readonly>{{ isset($account) && $account->{'Remarks'} !== null ? $account->{'Remarks'} : ''}}</textarea>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -159,11 +171,82 @@
 </div>
 @endsection
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+  $(document).ready(function () {
+    const selectedAccountName = "{{ request('account_name') }}";
+
+    $('.js-example-basic-single').select2({
+        theme: "classic"
+    });
+
+    $( "#electric_service_details" ).select2({
+      ajax: { 
+        url: "{{route('fetchAccounts')}}",
+        type: "get",
+        dataType: 'json',
+        data: function (params) {
+          return {
+              // _token: '{{csrf_token()}}',
+              search: params.term, // search term
+              byName: '1',
+              page: params.page
+          };
+        },
+        processResults:function (results, params){
+          params.page = params.page||1;
+
+          return{
+            results:results.data,
+            pagination:{
+              more:results.last_page!=params.page
+            },
+          }
+        },
+        cache: true
+      },
+      // placeholder:'Search Account Number',
+      templateResult: templateResult,
+      templateSelection: templateSelection,
+    });
+
+    function templateResult(data){
+    if (data.loading){
+      return data.text
+    }
+    return data.Name
+    }
+
+    function templateSelection(data){
+      // Set the hidden input value to the selected name
+      $('#search_name').val(data.Name);
+      return data.Name
+    }
+
+    // Set the initial selection if `selectedAccountId` and `selectedAccountName` exist
+    if (selectedAccountName) {
+      console.log(selectedAccountName)
+        const newOption = new Option(selectedAccountName, true);
+        $('#electric_service_details').append(newOption).trigger('change');
+    }
+  })
+
   function clearSearch() {
     $('#search_account_no').val('');
     $('#search_name').val('');
     $('#search_serial_no').val('');
   }
 </script>
+@endsection
+@section('style')
+<style>
+  .select2-container .select2-selection--single {
+    box-sizing: border-box;
+    cursor: pointer;
+    display: block;
+    height: 36px;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+</style>
 @endsection

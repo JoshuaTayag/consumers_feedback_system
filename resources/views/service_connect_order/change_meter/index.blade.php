@@ -21,7 +21,7 @@
             <form action="{{ route('cm.search') }}" method="GET">
               <div class="row p-3">
                 <div class="col-lg-2">
-                    <input type="date" placeholder="Search by Control No." id="search_sco_no" name="control_no" class="form-control" value="{{ request('control_no') }}">
+                    <input type="text" placeholder="Search by Control No." id="search_sco_no" name="control_no" class="form-control" value="{{ request('control_no') }}">
                 </div>
                 <div class="col-lg-2">
                     <input type="text" placeholder="Search by First Name" id="search_first_name" name="first_name" class="form-control" value="{{ request('first_name') }}">
@@ -47,23 +47,36 @@
                 @endphp
                 <div class="col-lg-4 mb-4">
                   <div class="card h-100">
-                    <div class="card-header p-1 bg-{{ $cm_request->status ? 'success' : 'danger' }}"></div>
+                    <div class="card-header p-1 bg-{{ $cm_request->status == 3 ? 'warning' : ($cm_request->status == 1 || $cm_request->status == 2 ? 'success' : 'danger')}}"></div>
                     <div class="card-body">
                       <div class="row mb-3">
                         <div class="col d-flex align-items-center">
-                          @if($cm_request->status == null)
+                          @if($cm_request->status == null || $cm_request->status == 3)
                             <div class="dropdown">
                               <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                                 Action
                               </button>
                               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                 @can('change-meter-request-edit')
-                                  <li><a class="dropdown-item" href="{{ route('editCM',$cm_request->id) }}"><i class="fa fa-pencil"></i> Update</a></li>
+                                  @if($cm_request->status == null)
+                                    <li><a class="dropdown-item" href="{{ route('editCM',$cm_request->id) }}"><i class="fa fa-pencil"></i> Update</a></li>
+                                  @endif
                                 @endcan
+
                                 <li><a class="dropdown-item" href="{{route('printChangeMeterRequest',$cm_request->id)}}" target="_blank"><i class="fa fa-print"></i> Print</a></li>
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-area="{{$cm_request->area}}" data-feeder="{{$cm_request->feeder}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
+
+                                  @if($cm_request->status == 3)
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#meterPostingModal" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-area="{{$cm_request->area}}" data-feeder="{{$cm_request->feeder}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
+                                  @endif
+
+                                  @if($cm_request->status == null)
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dispatchingModal" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}"><i class="fa fa-truck"></i>&nbsp; Dispatch</a></li>
+                                  @endif
+
                                 @can('change-meter-request-delete')
-                                  <li><a class="dropdown-item" href="{{route('deleteCM',$cm_request->id)}}"><i class="fa fa-trash"></i> Delete</a></li>
+                                  @if($cm_request->status == null)
+                                    <li><a class="dropdown-item" href="{{route('deleteCM',$cm_request->id)}}"><i class="fa fa-trash"></i> Delete</a></li>
+                                  @endif
                                 @endcan 
                               </ul>
                             </div>
@@ -73,61 +86,61 @@
                         </div>
                         <div class="col-lg-3 d-flex align-items-center">
                             <div class="mx-end ms-auto"> <!-- Add mx-auto to horizontally center the content -->
-                                <p class="badge rounded-pill bg-{{ $cm_request->status ? 'success' : 'danger' }} p-2 mb-0">{{ $cm_request->status ? 'Acted' : 'Not Acted' }}</p>
+                                <p class="badge rounded-pill bg-{{ $cm_request->status == 1 || $cm_request->status == 2 ? 'success' : ($cm_request->status == 3 ? 'warning text-dark' : 'danger')}} p-2 mb-0">{{ $cm_request->status == 1 || $cm_request->status == 2 ? 'Acted' : ($cm_request->status == 3 ? 'Dispatched' : 'Not Acted')}}</p>
                             </div>
                         </div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5">Control No. :</div>
+                      <div class="row border-bottom ">
+                        <div class="col-lg-5 border-end">Control No. :</div>
                         <div class="col-lg-7 fw-bold">{{$cm_request->control_no}}</div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5 ">Name:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Name:</div>
                         <div class="col-lg-7 ">{{$cm_request->last_name.', '.$cm_request->first_name}}</div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5 ">Account:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Account:</div>
                         <div class="col-lg-7 ">{{ substr($cm_request->account_number, 0, 2) }}-{{ substr($cm_request->account_number, 2, 4) }}-{{ substr($cm_request->account_number, 6, 4) }} </div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5 ">Process Date:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Process Date:</div>
                         <div class="col-lg-7 ">{{ date('F d, Y', strtotime($cm_request->created_at)) }}</div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5 ">Area:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Area:</div>
                         <div class="col-lg-7 ">A{{$cm_request->area}}</div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5 ">Address:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Address:</div>
                         <div class="col-lg-7 ">{{$cm_request->sitio.', '.$cm_request->barangay->barangay_name.', '. $cm_request->municipality->municipality_name}}</div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5 ">Consumer Type:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Consumer Type:</div>
                         <div class="col-lg-7 ">{{ $consumerType['name'] ?? 'Unknown Type'}}</div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5 ">Application Status:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Application Status:</div>
                         <!-- 1 = installed, 2 = rejected -->
-                        <div class="col-lg-7 {{ $cm_request->status == null ? 'd-none' : 'd-block'}}"><p class="badge rounded-pill bg-{{$cm_request->status == 1 ? 'warning' : ($cm_request->status == 2 ? 'success' : 'danger') }} p-2 fs-6" >{{$cm_request->status == 1 ? 'NOT COMPLETED' : ($cm_request->status == 2 ? 'INSTALLED' : 'REJECTED') }}</p></div>
+                        <div class="col-lg-7 {{ $cm_request->status == null ? 'd-none' : 'd-block'}}"><span class="badge my-1 rounded-pill bg-{{$cm_request->status == 1 ? 'danger' : ($cm_request->status == 2 ? 'success' : 'warning text-dark') }} p-2 fs-6" >{{$cm_request->status == 1 ? 'ACTED - NOT COMPLETED' : ($cm_request->status == 2 ? 'ACTED - COMPLETED' : ($cm_request->status == 3 ? 'DISPATCHED' : 'UNACTED')) }}</span></div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5 ">Old Meter No.:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Old Meter No.:</div>
                         <div class="col-lg-7 ">{{$cm_request->old_meter_no}}</div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5 ">New Meter No.:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">New Meter No.:</div>
                         <div class="col-lg-7 text-{{$cm_request->new_meter_no ? '' : 'danger'}} ">{{$cm_request->new_meter_no ? $cm_request->new_meter_no : "N/A"}}</div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5 ">Date Installed:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Date Installed:</div>
                         <div class="col-lg-7 text-{{$cm_request->date_time_acted ? '' : 'danger'}}">{{ $cm_request->date_time_acted ? date('F d, Y h:i A', strtotime($cm_request->date_time_acted)) : 'N/A' }}</div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5">Remarks:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Remarks:</div>
                         <div class="col-lg-7">{{$cm_request->remarks}}</div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-5">OR No.:</div>
+                      <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">OR No.:</div>
                         <div class="col-lg-7 {{$cm_request->changeMeterRequestTransaction ? 'fw-bold text-success' : ''}} ">{{$cm_request->changeMeterRequestTransaction ? $cm_request->changeMeterRequestTransaction->or_no : "None"}}</div>
                       </div>
                       <div class="row pt-3 text-muted">
@@ -141,6 +154,7 @@
               <div id="pagination">{{ $cm_requests->links() }}</div>
             </div>
               @include('service_connect_order.change_meter.meter_posting')
+              @include('service_connect_order.change_meter.dispatching')
           </div>
       </div>
   </div>
@@ -148,8 +162,10 @@
 @endsection
 @section('script')
 <script>
-  var myModal = document.getElementById('exampleModal');
-  myModal.addEventListener('show.bs.modal', function (event) {
+  var meterPostingModal = document.getElementById('meterPostingModal');
+  var dispatchingModal = document.getElementById('dispatchingModal');
+
+  meterPostingModal.addEventListener('show.bs.modal', function (event) {
     var button = event.relatedTarget;
 
     var sco = button.getAttribute('data-sco');
@@ -160,19 +176,42 @@
     var cm_id = button.getAttribute('data-id');
 
     // console.log(feeder)
-    var modal_sco = myModal.querySelector('#sco');
-    var modal_name = myModal.querySelector('#full_name');
-    var modal_process_date = myModal.querySelector('#process_date');
-    var modal_area = myModal.querySelector('#area');
-    var modal_feeder = myModal.querySelector('#feeder');
-    var modal_cm_id = myModal.querySelector('#cm_id');
+    var modal_sco = meterPostingModal.querySelector('#sco');
+    var modal_name = meterPostingModal.querySelector('#full_name');
+    var modal_process_date = meterPostingModal.querySelector('#process_date');
+    var modal_cm_id = meterPostingModal.querySelector('#cm_id');
 
     modal_sco.value = sco;
     modal_name.value = full_name;
     modal_process_date.value = process_date;
-    modal_area.value = area;
-    modal_feeder.value = feeder;
     modal_cm_id.value = cm_id;
+  });
+
+  dispatchingModal.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+
+    var sco = button.getAttribute('data-sco');
+    var cm_id = button.getAttribute('data-id');
+
+    // Get today's date
+    const today = new Date();
+    
+    // Format it as YYYY-MM-DD
+    const formattedDate = today.toISOString().split('T')[0];
+
+    // Format the time as HH:mm
+    const formattedTime = today.toTimeString().slice(0, 5);
+
+    console.log(formattedDate)
+    var modal_sco = dispatchingModal.querySelector('#sco_dispatched');
+    var modal_cm_id = dispatchingModal.querySelector('#cm_id');
+    var modal_dispatched_date = dispatchingModal.querySelector('#date_dispatched');
+    var modal_dispatched_time = dispatchingModal.querySelector('#time_dispatched');
+
+    modal_sco.value = sco;
+    modal_cm_id.value = cm_id;
+    modal_dispatched_date.value = formattedDate;
+    modal_dispatched_time.value = formattedTime;
   });
 
   const application_status = document.getElementById('status');

@@ -119,13 +119,13 @@
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                      {{ Form::label('sitio', 'Sitio') }}
-                      {{ Form::text('sitio', null, array('class' => 'form-control')) }}
+                      {{ Form::label('sitio', 'Sitio *') }}
+                      {{ Form::text('sitio', null, array('class' => 'form-control', 'required')) }}
                     </div>
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-lg-3">
+                  <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('membership_or', 'Membership OR *') }}
                         {{ Form::text('membership_or', null, array('class' => 'form-control', 'readonly')) }}
@@ -182,10 +182,16 @@
                         {{ Form::date('date_installed', null, array('class' => 'form-control')) }}
                     </div>
                   </div> -->
-                  <div class="col-lg-3">
+                  <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('meter_or_no', 'Meter OR #') }}
                         {{ Form::text('meter_or_no', null, array('class' => 'form-control')) }}
+                    </div>
+                  </div>
+                  <div class="col-lg-2">
+                    <div class="mb-2">
+                        {{ Form::label('process_date', 'Process Date *') }}
+                        {{ Form::date('process_date', null, array('class' => 'form-control', 'required')) }}
                     </div>
                   </div>
                 </div>
@@ -230,7 +236,7 @@
                   </div>
                   <div class="col-lg-6">
                     <div class="mb-2">
-                      <label class="form-label mb-1">Location </label>
+                      <label class="form-label mb-1">Landmark </label>
                       <textarea class="form-control" name="location" id="location"></textarea>
                     </div>
                   </div>
@@ -259,7 +265,7 @@
 <script>
   $( "#electric_service_detail" ).select2({
     ajax: { 
-      url: "{{route('fetchAccounts')}}",
+      url: "{{route('cmFetchAccounts')}}",
       type: "get",
       dataType: 'json',
       // delay: 100,

@@ -18,12 +18,12 @@
                   <span class="mb-0 align-middle fs-3">Payment Transaction</span>
               </div>
               <div class="col-lg-6 text-end">
-                <a class="btn btn-sm btn-primary" href="{{ route('indexCM') }}">MANUAL</a>
+                <!-- <a class="btn btn-sm btn-primary" href="{{ route('indexCM') }}">MANUAL</a> -->
               </div>
           </div>
         </div>
         <div class="card-body" style="background-color: #fafafa">
-          <form action="{{ route('payment-transact.store') }}" method="POST">
+          <form action="{{ route('payment-transact.store') }}" id="paymentForm" method="POST" onsubmit="return confirmSubmit(event)">
           @csrf
             <div class="row">
               <div class="col-lg-7">
@@ -36,18 +36,18 @@
                       <div class="col-lg-4">
                         <div class="mb-2">
                           {{ Form::label('or_no', 'OR No.') }}
-                          {{ Form::text('or_no', null, ['class' => 'form-control', 'required']) }}
+                          {{ Form::text('or_no', $new_or, ['class' => 'form-control', 'required']) }}
                         </div>
                       </div>
                       <div class="col-lg-4">
                         <div class="mb-2">
-                          {{ Form::label('first_name', 'First Name') }}
+                          {{ Form::label('first_name', 'First Name *') }}
                           {{ Form::text('first_name', null, ['class' => 'form-control', 'required']) }}
                         </div>
                       </div>
                       <div class="col-lg-4">
                         <div class="mb-2">
-                          {{ Form::label('last_name', 'Last Name') }}
+                          {{ Form::label('last_name', 'Last Name *') }}
                           {{ Form::text('last_name', null, ['class' => 'form-control', 'required']) }}
                         </div>
                       </div>
@@ -66,14 +66,14 @@
                       </div>
                       <div class="col-lg-4">
                         <div class="mb-2">
-                          <label for="barangay" class="form-label mb-1">Barangay *</label>
-                          <select id="barangay" class="form-control" name="barangay" required></select>
+                          <label for="barangay" class="form-label mb-1">Barangay</label>
+                          <select id="barangay" class="form-control" name="barangay"></select>
                         </div>
                       </div>
                       <div class="col-lg-4">
                         <div class="mb-2">
                           {{ Form::label('sitio', 'Sitio') }}
-                          {{ Form::text('sitio', null, array('class' => 'form-control', 'required')) }}
+                          {{ Form::text('sitio', null, array('class' => 'form-control')) }}
                         </div>
                       </div>
                       <div class="col-lg-4">
@@ -108,6 +108,33 @@
                     </div>
                   </div>
                 </div>
+                <div class="card mt-4">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-lg-4">
+                        <div class="mb-2">
+                          {{ Form::label('total', 'Total') }}
+                          {{ Form::number('total', null, ['class' => 'form-control', 'readonly' => true]) }}
+                        </div>
+                      </div>
+                      <div class="col-lg-4">
+                        <div class="mb-2">
+                          {{ Form::label('amount_tendered', 'Amount Tendered') }}
+                          {{ Form::number('amount_tendered', null, ['class' => 'form-control', 'readonly' => false, 'oninput' => 'calculateChange()']) }}
+                        </div>
+                      </div>
+                      <div class="col-lg-4">
+                        <div class="mb-2">
+                          {{ Form::label('change', 'Change') }}
+                          {{ Form::text('change', 'sdfsdf', ['class' => 'form-control bg-dark text-light fw-bold', 'readonly' => true, 'id' => 'change']) }}
+                        </div>
+                      </div>
+                      <div class="col-lg-12 mt-3 text-end">
+                        <button type="submit" class="btn btn-sm btn-primary" disabled id="submit_payment">Submit</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class="col-lg-5">
@@ -119,9 +146,6 @@
                     @include('service_connect_order.schedule_of_fees')
                   </div>
                 </div>
-              </div>
-              <div class="col-lg-12 mt-3 text-end">
-                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
               </div>
             </div>
           </form>
@@ -135,7 +159,7 @@
 <script>
   function calculateChange() {
     // Get the total_fees value, removing commas for calculation
-    var total = parseFloat(document.getElementById('total_fees').value.replace(/,/g, '')) || 0;
+    var total = parseFloat(document.getElementById('total').value.replace(/,/g, '')) || 0;
     // Get the amount_tendered value, removing commas for calculation
     var amount = parseFloat(document.getElementById('amount_tendered').value.replace(/,/g, '')) || 0;
 
@@ -150,10 +174,34 @@
     document.getElementById('change').value = change.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     // Enable the button if change is greater than or equal to total
-    var button = document.getElementById('submit_change_meter');
+    var button = document.getElementById('submit_payment');
     button.disabled = !(total <= amount);  
   }
 
+  function confirmSubmit(event) {
+    event.preventDefault(); // Prevent the form from submitting immediately
+    
+    // Show the SweetAlert confirmation dialog
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this transaction!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Submit!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // If confirmed, submit the form
+        document.getElementById("paymentForm").submit();
+      }
+    });
+    
+    // Return false to keep the form from submitting until user confirms
+    return false;
+  }
+  
   $('#municipality').on('change', function () {
     var id = $(this).children(":selected").attr("id");
     $("#barangay").html('');

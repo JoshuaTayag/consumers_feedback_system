@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <!-- <link href="https://fonts.cdnfonts.com/css/franklin-gothic" rel="stylesheet"> -->
+   <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <!-- SweetAlert2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <title>RECEIPT</title></title>
   <style>
     body{
@@ -326,14 +330,30 @@
     </tbody>
   </table>
 
-<script>
+  <script>
   window.onload = function() {
     window.print();  // This opens the print preview when the page loads
   };
+
   // Redirect after the print dialog is closed
   window.onafterprint = function() {
-    window.location.href = "{{ route('change-meter-request-transact.create') }}"; // Set the URL you want to redirect to
+    if (typeof Swal !== 'undefined') {  // Check if Swal is loaded
+      Swal.fire({
+          icon: 'success',
+          title: 'Print Complete!',
+          text: 'You will now be redirected.',
+          confirmButtonText: 'OK'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              // Perform the redirection after user confirms
+              window.location.href = "{{ route('change-meter-request-transact.create') }}";
+          }
+      });
+    } else {
+      console.error('Swal is not defined. Make sure SweetAlert2 is loaded.');
+    }
   };
 </script>
+
 </body>
 </html>

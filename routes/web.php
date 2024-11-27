@@ -100,6 +100,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('change-meter-request-edit/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'edit'])->name('editCM');
     Route::put('change-meter-request-update/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'update'])->name('updateCM');
     Route::post('change-meter-request-posting', [App\Http\Controllers\ChangeMeterRequestController::class, 'meterPosting'])->name('meterPostingCM');
+    Route::post('change-meter-request-dispatching', [App\Http\Controllers\ChangeMeterRequestController::class, 'cmDispatched'])->name('cmDispatching');
     Route::post('validate-meter-no', [App\Http\Controllers\ChangeMeterRequestController::class, 'validateMeterPosting'])->name('validateMeterPosting');
     Route::get('pdf-sco-cm/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'printChangeMeterRequest'])->name('printChangeMeterRequest');
     // Route::get('fetch-applications', [App\Http\Controllers\ServiceConnectOrderController::class, 'fetchServiceConnectApplications'])->name('fetchServiceConnectApplications');
@@ -108,6 +109,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('change-meter-request-view/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'view'])->name('viewCM');
     Route::get('change-meter-request-report', [App\Http\Controllers\ChangeMeterRequestController::class, 'viewReport'])->name('viewReport');
     Route::get('change-meter-request-report/pdf', [App\Http\Controllers\ChangeMeterRequestController::class, 'generateReport'])->name('generateReport');
+    Route::get('cm-fetch-accounts-records', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAccountDetails'])->name('cmFetchAccounts');
 
     Route::resource('change-meter-request', App\Http\Controllers\ChangeMeterRequestController::class);
 

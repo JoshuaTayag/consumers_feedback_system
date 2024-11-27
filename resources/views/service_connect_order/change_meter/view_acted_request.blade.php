@@ -149,7 +149,7 @@
               <div class="row">
                 <div class="col-lg-6 mb-1">
                   <div class="d-flex justify-content-between">
-                      <span class="fs-4 fw-bold">Location</span><span class="text-end fs-4 fw-bold">:</span>
+                      <span class="fs-4 fw-bold">Landmark</span><span class="text-end fs-4 fw-bold">:</span>
                   </div>
                 </div>
                 <div class="col-lg-6 mb-1">

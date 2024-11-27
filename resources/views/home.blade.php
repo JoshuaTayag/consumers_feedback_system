@@ -78,14 +78,26 @@
                                     <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">LIFELINE</p>
                                 </a>
                             </div>
-                            @if(Auth::user()->hasRole('Admin'))
+                            <div class="col-lg-3 my-1">
+                                <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('indexCM') }}">
+                                    <img src="{{asset('images/icons/meter.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
+                                    <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">CHANGE METER</p>
+                                </a>
+                            </div>
+                            <div class="col-lg-3 my-1">
+                                <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('change-meter-request-transact.create') }}">
+                                    <img src="{{asset('images/icons/cards.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
+                                    <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">CM PAYMENT</p>
+                                </a>
+                            </div>
+                            <!-- @if(Auth::user()->hasRole('Admin'))
                             <div class="col-lg-3 my-1">
                                 <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('surveyReport') }}">
                                     <img src="{{asset('images/icons/notes.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
                                     <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">CONSUMER SURVEY REPORT</p>
                                 </a>
                             </div>
-                            @endif
+                            @endif -->
                             <!-- <div class="col-lg-3">
                                 <button type="button" class="btn btn-outline-warning">
                                     <img src="{{asset('images/icons/notes.png')}}" class="img-fluid" style="max-width:40%;" alt="...">

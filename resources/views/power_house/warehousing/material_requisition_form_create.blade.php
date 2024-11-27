@@ -23,7 +23,7 @@
               <div class="col-lg-6">
                 <div class="mb-2">
                   <label for="project_name" class="form-label mb-1">Project Name *</label>
-                  <input type="text" class="form-control" id="project_name" name="project_name" required>
+                  <input type="text" class="form-control" id="project_name" name="project_name" {{ old('project_name')}} required>
                 </div>
               </div>
               <div class="col-lg-3">
@@ -114,7 +114,7 @@
               <div class="col-lg-3">
                 <div class="mb-3">
                   <label for="municipality" class="form-label mb-1">Municipality *</label>
-                  <select id="municipality" class="form-control" name="municipality">
+                  <select id="municipality" class="form-control" name="municipality" required>
                   <option value="">Choose...</option>
                   </select>
                 </div>
@@ -122,7 +122,7 @@
               <div class="col-lg-3">
                 <div class="mb-3">
                   <label for="barangay" class="form-label mb-1">Barangay</label>
-                  <select id="barangay" class="form-control" name="barangay">
+                  <select id="barangay" class="form-control" name="barangay" required>
                   <option value="">Choose...</option>
                   </select>
                 </div>

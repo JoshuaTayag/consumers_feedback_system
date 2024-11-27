@@ -55,8 +55,9 @@ class EmployeeController extends Controller
 
             // save it locally to ~/public/images/{$hash}.jpg
             $resize->save(public_path($path));
+            $input['signature_path'] = $path;
         }
-        $input['signature_path'] = $path;
+        
         $user = Employee::create($input);
     
         return redirect()->route('employee.index')

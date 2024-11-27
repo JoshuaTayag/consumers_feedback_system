@@ -22,132 +22,168 @@
         </div>
         <hr>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
           <label  class="form-label mb-1">Membership Fees</label>
-          <input type="number"  name="membership" name="id" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <input type="number"  name="membership" name="id" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
           <label class="form-label mb-1">Energy Conmp Deposit</label>
-          <input type="number"  name="energy_deposit" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <input type="number"  name="energy_deposit" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
-          <label class="form-label mb-1">Connection Fee</label>
-          <input type="number"  name="conn_fee" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <label class="form-label mb-1">Connection Fee <text class="text-danger">(V)</text></label>
+          <input type="number"  name="conn_fee" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
-          <label class="form-label mb-1">Xformer Rental</label>
-          <input type="number"  name="xformer_rental" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <label class="form-label mb-1">Xformer Rental <text class="text-danger">(V)</text></label>
+          <input type="number"  name="xformer_rental" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
-          <label class="form-label mb-1">Xformer Test</label>
-          <input type="number"  name="xformer_test" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <label class="form-label mb-1">Xformer Test <text class="text-danger">(V)</text></label>
+          <input type="number"  name="xformer_test" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
-          <label class="form-label mb-1">Xformer Installation.</label>
-          <input type="number"  name="xformer_installation" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <label class="form-label mb-1">Xformer Installation <text class="text-danger">(V)</text></label>
+          <input type="number"  name="xformer_installation" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
-          <label class="form-label mb-1">Xformer Removal.</label>
-          <input type="number"  name="xformer_removal" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <label class="form-label mb-1">Xformer Removal <text class="text-danger">(V)</text></label>
+          <input type="number"  name="xformer_removal" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
-          <label  class="form-label mb-1">Consumer Xfmr</label>
-          <input type="number"  name="consumer_xfmr" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <label  class="form-label mb-1">Consumer Xfmr <text class="text-danger">(V)</text></label>
+          <input type="number"  name="consumer_xfmr" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
-          <label  class="form-label mb-1">Consumer Pole</label>
-          <input type="number"  name="consumer_pole" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <label  class="form-label mb-1">Consumer Pole <text class="text-danger">(V)</text></label>
+          <input type="number"  name="consumer_pole" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
-          <label  class="form-label mb-1">Grounding Clamp</label>
-          <input type="number"  name="grounding_clamp" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <label  class="form-label mb-1">Grounding Clamp <text class="text-danger">(V)</text></label>
+          <input type="number"  name="grounding_clamp" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
-          <label  class="form-label mb-1">Grounding Rod</label>
-          <input type="number"  name="grounding_rod" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <label  class="form-label mb-1">Grounding Rod <text class="text-danger">(V)</text></label>
+          <input type="number"  name="grounding_rod" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
-          <label class="form-label mb-1">Meter Seal</label>
-          <input type="number"  name="meter_seal" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute || $isPaymentTransactRoute ? '' : 'disabled' }}>
+          <label class="form-label mb-1">Meter Seal <text class="text-danger">(V)</text></label>
+          <input type="number"  name="meter_seal" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
-          <label class="form-label mb-1">Hotline Clamp</label>
-          <input type="number"  name="hotline_clamp" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <label class="form-label mb-1">Hotline Clamp <text class="text-danger">(V)</text></label>
+          <input type="number"  name="hotline_clamp" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-block' : 'd-none'}}">
         <div class="mb-2">
           <label class="form-label mb-1">Metering Accessories <text class="text-danger">(V)</text></label>
-          <input type="number"  name="meter_accessories" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute || $isPaymentTransactRoute ? '' : 'disabled' }}>
+          <input type="number"  name="meter_accessories" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute || $isPaymentTransactRoute ? '' : 'disabled' }}>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
         <div class="mb-2">
           <label  class="form-label mb-1">Discredit Fee</label>
-          <input type="number"  name="discredit_fee" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <input type="number"  name="discredit_fee" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+        </div>
+      </div>
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-block' : 'd-none'}}">
+        <div class="mb-2">
+          <label  class="form-label mb-1">Calibration Fee <text class="text-danger">(V)</text></label>
+          <input type="number"  name="calibration_fee" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute || $isPaymentTransactRoute ? '' : 'disabled' }}>
+        </div>
+      </div>
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
+        <div class="mb-2">
+          <label  class="form-label mb-1">Others (ID Lamination) <text class="text-danger">(V)</text></label>
+          <input type="number"  name="others" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+        </div>
+      </div>
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
+        <div class="mb-2">
+          <label  class="form-label mb-1">Housewiring Kit <text class="text-danger">(V)</text></label>
+          <input type="number"  name="housewiring_kit" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+        </div>
+      </div>
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
+        <div class="mb-2">
+          <label  class="form-label mb-1">Excess Conductor <text class="text-danger">(V)</text></label>
+          <input type="number"  name="excess_conductor" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+        </div>
+      </div>
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
+        <div class="mb-2">
+          <label  class="form-label mb-1">Conductor Duplex #6 <text class="text-danger">(V)</label>
+          <input type="number" name="conductor_duplex" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+        </div>
+      </div>
+      <div class="col-lg-6 {{$isChangeMeterRoute ? 'd-none' : 'd-block'}}">
+        <div class="mb-2">
+          <label  class="form-label mb-1">Circuit Breaker <text class="text-danger">(V)</text></label>
+          <input type="number"  name="circuit_breaker" oninput="addTotal()" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
         </div>
       </div>
       <div class="col-lg-6">
         <div class="mb-2">
-          <label  class="form-label mb-1">Calibration Fee</label>
-          <input type="number"  name="calibration_fee" class="form-control form-control-sm" step="0.01" {{ $isChangeMeterRoute || $isPaymentTransactRoute ? '' : 'disabled' }}>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="mb-2">
-          <label  class="form-label mb-1">Others (ID Lamination)</label>
-          <input type="number"  name="others" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="mb-2">
-          <label  class="form-label mb-1">Housewiring Kit</label>
-          <input type="number"  name="housewiring_kit" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="mb-2">
-          <label  class="form-label mb-1">Excess Conductor</label>
-          <input type="number"  name="excess_conductor" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="mb-2">
-          <label  class="form-label mb-1">Conductor Duplex #6</label>
-          <input type="number" name="conductor_duplex" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="mb-2">
-          <label  class="form-label mb-1">Circuit Breaker</label>
-          <input type="number"  name="circuit_breaker" class="form-control form-control-sm" {{ $isChangeMeterRoute ? 'disabled' : '' }}>
+          <!-- <label  class="form-label mb-1">Total <text class="text-danger"></text></label> -->
+          <input type="hidden"  name="total_charge" class="form-control form-control-sm" step="0.01">
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  function addTotal() {
+    // Select all number inputs except 'total_charge' and 'total'
+    const inputs = document.querySelectorAll('input[type="number"]:not([name="total_charge"]):not([name="total"]):not([name="amount_tendered"])');
+    
+    let total = 0;
+
+    let vatables
+
+    // Loop through each input and sum the values
+    inputs.forEach(function(input) {
+        let value = parseFloat(input.value) || 0; // Convert to number, or default to 0
+
+        if (input.name === 'membership' || input.name === 'energy_deposit' || input.name === 'discredit_fee') {
+          value = value
+        } else {
+          value = value * 1.12; // Adding 12%
+        }
+
+        total += value;
+    });
+
+    // Set the total in the 'total_charge' input field
+    document.querySelector('input[name="total_charge"]').value = total.toFixed(4); // Format to 2 decimal places
+    document.querySelector('input[name="total"]').value = total.toFixed(4);
+
+    this.calculateChange();
+  }
+</script>

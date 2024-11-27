@@ -33,4 +33,14 @@ class PaymentTransaction extends Model implements Auditable
     {
         return $this->hasMany('App\Models\PaymentTransactionFees', 'cm_control_no', 'id');
     }
+
+    public function municipality()
+    {
+        return $this->belongsTo('App\Models\Municipality', 'municipality_id', 'id');
+    }
+
+    public function barangay()
+    {
+        return $this->belongsTo('App\Models\Barangay', 'barangay_id', 'id');
+    }
 }

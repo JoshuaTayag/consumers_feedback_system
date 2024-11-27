@@ -1,4 +1,4 @@
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade" id="meterPostingModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
@@ -25,8 +25,8 @@
           <hr>
           <div class="row" id="meter_details">
             <div class="col-lg-4">
-              <label for="meter_no">Meter No:</label>
-              <input type="text" value="" id="meter_no" name="meter_no" class="form-control">
+              <label for="meter_no">Meter No *:</label>
+              <input type="text" value="" id="meter_no" name="meter_no" class="form-control" required>
               <span id="error_meter"></span>
             </div>
             <!-- <div class="col">
@@ -53,29 +53,6 @@
               <label for="care_of">C/O:</label>
               <input type="text" value="" id="care_of" name="care_of" class="form-control">
             </div>
-            <div class="col-lg-1">
-              <div class="mb-2">
-                  {{ Form::label('area', 'Area *') }}
-                  <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
-                    <option value=""></option>
-                    <option value="1" {{ old('area') == "1" ? 'selected' : ''}} >A1</option>
-                    <option value="2" {{ old('area') == "2" ? 'selected' : ''}} >A2</option>
-                    <option value="3" {{ old('area') == "3" ? 'selected' : ''}} >A3</option>
-                    <option value="4" {{ old('area') == "4" ? 'selected' : ''}} >A4</option>
-                    <option value="5" {{ old('area') == "5" ? 'selected' : ''}} >A5</option>
-                  </select>
-              </div>
-            </div>
-            <div class="col-lg-3">
-              <label for="feeder">Feeder:</label>
-              <!-- <input type="text" value="" id="care_of" name="care_of" class="form-control" readonly> -->
-              <select id="feeder" class="form-control" name="feeder">
-                <option value=""></option>
-                @foreach (Config::get('constants.feeders') as $feeder)          
-                  <option value="{{ $feeder['name'] }}" id="">{{ $feeder['name'] }}</option>
-                @endforeach 
-              </select>
-            </div>
             <div class="col-lg-2">
               <label for="last_reading">Last Reading:</label>
               <input type="text" value="" id="last_reading" name="last_reading" class="form-control" >
@@ -87,16 +64,16 @@
           </div>
           <hr>
           <div class="row">
-            <div class="col-lg-3">
-              <label for="crew">Crew:</label>
-              <select id="crew" class="form-control" name="crew" >
+            {{-- <div class="col-lg-3">
+              <label for="crew">Crew *:</label>
+              <select id="crew" class="form-control" name="crew" required>
                 <option value=""></option>
                 @foreach ($ref_employees as $employee)          
-                  <option value="{{ $employee->full_name }}" id="">{{ $employee->full_name }}</option>
+                  <option value="{{ $employee['full_name'] }}" id="">{{ $employee['full_name'] }}</option>
                 @endforeach 
                 <option value="OTHERS">OTHERS</option>
               </select>
-            </div>
+            </div> --}}
             <div class="col-lg-3">
               <label for="status">Action Status:</label>
               <select id="status" class="form-control" name="status" required>
@@ -115,12 +92,12 @@
               <input type="time" value="" id="time" name="time" class="form-control" required>
             </div>
             <div class="col-lg-6">
-              <label for="damage_cause">Damage Cause:</label>
-              <textarea name="damage_cause" id="damage_cause" class="form-control" ></textarea>
+              <label for="damage_cause">Damage Cause *:</label>
+              <textarea name="damage_cause" id="damage_cause" class="form-control" required></textarea>
             </div>
             <div class="col-lg-6">
               <label for="crew_remarks">Crew Remarks:</label>
-              <textarea name="crew_remarks" id="crew_remarks" class="form-control" required></textarea>
+              <textarea name="crew_remarks" id="crew_remarks" class="form-control"></textarea>
             </div>
           </div>
         </div>

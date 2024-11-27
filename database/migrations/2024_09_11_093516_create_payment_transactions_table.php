@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('last_name');
 
             $table->integer('municipality_id');
-            $table->integer('barangay_id');
-            $table->string('sitio');
+            $table->integer('barangay_id')->nullable();
+            $table->string('sitio')->nullable();
 
             $table->string('business_type_id')->nullable();
             $table->string('consumer_type_id');

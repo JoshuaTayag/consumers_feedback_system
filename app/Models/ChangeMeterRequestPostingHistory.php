@@ -35,7 +35,8 @@ class ChangeMeterRequestPostingHistory extends Model implements Auditable
         "erc_seal_no",
         "created_at",
         "updated_at",
-        "deleted_at"
+        "deleted_at",
+        "account_no"
     ];
     
 }
