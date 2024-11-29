@@ -64,16 +64,6 @@
           </div>
           <hr>
           <div class="row">
-            {{-- <div class="col-lg-3">
-              <label for="crew">Crew *:</label>
-              <select id="crew" class="form-control" name="crew" required>
-                <option value=""></option>
-                @foreach ($ref_employees as $employee)          
-                  <option value="{{ $employee['full_name'] }}" id="">{{ $employee['full_name'] }}</option>
-                @endforeach 
-                <option value="OTHERS">OTHERS</option>
-              </select>
-            </div> --}}
             <div class="col-lg-3">
               <label for="status">Action Status:</label>
               <select id="status" class="form-control" name="status" required>

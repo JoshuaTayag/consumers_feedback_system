@@ -34,6 +34,7 @@
                     <option value="1" id="">UNACTED</option>
                     <option value="2" id="">ACTED - COMPLETED</option>
                     <option value="3" id="">ACTED - NOT COMPLETED</option>
+                    <option value="4" id="">DISPATCHED</option>
                   </select>
                 </div>
 

@@ -795,15 +795,23 @@
         'consumer_types' => [
             [
                 "id" => 1,
-                "name" => "Commercial/Change Meter"
+                "name" => "Residential"
             ],
             [
                 "id" => 2,
-                "name" => "Replacement of busted transformer"
+                "name" => "Commercial"
             ],
             [
                 "id" => 3,
-                "name" => "Residential/Change Meter"
+                "name" => "St. Light"
+            ],
+            [
+                "id" => 4,
+                "name" => "Public Building "
+            ],
+            [
+                "id" => 5,
+                "name" => "Religious Institution"
             ]
         ],
     ];

@@ -12,7 +12,7 @@
                       <span class="mb-0 align-middle fs-3">Electrician Details</span>
                   </div>
                   <div class="col-lg-7">
-                      <span class="mb-0 align-middle fs-3">Electrician Complaints</span>
+                      <span class="mb-0 align-middle fs-3">Complaints</span>
                   </div>
               </div>
             </div>
@@ -23,16 +23,16 @@
                     <div class="card-header p-1 bg-info"></div>
                     <div class="card-body">
                       <div class="row">
-                        <div class="col fs-4 border ms-2 rounded">Application No. :</div>
-                        <div class="col fs-4 border me-2">{{$electrician->control_number}}</div>
+                        <div class="col fs-5 border ms-2 rounded">Application No. :</div>
+                        <div class="col fs-5 border me-2">{{$electrician->control_number}}</div>
                       </div>
                       <div class="row">
-                        <div class="col fs-4 border ms-2">Full Name:</div>
-                        <div class="col fs-4 border me-2">{{$electrician->last_name.', '.$electrician->first_name.', '. $electrician->middle_name}}</div>
+                        <div class="col fs-5 border ms-2">Full Name:</div>
+                        <div class="col fs-5 border me-2">{{$electrician->last_name.', '.$electrician->first_name.', '. $electrician->middle_name}}</div>
                       </div>
                       <div class="row">
-                        <div class="col fs-4 border ms-2">Address:</div>
-                        <div class="col fs-4 border me-2">
+                        <div class="col fs-5 border ms-2">Address:</div>
+                        <div class="col fs-5 border me-2">
                           @php
                             if(count($electrician->electrician_addresses) != 0 ){
                               echo($electrician->electrician_addresses[0]->district->district_name.', ');
@@ -43,15 +43,14 @@
                         </div>
                       </div>
                       <div class="row">
-                        <div class="col fs-4 border ms-2">Date of Birth:</div>
-                        <div class="col fs-4 border me-2">{{ date('M d, Y', strtotime($electrician->date_of_birth)) }}</div>
+                        <div class="col fs-5 border ms-2">Date of Birth:</div>
+                        <div class="col fs-5 border me-2">{{ date('M d, Y', strtotime($electrician->date_of_birth)) }}</div>
                       </div>
                       <div class="row">
-                        <div class="col fs-4 border ms-2">Contact Number's:</div>
-                        <div class="col fs-4 border me-2">
-                          @foreach ($electrician->electrician_contact_numbers as $index => $contact) 
-                            {{$contact->contact_no}} <br>
-                          @endforeach
+                        <div class="col fs-5 border ms-2">Contact Number's:</div>
+                        <div class="col fs-5 border me-2">
+                          {{ $electrician->primary_contact_no }}<br>
+                          {{ $electrician->secondary_contact_no }}
                         </div>
                       </div>
                     </div>
@@ -79,6 +78,10 @@
                             <div class="row">
                               <div class="col fs-5 border ms-2">Nature Of Complaint:</div>
                               <div class="col fs-5 border me-2">{{Config::get('constants.nature_of_complaint_barangay_electrician.'.($electrician_complaint->nature_of_complaint-1).'.name')}}</div>
+                            </div>
+                            <div class="row">
+                              <div class="col fs-5 border ms-2">Complainant Contact No.:</div>
+                              <div class="col fs-5 border me-2">{{$electrician_complaint->complainant_contact_no}}</div>
                             </div>
                             <div class="row">
                               <div class="col fs-5 border ms-2">Act of misconduct:</div>

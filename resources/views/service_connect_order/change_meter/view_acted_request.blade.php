@@ -271,7 +271,7 @@
                   </div>
                 </div>
                 <div class="col-lg-6 mb-1">
-                  <span class="fs-4 fw-bold"><span class="">{{$cm_request->crew}}</span></span>
+                  <span class="fs-4 fw-bold"><span class="">{{$cm_request->changeMeterRequestCrew ? $cm_request->changeMeterRequestCrew->last_name.', '.$cm_request->changeMeterRequestCrew->first_name : null}}</span></span>
                 </div>
               </div>
 

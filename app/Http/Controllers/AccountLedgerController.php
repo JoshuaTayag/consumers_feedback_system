@@ -8,7 +8,8 @@ use DB;
 class AccountLedgerController extends Controller
 {
     public function indexLedger(Request $request){
-        return view('billing.ledger_index');
+        $ledger_history_kwh = "";
+        return view('billing.ledger_index',compact('ledger_history_kwh'));
     }
 
     public function searchLedger(Request $request){
@@ -50,7 +51,22 @@ class AccountLedgerController extends Controller
             ->select('*')
             ->where('Account No', 'like', "%$account_number%")->get();
 
-            return view('billing.ledger_index',compact('account', 'ledger_history'));
+            $ledger_history_kwh = DB::connection('sqlSrvHistory')
+            ->table('History Table')
+            ->selectRaw("
+                CAST(SUBSTRING(CAST(YearMonth AS VARCHAR), 1, 4) + '-' + SUBSTRING(CAST(YearMonth AS VARCHAR), 5, 2) + '-01' AS DATE) as date,
+                CAST([KWH Used] AS INT) as value
+            ")
+            ->where('Account No', 'like', "%$account_number%")
+            ->groupBy(DB::raw("CAST(SUBSTRING(CAST(YearMonth AS VARCHAR), 1, 4) + '-' + SUBSTRING(CAST(YearMonth AS VARCHAR), 5, 2) + '-01' AS DATE)"), DB::raw("CAST([KWH Used] AS INT)"))
+            ->orderBy(DB::raw("CAST(SUBSTRING(CAST(YearMonth AS VARCHAR), 1, 4) + '-' + SUBSTRING(CAST(YearMonth AS VARCHAR), 5, 2) + '-01' AS DATE)"), 'asc')
+            ->get();
+
+
+
+            // dd($ledger_history_kwh);
+
+            return view('billing.ledger_index',compact('account', 'ledger_history', 'ledger_history_kwh'));
 
         } else{
             return redirect()->route('ledger.index')->with('error', 'No Record Found!');

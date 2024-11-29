@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Electrician;
 use App\Models\BarangayElectrician\ElectricianComplaint;
+use App\Models\BarangayElectrician\ElectricianEducationalBackground;
 use Illuminate\Http\Request;
 use DB;
 use Image;
@@ -79,81 +80,125 @@ class ElectricianController extends Controller
         DB::transaction(function () use ($request, $control_id, $now) {
 
             // INSERT ELECTRICIAN DETAILS
-            $electrician_id = DB::table('barangay_electricians')->insertGetId(
-                array(
-                    'control_number' => $control_id,
-                    'first_name' => $request->first_name,
-                    'middle_name' => $request->middle_name,
-                    'last_name' => $request->last_name,
-                    'name_ext' => $request->name_ext,
-                    'sex' => $request->sex,
-                    'civil_status' => $request->civil_status,
-                    'date_of_birth' => $request->date_of_birth,
-                    'email_address' => $request->email_address,
-                    'fb_account' => $request->facebook_account,
-                    'spouse_first_name' => $request->spouse_first_name,
-                    'spouse_middle_name' => $request->spouse_middle_name,
-                    'spouse_last_name' => $request->spouse_last_name,
-                    'valid_id_type' => $request->type_of_id,
-                    'valid_id_number' => $request->valid_id_no,
-                    'application_type' => $request->application_type,
-                    'application_status' => $request->application_status,
+            // $electrician_id = DB::table('barangay_electricians')->insertGetId(
+            //     array(
+            //         'control_number' => $control_id,
+            //         'first_name' => $request->first_name,
+            //         'middle_name' => $request->middle_name,
+            //         'last_name' => $request->last_name,
+            //         'name_ext' => $request->name_ext,
+            //         'sex' => $request->sex,
+            //         'civil_status' => $request->civil_status,
+            //         'date_of_birth' => $request->date_of_birth,
+            //         'email_address' => $request->email_address,
+            //         'fb_account' => $request->facebook_account,
+            //         'spouse_first_name' => $request->spouse_first_name,
+            //         'spouse_middle_name' => $request->spouse_middle_name,
+            //         'spouse_last_name' => $request->spouse_last_name,
+            //         'valid_id_type' => $request->type_of_id,
+            //         'valid_id_number' => $request->valid_id_no,
+            //         'application_type' => $request->application_type,
+            //         'application_status' => $request->application_status,
                     
-                    'tesda_course_title' => $request->exists('course_title') ? $request->course_title : null ,
-                    'tesda_name_of_school' => $request->exists('name_of_school') ? $request->name_of_school : null ,
-                    'tesda_national_certificate_no' => $request->exists('certificate_no') ? $request->certificate_no : null ,
-                    'tesda_date_issued' => $request->exists('tesda_date_issued') ? $request->tesda_date_issued : null ,
-                    'tesda_valid_until_date' => $request->exists('tesda_validity') ? $request->tesda_validity : null ,
+            //         'tesda_course_title' => $request->exists('course_title') ? $request->course_title : null ,
+            //         'tesda_name_of_school' => $request->exists('name_of_school') ? $request->name_of_school : null ,
+            //         'tesda_national_certificate_no' => $request->exists('certificate_no') ? $request->certificate_no : null ,
+            //         'tesda_date_issued' => $request->exists('tesda_date_issued') ? $request->tesda_date_issued : null ,
+            //         'tesda_valid_until_date' => $request->exists('tesda_validity') ? $request->tesda_validity : null ,
 
-                    'rme_license_no' => $request->exists('rme_license_no') ? $request->rme_license_no : null ,
-                    'rme_issued_on' => $request->exists('rme_license_issued_on') ? $request->rme_license_issued_on : null ,
-                    'rme_issued_at' => $request->exists('rme_license_issued_at') ? $request->rme_license_issued_at : null ,
-                    'rme_valid_until' => $request->exists('rme_validity') ? $request->rme_validity : null ,
+            //         'rme_license_no' => $request->exists('rme_license_no') ? $request->rme_license_no : null ,
+            //         'rme_issued_on' => $request->exists('rme_license_issued_on') ? $request->rme_license_issued_on : null ,
+            //         'rme_issued_at' => $request->exists('rme_license_issued_at') ? $request->rme_license_issued_at : null ,
+            //         'rme_valid_until' => $request->exists('rme_validity') ? $request->rme_validity : null ,
 
-                    'ree_license_no' => $request->exists('ree_license_no') ? $request->ree_license_no : null ,
-                    'ree_issued_on' => $request->exists('ree_license_issued_on') ? $request->ree_license_issued_on : null ,
-                    'ree_issued_at' => $request->exists('ree_license_issued_at') ? $request->ree_license_issued_at : null ,
-                    'ree_valid_until' => $request->exists('ree_validity') ? $request->ree_validity : null ,
-                    'remarks' => $request->remarks,
-                    'application_status_remarks' => $request->application_remarks,
-                    'date_of_application' => $request->date_of_application,
-                    'created_by' => Auth::id(),
+            //         'ree_license_no' => $request->exists('ree_license_no') ? $request->ree_license_no : null ,
+            //         'ree_issued_on' => $request->exists('ree_license_issued_on') ? $request->ree_license_issued_on : null ,
+            //         'ree_issued_at' => $request->exists('ree_license_issued_at') ? $request->ree_license_issued_at : null ,
+            //         'ree_valid_until' => $request->exists('ree_validity') ? $request->ree_validity : null ,
+            //         'remarks' => $request->remarks,
+            //         'application_status_remarks' => $request->application_remarks,
+            //         'date_of_application' => $request->date_of_application,
+            //         'created_by' => Auth::id(),
 
-                    'created_at' => $now
-                )
-            );
+            //         'created_at' => $now
+            //     )
+            // );
+
+            $electrician = Electrician::create([
+                'control_number' => $control_id,
+                'first_name' => $request->first_name,
+                'middle_name' => $request->middle_name,
+                'last_name' => $request->last_name,
+                'name_ext' => $request->name_ext,
+                'sex' => $request->sex,
+                'civil_status' => $request->civil_status,
+                'date_of_birth' => $request->date_of_birth,
+                'email_address' => $request->email_address,
+                'fb_account' => $request->facebook_account,
+                'spouse_first_name' => $request->spouse_first_name,
+                'spouse_middle_name' => $request->spouse_middle_name,
+                'spouse_last_name' => $request->spouse_last_name,
+                'valid_id_type' => $request->type_of_id,
+                'valid_id_number' => $request->valid_id_no,
+                'application_type' => $request->application_type,
+                'application_status' => $request->application_status,
+            
+                'tesda_course_title' => $request->has('course_title') ? $request->course_title : null,
+                'tesda_name_of_school' => $request->has('name_of_school') ? $request->name_of_school : null,
+                'tesda_national_certificate_no' => $request->has('certificate_no') ? $request->certificate_no : null,
+                'tesda_date_issued' => $request->has('tesda_date_issued') ? $request->tesda_date_issued : null,
+                'tesda_valid_until_date' => $request->has('tesda_validity') ? $request->tesda_validity : null,
+            
+                'rme_license_no' => $request->has('rme_license_no') ? $request->rme_license_no : null,
+                'rme_issued_on' => $request->has('rme_license_issued_on') ? $request->rme_license_issued_on : null,
+                'rme_issued_at' => $request->has('rme_license_issued_at') ? $request->rme_license_issued_at : null,
+                'rme_valid_until' => $request->has('rme_validity') ? $request->rme_validity : null,
+            
+                'ree_license_no' => $request->has('ree_license_no') ? $request->ree_license_no : null,
+                'ree_issued_on' => $request->has('ree_license_issued_on') ? $request->ree_license_issued_on : null,
+                'ree_issued_at' => $request->has('ree_license_issued_at') ? $request->ree_license_issued_at : null,
+                'ree_valid_until' => $request->has('ree_validity') ? $request->ree_validity : null,
+            
+                'primary_contact_no' => $request->contact_no,
+                'secondary_contact_no' => $request->contact_no_ext,
+
+                'remarks' => $request->remarks,
+                'application_status_remarks' => $request->application_remarks,
+                'date_of_application' => $request->date_of_application,
+                'created_by' => Auth::id(),
+            ]);
+            
+            $electrician_id = $electrician->id; // Get the inserted ID
 
             //  INSERT EDUCATIONAL BACKGROUND TABLE     
             $educ_background = $request->educationalBackground;
             if($educ_background){
                 foreach ($educ_background as $key => $value) {
-                    DB::table('barangay_electrician_educational_backgrounds')->insert(
-                        array(
-                            'electrician_id' => $electrician_id,
-                            'educational_stage' => $value['educational_stage'],
-                            'name_of_school' => $value['name_of_school'],
-                            'degree_recieved' => $value['degree_recieved'],
-                            'year_graduated' => $value['year_graduated'],
-                            'created_at' => $now
-                        )
-                    );
+                    ElectricianEducationalBackground::create([
+                        'electrician_id' => $electrician_id,
+                        'educational_stage' => $value['educational_stage'],
+                        'name_of_school' => $value['name_of_school'],
+                        'degree_recieved' => $value['degree_recieved'],
+                        'year_graduated' => $value['year_graduated'],
+                        'created_at' => $now,
+                    ]);
                 }
             }
             
             //  INSERT CONTACT NUMBERS TABLE   
-            if($request->filled('contact_no_ext')){
-                $contact_numbers = [
-                    ['electrician_id' => $electrician_id, 'contact_no' => $request->contact_no],
-                    ['electrician_id' => $electrician_id, 'contact_no' => $request->contact_no_ext],
-                ];
-            }  
-            else{
-                $contact_numbers = [
-                    ['electrician_id' => $electrician_id, 'contact_no' => $request->contact_no]
-                ];
-            }
+            // if($request->filled('contact_no_ext')){
+            //     $contact_numbers = [
+            //         ['electrician_id' => $electrician_id, 'contact_no' => $request->contact_no],
+            //         ['electrician_id' => $electrician_id, 'contact_no' => $request->contact_no_ext],
+            //     ];
+            // }  
+            // else{
+            //     $contact_numbers = [
+            //         ['electrician_id' => $electrician_id, 'contact_no' => $request->contact_no]
+            //     ];
+            // }
             
-            DB::table('barangay_electrician_contact_numbers')->insert($contact_numbers);
+            // DB::table('barangay_electrician_contact_numbers')->insert($contact_numbers);
 
             //  INSERT ADDRESS   
             DB::table('barangay_electrician_addresses')->insert(
@@ -245,49 +290,100 @@ class ElectricianController extends Controller
         DB::transaction(function () use ($request, $electrician, $now) {
 
             // INSERT ELECTRICIAN DETAILS
-            $electrician_id = DB::table('barangay_electricians')->where('id', $electrician->id)->update(
-                array(
-                    // 'control_number' => $control_id,
-                    'first_name' => $request->first_name,
-                    'middle_name' => $request->middle_name,
-                    'last_name' => $request->last_name,
-                    'name_ext' => $request->name_ext,
-                    'sex' => $request->sex,
-                    'civil_status' => $request->civil_status,
-                    'date_of_birth' => $request->date_of_birth,
-                    'email_address' => $request->email_address,
-                    'fb_account' => $request->facebook_account,
-                    'spouse_first_name' => $request->spouse_first_name,
-                    'spouse_middle_name' => $request->spouse_middle_name,
-                    'spouse_last_name' => $request->spouse_last_name,
-                    'valid_id_type' => $request->type_of_id,
-                    'valid_id_number' => $request->valid_id_no,
-                    'application_type' => $request->application_type,
-                    'application_status' => $request->application_status,
+            // $electrician_id = DB::table('barangay_electricians')->where('id', $electrician->id)->update(
+            //     array(
+            //         // 'control_number' => $control_id,
+            //         'first_name' => $request->first_name,
+            //         'middle_name' => $request->middle_name,
+            //         'last_name' => $request->last_name,
+            //         'name_ext' => $request->name_ext,
+            //         'sex' => $request->sex,
+            //         'civil_status' => $request->civil_status,
+            //         'date_of_birth' => $request->date_of_birth,
+            //         'email_address' => $request->email_address,
+            //         'fb_account' => $request->facebook_account,
+            //         'spouse_first_name' => $request->spouse_first_name,
+            //         'spouse_middle_name' => $request->spouse_middle_name,
+            //         'spouse_last_name' => $request->spouse_last_name,
+            //         'valid_id_type' => $request->type_of_id,
+            //         'valid_id_number' => $request->valid_id_no,
+            //         'application_type' => $request->application_type,
+            //         'application_status' => $request->application_status,
                     
-                    'tesda_course_title' => $request->exists('course_title') ? $request->course_title : null ,
-                    'tesda_name_of_school' => $request->exists('name_of_school') ? $request->name_of_school : null ,
-                    'tesda_national_certificate_no' => $request->exists('certificate_no') ? $request->certificate_no : null ,
-                    'tesda_date_issued' => $request->exists('tesda_date_issued') ? $request->tesda_date_issued : null ,
-                    'tesda_valid_until_date' => $request->exists('tesda_validity') ? $request->tesda_validity : null ,
+            //         'tesda_course_title' => $request->exists('course_title') ? $request->course_title : null ,
+            //         'tesda_name_of_school' => $request->exists('name_of_school') ? $request->name_of_school : null ,
+            //         'tesda_national_certificate_no' => $request->exists('certificate_no') ? $request->certificate_no : null ,
+            //         'tesda_date_issued' => $request->exists('tesda_date_issued') ? $request->tesda_date_issued : null ,
+            //         'tesda_valid_until_date' => $request->exists('tesda_validity') ? $request->tesda_validity : null ,
 
-                    'rme_license_no' => $request->exists('rme_license_no') ? $request->rme_license_no : null ,
-                    'rme_issued_on' => $request->exists('rme_license_issued_on') ? $request->rme_license_issued_on : null ,
-                    'rme_issued_at' => $request->exists('rme_license_issued_at') ? $request->rme_license_issued_at : null ,
-                    'rme_valid_until' => $request->exists('rme_validity') ? $request->rme_validity : null ,
+            //         'rme_license_no' => $request->exists('rme_license_no') ? $request->rme_license_no : null ,
+            //         'rme_issued_on' => $request->exists('rme_license_issued_on') ? $request->rme_license_issued_on : null ,
+            //         'rme_issued_at' => $request->exists('rme_license_issued_at') ? $request->rme_license_issued_at : null ,
+            //         'rme_valid_until' => $request->exists('rme_validity') ? $request->rme_validity : null ,
 
-                    'ree_license_no' => $request->exists('ree_license_no') ? $request->ree_license_no : null ,
-                    'ree_issued_on' => $request->exists('ree_license_issued_on') ? $request->ree_license_issued_on : null ,
-                    'ree_issued_at' => $request->exists('ree_license_issued_at') ? $request->ree_license_issued_at : null ,
-                    'ree_valid_until' => $request->exists('ree_validity') ? $request->ree_validity : null ,
-                    'remarks' => $request->remarks,
-                    'application_status_remarks' => $request->application_remarks,
-                    'date_of_application' => $request->date_of_application,
-                    'created_by' => Auth::id(),
+            //         'ree_license_no' => $request->exists('ree_license_no') ? $request->ree_license_no : null ,
+            //         'ree_issued_on' => $request->exists('ree_license_issued_on') ? $request->ree_license_issued_on : null ,
+            //         'ree_issued_at' => $request->exists('ree_license_issued_at') ? $request->ree_license_issued_at : null ,
+            //         'ree_valid_until' => $request->exists('ree_validity') ? $request->ree_validity : null ,
+            //         'remarks' => $request->remarks,
+            //         'application_status_remarks' => $request->application_remarks,
+            //         'date_of_application' => $request->date_of_application,
+            //         'created_by' => Auth::id(),
 
-                    'updated_at' => $now
-                )
-            );
+            //         'updated_at' => $now
+            //     )
+            // );
+
+            // Retrieve the model instance by ID
+            $electrician = Electrician::findOrFail($electrician->id);
+
+            // dd($electrician);
+            // Update the fields
+            $electrician->update([
+                // 'control_number' => $control_id, // Uncomment if required
+                'first_name' => $request->first_name,
+                'middle_name' => $request->middle_name,
+                'last_name' => $request->last_name,
+                'name_ext' => $request->name_ext,
+                'sex' => $request->sex,
+                'civil_status' => $request->civil_status,
+                'date_of_birth' => $request->date_of_birth,
+                'email_address' => $request->email_address,
+                'fb_account' => $request->facebook_account,
+                'spouse_first_name' => $request->spouse_first_name,
+                'spouse_middle_name' => $request->spouse_middle_name,
+                'spouse_last_name' => $request->spouse_last_name,
+                'valid_id_type' => $request->type_of_id,
+                'valid_id_number' => $request->valid_id_no,
+                'application_type' => $request->application_type,
+                'application_status' => $request->application_status,
+
+                'tesda_course_title' => $request->has('course_title') ? $request->course_title : null,
+                'tesda_name_of_school' => $request->has('name_of_school') ? $request->name_of_school : null,
+                'tesda_national_certificate_no' => $request->has('certificate_no') ? $request->certificate_no : null,
+                'tesda_date_issued' => $request->has('tesda_date_issued') ? $request->tesda_date_issued : null,
+                'tesda_valid_until_date' => $request->has('tesda_validity') ? $request->tesda_validity : null,
+
+                'rme_license_no' => $request->has('rme_license_no') ? $request->rme_license_no : null,
+                'rme_issued_on' => $request->has('rme_license_issued_on') ? $request->rme_license_issued_on : null,
+                'rme_issued_at' => $request->has('rme_license_issued_at') ? $request->rme_license_issued_at : null,
+                'rme_valid_until' => $request->has('rme_validity') ? $request->rme_validity : null,
+
+                'ree_license_no' => $request->has('ree_license_no') ? $request->ree_license_no : null,
+                'ree_issued_on' => $request->has('ree_license_issued_on') ? $request->ree_license_issued_on : null,
+                'ree_issued_at' => $request->has('ree_license_issued_at') ? $request->ree_license_issued_at : null,
+                'ree_valid_until' => $request->has('ree_validity') ? $request->ree_validity : null,
+
+                'primary_contact_no' => $request->contact_no,
+                'secondary_contact_no' => $request->contact_no_ext,
+
+                'remarks' => $request->remarks,
+                'application_status_remarks' => $request->application_remarks,
+                'date_of_application' => $request->date_of_application,
+                'created_by' => Auth::id(),
+
+                'updated_at' => now(), // You can use `now()` directly in Laravel
+            ]);
 
             //  INSERT EDUCATIONAL BACKGROUND TABLE     
             $educ_background = $request->educationalBackground;
@@ -301,16 +397,13 @@ class ElectricianController extends Controller
 
                 // insert new record
                 foreach ($educ_background as $key => $value) {
-                    DB::table('barangay_electrician_educational_backgrounds')->insert(
-                        array(
-                            'electrician_id' => $electrician->id,
-                            'educational_stage' => $value['educational_stage'],
-                            'name_of_school' => $value['name_of_school'],
-                            'degree_recieved' => $value['degree_recieved'],
-                            'year_graduated' => $value['year_graduated'],
-                            'created_at' => $now
-                        )
-                    );
+                    ElectricianEducationalBackground::create([
+                        'electrician_id' => $electrician->id,
+                        'educational_stage' => $value['educational_stage'],
+                        'name_of_school' => $value['name_of_school'],
+                        'degree_recieved' => $value['degree_recieved'],
+                        'year_graduated' => $value['year_graduated'],
+                    ]);
                 }
             } else{
                 // delete existing record
@@ -318,34 +411,6 @@ class ElectricianController extends Controller
                 ->where('electrician_id', $electrician->id)
                 ->delete();
             }
-            
-            
-            //  INSERT CONTACT NUMBERS TABLE   
-            $contact_numbers = [];
-            if ($request->filled('contact_no')) {
-                $contact_numbers[] = [
-                    'electrician_id' => $electrician->id,
-                    'contact_no' => $request->contact_no,
-                    'created_at' => $now
-                ];
-            }
-
-            if ($request->filled('contact_no_ext')) {
-                $contact_numbers[] = [
-                    'electrician_id' => $electrician->id,
-                    'contact_no' => $request->contact_no_ext,
-                    'created_at' => $now
-                ];
-            }
-
-            // dd($contact_numbers);
-            // delete old contact number
-            DB::table('barangay_electrician_contact_numbers')
-                ->where('electrician_id', $electrician->id)
-                ->delete();
-
-            // insert new contact number
-            DB::table('barangay_electrician_contact_numbers')->insert($contact_numbers);
 
             //  INSERT ADDRESS   
             DB::table('barangay_electrician_addresses')->where('electrician_id', $electrician->id)->update(
@@ -399,7 +464,7 @@ class ElectricianController extends Controller
 
     public function electricianComplaintCreate()
     {
-        $electricians = Electrician::orderBy('last_name', 'asc')->get();
+        $electricians = Electrician::orderBy('last_name', 'asc')->where('application_status', 2)->get();
         $control_id = Helper::IDGeneratorQueryBuilder(DB::table('barangay_electrician_complaints'), 'control_number', 4, date('Y'));
         $districts = DB::connection('sqlSrvMembership')
         ->table('districts')
@@ -454,34 +519,28 @@ class ElectricianController extends Controller
         DB::transaction(function () use ($request, $now, $control_id, $path) {
 
             // INSERT ELECTRICIAN COMPLAINT
-            DB::table('barangay_electrician_complaints')->insert(
-                array(
-                    'control_number' => $control_id,
-                    'date' => $request->complaint_date,
-                    'complainant_name' => $request->complainant,
-                    'electrician_id' => $request->electrician,
-                    'act_of_misconduct' => $request->act_of_misconduct,
-                    'remarks' => $request->remarks,
-                    'nature_of_complaint' => $request->exists('other_complaint') ? null : $request->nature_of_complaint ,
-                    'other_nature_of_complaint' => $request->exists('other_complaint') ? $request->other_complaint : null ,
-
-                    'sanction_type' => $request->sanction_type,
-                    'revocation_date' => $request->exists('revocation_date') ? $request->revocation_date : null ,
-                    'date_of_suspension_from' => $request->exists('suspension_from') ? $request->suspension_from : null ,
-                    'date_of_suspension_to' => $request->exists('suspension_to') ? $request->suspension_to : null ,
-
-                    'status_of_complaint' => $request->status_of_complaint,
-                    'status_explanation' => $request->exists('status_explanation') ? $request->status_explanation : null ,
-
-                    'sanction_remarks' => $request->sanction_remarks,
-                    'file_path' => $path,
-                    'complainant_contact_no' => $request->contact_no,
-                    'complainant_district_id' => $request->district,
-                    'complainant_municipality_id' => $request->municipality,
-                    'complainant_barangay_id' => $request->barangay,
-                    'created_at' => $now
-                )
-            );
+            ElectricianComplaint::create([
+                'control_number' => $control_id,
+                'date' => $request->complaint_date,
+                'complainant_name' => $request->complainant,
+                'electrician_id' => $request->electrician,
+                'act_of_misconduct' => $request->act_of_misconduct,
+                'remarks' => $request->remarks,
+                'nature_of_complaint' => $request->exists('other_complaint') ? null : $request->nature_of_complaint,
+                'other_nature_of_complaint' => $request->exists('other_complaint') ? $request->other_complaint : null,
+                'sanction_type' => $request->sanction_type,
+                'revocation_date' => $request->exists('revocation_date') ? $request->revocation_date : null,
+                'date_of_suspension_from' => $request->exists('suspension_from') ? $request->suspension_from : null,
+                'date_of_suspension_to' => $request->exists('suspension_to') ? $request->suspension_to : null,
+                'status_of_complaint' => $request->status_of_complaint,
+                'status_explanation' => $request->exists('status_explanation') ? $request->status_explanation : null,
+                'sanction_remarks' => $request->sanction_remarks,
+                'file_path' => $path,
+                'complainant_contact_no' => $request->contact_no,
+                'complainant_district_id' => $request->district,
+                'complainant_municipality_id' => $request->municipality,
+                'complainant_barangay_id' => $request->barangay,
+            ]);
         });
 
 
@@ -491,7 +550,7 @@ class ElectricianController extends Controller
     public function electricianComplaintEdit(ElectricianComplaint $electricianComplaint, $id)
     {
         $complaint = ElectricianComplaint::find($id);
-        $electricians = Electrician::orderBy('id', 'desc')->get();
+        $electricians = Electrician::orderBy('id', 'desc')->where('application_status', 2)->get();
         $districts = DB::connection('sqlSrvMembership')
         ->table('districts')
         ->select('*')

@@ -48,6 +48,11 @@ class ChangeMeterRequest extends Model implements Auditable
         return $this->hasOne('App\Models\ChangeMeterRequestTransaction' , 'change_meter_id', 'id');
     }
 
+    public function changeMeterRequestCrew()
+    {
+        return $this->hasOne('App\Models\ChangeMeterRequestContractor' , 'id', 'crew');
+    }
+
     protected $fillable = [
         'control_no', 'first_name', 'middle_name', 'last_name', 'contact_no',
         'area', 'municipality_id', 'barangay_id', 'sitio', 'account_number',

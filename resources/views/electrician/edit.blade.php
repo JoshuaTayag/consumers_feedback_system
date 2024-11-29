@@ -128,13 +128,13 @@
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="contact_no" class="form-label mb-1">Primary Contact No. *</label>
-                    <input type="text" class="form-control" id="contact_no" name="contact_no" value="{{ $data[0]->electrician_contact_numbers[0]->contact_no }}" required>
+                    <input type="text" class="form-control" id="contact_no" name="contact_no" value="{{ $data[0]->primary_contact_no }}" required>
                 </div>
               </div>
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="contact_no_ext" class="form-label mb-1">Secondary Contact No.</label>
-                    <input type="text" class="form-control" id="contact_no_ext" name="contact_no_ext" value="{{ count($data[0]->electrician_contact_numbers) > 1 ? $data[0]->electrician_contact_numbers[1]->contact_no : null }}">
+                    <input type="text" class="form-control" id="contact_no_ext" name="contact_no_ext" value="{{ $data[0]->secondary_contact_no }}">
                 </div>
               </div>
               <div class="col-lg-2">

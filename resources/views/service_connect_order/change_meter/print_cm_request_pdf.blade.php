@@ -19,16 +19,6 @@
       text-align: center;
       font-size: 15px;
     }
-    hr, .blue{
-      padding: 0x;
-      margin: 0px;
-      border: 2px solid blue;
-    }
-    hr, .yellow{
-      padding: 0x;
-      margin: 0px;
-      border: 2px solid yellow;
-    }
     hr, .black{
       padding: 0x;
       margin: 0px;
@@ -36,15 +26,15 @@
     }
     .img-logo{
       position: absolute;
-      top: 25px;
-      left: 20px;
+      top: 65px;
+      /* left: 20px; */
       height: 80px;
       width: 80px;
     }
     .img-iso{
       position: absolute;
-      top: 25px;
-      right: 10px;
+      top: 65px;
+      /* right: 10px; */
       height: 80px;
       width: 100px;
     }
@@ -87,10 +77,64 @@
     .styled-table td {
         padding: 4px 5px;
     }
+
+    .container {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-left {
+            text-align: left;
+            width: 60%;
+        }
+        .header-left h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .header-right {
+            text-align: right;
+            width: 40%;
+        }
+        .info {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .info div {
+            width: 30%;
+        }
+        .title {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .new-header {
+            width: 100%; /* Make the table full width */
+            border-collapse: collapse; /* Remove gaps between cell borders */
+        }
+        .new-header td, .new-header th {
+            border: 1px solid black; /* Add borders to all cells */
+            padding: 8px; /* Add padding inside the cells */
+            text-align: left; /* Align text to the left */
+        }
+        thead {
+            background-color: #f0f0f0; /* Optional: Light background color for the header */
+        }
   </style>
 </head>
 <body>
-  <header>
+  @php
+    $consumerTypes = collect(Config::get('constants.consumer_types'));
+    $consumerType = $consumerTypes->firstWhere('id', $data->consumer_type);
+  @endphp
+  {{-- <header>
     <img src="{{ public_path('images/logo.png') }}" alt="" class="img-logo">
     <img src="{{ public_path('images/iso.png') }}" alt="" class="img-iso">
     <h2 class="heading">LEYTE V ELECTRIC COOPERATIVE, INC.</h2>
@@ -98,14 +142,59 @@
       (LEYECO V)<br>
       Brgy. San Pablo, Ormoc City, Leyte
     </p>
-  </header>
-  <hr class="blue">
-  <hr class="yellow">
+  </header> --}}
 
-  <div class="div" style="margin-top: 20px; margin-bottom: 0px; padding-bottom: 0px;">
-    <h2 class="text-center" style="padding-bottom: 0px; margin-bottom: 10px;">
-    REQUEST FOR CHANGE METER
-    </h2>
+    {{-- <div class="header">
+        <div class="header-left">
+            <h1>LEYTE V ELECTRIC COOPERATIVE, INC.</h1>
+            <p>Brgy. San Pablo, Ormoc City, Leyte<br>
+            Telephone Nos.: PLDT: (053) 839-3920 to 3921 / Globe: (053) 561-4466<br>
+            Cellular Phone Nos. Calls Only: Smart: 0998-964-3804; Globe: 0917-836-3895<br>
+            Website: www.leyeco-v.com.ph    eMail Address: info@leyeco-v.com.ph</p>
+        </div>
+        <div class="header-right">
+            <p>ISO 9001<br>Quality Management<br>Certified</p>
+        </div>
+    </div>
+    <div class="info">
+        <div>Document No.: FM-MSD-012</div>
+        <div>Revision No.: 001</div>
+        <div>Effectivity Date:</div>
+    </div>
+    <div class="title">
+        Request for Change Meter
+    </div> --}}
+    <table class="new-header">
+      <tbody>
+        <tr>
+          <td rowspan="4"><img src="{{ public_path('images/logo.png') }}" alt="" class="img-logo"></td>
+          <td colspan="3" style="padding-bottom: 0px !important; border-bottom:none;"><h3>LEYTE V ELECTRIC COOPERATIVE, INC.</h3></td>
+          <td rowspan="4"><img src="{{ public_path('images/iso.png') }}" alt="" class="img-iso"></td>
+        </tr>
+
+        <tr>
+          <td colspan="3" style="text-align: center !important; border:none; padding-top:0px;">
+            <span style="font-size: 13px">
+              Brgy. San Pablo, Ormoc City, Leyte<br>
+              Telephone Nos.: PLDT: (053) 839-3920 to 3921 / Globe: (053) 561-4466<br>
+              Cellular Phone Nos. Calls Only: Smart: 0998-964-3804; Globe: 0917-836-3895<br>
+              Website: www.leyeco-v.com.ph    eMail Address: info@leyeco-v.com.ph
+            </span>
+          </td>
+        </tr>
+        <tr>
+            <td><span style="font-size: 13px">Document No.: FM-MSD-012</span></td>
+            <td><span style="font-size: 13px">Revision No.: 001</span></td>
+            <td><span style="font-size: 13px">Effectivity Date: </span</td>
+        </tr>
+        <tr>
+          <td colspan="3"><h3>REQUEST FOR CHANGE METER</h3></td>
+        </tr>
+      </tbody>
+    </table>
+
+
+  <div class="div" style="margin-top: 0px; margin-bottom: 0px; padding-bottom: 0px;">
 
     <table class="styled-table" style="font-size: 14px; width: 100%; padding-top: 25px; padding-bottom: 0px;">
       <tbody>
@@ -120,7 +209,7 @@
         </tr>
         <tr><td>Contact #: {{$data->contact_no}}</td></tr>
         <tr><td>Address: {{$data->sitio.', '.$data->barangay->barangay_name.', '.$data->municipality->municipality_name}}</td></tr>
-        <tr><td>Consumer Type: {{$data->ConsumerType}}</td></tr>
+        <tr><td>Consumer Type: {{ $consumerType['name'] ?? 'Unknown Type'}}</td></tr>
         <tr><td>Meter OR #: {{$data->meter_or_number }}</td></tr>
         <tr><td>Remarks: {{$data->remarks}}</td></tr>
         <tr><td>Reference/Landmark: {{$data->location}}</td></tr>
@@ -130,8 +219,8 @@
     <table class="styled-table" style="font-size: 12px; width: 100%; margin-top: 15px; padding-bottom: 0px;">
       <tbody>
         <tr>
-          <td class="text-center" style="font-size: 14px;" >Prepared By:</td>
-          <td class="text-center" style="font-size: 14px;">Recommending Approval</td>
+          <td class="text-center" style="font-size: 14px;">Received and processed by:</td>
+          <td class="text-center" style="font-size: 14px;">Checked by</td>
           <td class="text-center" style="font-size: 14px;">Approved By:</td>
         </tr>
         <tr>
@@ -155,7 +244,7 @@
 
     <table class="styled-table" style="font-size: 14px; width: 100%; padding-top: 25px; padding-bottom: 0px;">
       <tbody>
-        <tr><td>Crew: {{$data->Crew}}</td></tr>
+        <tr><td>Crew: {{$data->changeMeterRequestCrew ? $data->changeMeterRequestCrew->last_name.', '.$data->changeMeterRequestCrew->first_name : null}}</td></tr>
         <tr>
           <td>Action Taken:</td>
           <td>( ) Acted</td>
@@ -189,6 +278,6 @@
       </tbody>
     </table>
   </div>
-  <p style="text-align:right; margin-top: 80px">Date and Time Generated: {{ date('m/d/Y h:i:a') }}</p>
+  <p style="text-align:right; margin-top: 70px">Date and Time Generated: {{ date('m/d/Y h:i:a') }}</p>
 </body>
 </html>

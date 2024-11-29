@@ -218,14 +218,14 @@
               <h5 class="styled-heading">Electric Service Details</h5>
               <div class="col-lg-2">
                 <div class="mb-2">
-                  <label for="membership_or" class="form-label mb-1">Membership OR</label>
-                  <input type="text" class="form-control" id="membership_or" name="membership_or" value="{{old('membership_or')}}" >
+                  <label for="membership_or" class="form-label mb-1">Membership OR *</label>
+                  <input type="text" class="form-control" id="membership_or" name="membership_or" value="{{old('membership_or')}}" required>
                 </div>
               </div>
               <div class="col-lg-2">
                 <div class="mb-2">
-                  <label for="membership_date" class="form-label mb-1">Membership Date</label>
-                  <input type="date" class="form-control" id="membership_date" name="membership_date" value="{{old('membership_date')}}" >
+                  <label for="membership_date" class="form-label mb-1">Membership Date *</label>
+                  <input type="date" class="form-control" id="membership_date" name="membership_date" value="{{old('membership_date')}}" required>
                 </div>
               </div>
               <div class="col-lg-6">

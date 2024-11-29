@@ -29,49 +29,10 @@ class ChangeMeterRequestController extends Controller
     public function index()
     {
         $cm_requests = ChangeMeterRequest::with('municipality', 'barangay')->orderBy('id','desc')->paginate(9);
-        // $ref_employees = DB::table('ref_employees')
-        // ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
-        // ->where('department', 'TSD')
-        // ->orderBy('last_name', 'ASC')
-        // ->get();
-
-        $dbPath = "\\\\sql02\\files\\Con_Or.mdb";
-
-        // Check if the file exists
-        if (!file_exists($dbPath)) {
-            throw new \Exception("Database file not found at: $dbPath");
-        }
-
-        // Connection string for MS Access
-        $connectionString = "Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=$dbPath;";
-        
-        // Attempt to connect
-        $connection = odbc_connect($connectionString, "", "");
-        if (!$connection) {
-            throw new \Exception("Failed to connect to the database. Error: " . odbc_errormsg());
-        }
-
-        // Directly construct the SQL query with values
-        $sql = "SELECT (LastName & ', ' & FirstName) AS full_name, Department 
-                FROM [Employee Masterlist Table] 
-                WHERE Department = 'TSD' 
-                ORDER BY Lastname ASC";
-        
-        // Execute the SQL statement
-        $result = odbc_exec($connection, $sql);
-        if (!$result) {
-            throw new \Exception("SQL error: " . odbc_errormsg($connection));
-        }
-
-        $ref_employees = [];
-
-        // Fetch results
-        while ($row = odbc_fetch_array($result)) {
-            $ref_employees[] = $row;
-        }
-        odbc_close($connection);
-        
-
+        $ref_employees = DB::table('change_meter_contractors')
+        ->select(DB::raw("CONCAT(last_name, ', ', first_name) AS full_name"), 'id')
+        ->orderBy('last_name', 'ASC')
+        ->get();
         return view('service_connect_order.change_meter.index',compact('cm_requests', 'ref_employees'));
     }
 
@@ -234,7 +195,6 @@ class ChangeMeterRequestController extends Controller
     public function edit(string $id)
     {
         $change_meter_request = ChangeMeterRequest::with('cmr_fees')->find($id);
-        dd($change_meter_request);
         if ($change_meter_request->date_time_acted) {
             return redirect(route('indexCM'))->withWarning("Can't Update Record!");
         } else {
@@ -424,7 +384,7 @@ class ChangeMeterRequestController extends Controller
     public function printChangeMeterRequest(Request $request, string $id)
     {
         $change_meter_request = ChangeMeterRequest::find($id);
-        // dd($change_meter_request);
+
         view()->share('data', $change_meter_request);
         $pdf = PDF::loadView('service_connect_order.change_meter.print_cm_request_pdf');
         return $pdf->stream();
@@ -628,48 +588,10 @@ class ChangeMeterRequestController extends Controller
         }
         $cm_requests = $cm_request->orderBy('control_no','DESC')->paginate(9);
 
-        // dd($scos);
-        // $ref_employees = DB::table('ref_employees')
-        // ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
-        // ->where('department', 'TSD')
-        // ->orderBy('last_name', 'ASC')
-        // ->get();
-
-        $dbPath = "\\\\sql02\\files\\Con_Or.mdb";
-
-        // Check if the file exists
-        if (!file_exists($dbPath)) {
-            throw new \Exception("Database file not found at: $dbPath");
-        }
-
-        // Connection string for MS Access
-        $connectionString = "Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=$dbPath;";
-        
-        // Attempt to connect
-        $connection = odbc_connect($connectionString, "", "");
-        if (!$connection) {
-            throw new \Exception("Failed to connect to the database. Error: " . odbc_errormsg());
-        }
-
-        // Directly construct the SQL query with values
-        $sql = "SELECT (LastName & ', ' & FirstName) AS full_name, Department 
-                FROM [Employee Masterlist Table] 
-                WHERE Department = 'TSD' 
-                ORDER BY Lastname ASC";
-        
-        // Execute the SQL statement
-        $result = odbc_exec($connection, $sql);
-        if (!$result) {
-            throw new \Exception("SQL error: " . odbc_errormsg($connection));
-        }
-
-        $ref_employees = [];
-
-        // Fetch results
-        while ($row = odbc_fetch_array($result)) {
-            $ref_employees[] = $row;
-        }
-        odbc_close($connection);
+        $ref_employees = DB::table('change_meter_contractors')
+        ->select(DB::raw("CONCAT(last_name, ', ', first_name) AS full_name"), 'id')
+        ->orderBy('last_name', 'ASC')
+        ->get();
 
         // return view('products.index', compact('products'));
         return view('service_connect_order.change_meter.index',compact('cm_requests','ref_employees'));
@@ -678,51 +600,7 @@ class ChangeMeterRequestController extends Controller
     public function view(string $id)
     {
         $cm_request = ChangeMeterRequest::find($id);
-
-        // $ref_employees = DB::table('ref_employees')
-        // ->select(DB::raw("CONCAT(last_name, ', ', SUBSTRING(first_name, 1, 1), '. ', SUBSTRING(middle_name, 1, 1)) AS full_name"))
-        // ->where('department', 'TSD')
-        // ->orderBy('last_name', 'ASC')
-        // ->get();
-        // dd($cm_request);
-
-        $dbPath = "\\\\sql02\\files\\Con_Or.mdb";
-
-        // Check if the file exists
-        if (!file_exists($dbPath)) {
-            throw new \Exception("Database file not found at: $dbPath");
-        }
-
-        // Connection string for MS Access
-        $connectionString = "Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=$dbPath;";
-        
-        // Attempt to connect
-        $connection = odbc_connect($connectionString, "", "");
-        if (!$connection) {
-            throw new \Exception("Failed to connect to the database. Error: " . odbc_errormsg());
-        }
-
-        // Directly construct the SQL query with values
-        $sql = "SELECT (LastName & ', ' & FirstName) AS full_name, Department 
-                FROM [Employee Masterlist Table] 
-                WHERE Department = 'TSD' 
-                ORDER BY Lastname ASC";
-        
-        // Execute the SQL statement
-        $result = odbc_exec($connection, $sql);
-        if (!$result) {
-            throw new \Exception("SQL error: " . odbc_errormsg($connection));
-        }
-
-        $ref_employees = [];
-
-        // Fetch results
-        while ($row = odbc_fetch_array($result)) {
-            $ref_employees[] = $row;
-        }
-        odbc_close($connection);
-
-        return view('service_connect_order.change_meter.view_acted_request',compact('cm_request', 'ref_employees'));
+        return view('service_connect_order.change_meter.view_acted_request',compact('cm_request'));
     }
 
     public function viewReport(Request $request)
@@ -753,6 +631,10 @@ class ChangeMeterRequestController extends Controller
 
         if ($request->app_status == 3) {
             $query->where('status', 1); // acted - not completed
+        }
+
+        if ($request->app_status == 4) {
+            $query->where('status', 3); // DISPATCHED
         }
 
         if ($request->area) {

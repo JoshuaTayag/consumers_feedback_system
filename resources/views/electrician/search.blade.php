@@ -15,10 +15,8 @@
     <th>{{ $electrician->date_of_birth }}</th>
     <th>{{ $electrician->fb_account ? $electrician->fb_account : 'NONE' }}</th>
     <th>
-      @foreach ($electrician->electrician_contact_numbers as $index => $contact) 
-        {{$contact->contact_no}} <br>
-      @endforeach
-      
+      {{ $electrician->primary_contact_no }}<br>
+      {{ $electrician->secondary_contact_no }}
     </th>
     <th>
     @if ($electrician->date_of_application)

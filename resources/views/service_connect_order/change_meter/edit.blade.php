@@ -189,7 +189,7 @@
                   <div class="col-lg-2">
                     <div class="mb-2">
                         {{ Form::label('process_date', 'Process Date *') }}
-                        {{ Form::date('process_date', null, array('class' => 'form-control', 'required')) }}
+                        {{ Form::date('process_date', $change_meter_request->process_date, array('class' => 'form-control', 'required')) }}
                     </div>
                   </div>
                 </div>
