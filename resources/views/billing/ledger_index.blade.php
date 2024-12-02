@@ -124,6 +124,18 @@
                     <textarea class="form-control" name="remarks" id="remarks" readonly>{{ isset($account) && $account->{'Remarks'} !== null ? $account->{'Remarks'} : ''}}</textarea>
                   </div>
                 </div>
+                <div class="col-lg-12">
+                  <div class="mb-2">
+                    <p class="form-label mb-1">CM History:</p>
+                    @if(isset($change_meters))
+                      @foreach ($change_meters as $key => $change_meter)
+                      <a href="{{ route('viewCM', $key) }}" type="submit" target="_blank"><span class="badge my-1 rounded-pill bg-primary">{{$change_meter}}</span></a>
+                      @endforeach
+                    @endif
+                    
+                    {{-- <span>{{$change_meters}}</span> --}}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

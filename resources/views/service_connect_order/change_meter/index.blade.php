@@ -86,7 +86,7 @@
                         </div>
                         <div class="col-lg-3 d-flex align-items-center">
                             <div class="mx-end ms-auto"> <!-- Add mx-auto to horizontally center the content -->
-                                <p class="badge rounded-pill bg-{{ $cm_request->status == 1 || $cm_request->status == 2 ? 'success' : ($cm_request->status == 3 ? 'warning text-dark' : 'danger')}} p-2 mb-0">{{ $cm_request->status == 1 || $cm_request->status == 2 ? 'Acted' : ($cm_request->status == 3 ? 'Dispatched' : 'Not Acted')}}</p>
+                                <p class="badge rounded-pill bg-{{ $cm_request->status == 1 || $cm_request->status == 2 ? 'success' : ($cm_request->status == 3 ? 'warning text-dark' : 'danger')}} p-2 mb-0">{{ $cm_request->status == 1 || $cm_request->status == 2 ? 'Acted' : ($cm_request->status == 3 ? 'Dispatched' : 'Unacted')}}</p>
                             </div>
                         </div>
                       </div>

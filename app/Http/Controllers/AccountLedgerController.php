@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\ChangeMeterRequest;
 use DB;
 
 class AccountLedgerController extends Controller
@@ -62,11 +63,10 @@ class AccountLedgerController extends Controller
             ->orderBy(DB::raw("CAST(SUBSTRING(CAST(YearMonth AS VARCHAR), 1, 4) + '-' + SUBSTRING(CAST(YearMonth AS VARCHAR), 5, 2) + '-01' AS DATE)"), 'asc')
             ->get();
 
+            $change_meters = ChangeMeterRequest::where('account_number', $account_number)->pluck('control_no', 'id');
+            // dd($change_meters);
 
-
-            // dd($ledger_history_kwh);
-
-            return view('billing.ledger_index',compact('account', 'ledger_history', 'ledger_history_kwh'));
+            return view('billing.ledger_index',compact('account', 'ledger_history', 'ledger_history_kwh', 'change_meters'));
 
         } else{
             return redirect()->route('ledger.index')->with('error', 'No Record Found!');

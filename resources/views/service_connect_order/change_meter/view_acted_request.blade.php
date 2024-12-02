@@ -120,7 +120,7 @@
                   </div>
                 </div>
                 <div class="col-lg-6 mb-1">
-                  <span class="fs-4 fw-bold"><span class="badge rounded-pill bg-{{$cm_request->status == 1 ? 'warning' : ($cm_request->status == 2 ? 'success' : 'danger') }}">{{$cm_request->status == 1 ? 'NOT COMPLETED' : ($cm_request->status == 2 ? 'INSTALLED' : 'REJECTED') }}</span></span>
+                  <span class="badge my-1 rounded-pill bg-{{$cm_request->status == 1 ? 'danger' : ($cm_request->status == 2 ? 'success' : 'warning text-dark') }} p-2 fs-6" >{{$cm_request->status == 1 ? 'ACTED - NOT COMPLETED' : ($cm_request->status == 2 ? 'ACTED - COMPLETED' : ($cm_request->status == 3 ? 'DISPATCHED' : 'UNACTED')) }}</span>
                 </div>
               </div>
 
@@ -216,7 +216,7 @@
                   </div>
                 </div>
                 <div class="col-lg-6 mb-1">
-                  <span class="fs-4 fw-bold"><span class="">{{$cm_request->postedMeterHistory->leyeco_seal_no}}</span></span>
+                  <span class="fs-4 fw-bold"><span class="">{{$cm_request->postedMeterHistory ? $cm_request->postedMeterHistory->leyeco_seal_no : null}}</span></span>
                 </div>
               </div>
 
@@ -227,7 +227,7 @@
                   </div>
                 </div>
                 <div class="col-lg-6 mb-1">
-                  <span class="fs-4 fw-bold"><span class="">{{$cm_request->postedMeterHistory->erc_seal_no}}</span></span>
+                  <span class="fs-4 fw-bold"><span class="">{{$cm_request->postedMeterHistory ? $cm_request->postedMeterHistory->erc_seal_no : null}}</span></span>
                 </div>
               </div>
 
