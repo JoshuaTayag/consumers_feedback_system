@@ -120,12 +120,12 @@ class MaterialRequisitionForm extends Model
     
     public function mcrt_items()
     {
-        return $this->hasMany('App\Models\MaterialRequisitionFormMcrtDetails', 'MCRTNo', 'mcrt_no');
+        return $this->hasMany('App\Models\MaterialRequisitionFormMcrtDetails', 'mcrt_id', 'mcrt_no');
     }
 
     public function mst_items()
     {
-        return $this->hasMany('App\Models\MaterialRequisitionFormMstDetails', 'MSTNo', 'mst_no');
+        return $this->hasMany('App\Models\MaterialRequisitionFormMstDetails', 'mst_id', 'mst_no');
     }
     
     protected $fillable = [ 'project_name', 

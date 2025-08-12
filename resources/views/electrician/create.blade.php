@@ -149,7 +149,8 @@
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="application_status" class="form-label mb-1">Application Status</label>
-                    <select name="application_status" id="application_status" class="form-control">
+                    <select name="application_status" id="application_status" class="form-control" required>
+                      <option value="">Choose...</option>
                       <option value="1">Pending</option>
                       <option value="2">Approved</option>
                       <option value="3">Disapproved</option>
@@ -206,8 +207,8 @@
               </div>
               <div class="col-lg-2">
                 <div class="mb-2">
-                  <label for="postal_code" class="form-label mb-1">Postal Code</label>
-                  <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{old('postal_code')}}">
+                  <label for="postal_code" class="form-label mb-1">Postal Code *</label>
+                  <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{old('postal_code')}}" required>
                 </div>
               </div>
             </div>
@@ -219,13 +220,13 @@
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="membership_or" class="form-label mb-1">Membership OR *</label>
-                  <input type="text" class="form-control" id="membership_or" name="membership_or" value="{{old('membership_or')}}" required>
+                  <input type="text" class="form-control" id="membership_or" name="membership_or" value="{{old('membership_or')}}" readonly required>
                 </div>
               </div>
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="membership_date" class="form-label mb-1">Membership Date *</label>
-                  <input type="date" class="form-control" id="membership_date" name="membership_date" value="{{old('membership_date')}}" required>
+                  <input type="date" class="form-control" id="membership_date" name="membership_date" value="{{old('membership_date')}}" readonly required>
                 </div>
               </div>
               <div class="col-lg-6">
@@ -485,7 +486,7 @@ $(document).ready(function () {
 
       $( "#electric_service_details" ).select2({
         ajax: { 
-          url: "{{route('fetchAccounts')}}",
+          url: "{{route('fetchAllAccounts')}}",
           type: "get",
           dataType: 'json',
           delay: 250,
@@ -498,37 +499,6 @@ $(document).ready(function () {
           },
           processResults:function (results, params){
             params.page = params.page||1;
-
-            return{
-              results:results.data,
-              pagination:{
-                more:results.last_page!=params.page
-              },
-            }
-          },
-          cache: true
-        },
-        // placeholder:'Search Account Number',
-        templateResult: templateResult,
-        templateSelection: templateSelection,
-     });
-
-     $( "#electric_service_detail" ).select2({
-        ajax: { 
-          url: "{{route('fetchAccounts')}}",
-          type: "get",
-          dataType: 'json',
-          delay: 250,
-          data: function (params) {
-            return {
-                // _token: '{{csrf_token()}}',
-                search: params.term, // search term
-                page: params.page
-            };
-          },
-          processResults:function (results, params){
-            params.page = params.page||1;
-
             return{
               results:results.data,
               pagination:{
@@ -551,7 +521,10 @@ $(document).ready(function () {
      }
 
      function templateSelection(data){
+      document.getElementById('membership_or').value = data.or_no;
+      document.getElementById('membership_date').value = data.or_no_date;
       return data.id + " | " +data.Name + " | " + data.Address
+      // console.log(data.OR No Issued);
      }
 
   /*------------------------------------------

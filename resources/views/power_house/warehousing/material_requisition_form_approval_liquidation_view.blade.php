@@ -13,6 +13,19 @@
           <div class="row">
             <div class="col-lg-4">
               <div class="d-flex justify-content-between">
+                  <span>MER No.</span><span class="text-end">:</span>
+              </div>
+            </div>
+            <div class="col-lg-8 fw-bold">
+              {{ date('y', strtotime($mrf->created_at)) . '-' . str_pad($mrf->id, 5, '0', STR_PAD_LEFT) }}
+            </div>
+          </div>
+
+          <hr class="my-1">
+
+          <div class="row">
+            <div class="col-lg-4">
+              <div class="d-flex justify-content-between">
                   <span>Project Name</span><span class="text-end">:</span>
               </div>
             </div>
@@ -199,7 +212,7 @@
               @foreach ($mrf->items as $item)  
               <tr>
                 <td>{{ $item->nea_code }}</td>
-                <td>{{ $item->item->Description }}</td>
+                <td>{{ $item->item->description }}</td>
                 <td>{{ number_format($item->unit_cost, 2) }}</td>
                 <td>{{ $item->quantity }}</td>
                 <td>{{ $item->liquidation_quantity }}</td>
@@ -215,8 +228,6 @@
   </div>
 
   <div class="row align-items-stretch mb-4">
-
-  <div class="row align-items-stretch mb-4">
     <div class="col-lg-6">
       <div class="card h-100">
         <div class="card-header fw-bold fs-5">
@@ -225,22 +236,22 @@
         <div class="card-body">
           <div class="row">
             <div class="col">
-              <div class="row mb-3">
+              <div class="row">
                 <div class="col-lg-4">
                   <label for="mcrt_no" class="fw-bold" >MCRT #</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mcrt_detail->MCRTNo }}" readonly>
+                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mcrt_detail->mcrt_number }}" readonly>
                 </div>
                 <div class="col-lg-4">
                   <label for="mcrt_no" class="fw-bold" >MCRT DATE</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ date('m/d/Y', strtotime($mcrt_detail->MCRTDate)) }}" readonly>
+                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ date('m/d/Y', strtotime($mcrt_detail->mcrt_date)) }}" readonly>
                 </div>
                 <div class="col-lg-4">
                   <label for="mcrt_no" class="fw-bold" >RETURNED</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mcrt_detail->ReturnedBy }}" readonly>
+                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mcrt_returned_employee->fullname }}" readonly>
                 </div>
-                <div class="col">
+                <div class="col pb-4">
                   <label for="mcrt_no" class="fw-bold" >Note</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mcrt_detail->Note }}" readonly>
+                  <textarea name="mcrt_note" class="form-control" id="mcrt_note" rows="2" readonly>{{ $mcrt_detail->note }}</textarea>  
                 </div>
               </div>
               <table class="table table-striped table-hover fw-bold">
@@ -252,11 +263,11 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @foreach ($mrf->mcrt_items as $item)  
+                  @foreach ($mcrt_item_details as $item)  
                     <tr>
-                      <td>{{ $item->CodeNo }}</td>
-                      <td>{{ $item->stock_item ? $item->stock_item->Description : "" }}</td>
-                      <td>{{ (int) $item->MCRTQty }}</td>
+                      <td>{{ $item->code }}</td>
+                      <td>{{ $item->description }}</td>
+                      <td>{{ (int) $item->quantity }}</td>
                     </tr>
                   @endforeach
                 </tbody>
@@ -278,19 +289,19 @@
               <div class="row mb-3">
                 <div class="col-lg-4">
                   <label for="mcrt_no" class="fw-bold" >MST #</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mst_detail->MSTNo }}" readonly>
+                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mst_detail->mst_number }}" readonly>
                 </div>
                 <div class="col-lg-4">
                   <label for="mcrt_no" class="fw-bold" >MST DATE</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ date('m/d/Y', strtotime($mst_detail->MSTDate)) }}" readonly>
+                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ date('m/d/Y', strtotime($mst_detail->mst_date)) }}" readonly>
                 </div>
                 <div class="col-lg-4">
                   <label for="mcrt_no" class="fw-bold" >RETURNED</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mst_detail->ReturnedBy }}" readonly>
+                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mst_returned_employee->fullname }}" readonly>
                 </div>
-                <div class="col">
+                <div class="col pb-4">
                   <label for="mcrt_no" class="fw-bold" >Note</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mst_detail->Note }}" readonly>
+                  <textarea name="mcrt_note" class="form-control" id="mcrt_note" rows="2" readonly>{{ $mst_detail->remarks }}</textarea>
                 </div>
               </div>
               <table class="table table-striped table-hover fw-bold">
@@ -302,11 +313,11 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @foreach ($mrf->mst_items as $item)  
+                  @foreach ($mst_item_details as $item)  
                     <tr>
-                      <td>{{ $item->CodeNo }}</td>
-                      <td>{{ $item->stock_item ? $item->stock_item->Description : "" }}</td>
-                      <td>{{ (int) $item->MCRTQty }}</td>
+                      <td>{{ $item->code }}</td>
+                      <td>{{ $item->description }}</td>
+                      <td>{{ (int) $item->quantity }}</td>
                     </tr>
                   @endforeach
                 </tbody>
@@ -386,13 +397,12 @@
   </div>
 
   <div class="row mb-4">
+    @if ($mrf->status != 11 && Auth::user()->hasRole('TSD (Richard)') || Auth::user()->hasRole('TSD Manager'))
       <div class="col-lg-12 text-end">
           <div class="d-inline-block">
-            @if(Auth::user()->hasRole('IAD') || Auth::user()->hasRole('Warehouse'))
               <button class="btn btn-danger btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#disApproved">
                 <i class="fas fa-times"></i> DISAPPROVED
               </button>
-            @endif
           </div>
 
           <div class="d-inline-block">
@@ -405,6 +415,7 @@
               </form>
           </div>
       </div>
+    @endif
   </div>
 
   <div class="modal fade" id="disApproved" tabindex="-1" aria-labelledby="disApprovedLabel" aria-hidden="true">

@@ -9,15 +9,19 @@ class MaterialRequisitionFormMstDetails extends Model
 {
     use HasFactory;
 
-    protected $table = 'MST Transaction Table';
-
     public function material_requisition_form()
     {
-        return $this->belongsTo('App\Models\MaterialRequisitionForm',  'mst_no', 'MSTNo');
+        return $this->belongsTo('App\Models\MaterialRequisitionForm',  'mst_no', 'mst_id');
     }
 
     public function stock_item()
     {
-        return $this->hasOne('App\Models\Datamanagement\StockedItem', 'ItemCode', 'CodeNo');
+        return $this->hasOne('App\Models\Datamanagement\StockedItem', 'id', 'item_id');
     }
+
+    protected $connection = 'pgsql';
+    protected $table = 'mst_item';
+    protected $primaryKey = 'id';
+    protected $keyType = 'string';  // Tell Laravel the primary key is a string (UUID)
+    public $incrementing = false;  
 }

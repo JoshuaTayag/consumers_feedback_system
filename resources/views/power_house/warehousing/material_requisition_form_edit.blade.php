@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="card-body">
-          @if($mrf->status == 1 && !$liquidation->first() && (Auth::user()->hasRole('CETD') or Auth::user()->hasRole('CETD SPRC')))
+          @if($mrf->status == 1 && !$liquidation->first() && (Auth::user()->hasRole('CETD (Dexter)') or Auth::user()->hasRole('CETD SPRC')))
             <div class="row mb-4">
               <div class="col-lg-12">
                 <div class="card">
@@ -50,7 +50,7 @@
                           </div>
                         @endif
 
-                        @if($mrf->status == 1 && !$liquidation->first() &&  Auth::user()->hasRole('CETD') && $mrf->req_type)
+                        @if($mrf->status == 1 && !$liquidation->first() &&  Auth::user()->hasRole('CETD (Dexter)') && $mrf->req_type)
                           <div class="col-lg-3">
                             <div class="mb-3">
                               <label for="req_type" class="form-label mb-1">Request Type</label>
@@ -105,14 +105,21 @@
           <div class="row">
             <div class="col-lg-6">
               <div class="card">
-                <div class="card-header">
-                  <h4>Project Information</h4>
+                <div class="card-header fw-bold fs-5">
+                  PROJECT DETAILS
                 </div>
                 <div class="card-body">
                   <div class="row">
+                    @if ($mrf->status != 0)
+                      <div class="col-lg-12 mb-2">
+                        <span class="text-danger fs-5 fw-bold">
+                          MER #: {{ $mrf->status != 0 ? date('y', strtotime($mrf->created_at)) . '-' . str_pad($mrf->id, 5, '0', STR_PAD_LEFT) : '' }}
+                        </span>
+                      </div>
+                    @endif
                     <div class="col-lg-12">
                       <div class="mb-2">
-                        <label for="project_name" class="form-label mb-1">Project Name *</label>
+                        <label for="project_name" class="form-label mb-1">Project Name </label>
                         <input type="text" class="form-control" id="project_name" name="project_name" value="{{$mrf->project_name}}" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                       </div>
                     </div>
@@ -155,13 +162,13 @@
                     </div>
                     <div class="col-lg-12 {{ $mrf->status == 0 ? 'd-none': 'd-block'}}">
                       <div class="mb-3">
-                        <label for="requested_by" class="form-label mb-1">Confirmed By:  <span class="text-danger fw-bold">{{ $mrf->confirmed_date ? date('F d, Y  h:i A', strtotime($mrf->confirmed_date)) : null }}</span></label>
+                        <label for="requested_by" class="form-label mb-1">Liquidation Confirmed By:  <span class="text-danger fw-bold">{{ $mrf->confirmed_date ? date('F d, Y  h:i A', strtotime($mrf->confirmed_date)) : null }}</span></label>
                         <input type="text" class="form-control" value="{{ $mrf->confirmed_by ? $mrf->user_confirmed->name : '' }}" disabled required>
                       </div>
                     </div>
                     <div class="col-lg-12 {{ $mrf->status == 0 ? 'd-none': 'd-block'}}">
                       <div class="mb-3">
-                        <label for="requested_by" class="form-label mb-1">Audited by  <span class="text-danger fw-bold">{{ $mrf->audited_date ? date('F d, Y  h:i A', strtotime($mrf->audited_date)) : null }}</span></label>
+                        <label for="requested_by" class="form-label mb-1">Liquidation Approved by  <span class="text-danger fw-bold">{{ $mrf->audited_date ? date('F d, Y  h:i A', strtotime($mrf->audited_date)) : null }}</span></label>
                         <input type="text" class="form-control" value="{{ $mrf->audit_by ? $mrf->user_audited->name : '' }}" disabled required>
                       </div>
                     </div>
@@ -197,6 +204,16 @@
                       <div class="mb-2">
                         <label for="project_name" class="form-label mb-1">Item</label>
                         @if($mrf->status == 0)
+                          <button type="button" class="btn btn-link p-0" tabindex="-1" data-bs-toggle="collapse"
+                              data-bs-target="#itemNote" aria-expanded="false" aria-controls="itemNote">
+                              <i class="fa fa-question-circle"></i>
+                          </button>
+                          <div class="collapse mb-2" id="itemNote">
+                              <div class="alert alert-info py-2 px-3 mb-0">
+                                  This field is case sensitive. Please ensure the correct capitalization of
+                                  letters.
+                              </div>
+                          </div>
                           <select class="js-example-basic-multiple form-control" id="item" name="item" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)></select>
                         @endif
                       </div>
@@ -213,8 +230,8 @@
                 </div>
               </div>
               <div class="card {{ $mrf->status == 0 ? 'd-none': 'd-block'}}">
-                <div class="card-header">
-                  <h4>References</h4>
+                <div class="card-header fw-bold fs-5">
+                  REFERENCES
                 </div>
                 <div class="card-body">
                   <div class="row">
@@ -245,8 +262,8 @@
           <div class="row mt-4">
             <div class="col-lg-12">
               <div class="card">
-                <div class="card-header">
-                  <h4>Address</h4>
+                <div class="card-header fw-bold fs-5">
+                  ADDRESS
                 </div>
                 <div class="card-body">
                   <div class="row">
@@ -324,8 +341,8 @@
           <div class="row mt-4">
             <div class="col-lg-12">
               <div class="card">
-                <div class="card-header">
-                  <h4>Items</h4>
+                <div class="card-header fw-bold fs-5">
+                  ITEMS
                 </div>
                 <div class="card-body">
                   <div class="row">
@@ -334,7 +351,7 @@
                         <table class="table table-bordered data-table">
                           <tr>
                             <th>#</th>
-                            <th>Nea Code</th>
+                            <th>Code</th>
                             <th>Description</th>
                             <th>Unit</th>
                             <th>Unit Cost</th>
@@ -547,11 +564,11 @@ $(document).ready(function () {
     if (data.loading){
       return data.text
     }
-    return data.ItemCode + " | " + data.Description
+    return data.code + " | " + data.description
     }
 
     function templateSelection(data){
-    return data.ItemCode + " | " + data.Description
+    return data.code + " | " + data.description
     }
 
   $('#get_items').click(function() {
@@ -740,7 +757,7 @@ function removeItem(val) {
     padding: .375rem .75rem;
     font-size: 1rem;
     line-height: 1.5;
-    color: #495057;
+    color: #000000;
     background-color: #fff;
     background-clip: padding-box;
     border: 1px solid #ced4da;
@@ -757,17 +774,44 @@ function removeItem(val) {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    border: 1px solid transparent;
+    /* color: #fff; */
+    border: 1px solid;
     padding: 0.375rem 0.75rem;
     font-size: 1rem;
     line-height: 1.5;
     border-radius: 0.25rem;
     transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    background-color: #007bff;
+    color: #fff;
+    position: relative;
+    z-index: 10;
+  }
+  .editable-buttons .editable-cancel {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* color: #fff; */
+    border: 1px solid;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    background-color: #007bff;
+    color: #fff;
+    position: relative;
+    z-index: 10;
   }
 
   .editable-click, a.editable-click, a.editable-click:hover {
     text-decoration: none;
-    border-bottom: solid 1px #00cc0a;
+    border-bottom: solid 1px #818181;
   }
 
 </style>

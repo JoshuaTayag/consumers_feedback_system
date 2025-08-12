@@ -66,6 +66,9 @@
               <li>
                 <a class="dropdown-item" href="{{ route('electricianActivityIndex') }}">ACTIVITIES / MEETING</a>
               </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('electricianMasterlistReport') }}">REPORT</a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -152,9 +155,9 @@
     </a>
     <ul class="dropdown-menu" aria-labelledby="navbarPowerBill">
       <li>
-        <a class="dropdown-item" href="#">
+        {{-- <a class="dropdown-item" href="#">
           PURCHASING&raquo;
-        </a>
+        </a> --}}
         <!-- <ul class="dropdown-menu dropdown-submenu">
           <li>
             <a class="dropdown-item" href="{{ route('pre_membership_index') }}">CANVASS</a>

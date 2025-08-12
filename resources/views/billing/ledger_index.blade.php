@@ -1,3 +1,6 @@
+@php
+    use Carbon\Carbon;
+@endphp
 @extends('layouts.app')
 
 @section('content')
@@ -49,7 +52,9 @@
                 <div class="col-lg-2">
                   <div class="mb-2">
                     <label class="form-label mb-1">Account No.  </label>
-                    <input class="form-control form-control-sm" name="account_name" id="account_name" value="{{ isset($account) && $account !== null ? $account->{'Accnt No'} : ''}}" readonly>
+                    <input class="form-control form-control-sm fw-bold" name="account_name" id="account_name" type='text'
+                      value="{{ isset($account) && $account !== null ? (strlen($account->{'Accnt No'}) === 10 ? substr($account->{'Accnt No'}, 0, 2) . '-' . substr($account->{'Accnt No'}, 2, 4) . '-' . substr($account->{'Accnt No'}, 6, 4) : $account->{'Accnt No'}) : ''}}" 
+                      readonly>
                   </div>
                 </div>
                 <div class="col-lg-3">
@@ -91,7 +96,7 @@
                 <div class="col">
                   <div class="mb-2">
                     <label class="form-label mb-1">Latest Reading Date </label>
-                    <input class="form-control form-control-sm" name="name" id="name" value="{{ isset($account) && $account !== null ? $account->{'LatestDateRdng'} : ''}}" readonly>
+                    <input class="form-control form-control-sm" name="name" id="name" value="{{ isset($account) && $account !== null && !empty($account->{'LatestDateRdng'}) ? Carbon::parse($account->{'LatestDateRdng'})->format('m/d/Y') : ''}}" readonly>
                   </div>
                 </div>
                 <div class="col">
@@ -109,7 +114,7 @@
                 <div class="col">
                   <div class="mb-2">
                     <label class="form-label mb-1">Date Of Entry </label>
-                    <input class="form-control form-control-sm" name="name" id="name" value="{{ isset($account) && $account !== null ? $account->{'Date'} : ''}}" readonly>
+                    <input class="form-control form-control-sm" name="name" id="name" value="{{ isset($account) && $account !== null && !empty($account->{'Date'}) ? Carbon::parse($account->{'Date'})->format('m/d/Y') : ''}}" readonly>
                   </div>
                 </div>
                 <div class="col">
@@ -124,6 +129,7 @@
                     <textarea class="form-control" name="remarks" id="remarks" readonly>{{ isset($account) && $account->{'Remarks'} !== null ? $account->{'Remarks'} : ''}}</textarea>
                   </div>
                 </div>
+                {{-- {{dd($account->Latitude)}} --}}
                 <div class="col-lg-12">
                   <div class="mb-2">
                     <p class="form-label mb-1">CM History:</p>
@@ -186,6 +192,19 @@
               <div id="chartdiv"></div>
             </div>
           </div>
+          <div class="card mt-4">
+            <div class="card-header fs-5">
+              Location
+            </div>
+            <div class="card-body">
+              <div id="map"></div>
+                @if(!isset($account) || empty($account->Latitude) || empty($account->Longitude))
+                    <div class="alert alert-info mt-2">
+                        <i class="fa fa-info-circle"></i> Location coordinates not available for this account.
+                    </div>
+                @endif
+            </div>
+          </div>
       </div>
   </div>
 </div>
@@ -205,7 +224,7 @@
 
     $( "#electric_service_details" ).select2({
       ajax: { 
-        url: "{{route('fetchAccounts')}}",
+        url: "{{route('getAccountName')}}",
         type: "get",
         dataType: 'json',
         data: function (params) {
@@ -284,111 +303,190 @@ data = data.map(item => ({
     value: parseInt(item.value, 10) // Convert value to integer
 }));
 
-// Create chart
-// https://www.amcharts.com/docs/v5/charts/xy-chart/
-var chart = root.container.children.push(am5xy.XYChart.new(root, {
-  focusable: true,
-  panX: true,
-  panY: true,
-  wheelX: "panX",
-  wheelY: "zoomX",
-  pinchZoomX:true,
-  paddingLeft: 0
-}));
+  // Create chart
+  // https://www.amcharts.com/docs/v5/charts/xy-chart/
+  var chart = root.container.children.push(am5xy.XYChart.new(root, {
+    focusable: true,
+    panX: true,
+    panY: true,
+    wheelX: "panX",
+    wheelY: "zoomX",
+    pinchZoomX:true,
+    paddingLeft: 0
+  }));
 
-var easing = am5.ease.linear;
-
-
-// Create axes
-// https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-var xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
-  maxDeviation: 0.1,
-  groupData: false,
-  baseInterval: {
-    timeUnit: "month",
-    count: 1
-  },
-  renderer: am5xy.AxisRendererX.new(root, {
-    minorGridEnabled: true,
-    minGridDistance: 100
-  }),
-  tooltip: am5.Tooltip.new(root, {})
-}));
-
-var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-  maxDeviation: 0.2,
-  renderer: am5xy.AxisRendererY.new(root, {})
-}));
+  var easing = am5.ease.linear;
 
 
-// Add series
-// https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-var series = chart.series.push(am5xy.LineSeries.new(root, {
-  minBulletDistance: 10,
-  connect: false,
-  xAxis: xAxis,
-  yAxis: yAxis,
-  valueYField: "value",
-  valueXField: "date",
-  tooltip: am5.Tooltip.new(root, {
-    pointerOrientation: "horizontal",
-    labelText: "{valueY} kWh"
-  })
-}));
+  // Create axes
+  // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+  var xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
+    maxDeviation: 0.1,
+    groupData: false,
+    baseInterval: {
+      timeUnit: "month",
+      count: 1
+    },
+    renderer: am5xy.AxisRendererX.new(root, {
+      minorGridEnabled: true,
+      minGridDistance: 100
+    }),
+    tooltip: am5.Tooltip.new(root, {})
+  }));
 
-series.fills.template.setAll({
-  fillOpacity: 0.2,
-  visible: true
-});
-
-series.strokes.template.setAll({
-  strokeWidth: 2
-});
+  var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+    maxDeviation: 0.2,
+    renderer: am5xy.AxisRendererY.new(root, {})
+  }));
 
 
-// Set up data processor to parse string dates
-// https://www.amcharts.com/docs/v5/concepts/data/#Pre_processing_data
-series.data.processor = am5.DataProcessor.new(root, {
-  dateFormat: "yyyy-MM-dd",
-  dateFields: ["date"]
-});
+  // Add series
+  // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+  var series = chart.series.push(am5xy.LineSeries.new(root, {
+    minBulletDistance: 10,
+    connect: false,
+    xAxis: xAxis,
+    yAxis: yAxis,
+    valueYField: "value",
+    valueXField: "date",
+    tooltip: am5.Tooltip.new(root, {
+      pointerOrientation: "horizontal",
+      labelText: "{valueY} kWh"
+    })
+  }));
 
-series.data.setAll(data);
+  series.fills.template.setAll({
+    fillOpacity: 0.2,
+    visible: true
+  });
 
-series.bullets.push(function() {
-  var circle = am5.Circle.new(root, {
-    radius: 6,
-    fill: root.interfaceColors.get("background"),
-    stroke: series.get("fill"),
-    strokeWidth: 4
-  })
-
-  return am5.Bullet.new(root, {
-    sprite: circle
-  })
-});
-
-
-// Add cursor
-// https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
-var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
-  xAxis: xAxis,
-  behavior: "none"
-}));
-cursor.lineY.set("visible", false);
-
-// add scrollbar
-chart.set("scrollbarX", am5.Scrollbar.new(root, {
-  orientation: "horizontal"
-}));
+  series.strokes.template.setAll({
+    strokeWidth: 2
+  });
 
 
-// Make stuff animate on load
-// https://www.amcharts.com/docs/v5/concepts/animations/
-chart.appear(1000, 100);
+  // Set up data processor to parse string dates
+  // https://www.amcharts.com/docs/v5/concepts/data/#Pre_processing_data
+  series.data.processor = am5.DataProcessor.new(root, {
+    dateFormat: "yyyy-MM-dd",
+    dateFields: ["date"]
+  });
 
-}); // end am5.ready()
+  series.data.setAll(data);
 
+  series.bullets.push(function() {
+    var circle = am5.Circle.new(root, {
+      radius: 6,
+      fill: root.interfaceColors.get("background"),
+      stroke: series.get("fill"),
+      strokeWidth: 4
+    })
+
+    return am5.Bullet.new(root, {
+      sprite: circle
+    })
+  });
+
+
+  // Add cursor
+  // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
+  var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
+    xAxis: xAxis,
+    behavior: "none"
+  }));
+  cursor.lineY.set("visible", false);
+
+  // add scrollbar
+  chart.set("scrollbarX", am5.Scrollbar.new(root, {
+    orientation: "horizontal"
+  }));
+
+
+  // Make stuff animate on load
+  // https://www.amcharts.com/docs/v5/concepts/animations/
+  chart.appear(1000, 100);
+
+  }); // end am5.ready()
+</script>
+
+
+@if(isset($account) && !empty($account->Latitude) && !empty($account->Longitude))
+    <script>
+        function initMap() {
+            // Extract latitude and longitude
+            var lat = parseFloat({{ $account->Latitude }});
+            var lng = parseFloat({{ $account->Longitude }});
+
+            // Initialize map
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: lat, lng: lng },
+                zoom: 15,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            });
+
+            // Add marker with info window
+            var marker = new google.maps.Marker({
+                position: { lat: lat, lng: lng },
+                map: map,
+                title: 'Account Location: {{ isset($account) ? $account->{"Name"} : "" }}',
+                animation: google.maps.Animation.DROP
+            });
+
+            // Create info window
+            var infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div style="padding: 10px;">
+                        <h6><strong>{{ isset($account) ? $account->{"Name"} : "" }}</strong></h6>
+                        <p><strong>Account No:</strong> {{ isset($account) ? $account->{"Accnt No"} : "" }}</p>
+                        <p><strong>Address:</strong> {{ isset($account) ? $account->{"Address"} : "" }}</p>
+                        <p><strong>Coordinates:</strong> ${lat}, ${lng}</p>
+                    </div>
+                `
+            });
+
+            // Open info window when marker is clicked
+            marker.addListener('click', function() {
+                infoWindow.open(map, marker);
+            });
+
+            // Auto-open info window
+            infoWindow.open(map, marker);
+        }
+
+        // Initialize map when page loads
+        window.onload = function() {
+            initMap();
+        };
+    </script>
+@else
+    <script>
+        function initMap() {
+            // Default map center (Philippines - Leyte area)
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 11.040625, lng: 124.603475 }, 
+                zoom: 10,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            });
+
+            // Add a default marker
+            var marker = new google.maps.Marker({
+                position: { lat: 11.040625, lng: 124.603475 },
+                map: map,
+                title: 'Leyte Electric Cooperative V'
+            });
+
+            console.log("Default location shown: Coordinates not available for this account.");
+        }
+
+        // Initialize map when page loads
+        window.onload = function() {
+            initMap();
+        };
+    </script>
+@endif
+
+<script async defer 
+    src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initMap">
 </script>
 @endsection
 @section('style')
@@ -404,6 +502,10 @@ chart.appear(1000, 100);
   #chartdiv {
     width: 100%;
     height: 500px;
+  }
+  #map {
+    height: 600px;
+    width: 100%;
   }
 </style>
 @endsection

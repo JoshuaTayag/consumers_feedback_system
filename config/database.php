@@ -171,6 +171,30 @@ return [
             'trust_server_certificate' => true,
         ],
 
+        'pgsql' => [
+            'driver'   => 'pgsql',
+            'host'     => env('DB_HOST_PGSQL', '127.0.0.1'),
+            'port'     => env('DB_PORT_PGSQL', '5432'),
+            'database' => env('DB_DATABASE_PGSQL'),
+            'username' => env('DB_USERNAME_PGSQL'),
+            'password' => env('DB_PASSWORD_PGSQL'),
+            'charset'  => 'utf8',
+            'prefix'   => '',
+            'schema'   => 'public',
+        ],
+
+        'pgsql-system' => [
+            'driver'   => 'pgsql',
+            'host'     => env('DB_HOST_PGSQL_2', '127.0.0.1'),
+            'port'     => env('DB_PORT_PGSQL_2', '5432'),
+            'database' => env('DB_DATABASE_PGSQL_2'),
+            'username' => env('DB_USERNAME_PGSQL_2'),
+            'password' => env('DB_PASSWORD_PGSQL_2'),
+            'charset'  => 'utf8',
+            'prefix'   => '',
+            'schema'   => 'public',
+        ],
+
     ],
 
     /*

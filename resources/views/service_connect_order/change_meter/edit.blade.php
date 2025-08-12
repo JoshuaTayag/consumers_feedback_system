@@ -135,15 +135,16 @@
                         {{ Form::date('membership_date', date('Y-m-d', strtotime($change_meter_request->{'Membership Date'})) , array('class' => 'form-control', 'readonly')) }}
                     </div>
                   </div>
-                  <div class="col-lg-3">
+                  <div class="col-lg-1">
                     <div class="mb-2">
-                        {{ Form::label('consumer_type', 'Consumer Type *') }}
-                        <select id="consumer_type" class="form-control" name="consumer_type" value="{{ old('consumer_type')}}" required>
+                        {{ Form::label('consumer_type', 'Type *') }}
+                        {{ Form::text('consumer_type', $change_meter_request->consumer_type, array('class' => 'form-control', 'readonly')) }}
+                        {{-- <select id="consumer_type" class="form-control" name="consumer_type" value="{{ old('consumer_type')}}" required>
                           <option value=""></option>
                           @foreach (Config::get('constants.consumer_types') as $consumer_type)          
                             <option value="{{ $consumer_type['id'] }}" id="" {{ $change_meter_request->consumer_type == $consumer_type['id'] ? 'selected' : ''}}>{{ $consumer_type['name'] }}</option>
                           @endforeach 
-                        </select>
+                        </select> --}}
                     </div>
                   </div>
                   <!-- <div class="col-lg-3">
@@ -180,13 +181,13 @@
                         {{ Form::date('date_installed', null, array('class' => 'form-control')) }}
                     </div>
                   </div> -->
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('meter_or_no', 'Meter OR #') }}
                         {{ Form::text('meter_or_no', $change_meter_request->meter_or_number, array('class' => 'form-control')) }}
                     </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('process_date', 'Process Date *') }}
                         {{ Form::date('process_date', $change_meter_request->process_date, array('class' => 'form-control', 'required')) }}

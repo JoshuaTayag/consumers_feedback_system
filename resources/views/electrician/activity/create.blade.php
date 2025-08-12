@@ -32,16 +32,24 @@
                   <input type="text" class="form-control" value="{{ old('conducted_by') }}" id="conducted_by"  name="conducted_by" required>
                 </div>
               </div>
-              <div class="col-lg-2">
+              <div class="col-lg-4">
                 <div class="mb-2">
                   <label for="date_of_activity" class="form-label">Date of Activity *</label>
-                  <input type="date" class="form-control" value="{{ old('date_of_activity') }}" id="date_of_activity"  name="date_of_activity" required>
+                    <div class="d-flex gap-2">
+                    <input type="date" class="form-control" value="{{ old('date_of_activity_start') }}" id="date_of_activity_start" name="date_of_activity_start" required placeholder="Start Date">
+                    <span class="align-self-center">to</span>
+                    <input type="date" class="form-control" value="{{ old('date_of_activity_end') }}" id="date_of_activity_end" name="date_of_activity_end" required placeholder="End Date">
+                    </div>
                 </div>
               </div>
-              <div class="col-lg-2">
+              <div class="col-lg-4">
                 <div class="mb-2">
                   <label for="time_conducted" class="form-label">Time *</label>
-                  <input type="time" class="form-control" value="{{ old('time_conducted') }}" id="time_conducted"  name="time_conducted" required>
+                  <div class="d-flex gap-2">
+                    <input type="time" class="form-control" value="{{ old('time_conducted_start') }}" id="time_conducted_start" name="time_conducted_start" required placeholder="Start Time">
+                    <span class="align-self-center">to</span>
+                    <input type="time" class="form-control" value="{{ old('time_conducted_end') }}" id="time_conducted_end" name="time_conducted_end" required placeholder="End Time">
+                  </div>
                 </div>
               </div>
               <div class="col-lg-4">

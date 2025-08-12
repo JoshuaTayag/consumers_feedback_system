@@ -51,7 +51,7 @@
                                     @php
                                       $ii = [];
                                       foreach ($data->items as $index => $mrf_item) {
-                                        array_push($ii, $mrf_item->item->Description);
+                                        array_push($ii, $mrf_item->item->description);
                                       }
                                     @endphp
                                     <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal" data-bs-name="{{$data}}"

@@ -31,3 +31,6 @@ Route::get('agmm-verified-registration/{id}', [App\Http\Controllers\AgmmControll
 Route::get('fetch-members/', [App\Http\Controllers\MembershipController::class, 'getMembers']);
 Route::get('fetch-mcrt/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getMcrt']);
 Route::get('fetch-mst/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getMst']);
+
+Route::get('fetch-account/{account_no}', 'App\Http\Controllers\AccountLedgerController@fetchAccount');
+Route::get('fetch-account/{type}/{value}', 'App\Http\Controllers\AccountLedgerController@fetchAccountDetails');

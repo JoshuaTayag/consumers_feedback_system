@@ -173,7 +173,7 @@
               </div>
               <div class="col-lg-4">
                 <div class="mb-2">
-                  <label for="attached_file" class="form-label mb-1">Attach File</label>
+                  <label for="attached_file" class="form-label mb-1">Attach File (PDF) *</label>
                     <input type="file" class="form-control border border-default" id="attached_file" name="attached_file">
                 </div>
               </div>

@@ -35,41 +35,6 @@
                           <th>{{ date('F d, Y', strtotime($data->requested_by)) }}</th>
                           <th>
                             <a href="{{route('mrfLiquidationApprovalView', $data->id)}}" class="btn btn-warning btn-sm" target="_blank"><i class="fa fa-eye"></i></a>
-                              <!-- <div class="row">
-                                  <div class="col-lg-6 p-1 text-center">
-                                    {{-- <a href="{{route('LifelineUpdate', $data->id)}}" class="btn btn-success btn-sm"><i class="fa fa-check"></i></a> --}}
-                                    <form method="POST" action="{{ route('mrfLiquidationApprovalUpdate', $data->id) }}">
-                                      @method('PUT')
-                                      @csrf
-                                      <button class="btn btn-success btn-sm" type="submit"><i class="fa fa-check"></i></button>
-                                    </form>
-                                  </div>
-                                  <div class="col-lg-6 py-1 text-center">
-                                    
-                                    {{-- <button type="button" class="btn btn-sm btn-primary" onclick="showModal('test','test')">
-                                      <i class="fa fa-eye"></i>
-                                    </button> --}}
-                                    @php
-                                      $ii = [];
-                                      foreach ($data->items as $index => $mrf_item) {
-                                        array_push($ii, $mrf_item->item->Description);
-                                      }
-                                    @endphp
-                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal" data-bs-name="{{$data}}"
-                                    data-bs-items="{{json_encode($ii)}}" 
-                                    data-bs-area="{{Config::get('constants.area_id.'.($data->area_id-1).'.name')}}" 
-                                    data-bs-sitio="{{ $data->sitio }}" 
-                                    data-bs-barangay="{{ $data->barangay ? $data->barangay->barangay_name : 'None' }}"
-                                    data-bs-municipality="{{ $data->municipality->municipality_name }}"
-                                    data-bs-requested="{{$data->requested_name}}" 
-                                    data-bs-liquidation="{{$data->mrf_liquidations}}" 
-                                    data-bs-requested-date="{{ date('F d, Y', strtotime($data->requested_by)) }}"
-                                    data-bs-mcrt-details="{{ $data->MCRTNo.','.$data->MCRTDate.','.$data->ReturnedBy.','.$data->Note }}"
-                                    data-bs-requested-date="{{ date('F d, Y', strtotime($data->requested_by)) }}">
-                                    <i class="fa fa-eye"></i></button>
-
-                                  </div>
-                              </div> -->
                           </th>
                       </tr>
                   @endforeach

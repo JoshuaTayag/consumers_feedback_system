@@ -9,15 +9,19 @@ class MaterialRequisitionFormMcrtDetails extends Model
 {
     use HasFactory;
 
-    protected $table = 'MCRT Transaction Table';
 
     public function material_requisition_form()
     {
-        return $this->belongsTo('App\Models\MaterialRequisitionForm',  'mcrt_no', 'MCRTNo');
+        return $this->belongsTo('App\Models\MaterialRequisitionForm',  'mcrt_no', 'mcrt_id');
     }
 
     public function stock_item()
     {
-        return $this->hasOne('App\Models\Datamanagement\StockedItem', 'ItemCode', 'CodeNo');
+        return $this->hasOne('App\Models\Datamanagement\StockedItem', 'id', 'item_id');
     }
+    protected $connection = 'pgsql';
+    protected $table = 'mcrt_item';
+    protected $primaryKey = 'id';
+    protected $keyType = 'string';  // Tell Laravel the primary key is a string (UUID)
+    public $incrementing = false;  
 }

@@ -33,6 +33,9 @@
                     <input type="text" placeholder="Search by Meter No" id="search_meter_no" name="meter_no" class="form-control" value="{{ request('meter_no') }}">
                 </div>
                 <div class="col-lg-2">
+                  <input type="text" placeholder="Search by Old Meter No" id="search_meter_no" name="old_meter_no" class="form-control" value="{{ request('old_meter_no') }}">
+                </div>
+                <div class="col-lg-2">
                   <button type="submit" class="btn btn-info"><i class="fa fa-search"></i></button>
                   <button type="button" class="btn btn-info" onclick="clearSearch()">Clear</button>
                 </div>
@@ -41,10 +44,6 @@
             <div class="card-body">
               <div class="row" id="show_data">
               @foreach ($cm_requests as $key => $cm_request)
-                @php
-                  $consumerTypes = collect(Config::get('constants.consumer_types'));
-                  $consumerType = $consumerTypes->firstWhere('id', $cm_request->consumer_type);
-                @endphp
                 <div class="col-lg-4 mb-4">
                   <div class="card h-100">
                     <div class="card-header p-1 bg-{{ $cm_request->status == 3 ? 'warning' : ($cm_request->status == 1 || $cm_request->status == 2 ? 'success' : 'danger')}}"></div>
@@ -100,7 +99,7 @@
                       </div>
                       <div class="row border-bottom">
                         <div class="col-lg-5 border-end">Account:</div>
-                        <div class="col-lg-7 ">{{ substr($cm_request->account_number, 0, 2) }}-{{ substr($cm_request->account_number, 2, 4) }}-{{ substr($cm_request->account_number, 6, 4) }} </div>
+                        <div class="col-lg-7 "><a style="text-decoration: none;" target="_blank" href="{{ route('ledger.search', ['account_no' => $cm_request->account_number]) }}">{{ substr($cm_request->account_number, 0, 2) }}-{{ substr($cm_request->account_number, 2, 4) }}-{{ substr($cm_request->account_number, 6, 4) }}</a></div>
                       </div>
                       <div class="row border-bottom">
                         <div class="col-lg-5 border-end">Process Date:</div>
@@ -116,7 +115,7 @@
                       </div>
                       <div class="row border-bottom">
                         <div class="col-lg-5 border-end">Consumer Type:</div>
-                        <div class="col-lg-7 ">{{ $consumerType['name'] ?? 'Unknown Type'}}</div>
+                        <div class="col-lg-7 ">{{ $cm_request->consumer_type ?? 'Unknown Type'}}</div>
                       </div>
                       <div class="row border-bottom">
                         <div class="col-lg-5 border-end">Application Status:</div>
@@ -229,7 +228,7 @@
   application_status.addEventListener('change', function() {
       // Toggle visibility of text field based on selected option
       if (application_status.value == 2) {
-        crew.setAttribute('required', 'required');
+        date_acted.setAttribute('required', 'required');
         time.setAttribute('required', 'required');
 
         meter_details.forEach(function(input) {
@@ -253,7 +252,7 @@
             input.disabled = true;
             input.value = '';
         });
-        crew.removeAttribute('required');
+        date_acted.removeAttribute('required');
         time.removeAttribute('required');
 
         $('#meter_no').removeClass('is-valid');

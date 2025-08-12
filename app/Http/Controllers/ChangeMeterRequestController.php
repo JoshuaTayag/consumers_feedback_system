@@ -96,15 +96,16 @@ class ChangeMeterRequestController extends Controller
                 'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
                 'membership_or' => ['required'],
                 // 'membership_date' => ['required'],
-                'consumer_type' => ['required'],
+                // 'consumer_type' => ['required'],
                 'meter_code_no' => ['required'],
                 'process_date' => ['required'],
                 'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo'],
             ]);
 
-            // $year = date("Y");
-            $control_id = Helper::IDGeneratorChangeMeter(new ChangeMeterRequest, 'control_no', 4, 'CM');
-            // dd($request);
+            $year = date("y");
+
+            $control_id = Helper::IDGeneratorChangeMeter(new ChangeMeterRequest, 'control_no', 5, $year, 'CM');
+
             DB::beginTransaction();
             try {
                 // Perform the first operation (creating a record in ServiceConnectOrder)
@@ -122,7 +123,7 @@ class ChangeMeterRequestController extends Controller
                     "care_of" => $request->care_of,
                     "feeder" => $request->feeder,
                     "membership_or" => $request->membership_or,
-                    "consumer_type" => $request->consumer_type,
+                    "consumer_type" => $request->consumer_type ? $request->consumer_type : 'N/A',
                     "old_meter_no" => $request->old_meter,
                     "meter_or_number" => $request->meter_or_no,
                     "meter_or_date" => null,
@@ -385,6 +386,16 @@ class ChangeMeterRequestController extends Controller
     {
         $change_meter_request = ChangeMeterRequest::find($id);
 
+        $coordinates = DB::connection('sqlSrvBilling')
+            ->table('Consumers Table')
+            ->where('Accnt No', $change_meter_request->account_number)
+            ->select('latitude', 'longitude')
+            ->first(); // Fetch the coordinates as an object
+
+        // Add coordinates to the model instance
+        $change_meter_request->latitude = $coordinates->latitude ?? null;
+        $change_meter_request->longitude = $coordinates->longitude ?? null;
+
         view()->share('data', $change_meter_request);
         $pdf = PDF::loadView('service_connect_order.change_meter.print_cm_request_pdf');
         return $pdf->stream();
@@ -568,6 +579,7 @@ class ChangeMeterRequestController extends Controller
         $f_name = $request->input('first_name');
         $l_name = $request->input('last_name');
         $meter_no = $request->input('meter_no');
+        $old_meter_no = $request->input('old_meter_no');
         // $products = Product::where('name', 'like', "%$query%")->get();
         $cm_request = ChangeMeterRequest::query();
 
@@ -585,6 +597,10 @@ class ChangeMeterRequestController extends Controller
 
         if ($meter_no !== null && $meter_no !== '') {
             $cm_request->where('new_meter_no', 'like', "%$meter_no%");
+        }
+
+        if ($old_meter_no !== null && $old_meter_no !== '') {
+            $cm_request->where('old_meter_no', 'like', "%$old_meter_no%");
         }
         $cm_requests = $cm_request->orderBy('control_no','DESC')->paginate(9);
 
@@ -662,11 +678,11 @@ class ChangeMeterRequestController extends Controller
 
             if($search == ''){
                 $accounts = DB::table('Consumers Table as ct')
-                ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No');
+                ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No', 'ct.Cons Type');
 
             } else{
                 $accounts = DB::table('Consumers Table as ct')
-                ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No')
+                ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No', 'ct.Cons Type')
                 ->where('ct.Accnt No', 'like', '%' .$search . '%');
             }
 

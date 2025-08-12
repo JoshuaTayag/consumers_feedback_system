@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('care_of')->nullable();
             $table->string('feeder');
             $table->string('membership_or')->nullable();
-            $table->integer('consumer_type');
+            $table->string('consumer_type');
 
             $table->string('old_meter_no');
             $table->string('meter_or_number')->nullable();

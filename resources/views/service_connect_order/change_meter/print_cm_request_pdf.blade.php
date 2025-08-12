@@ -130,10 +130,6 @@
   </style>
 </head>
 <body>
-  @php
-    $consumerTypes = collect(Config::get('constants.consumer_types'));
-    $consumerType = $consumerTypes->firstWhere('id', $data->consumer_type);
-  @endphp
   {{-- <header>
     <img src="{{ public_path('images/logo.png') }}" alt="" class="img-logo">
     <img src="{{ public_path('images/iso.png') }}" alt="" class="img-iso">
@@ -208,8 +204,14 @@
           <td>C/O: {{$data->care_of}}</td>
         </tr>
         <tr><td>Contact #: {{$data->contact_no}}</td></tr>
-        <tr><td>Address: {{$data->sitio.', '.$data->barangay->barangay_name.', '.$data->municipality->municipality_name}}</td></tr>
-        <tr><td>Consumer Type: {{ $consumerType['name'] ?? 'Unknown Type'}}</td></tr>
+        <tr>
+          <td>Address: {{$data->sitio.', '.$data->barangay->barangay_name.', '.$data->municipality->municipality_name}}</td>
+          <td>Latitude: {{$data->latitude}}</td>
+        </tr>
+        <tr>
+          <td>Consumer Type: {{ $data->consumer_type ?? 'Unknown Type'}}</td>
+          <td>Longtitude: {{$data->longitude}}</td>
+        </tr>
         <tr><td>Meter OR #: {{$data->meter_or_number }}</td></tr>
         <tr><td>Remarks: {{$data->remarks}}</td></tr>
         <tr><td>Reference/Landmark: {{$data->location}}</td></tr>

@@ -2,14 +2,14 @@
 <tr id="{{ $loop->iteration }}">
   <th>
     {{-- <input type="text" name="temp_nea_code|{{$temp_item->id}}" class="form-control" placeholder="{{$temp_item->item->ItemCode}}"> --}}
-    <input type="text" class="form-control" value="{{$temp_item->item->ItemCode}}" readonly>
+    <input type="text" class="form-control" value="{{$temp_item->item->code}}" readonly>
   </th>
   <th>
     <input type="hidden" class="form-control" name="item_id[]" value="{{$temp_item->item_id}}" readonly>
-    <input type="text" class="form-control" value="{{$temp_item->item->Description}}" readonly>
+    <input type="text" class="form-control" value="{{$temp_item->item->description}}" readonly>
   </th>
   <th>
-    <input type="number" class="form-control" value="{{$temp_item->item->AveragePrice}}" readonly>
+    <input type="number" class="form-control" value="{{$temp_item->item->price}}" readonly>
   </th>
   <th>
     @if(isset($structure))

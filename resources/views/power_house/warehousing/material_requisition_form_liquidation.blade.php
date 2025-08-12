@@ -8,7 +8,8 @@
     @if($mrf->iad_remarks)
       <div class="col-lg-12">
           <div class="alert alert-danger" role="alert">
-              IAD Remarks: {{ $mrf->iad_remarks }}
+            <p class="fw-bold">TSD Manager</p>
+              Remarks: {{ $mrf->iad_remarks }}
           </div>
       </div>
     @endif
@@ -16,7 +17,8 @@
     @if($mrf->warehouse_remarks)
       <div class="col-lg-12">
           <div class="alert alert-danger" role="alert">
-              Warehouse Remarks: {{ $mrf->warehouse_remarks }}
+            <p class="fw-bold">Richard Samson</p>
+              <p>Remarks: {{ $mrf->warehouse_remarks }}</p>
           </div>
       </div>
     @endif
@@ -186,8 +188,8 @@
                       </div>
                       <div class="col-lg-3">
                         <div class="mb-2">
-                          <label for="image_path" class="form-label mb-1">Upload Image (Maximum of 3 images only)</label>
-                          <input type="file" class="form-control" id="image_path" name="image_path[]" multiple>
+                          <label for="image_path" class="form-label mb-1">Upload Image (Maximum of 3 images only) *</label>
+                          <input type="file" class="form-control" id="image_path" name="image_path[]" multiple required>
                         </div>
                       </div>
                     </div>
@@ -207,7 +209,7 @@
                               <select id="mcrt_no" class="form-control" name="mcrt_no">
                                 <option value="">-------</option>
                                 @foreach ($mcrts as $mcrt)          
-                                  <option value="{{ $mcrt->MCRTno }}" id="{{ $mcrt->MCRTno }}">{{ $mcrt->MCRTno }}</option>
+                                  <option value="{{ $mcrt->mcrt_number }}" id="{{ $mcrt->mcrt_number }}">{{ $mcrt->mcrt_number }}</option>
                                 @endforeach 
                               </select>
                             </div>
@@ -219,7 +221,7 @@
                               <select id="mst_no" class="form-control" name="mst_no">
                                 <option value="">-------</option>
                                 @foreach ($msts as $mst)          
-                                  <option value="{{ $mst->MSTNo }}" id="{{ $mst->MSTNo }}">{{ $mst->MSTNo }}</option>
+                                  <option value="{{ $mst->mst_number }}" id="{{ $mst->mst_number }}">{{ $mst->mst_number }}</option>
                                 @endforeach 
                               </select>
                             </div>
@@ -380,7 +382,7 @@
               </div>
             </div> -->
             <div class="row">
-              <div class="col-lg-6 mt-2">
+              <div class="col-lg-12 mt-2 text-end">
                 <input type="submit" class="btn btn-primary btn-sm fa fa-trash" value="Save">
               {!! Form::close() !!} 
                 <form method="POST" action="{{ route('material-requisition-form.destroy', $mrf->id) }}">

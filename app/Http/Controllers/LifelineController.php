@@ -416,38 +416,68 @@ class LifelineController extends Controller
     }
 
     // Fetch records
-    public function getAccountDetails(Request $request){
+    public function getAccountDetailsNotExisting(Request $request){
         $search = $request->search;
-        $typeName = $request->has('byName') ? $request->byName : null;
-        
         $lifeline_data = Lifeline::pluck('account_no');
+        
+        if($search == ''){
+            $accounts = DB::table('Consumers Table as ct')
+            ->leftJoin('lifelines as ll', 'ct.Accnt No', '=', 'll.account_no')
+            ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No')
+            ->whereNull('ll.account_no'); // Ensures only non-existing accounts are selected
 
-        if ($typeName) {
+        }else{
             $accounts = DB::table('Consumers Table as ct')
             ->leftJoin('lifelines as ll', 'ct.Accnt No', '=', 'll.account_no')
             ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No')
             ->whereNull('ll.account_no') // Ensures only non-existing accounts are selected
-            ->where('ct.Name', 'like', '%' .$search . '%');
-        } else {
-            if($search == ''){
-                $accounts = DB::table('Consumers Table as ct')
-                ->leftJoin('lifelines as ll', 'ct.Accnt No', '=', 'll.account_no')
-                ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No')
-                ->whereNull('ll.account_no'); // Ensures only non-existing accounts are selected
-
-            } else{
-                $accounts = DB::table('Consumers Table as ct')
-                ->leftJoin('lifelines as ll', 'ct.Accnt No', '=', 'll.account_no')
-                ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No')
-                ->whereNull('ll.account_no') // Ensures only non-existing accounts are selected
-                ->where('ct.Accnt No', 'like', '%' .$search . '%');
-            }
+            ->where('ct.Accnt No', 'like', '%' .$search . '%');
         }
         $data = $accounts->paginate(10, ['*'], 'page', $request->page);
         // dd($data);
         return response()->json($data); 
     } 
 
+    public function getAccountDetails(Request $request){
+        $search = $request->search;
+        // dd($search);
+
+        if($search == ''){
+
+        $accounts = DB::table('Consumers Table as ct')
+        ->leftJoin('Consumer Masterdatabase Table as membership', 'ct.OR No', '=', 'membership.OR No')
+        ->select(
+            'ct.Accnt No as id',
+            'ct.Name',
+            'ct.Address',
+            'ct.OR No as or_no',
+            'ct.Date',
+            'ct.Prev Reading',
+            'ct.Serial No',
+            DB::raw("FORMAT(membership.[OR No Issued], 'yyyy-MM-dd') as or_no_date")
+        );
+
+        }else{
+
+        $accounts = DB::table('Consumers Table as ct')
+        ->leftJoin('Consumer Masterdatabase Table as membership', 'ct.OR No', '=', 'membership.OR No')
+        ->select(
+            'ct.Accnt No as id',
+            'ct.Name',
+            'ct.Address',
+            'ct.OR No as or_no',
+            'ct.Date',
+            'ct.Prev Reading',
+            'ct.Serial No',
+            DB::raw("FORMAT(membership.[OR No Issued], 'yyyy-MM-dd') as or_no_date")
+        )
+        ->where('ct.Accnt No', 'like', '%' .$search . '%');
+        }
+        $data = $accounts->paginate(10, ['*'], 'page', $request->page);
+        // dd($data);
+        return response()->json($data); 
+    } 
+    
     public function lifelineCoverageCertificate(Request $request, string $id)
     {
         $lifeline_data = Lifeline::find($id);

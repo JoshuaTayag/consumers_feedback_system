@@ -11,15 +11,16 @@ use Image;
 use App\Helpers\Helper;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
+use PDF;
 
 class ElectricianController extends Controller
 {
     function __construct()
     {
-         $this->middleware('permission:electrician-list|electrician-create|electrician-edit|electrician-delete', ['only' => ['index', 'electricianComplaintIndex', 'electricianComplaintView']]);
-         $this->middleware('permission:electrician-create', ['only' => ['create', 'store', 'electricianComplaintCreate', 'electricianComplaintStore']]);
-         $this->middleware('permission:electrician-edit', ['only' => ['edit','update', 'electricianComplaintEdit', 'electricianComplaintUpdate']]);
-         $this->middleware('permission:electrician-delete', ['only' => ['destroy', 'electricianComplaintDelete']]);
+        $this->middleware('permission:electrician-list|electrician-create|electrician-edit|electrician-delete', ['only' => ['index', 'electricianComplaintIndex', 'electricianComplaintView', 'electricianActivityIndex']]);
+        $this->middleware('permission:electrician-create', ['only' => ['create', 'store', 'electricianComplaintCreate', 'electricianComplaintStore', 'electricianActivityCreate', 'electricianActivityStore']]);
+        $this->middleware('permission:electrician-edit', ['only' => ['edit', 'update', 'electricianComplaintEdit', 'electricianComplaintUpdate', 'electricianActivityEdit', 'electricianActivityUpdate']]);
+        $this->middleware('permission:electrician-delete', ['only' => ['destroy', 'electricianComplaintDelete', 'electricianActivityDelete']]);
     }
 
     /**
@@ -27,7 +28,7 @@ class ElectricianController extends Controller
      */
     public function index()
     {
-        $data = Electrician::orderBy('id','asc')->paginate(10);
+        $data = Electrician::orderBy('id','desc')->paginate(10);
         return view('electrician.index')->with(compact('data'));
     }
 
@@ -699,8 +700,10 @@ class ElectricianController extends Controller
         $this->validate($request, [
             'name_of_activity' => ['required', 'string', 'max:255'],
             'conducted_by' => ['required', 'string', 'max:255'],
-            'date_of_activity' => ['required'],
-            'time_conducted' => ['required'],
+            'date_of_activity_start' => ['required'],
+            'date_of_activity_end' => ['required'],
+            'time_conducted_start' => ['required'],
+            'time_conducted_end' => ['required'],
             'venue' => ['required'],
             'participants' => ['required'],
             'attendees' => ['required'],
@@ -716,15 +719,17 @@ class ElectricianController extends Controller
                 array(
                     'activity_name' => $request->name_of_activity,
                     'facilited_by' => $request->conducted_by,
-                    'date_conducted' => $request->date_of_activity,
-                    'time_conducted' => $request->time_conducted,
+                    'date_conducted_from' => $request->date_of_activity_start,
+                    'date_conducted_to' => $request->date_of_activity_end,
+                    'time_conducted_from' => $request->time_conducted_start,
+                    'time_conducted_to' => $request->time_conducted_end,
                     'venue' => $request->venue,
                     'target_participants' => $request->participants,
                     'status' => 0,
                     'created_at' => $now
                 )
             );
-            
+
             foreach ($attendees as $key => $value) {
                 DB::table('electrician_attendance')->insert(
                     array(
@@ -735,7 +740,7 @@ class ElectricianController extends Controller
             }
             DB::commit();
             return redirect(route('electricianActivityIndex'))->withSuccess('Record successfully created!');
-            
+
         } catch (\Throwable $e) {
             // If an exception occurs, rollback the database transaction
             DB::rollBack();
@@ -752,31 +757,133 @@ class ElectricianController extends Controller
     public function electricianActivityEdit($id)
     {
         $activity = DB::table('electrician_activities')->where('id', $id)->first();
-        $electricians = DB::table('electrician_attendance')->where('activity_id', $id)->pluck('electrician_id');
-        // $electricians = Electrician::whereIn('id', $electricians)
-        // ->orderBy('last_name','desc')
-        // ->select('id','first_name','last_name')
-        // ->get()
-        // ->map(function ($electrician) {
-        //     return $electrician->getAttributes();
-        // });
+        $electricianIds = DB::table('electrician_attendance')->where('activity_id', $id)->pluck('electrician_id');
 
-        $electricians = Electrician::whereIn('id', $electricians)->orderBy('last_name','desc')->paginate(10);
-        // return response()->json($electricians); 
-
-    //     $data = Electrician::whereIn('id', $electricians)
-    // ->orderBy('last_name', 'desc')
-    // ->select('id', 'first_name', 'last_name')
-    // ->get();
-
+        // Get the electricians as a simple collection (not paginated) for JavaScript
+        $electricians = Electrician::whereIn('id', $electricianIds)
+            ->orderBy('last_name', 'desc')
+            ->select('id', 'first_name', 'last_name')
+            ->get();
 
         $districts = DB::connection('sqlSrvMembership')
-        ->table('districts')
-        ->select('*')
-        ->get();
-        //  dd($electricians);
-        //  return($electricians);
-        return view('electrician.activity.edit')->with(compact('activity','districts','electricians'));
+            ->table('districts')
+            ->select('*')
+            ->get();
+
+        return view('electrician.activity.edit')->with(compact('activity', 'districts', 'electricians'));
+    }
+
+    public function electricianActivityUpdate(Request $request, $id)
+    {
+        // validate requests
+        $this->validate($request, [
+            'name_of_activity' => ['required', 'string', 'max:255'],
+            'conducted_by' => ['required', 'string', 'max:255'],
+            'date_of_activity_start' => ['required'],
+            'date_of_activity_end' => ['required'],
+            'time_conducted_start' => ['required'],
+            'time_conducted_end' => ['required'],
+            'venue' => ['required'],
+            'participants' => ['required'],
+            'attendees' => ['required'],
+        ]);
+
+        $now = DB::raw('CURRENT_TIMESTAMP');
+        $attendees = $request->attendees;
+
+        try {
+            // Start a database transaction
+            DB::beginTransaction();
+
+            // UPDATE ELECTRICIAN ACTIVITY
+            DB::table('electrician_activities')->where('id', $id)->update(
+                array(
+                    'activity_name' => $request->name_of_activity,
+                    'facilited_by' => $request->conducted_by,
+                    'date_conducted_from' => $request->date_of_activity_start,
+                    'date_conducted_to' => $request->date_of_activity_end,
+                    'time_conducted_from' => $request->time_conducted_start,
+                    'time_conducted_to' => $request->time_conducted_end,
+                    'venue' => $request->venue,
+                    'target_participants' => $request->participants,
+                    'status' => 0,
+                    'updated_at' => $now
+                )
+            );
+
+            // Delete existing attendance records
+            DB::table('electrician_attendance')->where('activity_id', $id)->delete();
+
+            // Insert new attendance records
+            foreach ($attendees as $key => $value) {
+                DB::table('electrician_attendance')->insert(
+                    array(
+                        'electrician_id' => $value,
+                        'activity_id' => $id,
+                    )
+                );
+            }
+
+            DB::commit();
+            return redirect(route('electricianActivityIndex'))->withSuccess('Record successfully updated!');
+
+        } catch (\Throwable $e) {
+            // If an exception occurs, rollback the database transaction
+            DB::rollBack();
+
+            // You can log the exception for further investigation if needed
+            \Log::error($e);
+
+            // Return an error response or redirect to an error page
+            return response()->json(['error' => $e], 500);
+        }
+    }
+
+    public function electricianMasterlistReport()
+    {
+        $districts = DB::connection('sqlSrvMembership')
+            ->table('districts')
+            ->select('*')
+            ->get();
+        return view('electrician.electrician_report')->with(compact('districts'));
+    }
+
+    public function electricianMasterlistReportPdf(Request $request)
+    {
+        $district = $request->district;
+        $date_of_application_from = $request->date_of_application_from;
+        $date_of_application_to = $request->date_of_application_to;
+        $application_status = $request->application_status;
+
+        $electricians = Electrician::with(['electrician_addresses' => function($query) {
+            $query->orderBy('municipality_id', 'asc');
+        }])->orderBy('last_name', 'asc');
+
+        if ($district != 'all') {
+            $electricians->whereHas('electrician_addresses', function ($query) use ($district) {
+            $query->where('district_id', $district);
+            });
+        }
+        if ($date_of_application_from) {
+            $electricians->where('date_of_application', '>=', $date_of_application_from);
+        }
+        if ($date_of_application_to) {
+            $electricians->where('date_of_application', '<=', $date_of_application_to);
+        }
+        if ($application_status) {
+            $electricians->where('application_status', $application_status);
+        }
+
+        $electricians = $electricians->get()->sortBy(function($item) {
+            return optional($item->electrician_addresses->first())->municipality_id;
+        })->values();
+
+
+        // dd($electricians);
+
+        $pdf = PDF::loadView('electrician.electrician_masterlist_pdf', compact('electricians'))
+            ->setPaper('a4', 'landscape');
+        return $pdf->stream('electrician_masterlist_report.pdf');
     }
     
 }

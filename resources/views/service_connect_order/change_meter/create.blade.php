@@ -137,15 +137,16 @@
                         {{ Form::date('membership_date', null, array('class' => 'form-control', 'readonly')) }}
                     </div>
                   </div>
-                  <div class="col-lg-3">
+                  <div class="col-lg-1">
                     <div class="mb-2">
-                        {{ Form::label('consumer_type', 'Consumer Type *') }}
-                        <select id="consumer_type" class="form-control" name="consumer_type" value="{{ old('consumer_type')}}" required>
+                        {{ Form::label('consumer_type', 'Type *') }}
+                        {{ Form::text('consumer_type', null, array('class' => 'form-control', 'readonly')) }}
+                        {{-- <select id="consumer_type" class="form-control" name="consumer_type" value="{{ old('consumer_type')}}" required>
                           <option value=""></option>
                           @foreach (Config::get('constants.consumer_types') as $consumer_type)          
                             <option value="{{ $consumer_type['id'] }}" id="">{{ $consumer_type['name'] }}</option>
                           @endforeach 
-                        </select>
+                        </select> --}}
                     </div>
                   </div>
                   <!-- <div class="col-lg-3">
@@ -182,13 +183,13 @@
                         {{ Form::date('date_installed', null, array('class' => 'form-control')) }}
                     </div>
                   </div> -->
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('meter_or_no', 'Meter OR #') }}
                         {{ Form::text('meter_or_no', null, array('class' => 'form-control')) }}
                     </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('process_date', 'Process Date *') }}
                         {{ Form::date('process_date', null, array('class' => 'form-control', 'required')) }}
@@ -236,8 +237,8 @@
                   </div>
                   <div class="col-lg-6">
                     <div class="mb-2">
-                      <label class="form-label mb-1">Landmark </label>
-                      <textarea class="form-control" name="location" id="location"></textarea>
+                      <label class="form-label mb-1">Landmark *</label>
+                      <textarea class="form-control" name="location" id="location" required></textarea>
                     </div>
                   </div>
                 </div>
@@ -321,6 +322,7 @@
     document.getElementById('first_name').value = trimmedFirstName;
     document.getElementById('membership_or').value = data['OR No'];
     document.getElementById('membership_date').value = dateOnlyString;
+    document.getElementById('consumer_type').value = data['Cons Type'];
     // document.getElementById('last_reading').value = parseFloat(data['Prev Reading'].toFixed(0));
     var prevReading = parseFloat(data['Prev Reading']);
     if (!isNaN(prevReading)) {

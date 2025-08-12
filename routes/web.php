@@ -116,7 +116,8 @@ Route::group(['middleware' => 'auth'], function () {
     // lifeline
     Route::resource('lifeline', App\Http\Controllers\LifelineController::class);
     Route::post('lifeline-store-non-poor', [App\Http\Controllers\LifelineController::class, 'storeNonPoor'])->name('lifeline.store.non_poor');
-    Route::get('fetch-accounts-records', [App\Http\Controllers\LifelineController::class, 'getAccountDetails'])->name('fetchAccounts');
+    Route::get('fetch-accounts-records', [App\Http\Controllers\LifelineController::class, 'getAccountDetailsNotExisting'])->name('fetchAccounts');
+    Route::get('fetch-accounts', [App\Http\Controllers\LifelineController::class, 'getAccountDetails'])->name('fetchAllAccounts');
     Route::get('lifeline-approval', [App\Http\Controllers\LifelineController::class, 'approveLifelineIndex'])->name('approvedLifelineIndex');
     Route::put('lifeline-approval/{id}', [App\Http\Controllers\LifelineController::class, 'approveLifeline'])->name('LifelineUpdate');
     Route::put('lifeline-approval', [App\Http\Controllers\LifelineController::class, 'approveLifelineMultiple'])->name('LifelineMassUpdate');
@@ -128,7 +129,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     // Strucutures
     Route::resource('structure', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class);
-    Route::get('fetch-items', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'fetchItemsFromCmbis'])->name('fetchItems');
+    Route::get('fetch-items', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'fetchItemsFromPrism'])->name('fetchItems');
 
     // TEMP Structures
     Route::post('edit-structure-items', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'updateStructureItem'])->name('updateStructureItem');
@@ -158,6 +159,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('mrf-approval/liquidation/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationApprovalUpdate'])->name('mrfLiquidationApprovalUpdate');
     Route::get('mrf-approval/liquidation/view/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationApprovalView'])->name('mrfLiquidationApprovalView');
     Route::put('mrf-approval/liquidation/disapproved/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationIadDisapproved'])->name('mrfLiquidationIadDisapproved');
+    Route::get('fetch-MER', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'fetchMaterialRequisitionRecords'])->name('fetchMaterialRequisitionRecords');
 
     //TEMP MRF
     Route::post('edit-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItems'])->name('updateItems');
@@ -173,8 +175,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('electrician-complaint-create', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintCreate'])->name('electricianComplaintCreate');
     Route::post('electrician-complaint-store', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintStore'])->name('electricianComplaintStore');
     Route::delete('electrician-complaint-delete/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintDelete'])->name('electricianComplaintDelete');
+    Route::delete('electrician-activity-delete/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianActivityDelete'])->name('electricianActivityDelete');
     Route::get('electrician-complaint-edit/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintEdit'])->name('electricianComplaintEdit');
     Route::put('electrician-complaint-update/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintUpdate'])->name('electricianComplaintUpdate');
+    Route::put('electrician-activity-update/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianActivityUpdate'])->name('electricianActivityUpdate');
+    Route::get('electrician-masterlist-report', [App\Http\Controllers\ElectricianController::class, 'electricianMasterlistReport'])->name('electricianMasterlistReport');
+    Route::get('electrician-masterlist-report-pdf', [App\Http\Controllers\ElectricianController::class, 'electricianMasterlistReportPdf'])->name('electricianMasterlistReportPdf');
     Route::get('electrician-complaint-view/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintView'])->name('electricianComplaintView');
     Route::get('fetch-electrician', [App\Http\Controllers\ElectricianController::class, 'fetchElectricianApplication'])->name('fetchElectricianApplication');
     Route::get('electrician-activities', [App\Http\Controllers\ElectricianController::class, 'electricianActivityIndex'])->name('electricianActivityIndex');
@@ -188,6 +194,7 @@ Route::group(['middleware' => 'auth'], function () {
     // LEDGER
     Route::get('ledger', [App\Http\Controllers\AccountLedgerController::class, 'indexLedger'])->name('ledger.index');
     Route::get('ledger/search', [App\Http\Controllers\AccountLedgerController::class, 'searchLedger'])->name('ledger.search');
+    Route::get('fetch-accounts-records-by-name', [App\Http\Controllers\AccountLedgerController::class, 'getAccountName'])->name('getAccountName');
 
     // POWER BILL
     Route::resource('change-meter-request-transact', App\Http\Controllers\ChangeMeterRequestTransactionController::class);

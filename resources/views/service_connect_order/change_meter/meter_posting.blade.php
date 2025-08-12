@@ -54,12 +54,12 @@
               <input type="text" value="" id="care_of" name="care_of" class="form-control">
             </div>
             <div class="col-lg-2">
-              <label for="last_reading">Last Reading:</label>
-              <input type="text" value="" id="last_reading" name="last_reading" class="form-control" >
+              <label for="last_reading">Last Reading *:</label>
+              <input type="number" value="" id="last_reading" name="last_reading" class="form-control" >
             </div>
             <div class="col-lg-2">
               <label for="reading_initial">Reading Initial:</label>
-              <input type="text" value="" id="reading_initial" name="reading_initial" class="form-control" >
+              <input type="number" value="" id="reading_initial" name="reading_initial" class="form-control" >
             </div>
           </div>
           <hr>

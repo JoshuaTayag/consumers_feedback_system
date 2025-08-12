@@ -45,14 +45,16 @@ class StockedItem extends Model
 
         // $user = User::where('id', )
         //     ->get();
-        $items = DB::connection('mysqlCmbis')
+        $items = DB::connection('pgsql')
         ->table('unit')
-        ->where('UnitId', $this->UnitId)
-        ->select('UnitName')->get();
-        return $items[0]->UnitName;
+        ->where('id', $this->unit_id)
+        ->select('name')->get();
+        return $items->isNotEmpty() ? $items[0]->name : null;
     }
 
-    protected $connection = 'mysqlCmbis';
+    protected $connection = 'pgsql';
     protected $table = 'item';
-    protected $primaryKey = 'ItemId';
+    protected $primaryKey = 'id';
+    protected $keyType = 'string';  // Tell Laravel the primary key is a string (UUID)
+    public $incrementing = false;  
 }

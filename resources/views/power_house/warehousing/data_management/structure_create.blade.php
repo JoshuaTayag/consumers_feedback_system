@@ -23,7 +23,7 @@
               <div class="col-lg-2">
                 <div class="mb-2">
                   <label for="structure_code" class="form-label mb-1">Structure Code *</label>
-                    <input type="text" class="form-control" id="structure_code" name="structure_code" required>
+                    <input type="text" class="form-control" id="structure_code" name="structure_code" old="structure_code" required>
                 </div>
               </div>
               <div class="col-lg-2">
@@ -61,7 +61,7 @@
                 <div class="mb-2">
                   <table class="table table-bordered data-table">
                     <tr>
-                      <th>Nea Code</th>
+                      <th>Code</th>
                       <th>Description</th>
                       <th>Unit Cost</th>
                       <th>Quantity</th>
@@ -161,16 +161,16 @@ $(document).ready(function () {
       if (data.loading){
         return data.text
       }
-      return data.id + " | " +data.ItemCode + " | " + data.Description
+      return data.code + " | " + data.description
      }
 
      function templateSelection(data){
-      return data.id + " | " +data.ItemCode + " | " + data.Description
+      return data.code + " | " + data.description;
      }
 
      $('#add_item').click(function() {
       var item_id = $('#item').val();
-      console.log(item_id);
+      // console.log(item_id);
       $.ajax({
       method: 'POST',
       url: "{{route('updateStructureItem')}}",
