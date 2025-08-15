@@ -101,7 +101,7 @@
               </div>
             </div>
           @endif
-          {!! Form::open(array('route' => ['material-requisition-form.update', $mrf->id],'method'=>'PUT')) !!}
+          {!! Form::open(array('route' => ['material-requisition-form.update', $mrf->id],'method'=>'PUT', 'enctype' => 'multipart/form-data')) !!}
           <div class="row">
             <div class="col-lg-6">
               <div class="card">
@@ -251,7 +251,7 @@
                   <div class="row mx-1">
                     @foreach ($mrf->mrf_liquidations as $liquidations)    
                       <div class="col-lg-6 mb-1 border">
-                        <span class="fw-bold">{{ $liquidations->type }}# {{ $liquidations->type_number }}</span>
+                        <span class="fw-bold">{{ $liquidations->type }}{{ $liquidations->type_number ? '# ' . $liquidations->type_number : '' }} <br> Date: {{ date('m/d/Y', strtotime($liquidations->created_at)) }}</span>
                       </div>  
                     @endforeach
                   </div>
@@ -368,7 +368,15 @@
                           </table>
                       </div>
                     </div>
-                  
+
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            <label for="image_path" class="form-label mb-1">Upload Image (Maximum of 3 images
+                                only)</label>
+                            <input type="file" class="form-control" id="image_path" name="image_path[]"
+                                multiple>
+                        </div>
+                    </div>
 
                     <div class="col-lg-12">
                       <div class="mb-2">

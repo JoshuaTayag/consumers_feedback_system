@@ -25,7 +25,7 @@
                             <div class="col-lg-6 text-end">
                                 <a class="btn btn-success" href="{{ route('mrfLiquidationReport') }}" target="_blank"> <i
                                         class="fa fa-eye"></i> Liquidation Report </a>
-                                @if ($unliquidated_mrf < 10 && $daysPassed <= 30)
+                                @if ($unliquidated_mrf_count < 10 && $daysPassed <= 30)
                                     <a class="btn btn-success" href="{{ route('material-requisition-form.create') }}">
                                         Create New Request </a>
                                 @endif

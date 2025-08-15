@@ -51,12 +51,12 @@
 
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-md-10 mx-auto align-center">
-                                    <img src="{{asset('images/logo.png')}}" class="img-fluid mx-auto" style="max-width:20%;" alt="...">
-                                    <span class="fs-1"> <strong>Create an Account</strong></span>
+                                    <div class="col-md-10 mx-auto align-center text-center">
+                                    {{-- <img src="{{asset('images/logo.png')}}" class="img-fluid mx-auto" style="max-width:20%;" alt="..."> --}}
+                                    <span class="fs-1"> <strong>Please contact the IT Division to register!</strong></span>
                                     </div>
                                 </div>
-                                <div class="row mb-3">
+                                {{-- <div class="row mb-3">
                                     <div class="col-md-10 mx-auto">
                                         <span><a href="{{ route('login') }}">I already have an account</a></span>
                                     </div>
@@ -140,7 +140,7 @@
                                     </div>
 
                                     
-                                </form>
+                                </form> --}}
                             </div>
                         </div>
                     </div>
