@@ -13,4 +13,12 @@ class MaterialRequisitionFormLiquidation extends Model
     {
         return $this->belongsTo('App\Models\MaterialRequisitionForm',  'material_requisition_form_id', 'id');
     }
+
+    public function seriv_details(){
+        return $this->hasOne('App\Models\MaterialRequisitionFormSeriv', 'seriv_number', 'type_number');
+    }
+
+    public function mrv_details(){
+        return $this->hasOne('App\Models\MaterialRequisitionFormMrv', 'mrv_number', 'type_number');
+    }
 }
