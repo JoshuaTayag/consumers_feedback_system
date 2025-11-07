@@ -11,6 +11,6 @@ class TempStructureItem extends Model
 
     public function item()
     {
-        return $this->hasOne('App\Models\Datamanagement\StockedItem', 'ItemId', 'item_id');
+        return $this->hasOne('App\Models\Datamanagement\StockedItem', 'id', 'item_id');
     }
 }

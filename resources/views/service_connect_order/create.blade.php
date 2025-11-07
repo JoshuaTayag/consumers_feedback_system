@@ -40,7 +40,7 @@
                 {{ Form::label('occupancy_type', 'Occupancy Type') }}
                 <select id="occupancy_type" class="form-control" name="occupancy_type" required>
                   <option value="">Choose...</option>
-                  @foreach (Config::get('constants.occupancy_tpe') as $type)          
+                  @foreach (Config::get('constants.occupancy_type') as $type)          
                     <option value="{{ $type['name'] }}" id="">{{ $type['name'] }}</option>
                   @endforeach 
                 </select>

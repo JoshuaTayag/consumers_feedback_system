@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class MaterialRequisitionForm extends Model
 {
@@ -24,6 +25,42 @@ class MaterialRequisitionForm extends Model
     {
         $user = User::where('id', $this->approved_id)
             ->get();
+        $employee = $user[0]->employee;
+        if($employee){
+            return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
+        }
+        return $user[0]->name;
+    }
+
+    public function getProcessedNameAttribute()
+    {
+        $user = User::where('id', $this->processed_id)
+            ->get();
+        $employee = $user[0]->employee;
+        if($employee){
+            return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
+        }
+        return $user[0]->name;
+    }
+
+    public function getRequestTypeAssigneeNameAttribute()
+    {
+        $user = User::where('id', $this->req_type_assignee)
+            ->get();
+        $employee = $user[0]->employee;
+        if($employee){
+            return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
+        }
+        return $user[0]->name;
+    }
+
+    public function getImageNameAttribute()
+    {
+        $images = DB::table('material_requisition_form_liquidation_images')->where(
+                'material_requisition_form_id',  $this->id
+            )->get();
+        return $images;
+
         $employee = $user[0]->employee;
         if($employee){
             return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
@@ -61,7 +98,35 @@ class MaterialRequisitionForm extends Model
         return $this->belongsTo('App\Models\User', 'approved_id', 'id');
     }
 
+    public function request_type_assignee()
+    {
+        return $this->belongsTo('App\Models\User', 'req_type_assignee', 'id');
+    }
+
+    public function mrf_liquidations()
+    {
+        return $this->hasMany('App\Models\MaterialRequisitionFormLiquidation');
+    }
+
+    public function user_confirmed()
+    {
+        return $this->belongsTo('App\Models\User', 'confirmed_by', 'id');
+    }
+
+    public function user_audited()
+    {
+        return $this->belongsTo('App\Models\User', 'audit_by', 'id');
+    }
     
+    public function mcrt_items()
+    {
+        return $this->hasMany('App\Models\MaterialRequisitionFormMcrtDetails', 'mcrt_id', 'mcrt_no');
+    }
+
+    public function mst_items()
+    {
+        return $this->hasMany('App\Models\MaterialRequisitionFormMstDetails', 'mst_id', 'mst_no');
+    }
     
     protected $fillable = [ 'project_name', 
                             'district_id', 
@@ -81,5 +146,12 @@ class MaterialRequisitionForm extends Model
                             'liquidated_id',
                             'liquidated_by',
                             'area_id',
+                            'substation_id',
+                            'feeder_id',
+                            'cetd_remarks',
+                            'date_acted',
+                            'date_finished',
+                            'linemans',
+                            'liquidation_remarks',
                           ];
 }

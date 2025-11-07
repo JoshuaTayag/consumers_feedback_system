@@ -119,30 +119,51 @@ class StructureController extends Controller
     }
 
     // Fetch records
-    public function fetchItemsFromCmbis(Request $request){
+    public function fetchItemsFromPrism(Request $request){
         $search = $request->search;
 
         if($search == ''){
-        $items = DB::connection('mysqlCmbis')
-        ->table('item')
-        ->where('QuantityOnHand', '!=', '0')
-        ->select('ItemId as id', 'ItemCode', 'Description');
+            $items = DB::connection('pgsql')
+            ->table('item')
+            ->orderBy('code','DESC')
+            ->whereRaw('(total_quantity - quantity_on_queue) > 1')
+            ->select('id', 'code', 'description');
+        
         }else{
-        $items = DB::connection('mysqlCmbis')
-        ->table('item')
-        ->where('Description', 'like', '%' .$search . '%')
-        ->where('QuantityOnHand', '!=', '0')
-        ->select('ItemId as id', 'ItemCode', 'Description');
+            $items = DB::connection('pgsql')
+            ->table('item')
+            ->orderBy('code','DESC')
+            ->whereRaw('(total_quantity - quantity_on_queue) >= 1')
+            ->where('description', 'like', '%' .$search . '%')
+            ->select('id', 'code', 'description');
         }
         $data = $items->paginate(10, ['*'], 'page', $request->page);
         return response()->json($data); 
     } 
 
+    // public function fetchItemsFromCmbis(Request $request){
+    //     $search = $request->search;
+
+    //     if($search == ''){
+    //     $items = DB::connection('mysqlCmbis')
+    //     ->table('item')
+    //     ->where('QuantityOnHand', '!=', '0')
+    //     ->select('ItemId as id', 'ItemCode', 'Description');
+    //     }else{
+    //     $items = DB::connection('mysqlCmbis')
+    //     ->table('item')
+    //     ->where('Description', 'like', '%' .$search . '%')
+    //     ->where('QuantityOnHand', '!=', '0')
+    //     ->select('ItemId as id', 'ItemCode', 'Description');
+    //     }
+    //     $data = $items->paginate(10, ['*'], 'page', $request->page);
+    //     return response()->json($data); 
+    // } 
+
     public function updateStructureItem(Request $request)
     {
-        $item_id = (int)$request->item_id;
+        $item_id = $request->item_id;
         $structure_id = $request->structure_id;
-        // dd($request->structure_id);
         if($request->ajax() && $request->type != "update"){
 
             $temp_item = DB::table('temp_structure_items')
@@ -151,13 +172,13 @@ class StructureController extends Controller
             ->first();
 
             $item = StockedItem::find($item_id);
-
+            // dd($item_id);
             if($temp_item == null){
                 DB::table('temp_structure_items')->insert(
                     array("user_id" => Auth::id(),
                             "item_id" => $item_id,
                             "quantity" => 1,
-                            "unit_cost" => $item->AveragePrice,
+                            "unit_cost" => $item->price,
                             )
                 );
             }
@@ -174,7 +195,7 @@ class StructureController extends Controller
             return view('power_house.warehousing.data_management.structure_get_temp_items')->with(compact('temp_items'))->render();
         }
         else{
-
+            
             $temp_item = DB::table('structure_items')
             ->where('structure_id', $structure_id)
             ->where('item_id', '=', $item_id)
@@ -187,7 +208,7 @@ class StructureController extends Controller
                     array("structure_id" => $structure_id,
                             "item_id" => $item_id,
                             "quantity" => 1,
-                            "unit_cost" => $item->AveragePrice,
+                            "unit_cost" => $item->price,
                             )
                 );
             }

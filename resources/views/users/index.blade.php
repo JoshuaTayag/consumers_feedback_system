@@ -46,6 +46,7 @@
                  </tr>
                 @endforeach
                </table>
+               <div id="pagination">{{ $data->links() }}</div>
             </div>
           </div>
       </div>

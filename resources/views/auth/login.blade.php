@@ -48,16 +48,17 @@
                     <div class="col-md-6 fw-bold pt-5" style="font-family: 'Bacasime Antique', serif;">
                         <div class="row">
                             <div class="col-md-10 mx-auto">
-                            <img src="{{asset('images/logo.png')}}" class="img-fluid mx-auto" style="max-width:25%;" alt="..."><span class="fs-1"> LEYECO 5 </span>
+                            <img src="{{asset('images/logo.png')}}" class="img-fluid mx-auto" style="max-width:25%;" alt="..."><span class="" style="font-size: 50px;"> LEYECO V </span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-10 mx-auto fs-3">
                             <ul class="">
-                                <li>Pre-membership</li>
-                                <li></li>
-                                <li></li>
-                                <li></li>
+                                <li>Consumers Feedback Survey</li>
+                                <li>Membership / Pre-membership</li>
+                                <li>Lifeline</li>
+                                <li>MER</li>
+                                <li>Barangay Electrician</li>
                             </ul>
                             </div>
                         </div>

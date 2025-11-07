@@ -16,6 +16,7 @@
         "laravel/ui": "^4.2",
         "laravelcollective/html": "^6.4",
         "owen-it/laravel-auditing": "^13.5",
+        "ramsey/uuid": "^4.7",
         "realrashid/sweet-alert": "^7.0",
         "spatie/laravel-google-fonts": "^1.2",
         "spatie/laravel-permission": "^5.10"

@@ -29,6 +29,10 @@ class Lifeline extends Model implements Auditable
         return $this->belongsTo('App\Models\Barangay', 'barangay_id', 'id');
     }
 
+    public function consumer() {
+        return $this->setConnection('sqlSrvBilling')->belongsTo('App\Models\ConsumersTable', 'account_no' , 'Accnt No'); 
+    }
+
     protected $fillable = [
                             "control_no",
                             "first_name",
@@ -57,6 +61,8 @@ class Lifeline extends Model implements Auditable
                             "validity_period_from",
                             "validity_period_to",
                             "application_status",
+                            "approved_by",
+                            "approved_date",
                             "remarks"
                           ];
 

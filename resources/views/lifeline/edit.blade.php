@@ -177,13 +177,13 @@
               <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="validity_period_from" class="form-label mb-1">Validity Period From *</label>
-                  <input type="date" class="form-control" id="validity_period_from" name="validity_period_from" value="{{$lifeline->validity_period_from}}" readonly required>
+                  <input type="date" class="form-control" id="validity_period_from" name="validity_period_from" value="{{$lifeline->validity_period_from}}"  required>
                 </div>
               </div>
               <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="validity_period_to" class="form-label mb-1">Validity Period To *</label>
-                  <input type="date" class="form-control" id="validity_period_to" name="validity_period_to" value="{{$lifeline->validity_period_to}}" readonly required>
+                  <input type="date" class="form-control" id="validity_period_to" name="validity_period_to" value="{{$lifeline->validity_period_to}}"  required>
                 </div>
               </div>
               <div class="col-lg-3">
@@ -199,6 +199,12 @@
                 </div>
               </div>
               @endif
+              <div class="col-lg-3">
+                <div class="mb-2">
+                  <label for="date_of_application" class="form-label mb-1">Date Of Application*</label>
+                  <input type="date" class="form-control" id="date_of_application" name="date_of_application" value="{{$lifeline->date_of_application}}" required>
+                </div>
+              </div>
               <div class="col-lg-6">
                 <div class="mb-2">
                   <label for="representative_id_no" class="form-label mb-1">Rep ID No. (IF FILED THROUGH A REPRESENTATIVE)</label>

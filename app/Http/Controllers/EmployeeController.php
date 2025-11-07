@@ -14,7 +14,7 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-        $data = Employee::with('user')->orderBy('id','DESC')->paginate(5);
+        $data = Employee::with('user')->orderBy('id','DESC')->paginate(15);
         return view('employee.index',compact('data'));
     }
 
@@ -55,8 +55,9 @@ class EmployeeController extends Controller
 
             // save it locally to ~/public/images/{$hash}.jpg
             $resize->save(public_path($path));
+            $input['signature_path'] = $path;
         }
-        $input['signature_path'] = $path;
+        
         $user = Employee::create($input);
     
         return redirect()->route('employee.index')

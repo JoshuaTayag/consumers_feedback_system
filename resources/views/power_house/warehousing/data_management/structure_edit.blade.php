@@ -61,7 +61,7 @@
                 <div class="mb-2">
                   <table class="table table-bordered data-table">
                     <tr>
-                      <th>Nea Code</th>
+                      <th>Code</th>
                       <th>Description</th>
                       <th>Unit Cost</th>
                       <th>Quantity</th>
@@ -164,11 +164,11 @@ $(document).ready(function () {
       if (data.loading){
         return data.text
       }
-      return data.id + " | " +data.ItemCode + " | " + data.Description
+      return data.code + " | " + data.description
      }
 
      function templateSelection(data){
-      return data.id + " | " +data.ItemCode + " | " + data.Description
+      return data.code + " | " + data.description
      }
 
      $('#add_item').click(function() {

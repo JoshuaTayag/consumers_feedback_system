@@ -133,7 +133,7 @@
         <tr>
           <th rowspan="3" style="text-align: left;">PROJECT NAME: <br><br>
             {{ $datas[0]->project_name }}</th>
-          <td colspan="2"></td>
+          <td colspan="2">MER No. {{  date('y', strtotime($datas[0]->created_at)). "-". str_pad($datas[0]->id,5,'0',STR_PAD_LEFT) }}</td>
           <td style="width: 80px;">Date: {{ date('m/d/Y', strtotime($datas[0]->created_at)) }} </td>
           <td style="width: 70px;">Endorsed By</td>
           <td style="width: 67px;">Prepared By</td>
@@ -230,27 +230,31 @@
           <h4 class="text-center" style="position: relative; text-decoration: underline;">
             &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->requested_name}}&nbsp;&nbsp;&nbsp;&nbsp;
           </h4>
-          <p class="text-center" style="padding: 0px; margin-top: -10px; position: relative;">
+          <p class="text-center" style="padding: 0px; margin-top: -5px; position: relative;">
             {{$datas[0]->user_requested->employee ? $datas[0]->user_requested->employee->position : 'Pls Add employee data'}}
             {{-- {{$datas[0]->user_req->employee->prefix . " " . $datas[0]->user_req->employee->first_name . " " . substr($datas[0]->user_req->employee->middle_name, 0, 1). "." . " " . $datas[0]->user_req->employee->last_name . " " . $datas[0]->user_req->employee->suffix}} --}}
           </p>
         </td>
         <td style="border: none; width:33%; position: relative;">
           <p class="text-center">Approved By:</p> <br>
-          <img src="{{$datas[0]->user_approved->employee->signature_path}}"  alt="" class="img-signature">
+            @if(isset($datas[0]->user_approved->employee->signature_path))
+              <img src="{{$datas[0]->user_approved->employee->signature_path}}"  alt="" class="img-signature">
+            @endif
           <h4 class="text-center" style="position: relative; text-decoration: underline;">
             &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->approved_name}}&nbsp;&nbsp;&nbsp;&nbsp;
           </h4>
-          <p class="text-center" style="padding: 0px; margin-top: -10px; position: relative;">
-            {{$datas[0]->user_approved->employee->position}}
+          <p class="text-center" style="padding: 0px; margin-top: -5px; position: relative;">
+            @if(isset($datas[0]->user_approved->employee->position))
+              {{$datas[0]->user_approved->employee->position}}
+            @endif
           </p>
         </td>
         <td style="border: none; width:34%;">
           <p class="text-center">Processed By:</p> <br>
-          <h4 class="text-center" style="position: relative;">
-            
+          <h4 class="text-center" style="position: relative; text-decoration: underline;">
+            &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->processed_name}}&nbsp;&nbsp;&nbsp;&nbsp;
           </h4>
-          <p class="text-center" style="text-decoration: overline; padding: 0px; margin-top: -10px; position: relative;">
+          <p class="text-center" style="padding: 0px; margin-top: -5px; position: relative;">
             &nbsp;&nbsp;&nbsp;&nbsp; CETD &nbsp;&nbsp;&nbsp;&nbsp;
           </p>
         </td>
@@ -262,6 +266,18 @@
     <tbody>
       <tr>
         <td style="border: none;">
+          <p class="text-center">Evaluated By:</p> <br>
+          <h4 class="text-center" style="position: relative; text-decoration: underline;">
+            &nbsp;&nbsp;&nbsp;&nbsp;{{$datas[0]->request_type_assignee_name}}&nbsp;&nbsp;&nbsp;&nbsp;
+          </h4>
+          <p class="text-center" style=" padding: 0px; margin-top: -5px; position: relative;">
+            @if(isset($datas[0]->request_type_assignee->employee->position))
+              {{$datas[0]->request_type_assignee->employee->position}}
+            @endif
+          </p>
+        </td>
+
+        <td style="border: none;">
           <p class="text-center">Released By:</p> <br>
           <h4 class="text-center" style="position: relative;">
             
@@ -270,6 +286,7 @@
             &nbsp;&nbsp;&nbsp;&nbsp; WAREHOUSE &nbsp;&nbsp;&nbsp;&nbsp;
           </p>
         </td>
+
         <td style="border: none;">
           <p class="text-center">Liquidated By:</p> <br>
           <h4 class="text-center" style="position: relative;">

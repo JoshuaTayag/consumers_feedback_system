@@ -16,21 +16,86 @@ use Illuminate\Validation\Rule;
 use DB;
 use Carbon\Carbon;
 use PDF;
-use Image;
+use Intervention\Image\Facades\Image;
+use App\Models\MaterialRequisitionFormMcrtDetails;
 
 class MaterialRequisitionFormController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:material-requisition-form-list|material-requisition-form-create|material-requisition-form-edit|material-requisition-form-delete', ['only' => ['index', 'mrfApprovalIndex']]);
+         $this->middleware('permission:material-requisition-form-create', ['only' => ['create', 'store', 'mrfLiquidationCreate']]);
+         $this->middleware('permission:material-requisition-form-edit', ['only' => ['edit','update', 'mrfApprovalUpdate']]);
+         $this->middleware('permission:material-requisition-form-delete', ['only' => ['destroy']]);
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->orderBy('id','DESC')->paginate(10);
-        $unliquidated_mrf = MaterialRequisitionForm::where([['requested_id', Auth::id()], ['status', '<=', 2]])->count();
-        $liquidations = DB::table('material_requisition_form_liquidations')->get();
-        // dd($unliquidated_mrf);
-        // dd($liquidations->where('material_requisition_form_id', 18));
-        return view('power_house.warehousing.material_requisition_form_index', compact('mrfs','unliquidated_mrf','liquidations'));
+        // if(Auth::user()->hasRole('CETD SPRC')){
+        //     $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->where('status', 1)->where('req_type')->orderBy('id','DESC')->paginate(10);
+        // }
+        // else if(Auth::user()->hasRole('CETD (Dexter)')){
+        //     $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->where('status', 1)->where('req_type', '!=', null)->orderBy('id','DESC')->paginate(10);
+        // }
+        // else if(Auth::user()->hasRole('Admin') || Auth::user()->hasRole('TSD (Richard)') || Auth::user()->hasRole('CETD (Dexter)')){
+        //     $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->orderBy('id','DESC')->paginate(10);
+        // }
+        // else{
+        //     $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->where('requested_id', Auth::id())->orderBy('id','DESC')->paginate(10);
+        // }
+
+        $mrfsQuery = MaterialRequisitionForm::with('items', 'district', 'municipality', 'barangay')->orderBy('id', 'DESC');
+
+        if (Auth::user()->hasRole('CETD SPRC')) {
+            $mrfsQuery->where('status', 1)->where('req_type');
+        } elseif (Auth::user()->hasRole('CETD (Dexter)')) {
+            // $mrfsQuery->where('status', 1)->where('req_type', '!=', null);
+        } elseif (!(Auth::user()->hasRole('Admin') || Auth::user()->hasRole('TSD (Richard)')) || Auth::user()->hasRole('CETD (Dexter)') || Auth::user()->hasRole('TSD Manager')) {
+            $mrfsQuery->where('requested_id', Auth::id());
+        }
+
+
+        $mrfs = $mrfsQuery->paginate(10);
+        
+        $unliquidated_mrf = MaterialRequisitionForm::where('requested_id', operator: Auth::id())
+            ->where('status', '<', 11)
+            ->whereNotIn('status', [4]);
+
+        $unliquidated_mrf_count = $unliquidated_mrf->count();
+
+        $oldest = $unliquidated_mrf->with('mrf_liquidations')->get()->map(function($mrf) {
+            $oldestLiquidation = $mrf->mrf_liquidations->sortBy('created_at')->first();
+            return $oldestLiquidation ? [
+            'id' => $mrf->id,
+            'created_at' => $oldestLiquidation->created_at->addDays(5)
+            ] : null;
+        })->filter()->sortBy('created_at')->first();
+    
+        if ($unliquidated_mrf_count) {
+            // $liquidation_created_at = optional($oldest_unliquidated_mrf->mrf_liquidations->first())->created_at;
+            $liquidations = DB::table('material_requisition_form_liquidations')->get();
+            // dd($oldest);
+            $createdAt = $oldest ? $oldest['created_at'] : null;
+            $daysPassed = $createdAt ? $createdAt->diffInDays(Carbon::now()) : null;
+            $thirtyFiveDaysAgo = Carbon::now()->subDays(35);
+            // dd($createdAt, Carbon::now());
+
+            $old_unliquidated_mrf = $unliquidated_mrf->whereHas('mrf_liquidations', function ($query) use ($thirtyFiveDaysAgo) {
+                $query->where('created_at', '<', $thirtyFiveDaysAgo);
+            })->get();
+        } else {
+            $createdAt = null;
+            $daysPassed = null;
+            $liquidations = null;
+            $old_unliquidated_mrf = null;
+        }
+
+        $thirtyDaysAgo = Carbon::now()->subDays(35);
+
+        return view('power_house.warehousing.material_requisition_form_index', compact('mrfs','unliquidated_mrf_count','liquidations', 'daysPassed','old_unliquidated_mrf'));
     }
 
     public function mrfApprovalIndex()
@@ -60,10 +125,26 @@ class MaterialRequisitionFormController extends Controller
 
         // dd($temp_items);
 
-        if($unliquidated_mrf >= 5){
+        $oldest_unliquidated_mrf = MaterialRequisitionForm::where('requested_id', Auth::id())
+        ->whereIn('status', [1,2])
+        ->select('created_at')
+        ->orderBy('created_at', 'asc')
+        ->first();
+
+        $liquidations = DB::table('material_requisition_form_liquidations')->get();
+
+        if ($oldest_unliquidated_mrf) {
+            $createdAt = Carbon::parse($oldest_unliquidated_mrf->created_at);
+            $daysPassed = $createdAt->diffInDays(Carbon::now());
+        } else {
+            $createdAt = null;
+            $daysPassed = null;
+        }
+
+        if($unliquidated_mrf >= 10 || $daysPassed >= 30){
             // dd($unliquidated_mrf);
             return redirect(route('material-requisition-form.index'))->withWarning('Please Liquidate atleast one MRF to proceed!');
-            return view('power_house.warehousing.material_requisition_form_create', compact('structures','temp_items','users','districts'))->withSuccess('Please Liquidate atleast one MRF to proceed!');
+            return view('power_house.warehousing.material_requisition_form_create', compact('structures','temp_items','users','districts'))->withWarning('Please Liquidate atleast one MRF to proceed!');
         }
         else{
             return view('power_house.warehousing.material_requisition_form_create', compact('structures','temp_items','users','districts'));
@@ -79,13 +160,28 @@ class MaterialRequisitionFormController extends Controller
         $this->validate($request, [
             'project_name' => ['required', 'string', 'max:255'],
             'approved_by' => ['required'],
-            'requested_by' => ['required'],
             'area_id' => ['required'],
+            'image_path.*' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048', // Validate each file in the array
         ]);
+        
+        // dd($oldest_unliquidated_mrf);
+        $oldest_unliquidated_mrf = MaterialRequisitionForm::where('requested_id', Auth::id())
+        ->whereIn('status', [1,2])
+        ->select('created_at')
+        ->orderBy('created_at', 'asc')
+        ->first();
+        if ($oldest_unliquidated_mrf) {
+            $createdAt = Carbon::parse($oldest_unliquidated_mrf->created_at);
+            $daysPassed = $createdAt->diffInDays(Carbon::now());
+        } else {
+            $createdAt = null;
+            $daysPassed = null;
+        }
+        
 
-        $unliquidated_mrf = MaterialRequisitionForm::where([['requested_id', $request->requested_by], ['status', '<=', 2]])->count();
+        $unliquidated_mrf = MaterialRequisitionForm::where([['requested_id', Auth::id()], ['status', '<=', 2]])->count();
         // check if this user has unliquidated MRF's
-        if($unliquidated_mrf >= 5){
+        if($unliquidated_mrf >= 10 && $daysPassed >= 7){
             return redirect(route('material-requisition-form.index'))->withWarning('Please Liquidate atleast one MRF to proceed!');
         }
         // dd($request);
@@ -98,10 +194,12 @@ class MaterialRequisitionFormController extends Controller
             "sitio" => $request->sitio,
             "remarks" => $request->remarks,
             "status" => 0,
-            "requested_id" => $request->requested_by,
+            "requested_id" => Auth::id(),
             "requested_by" => now(),
             "approved_id" => $request->approved_by,
             "area_id" => $request->area_id,
+            "substation_id" => $request->substation,
+            "feeder_id" => $request->feeder,
             // "approved_by" => now(),
         ]);
         foreach($temp_items as $item){ 
@@ -115,10 +213,42 @@ class MaterialRequisitionFormController extends Controller
             ]);
         }
 
+        $ref_no = 'MER No. '.date('y', strtotime($material_requisition_form->created_at)). "-". str_pad($material_requisition_form->id,5,'0',STR_PAD_LEFT);
+
+        // dd($ref_no);
         // Insert Record structure
         TempMaterialRequisitionFormItem::with('item')->where('user_id', Auth::id())->delete();
+
+        $images_path = $request->file('image_path');
+
+        if($images_path){
+            // Handle each uploaded file
+            foreach ($images_path as $image_path) {
+                $resize = Image::make($image_path)
+                ->resize(600, null, function ($constraint) { $constraint->aspectRatio(); } )
+                ->encode('jpg',80);
+
+                // calculate md5 hash of encoded image
+                $hash = md5($resize->__toString());
+
+                // use hash as a name
+                $path = "images/mrf_images/{$material_requisition_form->id}_{$hash}.jpg";
+
+                // save it locally to ~/public/images/{$hash}.jpg
+                $resize->save(public_path($path));
+
+                DB::table('material_requisition_form_liquidation_images')->insert(
+                    array("user_id" => Auth::id(),
+                            "material_requisition_form_id" => $material_requisition_form->id,
+                            "image_path" => $path,
+                            "type" => 'BEFORE',
+                            )
+                );
+
+            }
+        }
         
-        return redirect(route('material-requisition-form.index'))->withSuccess('Record Successfully Created!');
+        return redirect(route('material-requisition-form.index'))->withSuccess('Record Successfully Created!<br>'. $ref_no);
     }
 
     /**
@@ -134,7 +264,7 @@ class MaterialRequisitionFormController extends Controller
      */
     public function edit(string $id)
     {
-        $mrf = MaterialRequisitionForm::with('items')->find($id);
+        $mrf = MaterialRequisitionForm::with('items', 'mrf_liquidations')->find($id);
         $structures = Structure::orderBy('id','DESC')->get();
         $users = User::orderBy('name','asc')->get();
         $liquidation = DB::table('material_requisition_form_liquidations')->where('material_requisition_form_id', $id)->get();
@@ -142,7 +272,6 @@ class MaterialRequisitionFormController extends Controller
         ->table('districts')
         ->select('*')
         ->get();
-        // dd($liquidation->first() ? "true" : 'false');
         return view('power_house.warehousing.material_requisition_form_edit', compact('structures','users','districts','mrf','liquidation'));
     }
 
@@ -155,23 +284,78 @@ class MaterialRequisitionFormController extends Controller
         $this->validate($request, [
             'project_name' => ['required', 'string', 'max:255'],
             'approved_by' => ['required'],
-            'requested_by' => ['required'],
         ]);
 
-        $material_requisition_form = MaterialRequisitionForm::find($id);
-        $material_requisition_form->project_name = $request->project_name;
-        $material_requisition_form->district_id = $request->district;
-        $material_requisition_form->municipality_id = $request->municipality;
-        $material_requisition_form->barangay_id = $request->barangay;
-        $material_requisition_form->sitio = $request->sitio;
-        $material_requisition_form->remarks = $request->remarks;
-        // $material_requisition_form->status = $request->control_no;
-        $material_requisition_form->requested_id = $request->requested_by;
-        $material_requisition_form->approved_id = $request->approved_by;
-        $material_requisition_form->area_id = $request->area_id;
-        $material_requisition_form->save();
+        DB::beginTransaction();
         
-        return redirect(route('material-requisition-form.index'))->withSuccess('Record Successfully Created!');
+        try {
+            $material_requisition_form = MaterialRequisitionForm::find($id);
+            $material_requisition_form->project_name = $request->project_name;
+            $material_requisition_form->district_id = $request->district;
+            $material_requisition_form->municipality_id = $request->municipality;
+            $material_requisition_form->barangay_id = $request->barangay;
+            $material_requisition_form->sitio = $request->sitio;
+            $material_requisition_form->remarks = $request->remarks;
+            $material_requisition_form->approved_id = $request->approved_by;
+            $material_requisition_form->area_id = $request->area_id;
+            $material_requisition_form->substation_id = $request->substation;
+            $material_requisition_form->feeder_id = $request->feeder;
+            $material_requisition_form->save();
+
+            $images_path = $request->file('image_path');
+
+            if($images_path){
+                // Get all existing image paths from the database
+                $existingImages = DB::table('material_requisition_form_liquidation_images')
+                    ->where('material_requisition_form_id', $id)
+                    ->where('type', 'BEFORE')
+                    ->pluck('image_path');
+                // dd($existingImages);
+                // Delete all stored images from the server
+                foreach ($existingImages as $image) {
+                    if (file_exists(public_path($image))) {
+                        unlink(public_path($image)); // Delete the image file
+                    }
+                }
+                
+                // Delete all existing image records from the database
+                DB::table('material_requisition_form_liquidation_images')
+                    ->where('material_requisition_form_id', $id)
+                    ->where('type', 'BEFORE')
+                    ->delete();
+
+                // Handle each uploaded file
+                foreach ($images_path as $image_path) {
+                    $resize = Image::make($image_path)
+                    ->resize(600, null, function ($constraint) { $constraint->aspectRatio(); } )
+                    ->encode('jpg',80);
+
+                    // calculate md5 hash of encoded image
+                    $hash = md5($resize->__toString());
+
+                    // use hash as a name
+                    $path = "images/mrf_images/{$material_requisition_form->id}_{$hash}.jpg";
+
+                    // save it locally to ~/public/images/{$hash}.jpg
+                    $resize->save(public_path($path));
+
+                    DB::table('material_requisition_form_liquidation_images')->insert([
+                        "user_id" => Auth::id(),
+                        "material_requisition_form_id" => $material_requisition_form->id,
+                        "image_path" => $path,
+                        "type" => 'BEFORE',
+                    ]);
+
+                }
+            }
+            
+            DB::commit();
+            return redirect(route('material-requisition-form.index'))->with('success', 'Record Successfully Updated!');
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with('error', 'An error occurred while updating the record.');
+        }
     }
 
     public function mrfApprovalUpdate(Request $request, string $id)
@@ -197,60 +381,75 @@ class MaterialRequisitionFormController extends Controller
 
     public function mrfLiquidationCreate(Request $request, string $id)
     {
+        $images_path = $request->file('image_path');
+        if($images_path){
+
+            // validate requests
+            $this->validate($request, [
+                'image_path' => 'array|max:3'
+            ]);
+        }
         if($request->has('assigning')){
-            foreach ($request->mrvs as $key => $mrv) {
-                DB::table('material_requisition_form_liquidations')->insert(
-                    array("user_id" => Auth::id(),
-                            "material_requisition_form_id" => $id,
-                            "type" => "MRV",
-                            "type_number" => $mrv,
-                            "date_acted" => Carbon::now(),
-                            "date_finished" => Carbon::now(),
-                            "image_path" => null,
-                            "remarks" => null,
-                            "created_at" => Carbon::now(),
-                            )
-                );
+            // dd($request);
+            if($request->mrvs){
+                foreach ($request->mrvs as $key => $mrv) {
+                    DB::table('material_requisition_form_liquidations')->insert(
+                        array("user_id" => Auth::id(),
+                                "material_requisition_form_id" => $id,
+                                "type" => "MRV",
+                                "type_number" => $mrv,
+                                "date_acted" => Carbon::now(),
+                                "date_finished" => Carbon::now(),
+                                "image_path" => null,
+                                "remarks" => null,
+                                "created_at" => Carbon::now(),
+                                )
+                    );
+                }
+            }
+            
+            if($request->serivs){
+                foreach ($request->serivs as $key => $seriv) {
+                    DB::table('material_requisition_form_liquidations')->insert(
+                        array("user_id" => Auth::id(),
+                                "material_requisition_form_id" => $id,
+                                "type" => "SERIV",
+                                "type_number" => $seriv,
+                                "date_acted" => Carbon::now(),
+                                "date_finished" => Carbon::now(),
+                                "image_path" => null,
+                                "remarks" => null,
+                                "created_at" => Carbon::now(),
+                                )
+                    );
+                }
             }
     
-            foreach ($request->serivs as $key => $seriv) {
-                DB::table('material_requisition_form_liquidations')->insert(
-                    array("user_id" => Auth::id(),
-                            "material_requisition_form_id" => $id,
-                            "type" => "SERIV",
-                            "type_number" => $seriv,
-                            "date_acted" => Carbon::now(),
-                            "date_finished" => Carbon::now(),
-                            "image_path" => null,
-                            "remarks" => null,
-                            "created_at" => Carbon::now(),
-                            )
-                );
-            }
+            
 
             $material_requisition_form = MaterialRequisitionForm::find($id);
 
             if($request->wo_no){
-                // DB::table('material_requisition_form_liquidations')->insert(
-                //     array("user_id" => Auth::id(),
-                //             "material_requisition_form_id" => $id,
-                //             "type" => "WO",
-                //             "type_number" => $request->wo_no,
-                //             "date_acted" => Carbon::now(),
-                //             "date_finished" => Carbon::now(),
-                //             "image_path" => null,
-                //             "remarks" => null,
-                //             "created_at" => Carbon::now(),
-                //             )
-                // );
                 $material_requisition_form->with_wo = $request->wo_no;
-                $material_requisition_form->status = 2;
-                
+            }
+
+            if ($request->req_type) {
+                $material_requisition_form->req_type = $request->req_type;
+                $material_requisition_form->req_type_assignee = Auth::id();
             }
             
+            if ($request->cetd_remarks) {
+                $material_requisition_form->cetd_remarks = $request->cetd_remarks;
+            }
+
+            if ($request->mrvs || $request->serivs) {
+                $material_requisition_form->status = 2;
+                $material_requisition_form->processed_id = Auth::id();
+                $material_requisition_form->processed_by = Carbon::now();
+            }
             $material_requisition_form->save();
 
-            return redirect(route('material-requisition-form.index'))->withSuccess('MRV/SERIV Successfully Assign!');
+            return redirect(route('material-requisition-form.index'))->withSuccess('Successfully Assign!');
         }
 
         else{
@@ -274,23 +473,50 @@ class MaterialRequisitionFormController extends Controller
             
             
             $input = $request->all();
-            $image_path = $request->file('image_path');
-            if($image_path){
-                // dd('test');
-                $resize = Image::make($image_path)
-                ->resize(600, null, function ($constraint) { $constraint->aspectRatio(); } )
-                ->encode('jpg',80);
+            if($images_path){
 
-                // calculate md5 hash of encoded image
-                $hash = md5($resize->__toString());
+                // Get all existing image paths from the database
+                $existingImages = DB::table('material_requisition_form_liquidation_images')
+                ->where('material_requisition_form_id', $id)
+                ->where('type', 'AFTER')
+                ->pluck('image_path');
 
-                // use hash as a name
-                $path = "images/mrf_images/{$hash}.jpg";
+                // Delete all stored images from the server
+                foreach ($existingImages as $image) {
+                    if (file_exists(public_path($image))) {
+                        unlink(public_path($image)); // Delete the image file
+                    }
+                }
+                
+                DB::table('material_requisition_form_liquidation_images')
+                ->where('material_requisition_form_id', $id)
+                ->where('type', 'AFTER')
+                ->delete();
 
-                // save it locally to ~/public/images/{$hash}.jpg
-                $resize->save(public_path($path));
+                // Handle each uploaded file
+                foreach ($images_path as $image_path) {
+                    $resize = Image::make($image_path)
+                    ->resize(600, null, function ($constraint) { $constraint->aspectRatio(); } )
+                    ->encode('jpg',80);
 
-                $input['image_path'] = $path;
+                    // calculate md5 hash of encoded image
+                    $hash = md5($resize->__toString());
+
+                    // use hash as a name
+                    $path = "images/mrf_images/{$hash}.jpg";
+
+                    // save it locally to ~/public/images/{$hash}.jpg
+                    $resize->save(public_path($path));
+
+                    DB::table('material_requisition_form_liquidation_images')->insert(
+                        array("user_id" => Auth::id(),
+                                "material_requisition_form_id" => $id,
+                                "image_path" => $path,
+                                "type" => 'AFTER',
+                                )
+                    );
+
+                }
             }
             
 
@@ -342,44 +568,44 @@ class MaterialRequisitionFormController extends Controller
             //     );
             // }
 
-            if($request->mcrt_no){
-                DB::table('material_requisition_form_liquidations')->insert(
-                    array("user_id" => Auth::id(),
-                            "material_requisition_form_id" => $id,
-                            "type" => "MCRT",
-                            "type_number" => $request->mcrt_no,
-                            "date_acted" => $request->date_acted,
-                            "date_finished" => $request->date_finished,
-                            "image_path" => $request->image_path,
-                            "remarks" => $request->remarks,
-                            "lineman" => $request->lineman,
-                            "created_at" => Carbon::now(),
-                            )
-                );
-            }
+            // if($request->mcrt_no){
+            //     DB::table('material_requisition_form_liquidations')->insert(
+            //         array("user_id" => Auth::id(),
+            //                 "material_requisition_form_id" => $id,
+            //                 "type" => "MCRT",
+            //                 "type_number" => $request->mcrt_no,
+            //                 "date_acted" => $request->date_acted,
+            //                 "date_finished" => $request->date_finished,
+            //                 "image_path" => null,
+            //                 "remarks" => null,
+            //                 "lineman" => null,
+            //                 "created_at" => Carbon::now(),
+            //                 )
+            //     );
+            // }
 
-            if($request->mst_no){
-                DB::table('material_requisition_form_liquidations')->insert(
-                    array("user_id" => Auth::id(),
-                            "material_requisition_form_id" => $id,
-                            "type" => "MST",
-                            "type_number" => $request->mst_no,
-                            "date_acted" => $request->date_acted,
-                            "date_finished" => $request->date_finished,
-                            "image_path" => $request->image_path,
-                            "remarks" => $request->remarks,
-                            "lineman" => $request->lineman,
-                            "created_at" => Carbon::now(),
-                            )
-                );
-            }
+            // if($request->mst_no){
+            //     DB::table('material_requisition_form_liquidations')->insert(
+            //         array("user_id" => Auth::id(),
+            //                 "material_requisition_form_id" => $id,
+            //                 "type" => "MST",
+            //                 "type_number" => $request->mst_no,
+            //                 "date_acted" => $request->date_acted,
+            //                 "date_finished" => $request->date_finished,
+            //                 "image_path" => null,
+            //                 "remarks" => null,
+            //                 "lineman" => null,
+            //                 "created_at" => Carbon::now(),
+            //                 )
+            //     );
+            // }
 
 
 
             // dd($request->quantity[0]);
             foreach ($request->item_ids as $key => $item) {
                 $material_requisition_form_item = MaterialRequisitionFormItems::find($item);
-                $material_requisition_form_item->liquidation_quantity = $request->quantity[$key];
+                $material_requisition_form_item->liquidation_quantity = $request->used_quantity[$key];
                 $material_requisition_form_item->save();
             }
 
@@ -387,7 +613,12 @@ class MaterialRequisitionFormController extends Controller
             $material_requisition_form->status = 3;
             $material_requisition_form->liquidated_id = Auth::id();
             $material_requisition_form->liquidated_by = Carbon::now();
-            // $material_requisition_form->with_wo = $request->filled('wo_no');
+            $material_requisition_form->date_acted = $request->date_acted;
+            $material_requisition_form->date_finished = $request->date_finished;
+            $material_requisition_form->linemans = $request->lineman;
+            $material_requisition_form->liquidation_remarks = $request->remarks;
+            $material_requisition_form->mcrt_no = $request->mcrt_no;
+            $material_requisition_form->mst_no = $request->mst_no;
             $material_requisition_form->save();
             
             return redirect(route('material-requisition-form.index'))->withSuccess('Record Successfully Liquidated!');
@@ -464,7 +695,7 @@ class MaterialRequisitionFormController extends Controller
 
     public function mrfUpdateItem(Request $request)
     {
-        $item_id = (int)$request->item_id;
+        $item_id = $request->item_id;
         $mrf_id = (int)$request->mrf_id;
 
         if($request->ajax()){
@@ -478,11 +709,11 @@ class MaterialRequisitionFormController extends Controller
 
             if($mrf_item == null){
                 DB::table('material_requisition_form_items')->insert(
-                    array("nea_code" => $item->ItemCode,
+                    array("nea_code" => $item->code,
                             "material_requisition_form_id" => $mrf_id,
                             "item_id" => $item_id,
                             "quantity" => 1,
-                            "unit_cost" => $item->AveragePrice,
+                            "unit_cost" => $item->price,
                             )
                 );
             }
@@ -578,7 +809,7 @@ class MaterialRequisitionFormController extends Controller
                 if($temp_item == null){
                     DB::table('temp_material_requisition_form_items')->insert(
                         array("user_id" => Auth::id(),
-                                "nea_code" => $stocked_item->ItemCode,
+                                "nea_code" => $stocked_item->code,
                                 "material_requisition_form_id" => 1,
                                 "item_id" => $item->item_id,
                                 "quantity" => $item->quantity,
@@ -604,7 +835,7 @@ class MaterialRequisitionFormController extends Controller
 
     public function updateItem(Request $request)
     {
-        $item_id = (int)$request->item_id;
+        $item_id = $request->item_id;
         if($request->ajax()){
 
             $temp_item = DB::table('temp_material_requisition_form_items')
@@ -617,7 +848,7 @@ class MaterialRequisitionFormController extends Controller
             if($temp_item == null){
                 DB::table('temp_material_requisition_form_items')->insert(
                     array("user_id" => Auth::id(),
-                            "nea_code" => $item->ItemCode,
+                            "nea_code" => $item->code,
                             "material_requisition_form_id" => 1,
                             "item_id" => $item_id,
                             "quantity" => 1,
@@ -710,18 +941,18 @@ class MaterialRequisitionFormController extends Controller
         $search = $request->search;
         $liquidated_mrvs = DB::table('material_requisition_form_liquidations')->where('type', 'MRV')->pluck('type_number');
         if($search == ''){
-        $accounts = DB::connection('mysqlCmbis')
-        ->table('materialrequisition')
-        ->orderBy('MaterialRequisitionId','DESC')
-        ->whereNotIn('RVNumber', $liquidated_mrvs)
-        ->select('RVNumber as id');
+        $accounts = DB::connection('pgsql')
+        ->table('mrv')
+        ->orderBy('mrv_number','DESC')
+        ->whereNotIn('mrv_number', $liquidated_mrvs)
+        ->select('mrv_number as id');
         }else{
-        $accounts = DB::connection('mysqlCmbis')
-        ->table('materialrequisition')
-        ->where('RVNumber', 'like', '%' .$search . '%')
-        ->orderBy('MaterialRequisitionId','DESC')
-        ->whereNotIn('RVNumber', $liquidated_mrvs)
-        ->select('RVNumber as id');
+        $accounts = DB::connection('pgsql')
+        ->table('mrv')
+        ->where('mrv_number', 'like', '%' .$search . '%')
+        ->orderBy('mrv_number','DESC')
+        ->whereNotIn('mrv_number', $liquidated_mrvs)
+        ->select('mrv_number as id');
         }
         $data = $accounts->paginate(10, ['*'], 'page', $request->page);
         return response()->json($data); 
@@ -731,18 +962,18 @@ class MaterialRequisitionFormController extends Controller
         $search = $request->search;
         $liquidated_seriv = DB::table('material_requisition_form_liquidations')->where('type', 'SERIV')->pluck('type_number');
         if($search == ''){
-        $accounts = DB::connection('mysqlCmbis')
+        $accounts = DB::connection('pgsql')
         ->table('seriv')
-        ->orderBy('SerivId','DESC')
-        ->whereNotIn('SERIVNum', $liquidated_seriv)
-        ->select('SERIVNum as id');
+        ->orderBy('seriv_number','DESC')
+        ->whereNotIn('seriv_number', $liquidated_seriv)
+        ->select('seriv_number as id');
         }else{
-        $accounts = DB::connection('mysqlCmbis')
+        $accounts = DB::connection('pgsql')
         ->table('seriv')
-        ->where('RVNumber', 'like', '%' .$search . '%')
-        ->orderBy('SerivId','DESC')
-        ->whereNotIn('SERIVNum', $liquidated_seriv)
-        ->select('SERIVNum as id');
+        ->where('seriv_number', 'like', '%' .$search . '%')
+        ->orderBy('seriv_number','DESC')
+        ->whereNotIn('seriv_number', $liquidated_seriv)
+        ->select('seriv_number as id');
         }
         $data = $accounts->paginate(10, ['*'], 'page', $request->page);
         return response()->json($data); 
@@ -750,6 +981,7 @@ class MaterialRequisitionFormController extends Controller
 
     public function mrfLiquidate(Request $request, string $id)
     {
+        
         $mrf = MaterialRequisitionForm::with('items')->find($id);
         $structures = Structure::orderBy('id','DESC')->get();
         $users = User::orderBy('name','asc')->get();
@@ -757,47 +989,392 @@ class MaterialRequisitionFormController extends Controller
         ->table('districts')
         ->select('*')
         ->get();
-        return view('power_house.warehousing.material_requisition_form_liquidation', compact('mrf','users','districts', 'structures'));
+        
+        $existing_mcrt = DB::table('material_requisition_forms')->pluck('mcrt_no');
+
+        // $mcrts = DB::table('MCRT Table')
+        // ->select('MCRTno')
+        // ->leftJoin('material_requisition_forms', 'MCRT Table.MCRTno', '=', 'material_requisition_forms.mcrt_no')
+        // ->whereDate('MCRTDate', '>', '2024-01-01')
+        // ->whereNull('material_requisition_forms.mcrt_no')
+        // ->orderBy('MCRT Table.MCRTNo', 'desc')
+        // ->get();
+
+        // $msts = DB::table('MST Table')
+        // ->select('MSTNo')
+        // ->leftJoin('material_requisition_forms', 'MST Table.MSTNo', '=', 'material_requisition_forms.mst_no')
+        // ->whereDate('MSTDate', '>', '2024-01-01')
+        // ->whereNull('material_requisition_forms.mst_no')
+        // ->orderBy('MST Table.MSTNo', 'desc')
+        // ->get();
+
+        $existing_mcrt = DB::table('material_requisition_forms')->whereNotNull('mcrt_no')->pluck('mcrt_no')->toArray();
+        $existing_mst = DB::table('material_requisition_forms')->whereNotNull('mst_no')->pluck('mst_no')->toArray();
+
+        $mcrts = DB::connection('pgsql')
+        ->table('mcrt')
+        ->select('mcrt_number')
+        ->orderBy('mcrt_number','DESC')
+        ->whereNotIn('mcrt_number', $existing_mcrt)
+        ->get();
+
+        $msts = DB::connection('pgsql')
+        ->table('mst')
+        ->select('mst_number')
+        ->orderBy('mst_number','DESC')
+        ->whereNotIn('mst_number', $existing_mst)
+        ->get();
+
+        // dd(vars: $mrf->items);
+        return view('power_house.warehousing.material_requisition_form_liquidation', compact('mrf','users','districts', 'structures', 'mcrts', 'msts'));
     }
 
     public function viewLiquidatedMrf(string $id){
         $mrf = MaterialRequisitionForm::with('items')->find($id);
         $mrf_liquidation = DB::table('material_requisition_form_liquidations')->where('material_requisition_form_id', $mrf->id)->get();
-        // dd($mrf_liquidation);
         return view('power_house.warehousing.material_requisition_form_liquidated_view', compact('mrf', 'mrf_liquidation'));
     }
 
     public function mrfLiquidationReport()
     {
         // $mrf = MaterialRequisitionForm::with('items')->find(16);
-        $mrfs = [];
-        $mrf = MaterialRequisitionForm::all();
-        // $mrf = DB::table('material_requisition_forms', 'material_requisition_form_liquidations')->select('material_requisition_forms.project_name, material_requisition_form_liquidations.type, material_requisition_form_liquidations.type_number')
-        // ->from('material_requisition_forms')
-        // ->join('material_requisition_form_liquidations')
-        // ->on('material_requisition_forms.id = material_requisition_form_liquidations.material_requisition_form_id');
-
-        // $mrf = DB::table('material_requisition_forms')
-        // ->select('material_requisition_forms.project_name', 'material_requisition_forms.status' , 'material_requisition_form_liquidations.type' , 'material_requisition_form_liquidations.type_number')
-        // ->join('material_requisition_form_liquidations', 'material_requisition_forms.id', '=', 'material_requisition_form_liquidations.material_requisition_form_id')
-        // ->where('material_requisition_forms.status', 2)
-        // ->get();
-
+        $requested_mrf = [];
         
+        // $mrfs['total_pending'] = MaterialRequisitionForm::with('user_requested')->groupBy('requested_id')->selectRaw('count(*) as total_pending, requested_id')->where('status', 0)->get();
+        // $mrfs['total_approved'] = MaterialRequisitionForm::with('user_requested')->groupBy('requested_id')->selectRaw('count(*) as total_approved, requested_id')->where('status', 1)->get();
+        // $mrfs['total_processed'] = MaterialRequisitionForm::with('user_requested')->groupBy('requested_id')->selectRaw('count(*) as total_processed, requested_id')->where('status', 2)->get();
+        // $mrfs['total_liquidated'] = MaterialRequisitionForm::with('user_requested')->groupBy('requested_id')->selectRaw('count(*) as total_liquidated, requested_id')->where('status', 3)->get();
 
-        $mrfs['pending'] = $mrf->where('status', 0)->count();
-        $mrfs['approved'] = $mrf->where('status', 1)->count();
-        $mrfs['liquidated'] = $mrf->where('status', 2)->count();
-        $mrfs['disapproved'] = $mrf->where('status', 3)->count();
-
-        $mrfs['pending_with_wo'] = $mrf->where('status', 0)->where('with_wo')->count();
-        $mrfs['approved_with_wo'] = $mrf->where('status', 1)->where('with_wo')->count();
-        $mrfs['liquidated_with_wo'] = $mrf->where('status', 2)->where('with_wo')->count();
-        $mrfs['disapproved_with_wo'] = $mrf->where('status', 3)->where('with_wo')->count();
-        
-        dd($mrfs);
-        view()->share('datas', $mrf);
+        $requested_mrf['without_wo'] = MaterialRequisitionForm::where('with_wo', null)->groupBy('requested_id')->selectRaw('count(*) as total_pending, requested_id')->get();
+        $requested_mrf['with_wo'] = MaterialRequisitionForm::where('with_wo', '<>', null)->groupBy('requested_id')->selectRaw('count(*) as total_pending, requested_id')->get();
+        view()->share('datas', $requested_mrf);
         $pdf = PDF::loadView('power_house.warehousing.mrf_liquidation_report_view');
         return $pdf->stream();
+    }
+
+    public function mrfLiquidationApprovalIndex()
+    {
+        if(Auth::user()->hasRole('TSD (Richard)')){
+            // $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay', 'mrf_liquidations')
+            // ->where('status', 3)
+            // ->orderBy('id','DESC')
+            // ->leftjoin('MCRT Table as mt', 'material_requisition_forms.mcrt_no', '=', 'mt.MCRTNo')
+            // ->leftjoin('MCRT Transaction Table AS mtt', 'material_requisition_forms.mcrt_no', '=', 'mtt.MCRTNo')
+            // ->select('material_requisition_forms.*', 'mt.MCRTNo','mt.MCRTDate', 'mt.ReturnedBy', 'mt.Note', 'mtt.CodeNo', 'mtt.MCRTQty', 'mtt.Unit')
+            // ->paginate(1);
+
+            $mrfs = MaterialRequisitionForm::with('items', 'district', 'municipality', 'barangay', 'mrf_liquidations', 'mcrt_items', 'mst_items')
+                ->where('status', 3)
+                ->orderBy('id', 'DESC')
+                ->leftJoin('MCRT Table as mt', 'material_requisition_forms.mcrt_no', '=', 'mt.MCRTNo')
+                ->leftJoin('MST Table as mst', 'material_requisition_forms.mst_no', '=', 'mst.MSTNo')
+                ->select(
+                    'material_requisition_forms.*',
+                    'mt.MCRTNo',
+                    'mt.MCRTDate',
+                    'mt.ReturnedBy',
+                    'mt.Note',
+                    'mst.MSTNo',
+                    'mst.MSTDate',
+                    'mst.ReturnedBy as mst_returned',
+                    'mst.Note as mst_note',
+                )
+                ->paginate(10);
+                    // return $mrfs;
+            return view('power_house.warehousing.material_requisition_form_approval_liquidation', compact('mrfs'));
+        }
+        else if(Auth::user()->hasRole('TSD Manager')){
+            // $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay', 'mrf_liquidations')
+            // ->where('status', 10)
+            // ->orderBy('id','DESC')
+            // ->paginate(10);
+
+            $mrfs = MaterialRequisitionForm::with('items', 'district', 'municipality', 'barangay', 'mrf_liquidations', 'mcrt_items', 'mst_items')
+                ->where('status', 10)
+                ->orderBy('id', 'DESC')
+                ->leftJoin('MCRT Table as mt', 'material_requisition_forms.mcrt_no', '=', 'mt.MCRTNo')
+                ->leftJoin('MST Table as mst', 'material_requisition_forms.mst_no', '=', 'mst.MSTNo')
+                ->select(
+                    'material_requisition_forms.*',
+                    'mt.MCRTNo',
+                    'mt.MCRTDate',
+                    'mt.ReturnedBy',
+                    'mt.Note',
+                    'mst.MSTNo',
+                    'mst.MSTDate',
+                    'mst.ReturnedBy as mst_returned',
+                    'mst.Note as mst_note',
+                )
+                ->paginate(10);
+
+            return view('power_house.warehousing.material_requisition_form_approval_liquidation', compact('mrfs'));
+        } else{
+            return redirect(route('mrfLiquidationApprovalIndex'))->withError('No Event made!');
+        }
+        
+    }
+    
+    public function mrfLiquidationApprovalUpdate(Request $request, string $id)
+    {
+        // status 10 means approved by custodian while 11 means already approved by audit
+        if(Auth::user()->hasRole('TSD (Richard)')){
+            $material_requisition_form = MaterialRequisitionForm::find($id);
+            $material_requisition_form->status = 10;
+            $material_requisition_form->confirmed_by = Auth::id();
+            $material_requisition_form->confirmed_date = Carbon::now();
+            $material_requisition_form->save();
+
+            return redirect(route('mrfLiquidationApprovalIndex'))->withSuccess('Successfully Approved!');
+        }
+        else if(Auth::user()->hasRole('TSD Manager')){
+            $material_requisition_form = MaterialRequisitionForm::find($id);
+            $material_requisition_form->status = 11;
+            $material_requisition_form->audit_by = Auth::id();
+            $material_requisition_form->audited_date = Carbon::now();
+            $material_requisition_form->save();
+
+            return redirect(route('mrfLiquidationApprovalIndex'))->withSuccess('Successfully Approved!');
+        }
+        else{
+            return redirect(route('mrfLiquidationApprovalIndex'))->withError('No Event made!');
+        }
+    }
+
+    public function getMcrt(string $id){
+        // $mcrt = DB::table('MCRT Table AS mt')
+        // ->leftJoin('MCRT Transaction Table AS mtt', 'mt.MCRTNo', '=', 'mtt.MCRTNo')
+        // ->select('mt.MCRTNo','mt.MCRTDate', 'mt.ReturnedBy', 'mt.Note', 'mtt.CodeNo', 'mtt.MCRTQty', 'mtt.Unit')
+        // ->where('mt.MCRTNo', '=', $id)
+        // ->get();
+        // Fetch the MCRT data
+
+
+        $mcrt = DB::table('MCRT Table AS mt')
+        ->leftJoin('MCRT Transaction Table AS mtt', 'mt.MCRTNo', '=', 'mtt.MCRTNo')
+        ->select(
+            'mt.MCRTNo', 
+            'mt.MCRTDate', 
+            'mt.ReturnedBy', 
+            'mt.Note', 
+            'mtt.CodeNo', 
+            'mtt.MCRTQty', 
+            'mtt.Unit'
+        )
+        ->where('mt.MCRTNo', '=', $id)
+        ->get();
+
+        // Enrich the MCRT data with the description from the StockedItem model
+        $mcrt->map(function($record) {
+        $item = StockedItem::where('ItemCode', '=', $record->CodeNo)
+            ->select('Description')
+            ->first();
+
+        if ($item) {
+            $record->Description = $item->Description;
+        } else {
+            $record->Description = null; // Set to null if no description is found
+        }
+
+        return $record;
+        });
+
+
+
+        return $mcrt;
+    }
+
+    public function getMst(string $id){
+        // $mst = DB::table('MST Table AS mt')
+        // ->leftJoin('MST Transaction Table AS mtt', 'mt.MSTNo', '=', 'mtt.MSTNo')
+        // ->select('mt.MSTNo','mt.MSTDate', 'mt.Returnedby', 'mt.Note', 'mtt.CodeNo', 'mtt.MSTQty', 'mtt.Unit')
+        // ->where('mt.MSTNo', '=', $id)
+        // ->get();
+
+        $mst = DB::table('MST Table AS mt')
+        ->leftJoin('MST Transaction Table AS mtt', 'mt.MSTNo', '=', 'mtt.MSTNo')
+        ->select(
+            'mt.MSTNo', 
+            'mt.MSTDate', 
+            'mt.Returnedby', 
+            'mt.Note', 
+            'mtt.CodeNo', 
+            'mtt.MSTQty', 
+            'mtt.Unit'
+        )
+        ->where('mt.MSTNo', '=', $id)
+        ->get();
+
+        // Enrich the MCRT data with the description from the StockedItem model
+        $mst->map(function($record) {
+        $item = StockedItem::where('ItemCode', '=', $record->CodeNo)
+            ->select('Description')
+            ->first();
+
+        if ($item) {
+            $record->Description = $item->Description;
+        } else {
+            $record->Description = null; // Set to null if no description is found
+        }
+
+        return $record;
+        });
+
+        return $mst;
+    }
+
+    public function mrfLiquidationApprovalView(string $id){ 
+        $mrf = MaterialRequisitionForm::with('items', 'district', 'municipality', 'barangay', 'mcrt_items.stock_item', 'mst_items')->find($id);
+
+        // get the details of MCRT and MST
+        $mst_detail = DB::connection('pgsql')
+        ->table('mst')
+        ->select('mst_number', 'mst_date', 'returned_by_id', 'remarks', 'id')
+        ->orderBy('mst_number','DESC')
+        ->where('mst_number', $mrf->mst_no)
+        ->first();
+        $mcrt_detail = DB::connection('pgsql')
+        ->table('mcrt')
+        ->select('mcrt_number', 'mcrt_date', 'returned_by_id', 'note', 'id')
+        ->orderBy('mcrt_number','DESC')
+        ->where('mcrt_number', $mrf->mcrt_no)
+        ->first();
+        
+        if ($mcrt_detail) {
+            // get the returned employee details for MCRT and MST
+            $mcrt_returned_employee = DB::connection('pgsql-system')
+            ->table('employee')
+            ->select(DB::raw("CONCAT(lastname, ', ', firstname, ' ', LEFT(middlename, 1), '.') as fullname"))
+            ->where('id', $mcrt_detail->returned_by_id)
+            ->first();
+
+            // get all item details of MCRT and MST
+            $mcrt_item_details = DB::connection('pgsql')
+            ->table('mcrt_item')
+            ->leftJoin('item', 'mcrt_item.item_id', '=', 'item.id')
+            ->select('mcrt_item.item_id', 'mcrt_item.quantity', 'item.description', 'item.code')
+            ->where('mcrt_item.mcrt_id', $mcrt_detail->id)
+            ->get();
+        } else {
+            $mcrt_returned_employee = null;
+            $mcrt_item_details = null;
+        }
+        
+        if ($mst_detail) {
+            // dd($mst_detail);
+            $mst_returned_employee = DB::connection('pgsql-system')
+            ->table('employee')
+            ->select(DB::raw("CONCAT(lastname, ', ', firstname, ' ', LEFT(middlename, 1), '.') as fullname"))
+            ->where('id', $mst_detail->returned_by_id)
+            ->first();
+
+            $mst_item_details = DB::connection('pgsql')
+            ->table('mst_item')
+            ->leftJoin('item', 'mst_item.item_id', '=', 'item.id')
+            ->select('mst_item.item_id', 'mst_item.quantity', 'item.description', 'item.code')
+            ->where('mst_item.mst_id', $mst_detail->id)
+            ->get();
+        } else {
+            $mst_returned_employee = null;
+            $mst_item_details = null;
+        }
+        
+
+        
+        
+
+        // dd(vars: $mcrt_item_details);
+
+        return view('power_house.warehousing.material_requisition_form_approval_liquidation_view', compact('mrf', 'mcrt_detail', 'mst_detail', 'mcrt_returned_employee', 'mst_returned_employee', 'mcrt_item_details', 'mst_item_details')); 
+    }
+
+    public function mrfLiquidationIadDisapproved(string $id, Request $request){
+        // dd($request);
+        // status 10 means approved by custodian while 11 means already approved by audit
+        if(Auth::user()->hasRole('TSD (Richard)')){
+            $material_requisition_form = MaterialRequisitionForm::find($id);
+            $material_requisition_form->status = 2;
+            $material_requisition_form->confirmed_by = null;
+            $material_requisition_form->confirmed_date = null;
+            $material_requisition_form->audit_by = null;
+            $material_requisition_form->audited_date = null;
+            $material_requisition_form->warehouse_remarks = $request->remarks;
+            $material_requisition_form->mcrt_no = null;
+            $material_requisition_form->mst_no = null;
+            $material_requisition_form->save();
+
+            return redirect(route('mrfLiquidationApprovalIndex'))->withSuccess('Successfully Disapproved!');
+        }
+        else if(Auth::user()->hasRole('TSD Manager')){
+            $material_requisition_form = MaterialRequisitionForm::find($id);
+            $material_requisition_form->status = 2;
+            $material_requisition_form->confirmed_by = null;
+            $material_requisition_form->confirmed_date = null;
+            $material_requisition_form->audit_by = null;
+            $material_requisition_form->audited_date = null;
+            $material_requisition_form->iad_remarks = $request->remarks;
+            $material_requisition_form->mcrt_no = null;
+            $material_requisition_form->mst_no = null;
+            $material_requisition_form->save();
+
+            return redirect(route('mrfLiquidationApprovalIndex'))->withSuccess('Successfully Disapproved!');
+        }
+        else{
+            return redirect(route('mrfLiquidationApprovalIndex'))->withError('No Event made!');
+        }
+    }
+    public function fetchMaterialRequisitionRecords(Request $request)
+    {
+
+        $mrfsQuery = MaterialRequisitionForm::with('items', 'district', 'municipality', 'barangay')->orderBy('id', 'DESC');
+
+        if (Auth::user()->hasRole('CETD SPRC')) {
+            $mrfsQuery->where('status', 1)->where('req_type');
+        } elseif (Auth::user()->hasRole('CETD (Dexter)')) {
+            // $mrfsQuery->where('status', 1)->where('req_type', '!=', null);
+        } elseif (!(Auth::user()->hasRole('Admin') || Auth::user()->hasRole('TSD (Richard)')) || Auth::user()->hasRole('CETD (Dexter)') || Auth::user()->hasRole('TSD Manager')) {
+            $mrfsQuery->where('requested_id', Auth::id());
+        }
+        
+        if($request->ajax()){
+            $mrfsQuery->where('project_name', 'LIKE', '%'.$request->project_name.'%');
+        }
+
+        $mrfs = $mrfsQuery->paginate(10);
+
+        $unliquidated_mrf = MaterialRequisitionForm::where([['requested_id', Auth::id()], ['status', '<', 11]])->count();
+
+        $oldest_unliquidated_mrf = MaterialRequisitionForm::with(['mrf_liquidations' => function ($query) {
+            $query->orderBy('created_at', 'asc');
+        }])
+        ->where('requested_id', Auth::id())
+        ->where('status', 2)
+        ->orderBy('created_at', 'asc')
+        ->first();
+    
+        if ($oldest_unliquidated_mrf) {
+            $liquidation_created_at = optional($oldest_unliquidated_mrf->mrf_liquidations->first())->created_at;
+            $liquidations = DB::table('material_requisition_form_liquidations')->get();
+
+            $createdAt = $liquidation_created_at;
+            $daysPassed = $createdAt->diffInDays(Carbon::now());
+        } else {
+            $createdAt = null;
+            $daysPassed = null;
+            $liquidations = null;
+        }
+
+        $thirtyDaysAgo = Carbon::now()->subDays(30);
+
+        $old_unliquidated_mrf = MaterialRequisitionForm::with('mrf_liquidations')
+        ->where('requested_id', Auth::id())
+        ->whereIn('status', [1, 2])
+        ->whereHas('mrf_liquidations', function ($query) use ($thirtyDaysAgo) {
+            $query->where('created_at', '<', $thirtyDaysAgo);
+        })
+        ->select('id', 'created_at', 'status')
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+        return view('power_house.warehousing.material_requisition_form_search', compact('mrfs','unliquidated_mrf','liquidations', 'daysPassed','old_unliquidated_mrf'))->render();
     }
 }

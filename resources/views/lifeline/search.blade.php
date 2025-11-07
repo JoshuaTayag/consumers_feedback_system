@@ -22,6 +22,7 @@
                                 @csrf
                                 {!! Form::hidden('account_no', $data->account_no )!!}
                                 {!! Form::hidden('id', $data->id )!!}
+                                {!! Form::hidden('date_of_application', $data->date_of_application )!!}
                                 <button class="btn btn-{{ $data->application_status == 0 ? 'warning' : 'success' }} btn-sm confirm-print" type="submit" ><i class="fa fa-print"></i></button>
                             </form>
                             {{-- <a href="{{ route('lifelineCoverageCertificate', $data->id) }}" target="_blank" class="btn btn-{{ $data->application_status == 0 ? 'warning' : 'success' }} btn-sm"><i class="fa fa-print"></i></a> --}}
@@ -38,14 +39,12 @@
                                 {!! Form::hidden('un_tag')!!}
                                 <button class="btn btn-warning btn-sm confirm-untag" type="submit" ><i class="fa fa-chain-broken"></i></button>
                             </form>
-                            {{-- <a href="{{ route('lifelineCoverageCertificate', $data->id) }}" target="_blank" class="btn btn-{{ $data->application_status == 0 ? 'warning' : 'success' }} btn-sm"><i class="fa fa-print"></i></a> --}}
                         </div>
                     @elseif($data->application_status == 2)
                         <div class="col-lg-4 p-1 text-center">
                             <a href="{{ route('lifelineCoverageCertificate', $data->id) }}" target="_blank" class="btn btn-{{ $data->application_status == 0 ? 'warning' : 'success' }} btn-sm"><i class="fa fa-print"></i></a>
                         </div>
                     @endif
-                    {{-- <a id="print_certification" href="{{ route('lifelineCoverageCertificate', $data->id) }}" target="_blank" class="btn btn-{{ $data->application_status == 0 ? 'warning' : 'success' }} btn-sm"><i class="fa fa-print"></i></a> --}}
                     @if($data->application_status == 0 || $data->application_status == 2)
                         <div class="col-lg-4 p-1 text-center">
                             <form method="POST" action="{{ route('lifeline.destroy', $data->id) }}">

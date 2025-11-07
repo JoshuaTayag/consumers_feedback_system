@@ -8,10 +8,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
 
     public function employee()
     {
@@ -20,7 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function requested_mrf()
     {
-        return $this->hasMany('App\Models\MaterialRequisitionForm');
+        return $this->hasMany('App\Models\MaterialRequisitionForm', 'requested_id', 'id');
     }
 
     public function approved_mrf()

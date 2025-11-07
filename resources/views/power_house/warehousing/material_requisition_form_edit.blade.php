@@ -10,7 +10,7 @@
         <div class="card-header">
           <div class="row align-items-center">
               <div class="col-lg-6">
-                  <span class="mb-0 align-middle fs-3">Edit MRF</span>
+                  <span class="mb-0 align-middle fs-3">Edit Material/Equipment Request</span>
               </div>
               <div class="col-lg-6 text-end">
                 <a class="btn btn-primary" href="{{ route('material-requisition-form.index') }}"> Back </a>
@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="card-body">
-          @if($mrf->status == 1 && !$liquidation->first() && Auth::user()->hasRole('CETD'))
+          @if($mrf->status == 1 && !$liquidation->first() && (Auth::user()->hasRole('CETD (Dexter)') or Auth::user()->hasRole('CETD SPRC')))
             <div class="row mb-4">
               <div class="col-lg-12">
                 <div class="card">
@@ -29,27 +29,69 @@
                     {!! Form::open(array('route' => ['mrfLiquidationCreate', $mrf->id],'method'=>'PUT')) !!}
                       <input type="hidden" name="assigning" value="true">
                       <div class="row">
-                        <div class="col-lg-4">
+                        @if($mrf->status == 1 && !$liquidation->first() &&  Auth::user()->hasRole('CETD SPRC'))
+                          <div class="col-lg-3">
+                            <div class="mb-3">
+                              <label for="req_type" class="form-label mb-1">Request Type</label>
+                              <!-- <input type="text" class="form-control" id="req_type" name="req_type" > -->
+                              <select id="req_type" class="form-control" name="req_type" required @disabled($mrf->req_type)>
+                                <option value="">Choose...</option>
+                                  @foreach (Config::get('constants.mer_request_type') as $req)          
+                                    <option value="{{ $req['id'] }}" id="" @selected( $mrf->req_type == $req['id']) >{{ $req['name'] }}</option>
+                                  @endforeach 
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-lg-3">
+                            <div class="mb-3">
+                              <label for="wo_no" class="form-label mb-1">WO No. </label>
+                              <input type="text" class="form-control" id="wo_no" name="wo_no" value="{{ $mrf->with_wo }}" @disabled($mrf->with_wo) disabled>
+                            </div>
+                          </div>
+                        @endif
+
+                        @if($mrf->status == 1 && !$liquidation->first() &&  Auth::user()->hasRole('CETD (Dexter)') && $mrf->req_type)
+                          <div class="col-lg-3">
+                            <div class="mb-3">
+                              <label for="req_type" class="form-label mb-1">Request Type</label>
+                              <!-- <input type="text" class="form-control" id="req_type" name="req_type" > -->
+                              <select id="req_type" class="form-control" name="req_type" required @disabled($mrf->req_type)>
+                                <option value="">Choose...</option>
+                                  @foreach (Config::get('constants.mer_request_type') as $req)          
+                                    <option value="{{ $req['id'] }}" id="" @selected( $mrf->req_type == $req['id']) >{{ $req['name'] }}</option>
+                                  @endforeach 
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-lg-3">
+                            <div class="mb-3">
+                              <label for="wo_no" class="form-label mb-1">WO No. </label>
+                              <input type="text" class="form-control" id="wo_no" name="wo_no" value="{{ $mrf->with_wo }}">
+                            </div>
+                          </div>
+
+                          <div class="col-lg-3">
+                            <div class="mb-2">
+                              <label for="project_name" class="form-label mb-1">MRV No.</label>
+                              <select class="form-control" id="mrvs" name="mrvs[]" multiple="multiple">
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-lg-3">
+                            <div class="mb-2">
+                              <label for="project_name" class="form-label mb-1">SERIV No.</label>
+                              <select class="form-control" id="serivs" name="serivs[]" style="width: 100%" multiple="multiple">
+                              </select>
+                            </div>
+                          </div>
+                        @endif
+                        <div class="col-lg-12">
                           <div class="mb-2">
-                            <label for="project_name" class="form-label mb-1">MRV No.</label>
-                            <select class="form-control" id="mrvs" name="mrvs[]" multiple="multiple">
-                            </select>
+                            <label for="project_name" class="form-label mb-1">Remarks</label>
+                            <textarea name="cetd_remarks" class="form-control" id="">{{ $mrf->cetd_remarks }}</textarea>
                           </div>
                         </div>
-                        <div class="col-lg-4">
-                          <div class="mb-2">
-                            <label for="project_name" class="form-label mb-1">SERIV No.</label>
-                            <select class="form-control" id="serivs" name="serivs[]" style="width: 100%" multiple="multiple">
-                            </select>
-                          </div>
-                        </div>
-                        <div class="col-lg-4">
-                          <div class="mb-3">
-                            <label for="wo_no" class="form-label mb-1">WO No. </label>
-                            <input type="text" class="form-control" id="wo_no" name="wo_no" required>
-                          </div>
-                        </div>
-                        <div class="col-lg-4">
+                        <div class="col col-lg-4 d-flex justify-content-left align-items-center">
                           <input type="submit" class="btn btn-primary btn-sm fa fa-trash" value="Assign">
                         </div>
                       </div>
@@ -59,25 +101,33 @@
               </div>
             </div>
           @endif
-          {!! Form::open(array('route' => ['material-requisition-form.update', $mrf->id],'method'=>'PUT')) !!}
+          {!! Form::open(array('route' => ['material-requisition-form.update', $mrf->id],'method'=>'PUT', 'enctype' => 'multipart/form-data')) !!}
           <div class="row">
             <div class="col-lg-6">
               <div class="card">
-                <div class="card-header">
-                  <h4>Project Information</h4>
+                <div class="card-header fw-bold fs-5">
+                  PROJECT DETAILS
                 </div>
                 <div class="card-body">
                   <div class="row">
+                    @if ($mrf->status != 0)
+                      <div class="col-lg-12 mb-2">
+                        <span class="text-danger fs-5 fw-bold">
+                          MER #: {{ $mrf->status != 0 ? date('y', strtotime($mrf->created_at)) . '-' . str_pad($mrf->id, 5, '0', STR_PAD_LEFT) : '' }}
+                        </span>
+                      </div>
+                    @endif
                     <div class="col-lg-12">
                       <div class="mb-2">
-                        <label for="project_name" class="form-label mb-1">Project Name *</label>
+                        <label for="project_name" class="form-label mb-1">Project Name </label>
                         <input type="text" class="form-control" id="project_name" name="project_name" value="{{$mrf->project_name}}" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                       </div>
                     </div>
                     <div class="col-lg-12">
                       <div class="mb-3">
                         <label for="requested_by" class="form-label mb-1">Requested By</label>
-                          <select id="requested_by" class="form-control" name="requested_by" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        <input type="text" class="form-control" id="requested_by" name="requested_by" value="{{ $mrf->requested_id ? $mrf->requested_name : auth()->user()->name }}" disabled required>
+                        <!-- <select id="requested_by" class="form-control" name="requested_by" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                             @foreach ($users as $user)          
                               <option value="{{ $user->id }}" @selected( $mrf->requested_id == $user->id) id="">
                                 {{ $user->name }} | 
@@ -88,13 +138,13 @@
                                 @endif
                               </option>
                             @endforeach 
-                          </select>
+                          </select> -->
                       </div>
                     </div>
                     <div class="col-lg-12">
                       <div class="mb-3">
                         <label for="structure" class="form-label mb-1">
-                          {{$mrf->status == 0 ? 'Approved By: ': ($mrf->status == 1 || $mrf->status == 2 ? 'Approved Date: ' : 'Disapproved Date: ') }}
+                          {{$mrf->status == 4 ? 'Disapproved By: ' :  'Approved By:' }}
                           <span class="text-danger fw-bold">{{ $mrf->approved_by ? date('F d, Y  h:i A', strtotime($mrf->approved_by)) : null }}</span></label>
                           <select id="approved_by" class="form-control" name="approved_by" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                             @foreach ($users as $user)          
@@ -110,12 +160,24 @@
                           </select>
                       </div>
                     </div>
+                    <div class="col-lg-12 {{ $mrf->status == 0 ? 'd-none': 'd-block'}}">
+                      <div class="mb-3">
+                        <label for="requested_by" class="form-label mb-1">Liquidation Confirmed By:  <span class="text-danger fw-bold">{{ $mrf->confirmed_date ? date('F d, Y  h:i A', strtotime($mrf->confirmed_date)) : null }}</span></label>
+                        <input type="text" class="form-control" value="{{ $mrf->confirmed_by ? $mrf->user_confirmed->name : '' }}" disabled required>
+                      </div>
+                    </div>
+                    <div class="col-lg-12 {{ $mrf->status == 0 ? 'd-none': 'd-block'}}">
+                      <div class="mb-3">
+                        <label for="requested_by" class="form-label mb-1">Liquidation Approved by  <span class="text-danger fw-bold">{{ $mrf->audited_date ? date('F d, Y  h:i A', strtotime($mrf->audited_date)) : null }}</span></label>
+                        <input type="text" class="form-control" value="{{ $mrf->audit_by ? $mrf->user_audited->name : '' }}" disabled required>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-lg-6">
-              <div class="card">
+              <div class="card {{ $mrf->status != 0 ? 'd-none': 'd-block'}}">
                 <div class="card-header">
                   <h4>Add Item</h4>
                 </div>
@@ -142,6 +204,16 @@
                       <div class="mb-2">
                         <label for="project_name" class="form-label mb-1">Item</label>
                         @if($mrf->status == 0)
+                          <button type="button" class="btn btn-link p-0" tabindex="-1" data-bs-toggle="collapse"
+                              data-bs-target="#itemNote" aria-expanded="false" aria-controls="itemNote">
+                              <i class="fa fa-question-circle"></i>
+                          </button>
+                          <div class="collapse mb-2" id="itemNote">
+                              <div class="alert alert-info py-2 px-3 mb-0">
+                                  This field is case sensitive. Please ensure the correct capitalization of
+                                  letters.
+                              </div>
+                          </div>
                           <select class="js-example-basic-multiple form-control" id="item" name="item" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)></select>
                         @endif
                       </div>
@@ -157,21 +229,48 @@
                   </div>
                 </div>
               </div>
-                
+              <div class="card {{ $mrf->status == 0 ? 'd-none': 'd-block'}}">
+                <div class="card-header fw-bold fs-5">
+                  REFERENCES
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-lg-12">
+                      <div class="mb-3">
+                        <label for="req_type" class="form-label mb-1">Request Type</label>
+                        <input type="text" class="form-control" value="{{ $mrf->req_type ? Config::get('constants.mer_request_type.'.$mrf->req_type.'.name') : 'None' }}" disabled>
+                      </div>
+                    </div>
+                    <div class="col-lg-12">
+                      <div class="mb-3">
+                        <label for="req_type" class="form-label mb-1">CETD Remarks</label>
+                        <input type="text" class="form-control" value="{{ $mrf->cetd_remarks }}" disabled>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mx-1">
+                    @foreach ($mrf->mrf_liquidations as $liquidations)    
+                      <div class="col-lg-6 mb-1 border">
+                        <span class="fw-bold">{{ $liquidations->type }}{{ $liquidations->type_number ? '# ' . $liquidations->type_number : '' }} <br> Date: {{ date('m/d/Y', strtotime($liquidations->created_at)) }}</span>
+                      </div>  
+                    @endforeach
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="row mt-4">
             <div class="col-lg-12">
               <div class="card">
-                <div class="card-header">
-                  <h4>Address</h4>
+                <div class="card-header fw-bold fs-5">
+                  ADDRESS
                 </div>
                 <div class="card-body">
                   <div class="row">
                     <div class="col-lg-4">
                       <div class="mb-2">
                         <label for="area" class="form-label mb-1">Area *</label>
-                        <select id="area" class="form-control" name="area_id" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        <select id="area" class="form-control" name="area_id" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id) required>
                           <option value="">Choose...</option>
                           @foreach (Config::get('constants.area_id') as $area)          
                             <option value="{{ $area['id'] }}" id="" @selected( $mrf->area_id == $area['id']) >{{ $area['name'] }}</option>
@@ -182,7 +281,7 @@
                     <div class="col-lg-4">
                       <div class="mb-3">
                         <label for="district" class="form-label mb-1">District *</label>
-                        <select id="district" class="form-control" name="district" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        <select id="district" class="form-control" name="district" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id) required>
                             <option value="">Choose...</option>
                             @foreach ($districts as $district)                        
                                 <option value="{{ $district->id }}" @selected( $mrf->district_id == $district->id) id="{{ $district->id }}">{{$district->district_name}}</option>
@@ -193,7 +292,7 @@
                     <div class="col-lg-4">
                       <div class="mb-3">
                         <label for="municipality" class="form-label mb-1">Municipality *</label>
-                        <select id="municipality" class="form-control" name="municipality" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        <select id="municipality" class="form-control" name="municipality" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id) required>
                           <option value="{{ $mrf->municipality_id }}" id="{{ $mrf->municipality_id }}">{{$mrf->municipality->municipality_name }}</option>
                         </select>
                       </div>
@@ -201,17 +300,38 @@
                     <div class="col-lg-4">
                       <div class="mb-3">
                         <label for="barangay" class="form-label mb-1">Barangay</label>
-                        <select id="barangay" class="form-control" name="barangay" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
-                          <option value="{{ $mrf->barangay_id }}" id="{{ $mrf->barangay_id }}">{{$mrf->barangay->barangay_name }}</option>
+                        <select id="barangay" class="form-control" name="barangay" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id) required>
+                          <option value="{{ $mrf->barangay_id }}" id="{{ $mrf->barangay_id }}">{{$mrf->barangay ? $mrf->barangay->barangay_name : null }}</option>
                         </select>
                       </div>
                     </div>
                     <div class="col-lg-4">
                       <div class="mb-3">
                         <label for="sitio" class="form-label mb-1">Sitio</label>
-                        <input type="text" class="form-control" id="sitio" name="sitio" value="{{$mrf->sitio }}" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        <input type="text" class="form-control" id="sitio" name="sitio" value="{{$mrf->sitio }}" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                       </div>
                     </div>
+                    <div class="col-lg-4">
+                      <div class="mb-3">
+                        <label for="substation" class="form-label mb-1">Substation</label>
+                        <!-- <input type="text" class="form-control" id="substation" name="substation" value="{{$mrf->substation_id }}" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)> -->
+                        <select id="substation" class="form-control" name="substation" required @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                          <option value="">Choose...</option>
+                          @foreach (Config::get('constants.substations') as $substation)          
+                            <option value="{{ $substation['id'] }}" id="" @selected( $mrf->substation_id == $substation['id']) >{{ $substation['name'] }}</option>
+                          @endforeach 
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-4">
+                      <div class="mb-3">
+                        <label for="feeder" class="form-label mb-1">Feeder</label>
+                        <!-- <input type="text" class="form-control" id="feeder" name="feeder" value="{{$mrf->feeder_id }}" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)> -->
+                        <select id="feeder" class="form-control" name="feeder" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                        </select>
+                      </div>
+                    </div>
+                    <input type="hidden" class="form-control" id="status" name="status" value="{{$mrf->status }}">
                   </div>
                 </div>
               </div>
@@ -221,8 +341,8 @@
           <div class="row mt-4">
             <div class="col-lg-12">
               <div class="card">
-                <div class="card-header">
-                  <h4>Items</h4>
+                <div class="card-header fw-bold fs-5">
+                  ITEMS
                 </div>
                 <div class="card-body">
                   <div class="row">
@@ -230,8 +350,10 @@
                       <div class="mb-2">
                         <table class="table table-bordered data-table">
                           <tr>
-                            <th>Nea Code</th>
+                            <th>#</th>
+                            <th>Code</th>
                             <th>Description</th>
+                            <th>Unit</th>
                             <th>Unit Cost</th>
                             <th>Quantity</th>
                             @if($mrf->status == 2)
@@ -246,7 +368,15 @@
                           </table>
                       </div>
                     </div>
-                  
+
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            <label for="image_path" class="form-label mb-1">Upload Image (Maximum of 3 images
+                                only)</label>
+                            <input type="file" class="form-control" id="image_path" name="image_path[]"
+                                multiple>
+                        </div>
+                    </div>
 
                     <div class="col-lg-12">
                       <div class="mb-2">
@@ -265,16 +395,16 @@
               <table>
                 <tr>
                   <td>
-                    <input type="submit" class="btn btn-primary btn-sm fa fa-trash" value="Save" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
+                    <input type="submit" class="btn btn-primary btn-sm fa fa-trash {{$mrf->status != 0 || $mrf->requested_id != auth()->user()->id ? 'd-none' : 'd-block' }}" value="Save" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)>
                     {!! Form::close() !!} 
                   </td>
-                  <td>
+                  <!-- <td>
                     <form method="POST" action="{{ route('material-requisition-form.destroy', $mrf->id) }}">
                       @method('DELETE')
                       @csrf
                       <button class="btn btn-danger btn-sm confirm-button" type="submit" @disabled($mrf->status != 0 || $mrf->requested_id != auth()->user()->id)><i class="fa fa-trash"></i> Delete</button>
                     </form>
-                  </td>
+                  </td> -->
                 </tr>
               </table>
             </div>
@@ -394,6 +524,18 @@
 
 $(document).ready(function () {
 
+  const app_status = document.getElementById('status');
+  if(app_status == 1){
+    const textbox1 = document.getElementById('req_type');
+    const textbox2 = document.getElementById('wo_no');
+    if (textbox1.value.trim() != 2) {
+      // Enable textbox2 if textbox1 has a value
+      textbox2.disabled = true;
+      textbox2.required = false;
+    }
+  }
+  
+
   $('.js-example-basic-multiple').select2();
 
   $( "#item" ).select2({
@@ -430,11 +572,11 @@ $(document).ready(function () {
     if (data.loading){
       return data.text
     }
-    return data.ItemCode + " | " + data.Description
+    return data.code + " | " + data.description
     }
 
     function templateSelection(data){
-    return data.ItemCode + " | " + data.Description
+    return data.code + " | " + data.description
     }
 
   $('#get_items').click(function() {
@@ -526,8 +668,37 @@ $(document).ready(function () {
       });
   });
 
+  const substationId = $('#substation').val();
 
+  if(substationId != ""){
+    
+    populateMunicipalities(substationId);
+  }
+
+  // Event listener for district dropdown change
+  $('#substation').change(function() {
+      const substationId = $(this).val();
+      // console.log(substationId)
+      populateMunicipalities(substationId);
+  });
 });
+
+// Function to populate municipalities dropdown based on selected substation
+function populateMunicipalities(substationId) {
+    var feeders = {!! json_encode(Config::get('constants.feeders')) !!};
+    
+    // Filter feeders based on the selected substationId
+    const substationFeeders = feeders.filter(feeder => feeder.substation_id == substationId);
+
+    // Populate municipalities dropdown with filtered feeders
+    $('#feeder').empty(); // Clear existing options
+    var selectedFeederId = "{{ $mrf->feeder_id }}";
+    $('#feeder').append(`<option value="">Choose...</option>`);
+    substationFeeders.forEach(feeder => {
+        // $('#feeder').append(`<option value="${feeder.id}" @selected($mrf->feeder_id == 1) >${feeder.name}</option>`);
+        $('#feeder').append(`<option value="${feeder.id}" ${feeder.id == selectedFeederId ? 'selected' : ''}>${feeder.name}</option>`);
+    });
+}
 
 function removeItem(val) {
   $(document).ready(function () {
@@ -548,6 +719,29 @@ function removeItem(val) {
 }
 
 
+  document.addEventListener('DOMContentLoaded', function (status) {
+      // Get references to the textboxes
+      const app_status = document.getElementById('status');
+      if(app_status.value == 1){
+      const textbox1 = document.getElementById('req_type');
+      const textbox2 = document.getElementById('wo_no');
+      
+      // Add event listener to textbox1
+      textbox1.addEventListener('input', function () {
+          // Check if textbox1 has a value
+          if (textbox1.value.trim() == 2) {
+              // Enable textbox2 if textbox1 has a value
+              textbox2.disabled = false;
+              textbox2.required = true;
+          } else {
+              // Otherwise, disable textbox2
+              textbox2.disabled = true;
+              textbox2.required = false;
+          }
+      });
+    }
+  });
+  
 
 </script>
 @endsection
@@ -571,7 +765,7 @@ function removeItem(val) {
     padding: .375rem .75rem;
     font-size: 1rem;
     line-height: 1.5;
-    color: #495057;
+    color: #000000;
     background-color: #fff;
     background-clip: padding-box;
     border: 1px solid #ced4da;
@@ -588,17 +782,44 @@ function removeItem(val) {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    border: 1px solid transparent;
+    /* color: #fff; */
+    border: 1px solid;
     padding: 0.375rem 0.75rem;
     font-size: 1rem;
     line-height: 1.5;
     border-radius: 0.25rem;
     transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    background-color: #007bff;
+    color: #fff;
+    position: relative;
+    z-index: 10;
+  }
+  .editable-buttons .editable-cancel {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* color: #fff; */
+    border: 1px solid;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    background-color: #007bff;
+    color: #fff;
+    position: relative;
+    z-index: 10;
   }
 
   .editable-click, a.editable-click, a.editable-click:hover {
     text-decoration: none;
-    border-bottom: solid 1px #00cc0a;
+    border-bottom: solid 1px #818181;
   }
 
 </style>

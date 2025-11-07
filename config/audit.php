@@ -152,7 +152,7 @@ return [
     'drivers' => [
         'database' => [
             'table'      => 'audits',
-            'connection' => 'sqlSrvMembership',
+            'connection' => 'sqlsrv',
         ],
     ],
 
