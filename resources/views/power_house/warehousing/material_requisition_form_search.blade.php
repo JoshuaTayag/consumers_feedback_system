@@ -73,7 +73,7 @@
                             Action
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                            @if ($mrf->requested_id == auth()->user()->id && $mrf->status != 11)
+                            @if ($mrf->status != 11)
                                 <li><a href="{{ route('material-requisition-form.edit', $mrf->id) }}"
                                         class="dropdown-item"><i class="fa fa-eye"></i>
                                         View</a></li>

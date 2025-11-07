@@ -233,48 +233,58 @@
         <div class="card-header fw-bold fs-5">
           MCRT DETAILS
         </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col">
-              <div class="row">
-                <div class="col-lg-4">
-                  <label for="mcrt_no" class="fw-bold" >MCRT #</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mcrt_detail->mcrt_number }}" readonly>
+        @if ($mcrt_detail)
+          <div class="card-body">
+            <div class="row">
+              <div class="col">
+                <div class="row">
+                  <div class="col-lg-4">
+                    <label for="mcrt_no" class="fw-bold" >MCRT #</label>
+                    <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mcrt_detail->mcrt_number }}" readonly>
+                  </div>
+                  <div class="col-lg-4">
+                    <label for="mcrt_no" class="fw-bold" >MCRT DATE</label>
+                    <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ date('m/d/Y', strtotime($mcrt_detail->mcrt_date)) }}" readonly>
+                  </div>
+                  <div class="col-lg-4">
+                    <label for="mcrt_no" class="fw-bold" >RETURNED</label>
+                    <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mcrt_returned_employee->fullname }}" readonly>
+                  </div>
+                  <div class="col pb-4">
+                    <label for="mcrt_no" class="fw-bold" >Note</label>
+                    <textarea name="mcrt_note" class="form-control" id="mcrt_note" rows="2" readonly>{{ $mcrt_detail->note }}</textarea>  
+                  </div>
                 </div>
-                <div class="col-lg-4">
-                  <label for="mcrt_no" class="fw-bold" >MCRT DATE</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ date('m/d/Y', strtotime($mcrt_detail->mcrt_date)) }}" readonly>
-                </div>
-                <div class="col-lg-4">
-                  <label for="mcrt_no" class="fw-bold" >RETURNED</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mcrt_returned_employee->fullname }}" readonly>
-                </div>
-                <div class="col pb-4">
-                  <label for="mcrt_no" class="fw-bold" >Note</label>
-                  <textarea name="mcrt_note" class="form-control" id="mcrt_note" rows="2" readonly>{{ $mcrt_detail->note }}</textarea>  
-                </div>
-              </div>
-              <table class="table table-striped table-hover fw-bold">
-                <thead class="bg-dark">
-                  <tr>
-                    <th>NEA CODE</th>
-                    <th>ITEM DESCRIPTION</th>
-                    <th>QUANTITY</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach ($mcrt_item_details as $item)  
+                <table class="table table-striped table-hover fw-bold">
+                  <thead class="bg-dark">
                     <tr>
-                      <td>{{ $item->code }}</td>
-                      <td>{{ $item->description }}</td>
-                      <td>{{ (int) $item->quantity }}</td>
+                      <th>NEA CODE</th>
+                      <th>ITEM DESCRIPTION</th>
+                      <th>QUANTITY</th>
                     </tr>
-                  @endforeach
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    @foreach ($mcrt_item_details as $item)  
+                      <tr>
+                        <td>{{ $item->code }}</td>
+                        <td>{{ $item->description }}</td>
+                        <td>{{ (int) $item->quantity }}</td>
+                      </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
+        @else
+          <div class="card-body">
+            <div class="row">
+              <div class="col text-center">
+                <h4 class="text-danger fw-bold">No MCRT Found</h4>
+              </div>
+            </div>
+          </div>
+        @endif
       </div>
     </div>
 
@@ -283,48 +293,58 @@
         <div class="card-header fw-bold fs-5">
           MST DETAILS
         </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col">
-              <div class="row mb-3">
-                <div class="col-lg-4">
-                  <label for="mcrt_no" class="fw-bold" >MST #</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mst_detail->mst_number }}" readonly>
+        @if ($mst_detail)
+          <div class="card-body">
+            <div class="row">
+              <div class="col">
+                <div class="row mb-3">
+                  <div class="col-lg-4">
+                    <label for="mcrt_no" class="fw-bold" >MST #</label>
+                    <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mst_detail->mst_number }}" readonly>
+                  </div>
+                  <div class="col-lg-4">
+                    <label for="mcrt_no" class="fw-bold" >MST DATE</label>
+                    <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ date('m/d/Y', strtotime($mst_detail->mst_date)) }}" readonly>
+                  </div>
+                  <div class="col-lg-4">
+                    <label for="mcrt_no" class="fw-bold" >RETURNED</label>
+                    <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mst_returned_employee->fullname }}" readonly>
+                  </div>
+                  <div class="col pb-4">
+                    <label for="mcrt_no" class="fw-bold" >Note</label>
+                    <textarea name="mcrt_note" class="form-control" id="mcrt_note" rows="2" readonly>{{ $mst_detail->remarks }}</textarea>
+                  </div>
                 </div>
-                <div class="col-lg-4">
-                  <label for="mcrt_no" class="fw-bold" >MST DATE</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ date('m/d/Y', strtotime($mst_detail->mst_date)) }}" readonly>
-                </div>
-                <div class="col-lg-4">
-                  <label for="mcrt_no" class="fw-bold" >RETURNED</label>
-                  <input type="text" name="mcrt_no" class="form-control" id="mcrt_no" value="{{ $mst_returned_employee->fullname }}" readonly>
-                </div>
-                <div class="col pb-4">
-                  <label for="mcrt_no" class="fw-bold" >Note</label>
-                  <textarea name="mcrt_note" class="form-control" id="mcrt_note" rows="2" readonly>{{ $mst_detail->remarks }}</textarea>
-                </div>
-              </div>
-              <table class="table table-striped table-hover fw-bold">
-                <thead class="bg-dark">
-                  <tr>
-                    <th>NEA CODE</th>
-                    <th>ITEM DESCRIPTION</th>
-                    <th>QUANTITY</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach ($mst_item_details as $item)  
+                <table class="table table-striped table-hover fw-bold">
+                  <thead class="bg-dark">
                     <tr>
-                      <td>{{ $item->code }}</td>
-                      <td>{{ $item->description }}</td>
-                      <td>{{ (int) $item->quantity }}</td>
+                      <th>NEA CODE</th>
+                      <th>ITEM DESCRIPTION</th>
+                      <th>QUANTITY</th>
                     </tr>
-                  @endforeach
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    @foreach ($mst_item_details as $item)  
+                      <tr>
+                        <td>{{ $item->code }}</td>
+                        <td>{{ $item->description }}</td>
+                        <td>{{ (int) $item->quantity }}</td>
+                      </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
+        @else
+          <div class="card-body">
+            <div class="row">
+              <div class="col text-center">
+                <h4 class="text-danger fw-bold">No MST Found</h4>
+              </div>
+            </div>
+          </div>
+        @endif
       </div>
     </div>
   </div>
@@ -435,7 +455,7 @@
 
               <div class="row">
                 <div class="col">
-                  <textarea name="remarks" id="remarks" class="form-control"></textarea>
+                  <textarea name="remarks" id="remarks" class="form-control" required></textarea>
                 </div>
               </div>
             </div>

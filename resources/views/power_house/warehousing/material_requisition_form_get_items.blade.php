@@ -53,7 +53,7 @@
     @endif
   
   
-    @if($mrf->status == 0)
+    @if($mrf->status == 0 && $mrf->requested_id == auth()->user()->id)
       <th>
         <a href="#"  class="btn btn-danger" onclick="removeItem({{$mrf_item->id}})"><i class="fa fa-times"></i></a>
       </th>

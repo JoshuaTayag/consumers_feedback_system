@@ -115,7 +115,7 @@
                                         <option value="">Choose...</option>
                                         @foreach (Config::get('constants.area_id') as $area)
                                             <option value="{{ $area['id'] }}" id=""
-                                                {{ old('area') ? 'selected' : '' }}>{{ $area['name'] }}</option>
+                                                {{ old('area_id') ? 'selected' : '' }}>{{ $area['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -126,7 +126,7 @@
                                     <select id="district" class="form-control" name="district" required>
                                         <option value="">Choose...</option>
                                         @foreach ($districts as $district)
-                                            <option value="{{ $district->id }}" id="{{ $district->id }}">
+                                            <option value="{{ $district->id }}" id="{{ $district->id }}" {{ old('district') ? 'selected' : '' }}>
                                                 {{ $district->district_name }}</option>
                                         @endforeach
                                     </select>
@@ -151,7 +151,7 @@
                             <div class="col-lg-3">
                                 <div class="mb-3">
                                     <label for="sitio" class="form-label mb-1">Sitio</label>
-                                    <input type="text" class="form-control" id="sitio" name="sitio">
+                                    <input type="text" class="form-control" id="sitio" value="{{ old('sitio') }}" name="sitio">
                                 </div>
                             </div>
                             <div class="col-lg-2">

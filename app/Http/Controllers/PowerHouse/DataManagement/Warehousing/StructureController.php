@@ -133,7 +133,7 @@ class StructureController extends Controller
             $items = DB::connection('pgsql')
             ->table('item')
             ->orderBy('code','DESC')
-            ->whereRaw('(total_quantity - quantity_on_queue) > 1')
+            ->whereRaw('(total_quantity - quantity_on_queue) >= 1')
             ->where('description', 'like', '%' .$search . '%')
             ->select('id', 'code', 'description');
         }
