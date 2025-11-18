@@ -53,22 +53,38 @@ class ChangeMeterApiController extends Controller
     
     public function meterPosting(Request $request)
     {
-        // Basic validation
+        // Basic validation first
         $request->validate([
             'cm_id' => 'required|exists:change_meter_requests,id',
-            'meter_no' => 'required|string',
             'date_acted' => 'required|date',
             'time' => 'required|date_format:H:i',
             'crew' => 'required|integer',
-            'status' => 'required|integer',
-            'seal_no' => 'required|nullable|string',
-            'erc_seal' => 'required|nullable|string',
+            'status' => 'required|integer|in:1,2', // Only allow status 1 or 2
             'care_of' => 'nullable|string',
             'last_reading' => 'nullable|numeric',
             'reading_initial' => 'nullable|numeric',
-            'damage_cause' => 'required|nullable|string',
-            'crew_remarks' => 'nullable|string',
+            'damage_cause' => 'nullable|string',
         ]);
+
+        // Conditional validation based on status
+        if ($request->status == 2) {
+            // Status 2 (acted-completed) - require meter_no, seal_no, erc_seal
+            $request->validate([
+                'meter_no' => 'required|string',
+                'seal_no' => 'required|string',
+                'erc_seal' => 'required|string',
+                'crew_remarks' => 'nullable|string',
+            ]);
+        } elseif ($request->status == 3) {
+            // Status 3 (acted-not-completed) - these fields are optional
+            $request->validate([
+                'meter_no' => 'nullable|string',
+                'seal_no' => 'nullable|string',
+                'erc_seal' => 'nullable|string',
+                'crew_remarks' => 'required|string',
+            ]);
+        }
+
 
         try {
 
@@ -193,6 +209,8 @@ class ChangeMeterApiController extends Controller
                 "action_status" => $change_meter_request->status,
                 "leyeco_seal_no" => $request->seal_no,
                 "serial_no" => null,
+                "area" => $change_meter_request->area,
+                "feeder" => $change_meter_request->feeder,
                 "erc_seal_no" => $request->erc_seal,
                 "posted_by" => auth()->id(),
                 "created_at" => \Carbon\Carbon::now(),
@@ -315,4 +333,57 @@ class ChangeMeterApiController extends Controller
             ], 500);
         }
     }
+
+    public function fetchChangeMeterRequestHistory(Request $request)
+    {
+        try {
+            $contractorId = auth()->user()->change_meter_contractor->id;
+
+            $date_from = $request->input('date_from');
+            $date_to = $request->input('date_to');
+            $status = $request->input('status');
+
+            // Fetch change meter request history for the given contractor
+            $changeMeterRequests = ChangeMeterRequest::select('id', 'control_no', 'contact_no', 'sitio', 'barangay_id', 'municipality_id','account_number', 'consumer_type', 'remarks', 'old_meter_no', 'new_meter_no', 'care_of', 'location', 'meter_or_number', 'date_time_acted', 'status')
+                ->selectRaw("CONCAT(last_name, ', ', first_name, ' ', middle_name) as full_name")
+                ->with('municipality', 'barangay')
+                ->where('crew', $contractorId)
+                ->when($status !== null, function ($query) use ($status) {
+                    return $query->where('status', $status);
+                })
+                ->orderBy('date_time_acted', 'desc')
+                ->when($date_from && $date_to, function ($query) use ($date_from, $date_to) {
+                    return $query->whereBetween('date_time_acted', [$date_from . ' 00:00:00', $date_to . ' 23:59:59']);
+                })
+                ->get()
+                ->map(function ($request) {
+                    return [
+                        'cm_id' => $request->id,
+                        'control_no' => $request->control_no,
+                        'full_name' => $request->full_name,
+                        'contact_no' => $request->contact_no,
+                        'address' => $request->sitio .', '. $request->barangay->barangay_name .', '. $request->municipality->municipality_name,
+                        'consumer_type' => $request->consumer_type,
+                        'meter_or' => $request->meter_or_number,
+                        'remarks' => $request->remarks,
+                        'land_mark' => $request->location,
+                        'old_meter_no' => $request->old_meter_no,
+                        'new_meter_no' => $request->new_meter_no,
+                        'date_time_acted' => $request->date_time_acted,
+                        'status' => $request->status,
+                    ];
+                }); 
+            return response()->json([
+                'success' => true,
+                'data' => $changeMeterRequests,
+                'count_of_requests' => $changeMeterRequests->count()
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching change meter request history: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

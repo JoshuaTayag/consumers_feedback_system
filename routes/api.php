@@ -45,5 +45,5 @@ Route::post('/refresh', [App\Http\Controllers\Api\AuthController::class, 'refres
 Route::get('/change-meter-requests', [App\Http\Controllers\API\ChangeMeterApiController::class, 'fetchChangeMeterDataPerContractor'])->middleware('auth:sanctum');
 Route::post('/change-meter-requests-meter-posting', [App\Http\Controllers\API\ChangeMeterApiController::class, 'meterPosting'])->middleware('auth:sanctum');
 Route::post('/change-meter-requests-transfer', [App\Http\Controllers\API\ChangeMeterApiController::class, 'transferChangeMeterRequest'])->middleware('auth:sanctum');
-Route::get('/change-meter-requests-history', [App\Http\Controllers\API\ChangeMeterApiController::class, 'fetchChangeMeterRequestHistory'])->middleware('auth:sanctum');
+Route::post('/change-meter-requests-history', [App\Http\Controllers\API\ChangeMeterApiController::class, 'fetchChangeMeterRequestHistory'])->middleware('auth:sanctum');
 Route::get('/change-meter-request-contractors', [App\Http\Controllers\API\ChangeMeterApiController::class, 'fetchChangeMeterRequestContractors'])->middleware('auth:sanctum');
