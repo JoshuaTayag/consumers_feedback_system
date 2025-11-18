@@ -65,6 +65,7 @@
                                 <li><a class="dropdown-item" href="{{route('printChangeMeterRequest',$cm_request->id)}}" target="_blank"><i class="fa fa-print"></i> Print</a></li>
 
                                   @if($cm_request->status == 3)
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#transferRequestModal" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-crew-id="{{$cm_request->crew}}"><i class="fa fa-shuffle"></i>&nbsp; Transfer Request</a></li>
                                     <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#meterPostingModal" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-area="{{$cm_request->area}}" data-feeder="{{$cm_request->feeder}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
                                   @endif
 
@@ -154,6 +155,7 @@
             </div>
               @include('service_connect_order.change_meter.meter_posting')
               @include('service_connect_order.change_meter.dispatching')
+              @include('service_connect_order.change_meter.transfer_request')
           </div>
       </div>
   </div>
@@ -163,6 +165,7 @@
 <script>
   var meterPostingModal = document.getElementById('meterPostingModal');
   var dispatchingModal = document.getElementById('dispatchingModal');
+  var transferRequestModal = document.getElementById('transferRequestModal');
 
   meterPostingModal.addEventListener('show.bs.modal', function (event) {
     var button = event.relatedTarget;
@@ -184,6 +187,33 @@
     modal_name.value = full_name;
     modal_process_date.value = process_date;
     modal_cm_id.value = cm_id;
+  });
+
+  transferRequestModal.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+
+    var sco = button.getAttribute('data-sco');
+    var cm_id = button.getAttribute('data-id');
+    var crew_id = button.getAttribute('data-crew-id');
+
+    // Get today's date
+    const today = new Date();
+    
+    // Format it as YYYY-MM-DD
+    const formattedDate = today.toISOString().split('T')[0];
+
+    // Format the time as HH:mm
+    const formattedTime = today.toTimeString().slice(0, 5);
+
+    console.log(formattedDate)
+    var modal_sco = transferRequestModal.querySelector('#sco_dispatched');
+    var modal_cm_id = transferRequestModal.querySelector('#cm_id');
+    var modal_dispatched_date = transferRequestModal.querySelector('#date_dispatched');
+
+    modal_sco.value = sco;
+    modal_cm_id.value = cm_id;
+    modal_dispatched_date.value = formattedDate;
+    $('#crew_dispatched_from').val(crew_id).trigger('change');
   });
 
   dispatchingModal.addEventListener('show.bs.modal', function (event) {

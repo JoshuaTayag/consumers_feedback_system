@@ -29,6 +29,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany('App\Models\MaterialRequisitionForm');
     }
     
+    public function change_meter_contractor()
+    {
+        return $this->hasOne('App\Models\ChangeMeterRequestContractor', 'user_id', 'id');
+    }   
     /**
      * The attributes that are mass assignable.
      *

@@ -32,13 +32,13 @@ class LoginController extends Controller
 
     protected function authenticated()
     {
-        if (Auth::user()->hasRole('AGMM VERIFIER')) {
-            return redirect()->route('agmmAccounts');
-        } else if (Auth::user()->hasRole('AGMM ALLOWANCE DISBURSER')) {
-            return redirect()->route('scanAllowanceQR');
-        } else{
-            return redirect()->route('home');
-        }
+        // if (Auth::user()->hasRole('AGMM VERIFIER')) {
+        //     return redirect()->route('agmmAccounts');
+        // } else if (Auth::user()->hasRole('AGMM ALLOWANCE DISBURSER')) {
+        //     return redirect()->route('scanAllowanceQR');
+        // } else{
+        //     return redirect()->route('home');
+        // }
     }
     /**
      * Create a new controller instance.
