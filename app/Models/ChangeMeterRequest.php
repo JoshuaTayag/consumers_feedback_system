@@ -23,6 +23,14 @@ class ChangeMeterRequest extends Model implements Auditable
         return $user[0]->name;
     }
 
+    public function getCrewFullNameAttribute()
+    {
+        if ($this->changeMeterRequestCrew) {
+            return $this->changeMeterRequestCrew->first_name . ' ' . $this->changeMeterRequestCrew->last_name;
+        }
+        return 'No Crew Assigned';
+    }
+
     public function municipality()
     {
         return $this->belongsTo('App\Models\Municipality', 'municipality_id', 'id');
@@ -62,4 +70,6 @@ class ChangeMeterRequest extends Model implements Auditable
         'date_time_acted', 'status', 'damage_cause', 'crew_remarks', 'created_by',
         'created_at', 'process_date', 'dispatched_date'
     ];
+
+    protected $appends = ['crew_full_name'];
 }

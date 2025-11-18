@@ -124,6 +124,10 @@
                         <div class="col-lg-7 {{ $cm_request->status == null ? 'd-none' : 'd-block'}}"><span class="badge my-1 rounded-pill bg-{{$cm_request->status == 1 ? 'danger' : ($cm_request->status == 2 ? 'success' : 'warning text-dark') }} p-2 fs-6" >{{$cm_request->status == 1 ? 'ACTED - NOT COMPLETED' : ($cm_request->status == 2 ? 'ACTED - COMPLETED' : ($cm_request->status == 3 ? 'DISPATCHED' : 'UNACTED')) }}</span></div>
                       </div>
                       <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Crew:</div>
+                        <div class="col-lg-7 ">{{$cm_request->crew_full_name}}</div>
+                      </div>
+                      <div class="row border-bottom">
                         <div class="col-lg-5 border-end">Old Meter No.:</div>
                         <div class="col-lg-7 ">{{$cm_request->old_meter_no}}</div>
                       </div>
@@ -132,7 +136,7 @@
                         <div class="col-lg-7 text-{{$cm_request->new_meter_no ? '' : 'danger'}} ">{{$cm_request->new_meter_no ? $cm_request->new_meter_no : "N/A"}}</div>
                       </div>
                       <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Date Installed:</div>
+                        <div class="col-lg-5 border-end">{{ $cm_request->status == 1 ? 'Date Acted' : 'Date Installed'}}</div>
                         <div class="col-lg-7 text-{{$cm_request->date_time_acted ? '' : 'danger'}}">{{ $cm_request->date_time_acted ? date('F d, Y h:i A', strtotime($cm_request->date_time_acted)) : 'N/A' }}</div>
                       </div>
                       <div class="row border-bottom">
