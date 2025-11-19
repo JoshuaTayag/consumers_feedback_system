@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\ChangeMeterRequest;
 use App\Models\ChangeMeterRequestFees;
 use App\Models\ChangeMeterRequestPostingHistory;
+use App\Services\ChangeMeterService;
+use App\Services\SignatureService;
 use DB;
 use App\Helpers\Helper;
 use Illuminate\Support\Facades\Auth;
@@ -15,8 +17,13 @@ use PDO;
 
 class ChangeMeterRequestController extends Controller
 {
-    function __construct()
+    protected $changeMeterService;
+    protected $signatureService;
+
+    function __construct(ChangeMeterService $changeMeterService, SignatureService $signatureService)
     {
+         $this->changeMeterService = $changeMeterService;
+         $this->signatureService = $signatureService;
          $this->middleware('permission:change-meter-request-list|change-meter-request-create|change-meter-request-edit|change-meter-request-delete', ['only' => ['index']]);
          $this->middleware('permission:change-meter-request-create', ['only' => ['create','store']]);
          $this->middleware('permission:change-meter-request-edit', ['only' => ['edit','update']]);
@@ -492,7 +499,7 @@ class ChangeMeterRequestController extends Controller
             // Update the existing record with new data
             $change_meter_request->update($dataToUpdate);
 
-            $change_meter_request_history = ChangeMeterRequestPostingHistory::create([
+            ChangeMeterRequestPostingHistory::create([
                 "sco_no" => $change_meter_request->control_no,
                 "old_meter_no" => $change_meter_request->old_meter_no,
                 "new_meter_no" => $change_meter_request->new_meter_no,
@@ -524,7 +531,7 @@ class ChangeMeterRequestController extends Controller
 
                 $newRemarks = substr($existingRemarks . $completeRemarks, 0);
 
-                $billing = DB::connection('sqlSrvBilling')
+                DB::connection('sqlSrvBilling')
                 ->table('Consumers Table')
                 ->where('Accnt No', $change_meter_request->account_number)
                 ->update([
@@ -573,6 +580,19 @@ class ChangeMeterRequestController extends Controller
 
     }
 
+    public function cmTransferOfDispatching(Request $request){
+        $result = $this->changeMeterService->transferChangeMeterRequest(
+            $request->cm_id,
+            $request->crew_dispatched_to
+        );
+
+        if ($result['success']) {
+            return redirect(route('indexCM'))->withSuccess($result['message']);
+        } else {
+            return redirect(route('indexCM'))->withError($result['message']);
+        }
+    }
+
     public function search(Request $request)
     {
         $control_no = $request->input('control_no');
@@ -616,7 +636,12 @@ class ChangeMeterRequestController extends Controller
     public function view(string $id)
     {
         $cm_request = ChangeMeterRequest::find($id);
-        return view('service_connect_order.change_meter.view_acted_request',compact('cm_request'));
+        
+        // Get signature data if it exists
+        $signatureResponse = $this->signatureService->getSignatures($id);
+        $signatures = $signatureResponse['success'] ? collect($signatureResponse['data']) : collect();
+        
+        return view('service_connect_order.change_meter.view_acted_request', compact('cm_request', 'signatures'));
     }
 
     public function viewReport(Request $request)

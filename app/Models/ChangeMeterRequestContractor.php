@@ -14,5 +14,10 @@ class ChangeMeterRequestContractor extends Model
         return $this->belongsTo('App\Models\ChangeMeterRequest');
     }
 
+    public function user()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
     protected $table = 'change_meter_contractors';
 }

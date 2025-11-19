@@ -48,7 +48,7 @@
                   <div class="col-lg-3">
                     <div class="mb-2">
                         {{ Form::label('last_name', 'Last Name') }}
-                        {{ Form::text('last_name', null, array('class' => 'form-control', 'readonly', 'required')) }}
+                        {{ Form::text('last_name', null, array('class' => 'form-control', 'required')) }}
                     </div>
                   </div>
                   <div class="col-lg-3">
@@ -301,39 +301,44 @@
   return data.id + " | " +data.Name + " | " + data.Address
   }
 
-  function templateSelection(data){
-    // Assuming data.Name contains a full name
-    var fullName = data.Name;
-    // Split the full name into parts using a space delimiter
-    var partsOfFullName = fullName.split(',');
-    // Extract the first name and last name
-    var l_name = partsOfFullName[0];
-    var f_name = partsOfFullName[1];
+  function templateSelection(data) {
+      // Handle splitting the name
+      var fullName = data.Name || "";
+      var parts = fullName.split(',');
 
-    // Assuming data.Date contains the datetime string "1999-08-05 00:00:00"
-    var dateTimeString = data.Date;
-    var dateOnlyString = dateTimeString.split(' ')[0]; // Extract date part
+      var l_name = "";
+      var f_name = "";
 
-    var trimmedFirstName = f_name.replace(/\s+$/g, '');
-    var trimmedLastName = l_name.replace(/\s+$/g, '');
-    var trimmedSerialNo = data['Serial No'].replace(/\s+$/g, '');
+      if (parts.length > 1) {
+          // With comma → Last, First
+          l_name = parts[0].trim();
+          f_name = parts[1].trim();
+      } else {
+          // No comma → put entire text in FIRST NAME
+          f_name = fullName.trim();
+          l_name = "N/A";
+      }
 
-    document.getElementById('last_name').value = trimmedLastName;
-    document.getElementById('first_name').value = trimmedFirstName;
-    document.getElementById('membership_or').value = data['OR No'];
-    document.getElementById('membership_date').value = dateOnlyString;
-    document.getElementById('consumer_type').value = data['Cons Type'];
-    // document.getElementById('last_reading').value = parseFloat(data['Prev Reading'].toFixed(0));
-    var prevReading = parseFloat(data['Prev Reading']);
-    if (!isNaN(prevReading)) {
-        document.getElementById('last_reading').value = prevReading.toFixed(0);
-    }
-    document.getElementById('old_meter').value = trimmedSerialNo;
+      // Extract date only
+      var dateOnlyString = (data.Date || "").split(' ')[0];
 
+      var prevReading = parseFloat(data['Prev Reading']);
 
-    return data.id + " | " +data.Name + " | " + data.Address
+      document.getElementById('last_name').value = l_name;
+      document.getElementById('first_name').value = f_name;
+      document.getElementById('membership_or').value = data['OR No'];
+      document.getElementById('membership_date').value = dateOnlyString;
+      document.getElementById('consumer_type').value = data['Cons Type'];
 
+      if (!isNaN(prevReading)) {
+          document.getElementById('last_reading').value = prevReading.toFixed(0);
+      }
+
+      document.getElementById('old_meter').value = (data['Serial No'] || "").trim();
+
+      return data.id + " | " + data.Name + " | " + data.Address;
   }
+
 
   $('#municipality').on('change', function () {
       var id = $(this).children(":selected").attr("id");

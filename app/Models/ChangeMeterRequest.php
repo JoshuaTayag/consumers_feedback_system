@@ -23,6 +23,14 @@ class ChangeMeterRequest extends Model implements Auditable
         return $user[0]->name;
     }
 
+    public function getCrewFullNameAttribute()
+    {
+        if ($this->changeMeterRequestCrew) {
+            return $this->changeMeterRequestCrew->first_name . ' ' . $this->changeMeterRequestCrew->last_name;
+        }
+        return 'No Crew Assigned';
+    }
+
     public function municipality()
     {
         return $this->belongsTo('App\Models\Municipality', 'municipality_id', 'id');
@@ -53,6 +61,36 @@ class ChangeMeterRequest extends Model implements Auditable
         return $this->hasOne('App\Models\ChangeMeterRequestContractor' , 'id', 'crew');
     }
 
+    // Add signature relationships
+    public function signatures()
+    {
+        return $this->hasMany(ChangeMeterSignature::class);
+    }
+
+    public function customerSignature()
+    {
+        return $this->hasOne(ChangeMeterSignature::class)->where('signature_type', 'customer');
+    }
+
+    public function contractorSignature()
+    {
+        return $this->hasOne(ChangeMeterSignature::class)->where('signature_type', 'contractor');
+    }
+
+    // Signature helper methods
+    public function hasCustomerSignature()
+    {
+        return $this->customerSignature()->exists();
+    }
+
+    public function hasRequiredSignatures($requireCustomer = true, $requireContractor = false)
+    {
+        $hasCustomer = $requireCustomer ? $this->hasCustomerSignature() : true;
+        $hasContractor = $requireContractor ? $this->hasContractorSignature() : true;
+        
+        return $hasCustomer && $hasContractor;
+    }
+
     protected $fillable = [
         'control_no', 'first_name', 'middle_name', 'last_name', 'contact_no',
         'area', 'municipality_id', 'barangay_id', 'sitio', 'account_number',
@@ -62,4 +100,6 @@ class ChangeMeterRequest extends Model implements Auditable
         'date_time_acted', 'status', 'damage_cause', 'crew_remarks', 'created_by',
         'created_at', 'process_date', 'dispatched_date'
     ];
+
+    protected $appends = ['crew_full_name'];
 }

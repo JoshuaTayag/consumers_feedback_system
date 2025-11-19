@@ -34,3 +34,16 @@ Route::get('fetch-mst/{id}', [App\Http\Controllers\PowerHouse\Warehousing\Materi
 
 Route::get('fetch-account/{account_no}', 'App\Http\Controllers\AccountLedgerController@fetchAccount');
 Route::get('fetch-account/{type}/{value}', 'App\Http\Controllers\AccountLedgerController@fetchAccountDetails');
+
+// Authentication API routes
+Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/logout', [App\Http\Controllers\Api\AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::get('/me', [App\Http\Controllers\Api\AuthController::class, 'user'])->middleware('auth:sanctum');
+Route::post('/refresh', [App\Http\Controllers\Api\AuthController::class, 'refresh'])->middleware('auth:sanctum');
+
+// Change Meter API routes
+Route::get('/change-meter-requests', [App\Http\Controllers\API\ChangeMeterApiController::class, 'fetchChangeMeterDataPerContractor'])->middleware('auth:sanctum');
+Route::post('/change-meter-requests-meter-posting', [App\Http\Controllers\API\ChangeMeterApiController::class, 'meterPosting'])->middleware('auth:sanctum');
+Route::post('/change-meter-requests-transfer', [App\Http\Controllers\API\ChangeMeterApiController::class, 'transferChangeMeterRequest'])->middleware('auth:sanctum');
+Route::post('/change-meter-requests-history', [App\Http\Controllers\API\ChangeMeterApiController::class, 'fetchChangeMeterRequestHistory'])->middleware('auth:sanctum');
+Route::get('/change-meter-request-contractors', [App\Http\Controllers\API\ChangeMeterApiController::class, 'fetchChangeMeterRequestContractors'])->middleware('auth:sanctum');
