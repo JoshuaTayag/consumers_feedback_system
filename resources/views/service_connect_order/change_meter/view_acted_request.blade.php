@@ -378,21 +378,6 @@
                         </div>
                       </div>
                       @endif
-                      
-                      <div class="row mb-2">
-                        <div class="col-lg-4">
-                          <span class="fs-5 fw-bold">Signed By:</span>
-                        </div>
-                        <div class="col-lg-8">
-                          <span class="fs-5">
-                            @if($signature->creator)
-                              {{ $signature->creator->name }}
-                            @else
-                              System
-                            @endif
-                          </span>
-                        </div>
-                      </div>
                     </div>
                     
                     <div class="col-lg-4 text-center">
