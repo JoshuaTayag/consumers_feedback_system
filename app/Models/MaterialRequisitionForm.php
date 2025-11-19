@@ -28,6 +28,9 @@ class MaterialRequisitionForm extends Model
     {
         $user = User::where('id', $this->approved_id)
             ->get();
+        if ($user->isEmpty()) {
+            return null;
+        }
         $employee = $user[0]->employee;
         if($employee){
             return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
@@ -39,6 +42,9 @@ class MaterialRequisitionForm extends Model
     {
         $user = User::where('id', $this->processed_id)
             ->get();
+        if ($user->isEmpty()) {
+            return null;
+        }
         $employee = $user[0]->employee;
         if($employee){
             return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
@@ -50,25 +56,20 @@ class MaterialRequisitionForm extends Model
     {
         $user = User::where('id', $this->req_type_assignee)
             ->get();
+        if ($user->isEmpty()) {
+            return null;
+        }
         $employee = $user[0]->employee;
         if($employee){
             return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
         }
         return $user[0]->name;
     }
-
-    public function getImageNameAttribute()
+    
+    // Alternatively, use an Eloquent relationship:
+    public function liquidationImages()
     {
-        $images = DB::table('material_requisition_form_liquidation_images')->where(
-                'material_requisition_form_id',  $this->id
-            )->get();
-        return $images;
-
-        $employee = $user[0]->employee;
-        if($employee){
-            return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
-        }
-        return $user[0]->name;
+        return $this->hasMany('App\Models\MaterialRequisitionFormLiquidationImage', 'material_requisition_form_id', 'id')->limit(10);
     }
 
     public function items()
