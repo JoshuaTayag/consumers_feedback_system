@@ -14,6 +14,9 @@ class MaterialRequisitionForm extends Model
     {
         $user = User::where('id', $this->requested_id)
             ->get();
+        if ($user->isEmpty()) {
+            return null;
+        }
         $employee = $user[0]->employee;
         if($employee){
             return $employee->prefix . " " . $employee->first_name . " " . substr($employee->middle_name, 0, 1). "." . " " . $employee->last_name . " " . $employee->suffix;
