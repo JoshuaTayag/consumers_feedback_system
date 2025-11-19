@@ -8,14 +8,16 @@ use Illuminate\Http\Request;
 use App\Models\ChangeMeterRequest;
 use App\Models\ChangeMeterRequestPostingHistory;
 use App\Services\ChangeMeterService;
+use App\Services\SignatureService;
 
 class ChangeMeterApiController extends Controller
 {
     protected $changeMeterService;
-
-    public function __construct(ChangeMeterService $changeMeterService)
+    protected $signatureService;
+    public function __construct(ChangeMeterService $changeMeterService, SignatureService $signatureService)
     {
         $this->changeMeterService = $changeMeterService;
+        $this->signatureService = $signatureService;
     }
 
     public function fetchChangeMeterDataPerContractor(Request $request)
@@ -64,6 +66,7 @@ class ChangeMeterApiController extends Controller
             'last_reading' => 'nullable|numeric',
             'reading_initial' => 'nullable|numeric',
             'damage_cause' => 'nullable|string',
+            'require_consumer_signature' => 'boolean',
         ]);
 
         // Conditional validation based on status
@@ -74,8 +77,15 @@ class ChangeMeterApiController extends Controller
                 'seal_no' => 'required|string',
                 'erc_seal' => 'required|string',
                 'crew_remarks' => 'nullable|string',
+
+                'consumer_signature_data' => 'nullable|string', // Base64 encoded image
+                'consumer_name' => 'required_with:consumer_signature_data|string|max:255',
+                'consumer_position' => 'nullable|string|max:255',
+                'latitude' => 'required_with:consumer_signature_data|numeric|between:-90,90',
+                'longitude' => 'required_with:consumer_signature_data|numeric|between:-180,180',
+                'gps_accuracy' => 'nullable|numeric',   
             ]);
-        } elseif ($request->status == 3) {
+        } else if ($request->status == 3) {
             // Status 3 (acted-not-completed) - these fields are optional
             $request->validate([
                 'meter_no' => 'nullable|string',
@@ -163,7 +173,38 @@ class ChangeMeterApiController extends Controller
                 }
             }
 
+
             \DB::beginTransaction();
+
+            // Handle signature collection if provided
+            $signatureCollected = false;
+            if ($request->consumer_signature_data && $request->consumer_name) {
+                $metadata = [
+                    'position' => $request->consumer_position ?? 'Consumer',
+                    'device_info' => $request->header('User-Agent'),
+                    'collected_at' => now()->toISOString(),
+                    'accuracy' => $request->gps_accuracy,
+                ];
+
+                $signatureResult = $this->signatureService->storeConsumerSignature(
+                    $request->cm_id,
+                    $request->consumer_signature_data,
+                    $request->consumer_name,
+                    $request->latitude,
+                    $request->longitude,
+                    $metadata
+                );
+
+                if (!$signatureResult['success']) {
+                    \DB::rollback();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to save consumer signature: ' . $signatureResult['message']
+                    ], 400);
+                }
+
+                $signatureCollected = true;
+            }
 
             // Find the existing record
             $change_meter_request = ChangeMeterRequest::findOrFail($request->cm_id);
@@ -250,7 +291,8 @@ class ChangeMeterApiController extends Controller
                     'account_number' => $change_meter_request->account_number,
                     'new_meter_no' => $change_meter_request->new_meter_no,
                     'status' => $change_meter_request->status,
-                    'date_time_acted' => $change_meter_request->date_time_acted
+                    'date_time_acted' => $change_meter_request->date_time_acted,
+                    'consumer_signature_collected' => $this->signatureService->hasConsumerSignature($request->cm_id)
                 ]
             ], 200);
 
@@ -371,6 +413,7 @@ class ChangeMeterApiController extends Controller
                         'new_meter_no' => $request->new_meter_no,
                         'date_time_acted' => $request->date_time_acted,
                         'status' => $request->status,
+                        'account_no' => substr($request->account_number, 0, 2) . '-' . substr($request->account_number, 2, 4) . '-' . substr($request->account_number, 6, 4)
                     ];
                 }); 
             return response()->json([

@@ -61,6 +61,36 @@ class ChangeMeterRequest extends Model implements Auditable
         return $this->hasOne('App\Models\ChangeMeterRequestContractor' , 'id', 'crew');
     }
 
+    // Add signature relationships
+    public function signatures()
+    {
+        return $this->hasMany(ChangeMeterSignature::class);
+    }
+
+    public function customerSignature()
+    {
+        return $this->hasOne(ChangeMeterSignature::class)->where('signature_type', 'customer');
+    }
+
+    public function contractorSignature()
+    {
+        return $this->hasOne(ChangeMeterSignature::class)->where('signature_type', 'contractor');
+    }
+
+    // Signature helper methods
+    public function hasCustomerSignature()
+    {
+        return $this->customerSignature()->exists();
+    }
+
+    public function hasRequiredSignatures($requireCustomer = true, $requireContractor = false)
+    {
+        $hasCustomer = $requireCustomer ? $this->hasCustomerSignature() : true;
+        $hasContractor = $requireContractor ? $this->hasContractorSignature() : true;
+        
+        return $hasCustomer && $hasContractor;
+    }
+
     protected $fillable = [
         'control_no', 'first_name', 'middle_name', 'last_name', 'contact_no',
         'area', 'municipality_id', 'barangay_id', 'sitio', 'account_number',

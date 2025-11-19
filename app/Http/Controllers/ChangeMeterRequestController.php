@@ -7,6 +7,7 @@ use App\Models\ChangeMeterRequest;
 use App\Models\ChangeMeterRequestFees;
 use App\Models\ChangeMeterRequestPostingHistory;
 use App\Services\ChangeMeterService;
+use App\Services\SignatureService;
 use DB;
 use App\Helpers\Helper;
 use Illuminate\Support\Facades\Auth;
@@ -17,10 +18,12 @@ use PDO;
 class ChangeMeterRequestController extends Controller
 {
     protected $changeMeterService;
+    protected $signatureService;
 
-    function __construct(ChangeMeterService $changeMeterService)
+    function __construct(ChangeMeterService $changeMeterService, SignatureService $signatureService)
     {
          $this->changeMeterService = $changeMeterService;
+         $this->signatureService = $signatureService;
          $this->middleware('permission:change-meter-request-list|change-meter-request-create|change-meter-request-edit|change-meter-request-delete', ['only' => ['index']]);
          $this->middleware('permission:change-meter-request-create', ['only' => ['create','store']]);
          $this->middleware('permission:change-meter-request-edit', ['only' => ['edit','update']]);
@@ -633,7 +636,12 @@ class ChangeMeterRequestController extends Controller
     public function view(string $id)
     {
         $cm_request = ChangeMeterRequest::find($id);
-        return view('service_connect_order.change_meter.view_acted_request',compact('cm_request'));
+        
+        // Get signature data if it exists
+        $signatureResponse = $this->signatureService->getSignatures($id);
+        $signatures = $signatureResponse['success'] ? collect($signatureResponse['data']) : collect();
+        
+        return view('service_connect_order.change_meter.view_acted_request', compact('cm_request', 'signatures'));
     }
 
     public function viewReport(Request $request)
