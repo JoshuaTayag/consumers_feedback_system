@@ -113,6 +113,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('cm-fetch-accounts-records', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAccountDetails'])->name('cmFetchAccounts');
 
     Route::resource('change-meter-request', App\Http\Controllers\ChangeMeterRequestController::class);
+    Route::resource('change-meter-contractor', App\Http\Controllers\ChangeMeterRequestContractorController::class);
 
     // lifeline
     Route::resource('lifeline', App\Http\Controllers\LifelineController::class);

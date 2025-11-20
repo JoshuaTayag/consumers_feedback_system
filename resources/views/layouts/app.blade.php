@@ -98,15 +98,18 @@
                                         MANAGEMENT
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="navbarManagementDropdown">
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('users.index') }}">USER MANAGEMENT</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('employee.index') }}">EMPLOYEE MANAGEMENT</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('roles.index') }}">ROLES MANAGEMENT</a>
-                                    </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('users.index') }}">USER</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('employee.index') }}">EMPLOYEE</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('roles.index') }}">ROLES</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('change-meter-contractor.index') }}">CHANGE METER CONTRACTORS</a>
+                                        </li>
                                     </ul>
                                 </li>
                             @endif
