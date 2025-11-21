@@ -38,6 +38,7 @@ class ChangeMeterRequestController extends Controller
         $cm_requests = ChangeMeterRequest::with('municipality', 'barangay')->orderBy('id','desc')->paginate(9);
         $ref_employees = DB::table('change_meter_contractors')
         ->select(DB::raw("CONCAT(last_name, ', ', first_name) AS full_name"), 'id')
+        ->whereNotNull('user_id')
         ->orderBy('last_name', 'ASC')
         ->get();
         return view('service_connect_order.change_meter.index',compact('cm_requests', 'ref_employees'));

@@ -356,6 +356,7 @@ class ChangeMeterApiController extends Controller
         try {
             $contractors = ChangeMeterRequestContractor::select('id', 'first_name', 'last_name')
                 ->orderBy('first_name', 'asc')
+                ->whereNotNull('user_id')
                 ->get()
                 ->map(function ($contractor) {
                     return [
