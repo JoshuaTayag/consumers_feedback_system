@@ -88,6 +88,19 @@
   align-items: center;
   justify-content: flex-start;
 }
+
+/* Action Buttons */
+.action-buttons {
+  white-space: nowrap;
+}
+
+.action-buttons .btn {
+  margin-right: 5px;
+}
+
+.action-buttons .text-muted {
+  font-style: italic;
+}
 </style>
 @endsection
 
@@ -140,16 +153,24 @@
                        </label>
                      </div>
                    </td>
-                   <td>
-                      <a class="btn btn-primary btn-sm" href="{{ route('users.edit',$user->id) }}">Edit</a>
-                      {{-- @if(!$user->trashed() && $user->id != auth()->id())
+                   <td class="action-buttons">
+                      @if(!$user->trashed())
+                        <a class="btn btn-primary btn-sm edit-btn" href="{{ route('users.edit',$user->id) }}">Edit</a>
+                      @endif
+                      
+                      @if($user->id == auth()->id())
+                        <span class="text-muted small">Current User</span>
+                      @elseif($user->trashed())
+                        <span class="text-muted small">Deactivated</span>
+                      @endif
+                      
+                      {{-- Future delete functionality can be uncommented if needed
+                      @if(!$user->trashed() && $user->id != auth()->id())
                        <form method="POST" action="{{ route('userDestroy', $user->id) }}" style="display:inline" onsubmit="return confirm('Are you sure you want to permanently delete this user?')">
                            @csrf
                            @method('DELETE')
                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                        </form>
-                      @elseif($user->id == auth()->id())
-                       <span class="text-muted small">Current User</span>
                       @endif --}}
                    </td>
                  </tr>
@@ -166,6 +187,33 @@
 @section('script')
 <script>
 console.log('User management script loaded');
+
+// Check for session messages and display with SweetAlert
+@if(session('success'))
+    Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '{{ session('success') }}',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
+@endif
+
+@if(session('error'))
+    Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: '{{ session('error') }}',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true
+    });
+@endif
 
 function toggleUserStatus(userId, switchElement) {
     console.log('Toggle called for user:', userId, 'Current state:', switchElement.checked);
@@ -211,12 +259,48 @@ function performStatusToggle(userId, switchElement, isActive) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Update the row styling based on new status
+            // Update the row styling and buttons based on new status
             const row = switchElement.closest('tr');
+            const actionCell = row.querySelector('.action-buttons');
+            const editBtn = actionCell.querySelector('.edit-btn');
+            const statusSpan = actionCell.querySelector('.text-muted');
+            
             if (data.status === 'active') {
+                // User is now active
                 row.classList.remove('user-row-inactive');
+                
+                // Show edit button if it doesn't exist and user is not current user
+                const isCurrentUser = actionCell.textContent.includes('Current User');
+                if (!editBtn && !isCurrentUser) {
+                    const newEditBtn = document.createElement('a');
+                    newEditBtn.className = 'btn btn-primary btn-sm edit-btn';
+                    newEditBtn.href = `/users/${userId}/edit`;
+                    newEditBtn.textContent = 'Edit';
+                    actionCell.insertBefore(newEditBtn, actionCell.firstChild);
+                }
+                
+                // Update status text for deactivated users (not current user)
+                if (statusSpan && statusSpan.textContent.includes('Deactivated')) {
+                    statusSpan.remove();
+                }
+                
             } else {
+                // User is now inactive
                 row.classList.add('user-row-inactive');
+                
+                // Hide edit button
+                if (editBtn) {
+                    editBtn.remove();
+                }
+                
+                // Add deactivated status text if user is not current user
+                const isCurrentUser = actionCell.textContent.includes('Current User');
+                if (!isCurrentUser && !actionCell.textContent.includes('Deactivated')) {
+                    const deactivatedSpan = document.createElement('span');
+                    deactivatedSpan.className = 'text-muted small';
+                    deactivatedSpan.textContent = 'Deactivated';
+                    actionCell.appendChild(deactivatedSpan);
+                }
             }
             
             // Show success message with SweetAlert

@@ -77,8 +77,11 @@ class UserController extends Controller
         $user = User::find($id);
         $roles = Role::pluck('name','name')->all();
         $userRole = $user->roles->pluck('name','name')->all();
+        
+        // Check if user is editing themselves
+        $isEditingSelf = (int)$id === auth()->id();
     
-        return view('users.edit',compact('user','roles','userRole'));
+        return view('users.edit',compact('user','roles','userRole','isEditingSelf'));
     }
 
     /**
@@ -92,6 +95,30 @@ class UserController extends Controller
             'password' => 'same:confirm-password',
             'roles' => 'required'
         ]);
+
+        $user = User::find($id);
+        
+        // Check if user is trying to edit their own roles
+        if ((int)$id === auth()->id()) {
+            // Get current user roles
+            $currentRoles = $user->roles->pluck('name')->toArray();
+            $newRoles = $request->input('roles');
+            
+            // Sort arrays for comparison
+            sort($currentRoles);
+            sort($newRoles);
+            
+            // Check if roles have changed
+            if ($currentRoles !== $newRoles) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'You cannot modify your own roles. Please contact an administrator if you need role changes.');
+            } else {
+                // Remove roles from request to prevent update
+                DB::table('model_has_roles')->where('model_id',$id)->delete();
+                $user->assignRole($request->input('roles'));
+            }
+        }
     
         $input = $request->all();
         if(!empty($input['password'])){ 
@@ -100,11 +127,7 @@ class UserController extends Controller
             $input = Arr::except($input,array('password'));    
         }
     
-        $user = User::find($id);
         $user->update($input);
-        DB::table('model_has_roles')->where('model_id',$id)->delete();
-    
-        $user->assignRole($request->input('roles'));
     
         return redirect()->route('users.index')
                         ->with('success','User updated successfully');
