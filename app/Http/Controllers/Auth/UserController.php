@@ -26,7 +26,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $data = User::orderBy('id','DESC')->paginate(15);
+        $data = User::withTrashed()->orderBy('id','DESC')->paginate(15);
         return view('users.index',compact('data'));
     }
 
@@ -119,5 +119,54 @@ class UserController extends Controller
         $user->delete();
         return redirect()->route('users.index')
                         ->with('success','User successfully archived!');
+    }
+
+    /**
+     * Toggle user status between active and inactive
+     */
+    public function toggleStatus(string $id)
+    {
+        try {
+            // Find user including soft deleted ones
+            $user = User::withTrashed()->find($id);
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+
+            // Prevent deactivating yourself
+            if ($user->id == auth()->id() && !$user->trashed()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You cannot deactivate your own account'
+                ], 400);
+            }
+
+            $action = '';
+            if ($user->trashed()) {
+                // Restore user (activate)
+                $user->restore();
+                $action = 'activated';
+            } else {
+                // Soft delete user (deactivate)
+                $user->delete();
+                $action = 'deactivated';
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "User {$action} successfully",
+                'status' => $user->trashed() ? 'inactive' : 'active'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

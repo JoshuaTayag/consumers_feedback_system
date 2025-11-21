@@ -84,6 +84,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('users', [App\Http\Controllers\Auth\UserController::class, 'store'])->name('userStore');
     Route::get('users/{id}/edit', [App\Http\Controllers\Auth\UserController::class, 'edit'])->name('users.edit');
     Route::put('users/update/{id}', [App\Http\Controllers\Auth\UserController::class, 'update'])->name('userUpdate');
+    Route::post('users/{id}/toggle-status', [App\Http\Controllers\Auth\UserController::class, 'toggleStatus'])->name('users.toggleStatus');
     Route::delete('users/{id}', [App\Http\Controllers\Auth\UserController::class, 'destroy'])->name('userDestroy');
 
     // employees
