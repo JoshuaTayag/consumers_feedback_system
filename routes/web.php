@@ -112,6 +112,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('change-meter-request-report', [App\Http\Controllers\ChangeMeterRequestController::class, 'viewReport'])->name('viewReport');
     Route::get('change-meter-request-report/pdf', [App\Http\Controllers\ChangeMeterRequestController::class, 'generateReport'])->name('generateReport');
     Route::get('cm-fetch-accounts-records', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAccountDetails'])->name('cmFetchAccounts');
+    Route::get('change-meter-request-audit-logs/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAuditLogs'])->name('cmAuditLogs');
+    Route::get('change-meter-request-export-audit-logs/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'exportAuditLogs'])->name('cmExportAuditLogs');
 
     Route::resource('change-meter-request', App\Http\Controllers\ChangeMeterRequestController::class);
     Route::resource('change-meter-contractor', App\Http\Controllers\ChangeMeterRequestContractorController::class);

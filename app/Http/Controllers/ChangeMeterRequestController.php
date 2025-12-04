@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ChangeMeterRequest;
 use App\Models\ChangeMeterRequestFees;
 use App\Models\ChangeMeterRequestPostingHistory;
+use App\Models\User;
 use App\Services\ChangeMeterService;
 use App\Services\SignatureService;
 use DB;
@@ -84,6 +85,7 @@ class ChangeMeterRequestController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request);
         $change_meter_request_exists = ChangeMeterRequest::where('account_number', $request->electric_service_detail)
         ->where('status', null);
         // dd($change_meter_request_exists->first('control_no')->control_no);
@@ -151,6 +153,19 @@ class ChangeMeterRequestController extends Controller
                     "process_date" => $request->process_date,
                 ]);
 
+                // check if there is a payment for meter accessories or calibration fee
+                if ($request->meter_accessories > 0 || $request->calibration_fee > 0) {
+                    DB::connection('sqlSrvHousewiring')
+                    ->table('Transaction Table')
+                    ->insert([
+                            "SCONo" => $control_id,
+                            "Kwhm Deposit" => $request->meter_accessories,
+                            "Calibration" => $request->calibration_fee,
+                            "VATPercentage" => 0.12,
+                            "WireUnitCost" => 29.00,
+                            "MeterSeal" => 0.00,
+                    ]);
+                }
                 
                 $feeFields = [
                     'membership', 'energy_deposit', 'conn_fee', 'xformer_rental', 'xformer_test',
@@ -641,8 +656,11 @@ class ChangeMeterRequestController extends Controller
         // Get signature data if it exists
         $signatureResponse = $this->signatureService->getSignatures($id);
         $signatures = $signatureResponse['success'] ? collect($signatureResponse['data']) : collect();
+
+        // Get audit logs for this change meter request
+        $audits = $cm_request->audits()->with('user')->orderBy('created_at', 'desc')->get();
         
-        return view('service_connect_order.change_meter.view_acted_request', compact('cm_request', 'signatures'));
+        return view('service_connect_order.change_meter.view_acted_request', compact('cm_request', 'signatures', 'audits'));
     }
 
     public function viewReport(Request $request)
@@ -715,6 +733,196 @@ class ChangeMeterRequestController extends Controller
         $data = $accounts->paginate(10, ['*'], 'page', $request->page);
         // dd($data);
         return response()->json($data); 
+    }
+
+    /**
+     * Get audit logs for a specific change meter request
+     */
+    public function getAuditLogs(string $id)
+    {
+        try {
+            $cm_request = ChangeMeterRequest::findOrFail($id);
+            $audits = $cm_request->audits()->with('user')->orderBy('created_at', 'desc')->get();
+            
+            $formattedAudits = $audits->map(function ($audit) {
+                $changes = [];
+                $createdData = [];
+                
+                if ($audit->event == 'created' && $audit->new_values) {
+                    // For created events, show important initial values
+                    $importantFields = [
+                        'control_no', 'first_name', 'last_name', 'account_number', 
+                        'area', 'municipality_id', 'barangay_id', 'old_meter_no', 
+                        'type_of_meter', 'created_by'
+                    ];
+                    
+                    foreach ($importantFields as $field) {
+                        if (array_key_exists($field, $audit->new_values)) {
+                            $createdData[] = [
+                                'field' => ucwords(str_replace('_', ' ', $field)),
+                                'value' => is_null($audit->new_values[$field]) ? 'NULL' : $audit->new_values[$field]
+                            ];
+                        }
+                    }
+                    
+                    // If no important fields found, show first 8 fields
+                    if (empty($createdData)) {
+                        $count = 0;
+                        foreach ($audit->new_values as $key => $value) {
+                            if ($count >= 8) break;
+                            $createdData[] = [
+                                'field' => ucwords(str_replace('_', ' ', $key)),
+                                'value' => is_null($value) ? 'NULL' : $value
+                            ];
+                            $count++;
+                        }
+                    }
+                }
+                
+                if ($audit->event == 'updated' && $audit->old_values && $audit->new_values) {
+                    foreach ($audit->new_values as $key => $newValue) {
+                        if (array_key_exists($key, $audit->old_values) && $audit->old_values[$key] != $newValue) {
+                            $changes[] = [
+                                'field' => ucwords(str_replace('_', ' ', $key)),
+                                'old_value' => is_null($audit->old_values[$key]) ? 'NULL' : $audit->old_values[$key],
+                                'new_value' => is_null($newValue) ? 'NULL' : $newValue
+                            ];
+                        }
+                    }
+                }
+                
+                return [
+                    'id' => $audit->id,
+                    'event' => $audit->event,
+                    'user_name' => $audit->user ? $audit->user->name : 'System',
+                    'created_at' => $audit->created_at->format('M d, Y h:i A'),
+                    'changes' => $changes,
+                    'created_data' => $createdData,
+                    'ip_address' => $audit->ip_address,
+                    'user_agent' => $audit->user_agent
+                ];
+            });
+            
+            return response()->json([
+                'success' => true,
+                'data' => $formattedAudits,
+                'total' => $audits->count()
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch audit logs: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Export audit logs for a specific change meter request to CSV
+     */
+    public function exportAuditLogs(string $id)
+    {
+        try {
+            $cm_request = ChangeMeterRequest::findOrFail($id);
+            $audits = $cm_request->audits()->with('user')->orderBy('created_at', 'desc')->get();
+            
+            $filename = 'change_meter_audit_logs_' . $cm_request->control_no . '_' . date('Y-m-d_H-i-s') . '.csv';
+            
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ];
+            
+            $callback = function() use ($audits, $cm_request) {
+                $file = fopen('php://output', 'w');
+                
+                // Add CSV headers
+                fputcsv($file, [
+                    'Control No', 'Date & Time', 'User', 'Event', 'Field Changed', 
+                    'Old Value', 'New Value', 'IP Address', 'User Agent'
+                ]);
+                
+                foreach ($audits as $audit) {
+                    if ($audit->event == 'created' && $audit->new_values) {
+                        // For created events, export important initial values
+                        $importantFields = [
+                            'control_no', 'first_name', 'last_name', 'account_number', 
+                            'area', 'old_meter_no', 'type_of_meter'
+                        ];
+                        
+                        foreach ($importantFields as $field) {
+                            if (array_key_exists($field, $audit->new_values)) {
+                                fputcsv($file, [
+                                    $cm_request->control_no,
+                                    $audit->created_at->format('M d, Y h:i A'),
+                                    $audit->user ? $audit->user->name : 'System',
+                                    ucfirst($audit->event),
+                                    ucwords(str_replace('_', ' ', $field)),
+                                    '-',
+                                    is_null($audit->new_values[$field]) ? 'NULL' : $audit->new_values[$field],
+                                    $audit->ip_address,
+                                    $audit->user_agent
+                                ]);
+                            }
+                        }
+                    } elseif ($audit->event == 'updated' && $audit->old_values && $audit->new_values) {
+                        foreach ($audit->new_values as $key => $newValue) {
+                            if (array_key_exists($key, $audit->old_values) && $audit->old_values[$key] != $newValue) {
+                                fputcsv($file, [
+                                    $cm_request->control_no,
+                                    $audit->created_at->format('M d, Y h:i A'),
+                                    $audit->user ? $audit->user->name : 'System',
+                                    ucfirst($audit->event),
+                                    ucwords(str_replace('_', ' ', $key)),
+                                    is_null($audit->old_values[$key]) ? 'NULL' : $audit->old_values[$key],
+                                    is_null($newValue) ? 'NULL' : $newValue,
+                                    $audit->ip_address,
+                                    $audit->user_agent
+                                ]);
+                            }
+                        }
+                    } elseif ($audit->event == 'deleted' && $audit->old_values) {
+                        // For deleted events, show key fields that were deleted
+                        $keyFields = ['control_no', 'first_name', 'last_name', 'account_number', 'status'];
+                        foreach ($keyFields as $field) {
+                            if (array_key_exists($field, $audit->old_values)) {
+                                fputcsv($file, [
+                                    $cm_request->control_no,
+                                    $audit->created_at->format('M d, Y h:i A'),
+                                    $audit->user ? $audit->user->name : 'System',
+                                    ucfirst($audit->event),
+                                    ucwords(str_replace('_', ' ', $field)),
+                                    is_null($audit->old_values[$field]) ? 'NULL' : $audit->old_values[$field],
+                                    '-',
+                                    $audit->ip_address,
+                                    $audit->user_agent
+                                ]);
+                            }
+                        }
+                    } else {
+                        // For other events or events without detailed data
+                        fputcsv($file, [
+                            $cm_request->control_no,
+                            $audit->created_at->format('M d, Y h:i A'),
+                            $audit->user ? $audit->user->name : 'System',
+                            ucfirst($audit->event),
+                            $audit->event == 'created' ? 'Record Created' : 'Record ' . ucfirst($audit->event),
+                            '-',
+                            '-',
+                            $audit->ip_address,
+                            $audit->user_agent
+                        ]);
+                    }
+                }
+                
+                fclose($file);
+            };
+            
+            return response()->stream($callback, 200, $headers);
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to export audit logs: ' . $e->getMessage());
+        }
     } 
 
 }

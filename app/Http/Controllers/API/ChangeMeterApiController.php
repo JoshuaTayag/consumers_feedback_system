@@ -209,6 +209,15 @@ class ChangeMeterApiController extends Controller
             // Find the existing record
             $change_meter_request = ChangeMeterRequest::findOrFail($request->cm_id);
 
+            // Debug logging for audit tracking
+            \Log::info('API Audit Debug - Before Update', [
+                'bearer_token' => $request->bearerToken() ? 'present' : 'missing',
+                'sanctum_user_id' => auth('sanctum')->id(),
+                'web_user_id' => auth('web')->id(),
+                'auth_user_id' => auth()->id(),
+                'request_user' => $request->user() ? $request->user()->id : null,
+                'cm_request_id' => $request->cm_id
+            ]);
 
             // Get the crew id
             $crew_id = auth()->user()->change_meter_contractor->id;
@@ -239,6 +248,13 @@ class ChangeMeterApiController extends Controller
 
             // Update the existing record with new data
             $change_meter_request->update($dataToUpdate);
+
+            // Debug logging after update
+            \Log::info('API Audit Debug - After Update', [
+                'updated_fields' => $dataToUpdate,
+                'current_user' => auth()->id(),
+                'sanctum_user' => auth('sanctum')->id()
+            ]);
 
             // Create posting history record
             ChangeMeterRequestPostingHistory::create([
