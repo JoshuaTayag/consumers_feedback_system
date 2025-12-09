@@ -178,6 +178,9 @@
               <li>
                 <a class="dropdown-item" href="{{ route('structure.index') }}">STRUCTURE</a>
               </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('meters.index') }}">METERS</a>
+              </li>
             </ul>
           </li>
         </ul>

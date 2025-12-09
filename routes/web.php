@@ -174,6 +174,14 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('edit-material-cost', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItemCost'])->name('updateItemCost');
     Route::delete('delete-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'deleteItem'])->name('removeItem');
 
+    // METER MANAGEMENT
+    // Specific routes must come before resource routes to avoid conflicts
+    Route::get('meters/search', [App\Http\Controllers\MeterController::class, 'search'])->name('meters.search');
+    Route::post('meters/validate-serial', [App\Http\Controllers\MeterController::class, 'validateSerialNumber'])->name('meters.validate-serial');
+    Route::post('meters/validate-erc-seal', [App\Http\Controllers\MeterController::class, 'validateErcSeal'])->name('meters.validate-erc-seal');
+    Route::get('meters/{id}/audit-logs', [App\Http\Controllers\MeterController::class, 'getAuditLogs'])->name('meters.audit-logs');
+    Route::resource('meters', App\Http\Controllers\MeterController::class);
+
     // ELECTRICIAN
     Route::resource('electrician', App\Http\Controllers\ElectricianController::class);
     Route::get('electrician-complaints', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintIndex'])->name('electricianComplaintIndex');
