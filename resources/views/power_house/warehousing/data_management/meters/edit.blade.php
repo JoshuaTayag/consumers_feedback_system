@@ -37,9 +37,6 @@
                             <small class="opacity-75">Serial: {{ $meter->serial_number }}</small>
                         </div>
                         <div class="col-lg-6 text-end">
-                            <a class="btn btn-secondary btn-sm me-2" href="{{ route('meters.show', $meter->id) }}">
-                                <i class="fas fa-eye"></i> View Details
-                            </a>
                             <a class="btn btn-warning btn-sm" href="{{ route('meters.index') }}">
                                 <i class="fas fa-arrow-left"></i> Back to List
                             </a>
@@ -56,22 +53,25 @@
                         <div class="row mb-3">
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <select class="form-select @error('meter_brand') is-invalid @enderror" 
-                                            id="meter_brand" name="meter_brand" required>
-                                        <option value="">Select Meter Brand</option>
-                                        <option value="Schneider" {{ old('meter_brand', $meter->meter_brand) == 'Schneider' ? 'selected' : '' }}>Schneider</option>
-                                        <option value="ABB" {{ old('meter_brand', $meter->meter_brand) == 'ABB' ? 'selected' : '' }}>ABB</option>
-                                        <option value="Siemens" {{ old('meter_brand', $meter->meter_brand) == 'Siemens' ? 'selected' : '' }}>Siemens</option>
-                                        <option value="General Electric" {{ old('meter_brand', $meter->meter_brand) == 'General Electric' ? 'selected' : '' }}>General Electric</option>
-                                        <option value="Elster" {{ old('meter_brand', $meter->meter_brand) == 'Elster' ? 'selected' : '' }}>Elster</option>
-                                        <option value="Landis+Gyr" {{ old('meter_brand', $meter->meter_brand) == 'Landis+Gyr' ? 'selected' : '' }}>Landis+Gyr</option>
-                                        <option value="Other" {{ old('meter_brand', $meter->meter_brand) == 'Other' ? 'selected' : '' }}>Other</option>
+                                    <select class="form-select @error('meter_type_id') is-invalid @enderror" 
+                                            id="meter_type_id" name="meter_type_id" required>
+                                        <option value="">Select Meter Type</option>
+                                        @foreach($meter_types as $meterType)
+                                            <option value="{{ $meterType->id }}" 
+                                                    data-brand="{{ $meterType->meter_brand }}"
+                                                    data-code="{{ $meterType->meter_code }}" 
+                                                    data-description="{{ $meterType->meter_description }}"
+                                                    {{ old('meter_type_id', $meter->meter_type_id) == $meterType->id ? 'selected' : '' }}>
+                                                {{ $meterType->meter_brand }} ({{ $meterType->meter_code }})
+                                            </option>
+                                        @endforeach
                                     </select>
-                                    <label for="meter_brand"><i class="fas fa-industry"></i> Meter Brand *</label>
-                                    @error('meter_brand')
+                                    <label for="meter_type_id"><i class="fas fa-industry"></i> Meter Type *</label>
+                                    @error('meter_type_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                <small class="text-muted mt-1" id="meter_description"></small>
                             </div>
                         </div>
 
@@ -132,9 +132,12 @@
                                     <select class="form-select @error('control_type') is-invalid @enderror" 
                                             id="control_type" name="control_type">
                                         <option value="">Select Control Type</option>
-                                        <option value="Single Phase" {{ old('control_type', $meter->control_type) == 'Single Phase' ? 'selected' : '' }}>Single Phase</option>
-                                        <option value="Three Phase" {{ old('control_type', $meter->control_type) == 'Three Phase' ? 'selected' : '' }}>Three Phase</option>
-                                        <option value="CT Metered" {{ old('control_type', $meter->control_type) == 'CT Metered' ? 'selected' : '' }}>CT Metered</option>
+                                        @foreach(config('constants.meter_control_type') as $controlType)
+                                            <option value="{{ $controlType['name'] }}" 
+                                                    {{ old('control_type', $meter->control_type) == $controlType['name'] ? 'selected' : '' }}>
+                                                {{ $controlType['name'] }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                     <label for="control_type"><i class="fas fa-cogs"></i> Control Type</label>
                                     @error('control_type')
@@ -175,9 +178,6 @@
                             <div class="col-12">
                                 <div class="d-flex justify-content-between">
                                     <div>
-                                        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-                                            <i class="fas fa-trash"></i> Delete Meter
-                                        </button>
                                     </div>
                                     <div>
                                         <a href="{{ route('meters.show', $meter->id) }}" class="btn btn-secondary me-2">
@@ -208,6 +208,7 @@
 <script>
 $(document).ready(function() {
     initializeValidation();
+    initializeMeterBrandDescription();
 });
 
 function initializeValidation() {
@@ -257,6 +258,33 @@ function validateField(fieldType, value, excludeId = null) {
             messageElement.text('✗ ' + response.message).removeClass('valid').addClass('invalid');
         }
     });
+}
+
+// Meter Brand Description Functions
+function initializeMeterBrandDescription() {
+    // Show meter description when type is selected
+    $('#meter_type_id').on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        const description = selectedOption.data('description');
+        const code = selectedOption.data('code');
+        const brand = selectedOption.data('brand');
+        
+        if (description && code && brand) {
+            $('#meter_description').text(`${brand} - Code: ${code} - ${description}`);
+        } else {
+            $('#meter_description').text('');
+        }
+    });
+    
+    // Initialize description on page load (for existing meter)
+    const selectedOption = $('#meter_type_id option:selected');
+    const description = selectedOption.data('description');
+    const code = selectedOption.data('code');
+    const brand = selectedOption.data('brand');
+    
+    if (description && code && brand) {
+        $('#meter_description').text(`${brand} - Code: ${code} - ${description}`);
+    }
 }
 
 function confirmDelete() {

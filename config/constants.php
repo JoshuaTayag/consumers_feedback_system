@@ -814,6 +814,36 @@
                 "name" => "Religious Institution"
             ]
         ],
+
+        'meter_control_type' => [
+            [
+                "id" => 1,
+                "name" => "Single Phase"
+            ],
+            [
+                "id" => 2,
+                "name" => "Three Phase"
+            ],
+            [
+                "id" => 3,
+                "name" => "CT Metered"
+            ]
+        ],
+
+        'meter_transaction_type' => [
+            [
+                "id" => 1,
+                "name" => "Change Meter"
+            ],
+            [
+                "id" => 2,
+                "name" => "New Connection"
+            ],
+            [
+                "id" => 3,
+                "name" => "Buffer"
+            ]
+        ],
     ];
 
 ?>

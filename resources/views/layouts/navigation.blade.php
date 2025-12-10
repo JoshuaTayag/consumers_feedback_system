@@ -181,6 +181,9 @@
               <li>
                 <a class="dropdown-item" href="{{ route('meters.index') }}">METERS</a>
               </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('meter-type.index') }}">METER TYPES</a>
+              </li>
             </ul>
           </li>
         </ul>

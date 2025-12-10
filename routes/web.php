@@ -180,6 +180,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('meters/validate-serial', [App\Http\Controllers\MeterController::class, 'validateSerialNumber'])->name('meters.validate-serial');
     Route::post('meters/validate-erc-seal', [App\Http\Controllers\MeterController::class, 'validateErcSeal'])->name('meters.validate-erc-seal');
     Route::get('meters/{id}/audit-logs', [App\Http\Controllers\MeterController::class, 'getAuditLogs'])->name('meters.audit-logs');
+    Route::put('meters/{id}/assign', [App\Http\Controllers\MeterController::class, 'assign'])->name('meters.assign');
+    Route::put('meters/{id}/return', [App\Http\Controllers\MeterController::class, 'returnMeter'])->name('meters.return');
     Route::resource('meters', App\Http\Controllers\MeterController::class);
 
     // ELECTRICIAN
@@ -215,6 +217,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('change-meter-request-pay/receipt/{id}', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'changeMeterReceipt'])->name('changeMeterReceipt');
 
     Route::resource('payment-transact', App\Http\Controllers\PaymentTransactionController::class);
+
+    Route::resource('meter-type', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\MeterTypeController::class);
     // Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
 });
 

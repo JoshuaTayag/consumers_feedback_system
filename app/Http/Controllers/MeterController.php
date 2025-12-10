@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Meter;
+use App\Models\DataManagement\MeterType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -16,25 +17,24 @@ class MeterController extends Controller
 
     public function index()
     {
-        $meters = Meter::orderBy('created_at', 'desc')->paginate(15);
-        return view('power_house.warehousing.data_management.meters.index', compact('meters'));
+        $meters = Meter::with('meterType')->orderBy('created_at', 'desc')->paginate(15);
+        $meters_types = MeterType::get();
+        return view('power_house.warehousing.data_management.meters.index', compact('meters', 'meters_types'));
     }
 
     public function create()
     {
-        return view('power_house.warehousing.data_management.meters.create');
+        $meter_types = MeterType::all();
+        return view('power_house.warehousing.data_management.meters.create', compact('meter_types'));
     }
 
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'meter_brand' => 'required|string|max:255',
+            'meter_type_id' => 'required|integer|exists:meter_types,id',
             'serial_number' => 'required|string|max:255|unique:meters,serial_number',
             'erc_seal_number' => 'required|string|max:255|unique:meters,erc_seal_number',
             'leyeco_seal_number' => 'required|string|max:255|unique:meters,leyeco_seal_number',
-            'control_type' => 'nullable|string|max:255',
-            'control_no' => 'nullable|string|max:255',
-            'account_number' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -51,7 +51,13 @@ class MeterController extends Controller
         try {
             DB::beginTransaction();
 
-            $meter = Meter::create($request->all());
+            // Only create with the required fields
+            $meter = Meter::create($request->only([
+                'meter_type_id',
+                'serial_number',
+                'erc_seal_number',
+                'leyeco_seal_number'
+            ]));
 
             DB::commit();
 
@@ -81,7 +87,7 @@ class MeterController extends Controller
 
     public function show($id)
     {
-        $meter = Meter::find($id);
+        $meter = Meter::with('meterType')->find($id);
         
         if (!$meter) {
             if (request()->expectsJson()) {
@@ -108,12 +114,13 @@ class MeterController extends Controller
     public function edit($id)
     {
         $meter = Meter::find($id);
-        
+        $meter_types = MeterType::all();
+
         if (!$meter) {
             return redirect()->route('meters.index')->with('error', 'Meter not found');
         }
 
-        return view('power_house.warehousing.data_management.meters.edit', compact('meter'));
+        return view('power_house.warehousing.data_management.meters.edit', compact('meter', 'meter_types'));
     }
 
     public function update(Request $request, $id)
@@ -130,14 +137,22 @@ class MeterController extends Controller
             return redirect()->route('meters.index')->with('error', 'Meter not found');
         }
 
+        // Check if meter is assigned - prevent editing assigned meters
+        if (!empty($meter->control_type) || !empty($meter->control_no) || !empty($meter->account_number)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot edit assigned meter. Please return the meter first to make changes.'
+                ], 422);
+            }
+            return redirect()->back()->with('error', 'Cannot edit assigned meter. Please return the meter first to make changes.');
+        }
+
         $validator = Validator::make($request->all(), [
-            'meter_brand' => 'required|string|max:255',
+            'meter_type_id' => 'required|integer|exists:meter_types,id',
             'serial_number' => 'required|string|max:255|unique:meters,serial_number,' . $id,
             'erc_seal_number' => 'required|string|max:255|unique:meters,erc_seal_number,' . $id,
             'leyeco_seal_number' => 'required|string|max:255|unique:meters,leyeco_seal_number,' . $id,
-            'control_type' => 'nullable|string|max:255',
-            'control_no' => 'nullable|string|max:255',
-            'account_number' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -154,7 +169,13 @@ class MeterController extends Controller
         try {
             DB::beginTransaction();
 
-            $meter->update($request->all());
+            // Only update the basic meter fields, not assignment fields
+            $meter->update($request->only([
+                'meter_type_id',
+                'serial_number',
+                'erc_seal_number',
+                'leyeco_seal_number'
+            ]));
 
             DB::commit();
 
@@ -269,10 +290,32 @@ class MeterController extends Controller
     {
         $query = Meter::query();
 
+        // Filter for unassigned meters only
+        if ($request->has('unassigned') && $request->unassigned === 'true') {
+            $query->where(function($q) {
+                $q->whereNull('control_type')
+                  ->whereNull('control_no')
+                  ->whereNull('account_number');
+            });
+        }
+
+        // Filter for assigned meters only
+        if ($request->has('assigned') && $request->assigned === 'true') {
+            $query->where(function($q) {
+                $q->whereNotNull('control_type')
+                  ->orWhereNotNull('control_no')
+                  ->orWhereNotNull('account_number');
+            });
+        }
+
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('meter_brand', 'like', "%{$search}%")
+                $q->whereHas('meterType', function($mt) use ($search) {
+                    $mt->where('meter_brand', 'like', "%{$search}%")
+                      ->orWhere('meter_code', 'like', "%{$search}%")
+                      ->orWhere('meter_description', 'like', "%{$search}%");
+                  })
                   ->orWhere('serial_number', 'like', "%{$search}%")
                   ->orWhere('leyeco_seal_number', 'like', "%{$search}%")
                   ->orWhere('erc_seal_number', 'like', "%{$search}%")
@@ -283,7 +326,7 @@ class MeterController extends Controller
 
         if ($request->expectsJson()) {
             // For AJAX requests, return all results (not paginated)
-            $meters = $query->orderBy('created_at', 'desc')->get();
+            $meters = $query->with('meterType')->orderBy('created_at', 'desc')->get();
             return response()->json([
                 'success' => true,
                 'data' => $meters
@@ -313,6 +356,103 @@ class MeterController extends Controller
                 'success' => false,
                 'message' => 'Failed to fetch audit logs: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function assign(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'control_type' => 'required|string|max:255',
+                'control_no' => 'nullable|string|max:255',
+                'account_number' => 'nullable|string|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Validation failed',
+                        'errors' => $validator->errors()
+                    ], 422);
+                }
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+            $meter = Meter::findOrFail($id);
+            
+            // Check if meter is already assigned
+            if (!empty($meter->control_type) || !empty($meter->control_no) || !empty($meter->account_number)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This meter is already assigned to a transaction.'
+                ], 422);
+            }
+
+            $meter->update([
+                'control_type' => $request->control_type,
+                'control_no' => $request->control_no,
+                'account_number' => $request->account_number,
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Meter assigned successfully!',
+                    'data' => $meter->load('meterType')
+                ]);
+            }
+
+            return redirect()->route('meters.index')->with('success', 'Meter assigned successfully!');
+
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to assign meter: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Failed to assign meter: ' . $e->getMessage());
+        }
+    }
+
+    public function returnMeter(Request $request, $id)
+    {
+        try {
+            $meter = Meter::findOrFail($id);
+            
+            // Check if meter is actually assigned
+            if (empty($meter->control_type) && empty($meter->control_no) && empty($meter->account_number)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This meter is not currently assigned to any transaction.'
+                ], 422);
+            }
+
+            $meter->update([
+                'control_type' => null,
+                'control_no' => null,
+                'account_number' => null,
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Meter returned successfully! It is now available for new assignments.',
+                    'data' => $meter->load('meterType')
+                ]);
+            }
+
+            return redirect()->route('meters.index')->with('success', 'Meter returned successfully!');
+
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to return meter: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Failed to return meter: ' . $e->getMessage());
         }
     }
 }

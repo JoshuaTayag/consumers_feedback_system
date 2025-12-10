@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('meters', function (Blueprint $table) {
             $table->id();
-            $table->string('meter_brand');
+            $table->unsignedBigInteger('meter_type_id');
             $table->string('serial_number')->unique();
             $table->string('leyeco_seal_number')->unique();
             $table->string('erc_seal_number')->unique();

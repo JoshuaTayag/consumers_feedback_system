@@ -81,18 +81,20 @@
                         <div class="row mb-3">
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <select class="form-select" id="meter_brand" name="meter_brand" required>
-                                        <option value="">Select Meter Brand</option>
-                                        <option value="Schneider">Schneider</option>
-                                        <option value="ABB">ABB</option>
-                                        <option value="Siemens">Siemens</option>
-                                        <option value="General Electric">General Electric</option>
-                                        <option value="Elster">Elster</option>
-                                        <option value="Landis+Gyr">Landis+Gyr</option>
-                                        <option value="Other">Other</option>
+                                    <select class="form-select" id="meter_type_id" name="meter_type_id" required>
+                                        <option value="">Select Meter Type</option>
+                                        @foreach($meters_types as $meterType)
+                                            <option value="{{ $meterType->id }}" 
+                                                    data-brand="{{ $meterType->meter_brand }}"
+                                                    data-code="{{ $meterType->meter_code }}" 
+                                                    data-description="{{ $meterType->meter_description }}">
+                                                {{ $meterType->meter_brand }} ({{ $meterType->meter_code }})
+                                            </option>
+                                        @endforeach
                                     </select>
-                                    <label for="meter_brand"><i class="fas fa-industry"></i> Meter Brand *</label>
+                                    <label for="meter_type_id"><i class="fas fa-industry"></i> Meter Type *</label>
                                 </div>
+                                <small class="text-muted mt-1" id="meter_description"></small>
                             </div>
                         </div>
 
@@ -132,37 +134,7 @@
                             </div>
                         </div>
 
-                        <!-- Optional Fields -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select class="form-select" id="control_type" name="control_type">
-                                        <option value="">Select Control Type</option>
-                                        <option value="Single Phase">Single Phase</option>
-                                        <option value="Three Phase">Three Phase</option>
-                                        <option value="CT Metered">CT Metered</option>
-                                    </select>
-                                    <label for="control_type"><i class="fas fa-cogs"></i> Control Type</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="control_no" name="control_no" 
-                                           placeholder="Enter control number" readonly>
-                                    <label for="control_no"><i class="fas fa-hashtag"></i> Control Number</label>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="account_number" name="account_number" 
-                                           placeholder="Enter account number" readonly>
-                                    <label for="account_number"><i class="fas fa-user"></i> Account Number</label>
-                                </div>
-                            </div>
-                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -177,7 +149,75 @@
         </div>
     </div>
 
+    <!-- Assign Meter Modal -->
+    <div class="modal fade" id="assignMeterModal" tabindex="-1" role="dialog" aria-labelledby="assignMeterModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="assignMeterModalLabel">
+                        <i class="fas fa-link"></i> Assign Meter to Transaction
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeAssignMeterModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Meter Information Display -->
+                    <div class="alert alert-info mb-3" id="meterInfoDisplay">
+                        <h6><i class="fas fa-info-circle"></i> Meter Information:</h6>
+                        <div id="meterInfoContent"></div>
+                    </div>
 
+                    <form id="assignMeterForm">
+                        <input type="hidden" id="assign_meter_id" name="meter_id">
+                        
+                        <!-- Transaction Type -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <select class="form-select" id="assign_control_type" name="control_type" required>
+                                        <option value="">Select Transaction Type</option>
+                                        @foreach(config('constants.meter_transaction_type') as $transaction_type)
+                                            <option value="{{ $transaction_type['name'] }}">{{ $transaction_type['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                    <label for="assign_control_type"><i class="fas fa-cogs"></i> Transaction Type *</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Control Number -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="assign_control_no" name="control_no" 
+                                           placeholder="Enter control number">
+                                    <label for="assign_control_no"><i class="fas fa-hashtag"></i> Control Number</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Number -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="assign_account_number" name="account_number" 
+                                           placeholder="Enter account number">
+                                    <label for="assign_account_number"><i class="fas fa-user"></i> Account Number</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeAssignMeterModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-warning" id="assignMeterBtn" onclick="assignMeter()">
+                        <i class="fas fa-link"></i> Assign Meter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <div class="row">
@@ -231,7 +271,8 @@
                         <table class="table table-hover">
                             <thead class="table-dark">
                                 <tr>
-                                    <th><i class="fas fa-industry"></i> Meter Brand</th>
+                                    <th><i class="fas fa-industry"></i> Brand</th>
+                                    <th><i class="fas fa-info-circle"></i> Status</th>
                                     <th><i class="fas fa-barcode"></i> Serial No.</th>
                                     <th><i class="fas fa-seal"></i> L5 Seal</th>
                                     <th><i class="fas fa-certificate"></i> ERC Seal</th>
@@ -246,7 +287,18 @@
                                 @forelse($meters as $meter)
                                 <tr class="meter-row" data-meter-id="{{ $meter->id }}">
                                     <td>
-                                        <span class="badge bg-info">{{ $meter->meter_brand }}</span>
+                                        @if(!empty($meter->control_type) || !empty($meter->control_no) || !empty($meter->account_number))
+                                            <span class="badge bg-success" title="Assigned Meter">{{ $meter->meterType->meter_brand ?? 'N/A' }}</span>
+                                        @else
+                                            <span class="badge bg-warning text-dark" title="Available Meter">{{ $meter->meterType->meter_brand ?? 'N/A' }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if(!empty($meter->control_type) || !empty($meter->control_no) || !empty($meter->account_number))
+                                            <small class="text-success"><i class="fas fa-lock"></i> Assigned</small>
+                                        @else
+                                            <small class="text-warning"><i class="fas fa-unlock"></i> Available</small>
+                                        @endif
                                     </td>
                                     <td>
                                         <code>{{ $meter->serial_number }}</code>
@@ -275,10 +327,28 @@
                                                     onclick="viewMeter({{ $meter->id }})" title="View Details">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button type="button" class="btn btn-outline-warning" 
-                                                    onclick="editMeter({{ $meter->id }})" title="Edit Meter">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
+                                            @if(empty($meter->control_type) && empty($meter->control_no) && empty($meter->account_number))
+                                                <button type="button" class="btn btn-outline-warning" 
+                                                        onclick="editMeter({{ $meter->id }})" title="Edit Meter">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            @else
+                                                <button type="button" class="btn btn-outline-warning disabled" 
+                                                        title="Cannot edit assigned meter" disabled>
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            @endif
+                                            @if(empty($meter->control_type) && empty($meter->control_no) && empty($meter->account_number))
+                                                <button type="button" class="btn btn-outline-success" 
+                                                        onclick="openAssignMeterModal({{ $meter->id }})" title="Assign Meter">
+                                                    <i class="fas fa-link"></i>
+                                                </button>
+                                            @else
+                                                <button type="button" class="btn btn-outline-secondary" 
+                                                        onclick="returnMeter({{ $meter->id }})" title="Return Meter">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                            @endif
                                             <button type="button" class="btn btn-outline-info" 
                                                     onclick="viewAuditLogs({{ $meter->id }})" title="View Audit Logs">
                                                 <i class="fas fa-history"></i>
@@ -317,7 +387,7 @@
     <div class="modal fade" id="auditLogsModal" tabindex="-1" aria-labelledby="auditLogsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header bg-secondary text-white">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="auditLogsModalLabel">
                         <i class="fas fa-history"></i> Meter Audit Logs
                     </h5>
@@ -406,11 +476,13 @@ window.loadMeterData = function(meterId) {
         if (response.success) {
             const meter = response.data;
             $('#meter_id').val(meter.id);
-            $('#meter_brand').val(meter.meter_brand);
+            $('#meter_type_id').val(meter.meter_type_id);
             $('#serial_number').val(meter.serial_number);
             $('#erc_seal_number').val(meter.erc_seal_number);
             $('#leyeco_seal_number').val(meter.leyeco_seal_number);
-            $('#control_type').val(meter.control_type || '');
+            
+            // Trigger change event to show description
+            $('#meter_type_id').trigger('change');
         } else {
             throw new Error(response.message || 'Invalid response format');
         }
@@ -478,7 +550,131 @@ window.saveMeter = function() {
     });
 };
 
+// Assign Meter Functions
+window.openAssignMeterModal = function(meterId) {
+    // Clear previous data
+    $('#assignMeterForm')[0].reset();
+    $('#assign_meter_id').val(meterId);
+    
+    // Load meter information to display
+    loadMeterInfoForAssignment(meterId);
+    
+    // Show the modal
+    try {
+        var modal = new bootstrap.Modal(document.getElementById('assignMeterModal'), {
+            backdrop: 'static',
+            keyboard: false
+        });
+        modal.show();
+    } catch (error) {
+        $('#assignMeterModal').modal('show');
+    }
+};
 
+window.closeAssignMeterModal = function() {
+    try {
+        var modal = bootstrap.Modal.getInstance(document.getElementById('assignMeterModal'));
+        if (modal) {
+            modal.hide();
+        } else {
+            $('#assignMeterModal').modal('hide');
+        }
+    } catch (error) {
+        $('#assignMeterModal').modal('hide');
+    }
+};
+
+window.loadMeterInfoForAssignment = function(meterId) {
+    fetch(`/meters/${meterId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(response => {
+        if (response.success) {
+            const meter = response.data;
+            const meterType = meter.meter_type ? meter.meter_type : null;
+            
+            let infoHtml = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Meter Brand:</strong> ${meterType ? meterType.meter_brand : 'N/A'}<br>
+                        <strong>Meter Code:</strong> ${meterType ? meterType.meter_code : 'N/A'}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Serial Number:</strong> <code>${meter.serial_number}</code><br>
+                        <strong>ERC Seal:</strong> <code>${meter.erc_seal_number}</code><br>
+                        <strong>LEYECO Seal:</strong> <code>${meter.leyeco_seal_number}</code>
+                    </div>
+                </div>
+            `;
+            
+            $('#meterInfoContent').html(infoHtml);
+        } else {
+            throw new Error(response.message || 'Failed to load meter information');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading meter info:', error);
+        $('#meterInfoContent').html('<div class="text-danger">Failed to load meter information</div>');
+        showAlert('Failed to load meter information: ' + error.message, 'error');
+    });
+};
+
+window.assignMeter = function() {
+    const form = document.getElementById('assignMeterForm');
+    const formData = new FormData(form);
+    const meterId = $('#assign_meter_id').val();
+    
+    // Add CSRF token and method
+    formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+    formData.append('_method', 'PUT');
+    
+    // Disable submit button
+    const submitButton = document.getElementById('assignMeterBtn');
+    submitButton.disabled = true;
+    const originalText = submitButton.innerHTML;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Assigning...';
+    
+    fetch(`/meters/${meterId}/assign`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            showAlert('Meter assigned successfully!', 'success');
+            closeAssignMeterModal();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            return response.json().then(data => {
+                throw new Error(data.message || `Server error: ${response.status}`);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error assigning meter:', error);
+        showAlert('Error assigning meter: ' + error.message, 'error');
+    })
+    .finally(() => {
+        // Re-enable submit button
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
+    });
+};
 
 // Validation Functions
 window.initializeValidation = function() {
@@ -545,17 +741,164 @@ window.validateField = function(fieldType, value) {
     });
 };
 
+// Meter Brand Description Functions
+window.initializeMeterBrandDescription = function() {
+    // Show meter description when type is selected
+    $(document).on('change', '#meter_type_id', function() {
+        const selectedOption = $(this).find('option:selected');
+        const description = selectedOption.data('description');
+        const code = selectedOption.data('code');
+        const brand = selectedOption.data('brand');
+        
+        if (description && code && brand) {
+            $('#meter_description').text(`${brand} - Code: ${code} - ${description}`);
+        } else {
+            $('#meter_description').text('');
+        }
+    });
+    
+    // Initialize description on modal open (for edit mode)
+    $('#meterModal').on('shown.bs.modal', function() {
+        const selectedOption = $('#meter_type_id option:selected');
+        const description = selectedOption.data('description');
+        const code = selectedOption.data('code');
+        const brand = selectedOption.data('brand');
+        
+        if (description && code && brand) {
+            $('#meter_description').text(`${brand} - Code: ${code} - ${description}`);
+        }
+    });
+};
+
 // CRUD Functions
 window.editMeter = function(meterId) {
-    openMeterModal(meterId);
+    // First check if the meter is assigned by making an API call
+    fetch(`/meters/${meterId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(response => {
+        if (response.success) {
+            const meter = response.data;
+            
+            // Check if meter is assigned
+            if (meter.control_type || meter.control_no || meter.account_number) {
+                Swal.fire({
+                    title: 'Cannot Edit Assigned Meter',
+                    text: 'This meter is currently assigned to a transaction. Please return the meter first to make changes.',
+                    icon: 'warning',
+                    confirmButtonColor: '#6c757d',
+                    confirmButtonText: 'Understood'
+                });
+                return;
+            }
+            
+            // If not assigned, proceed with edit
+            openMeterModal(meterId);
+        } else {
+            throw new Error(response.message || 'Failed to load meter information');
+        }
+    })
+    .catch(error => {
+        console.error('Error checking meter status:', error);
+        showAlert('Failed to check meter status: ' + error.message, 'error');
+    });
 };
 
 window.viewMeter = function(meterId) {
     window.location.href = `/meters/${meterId}`;
 };
 
+window.returnMeter = function(meterId) {
+    Swal.fire({
+        title: 'Return Meter',
+        text: 'Are you sure you want to return this meter? This will remove its assignment and make it available for new transactions.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#6c757d',
+        cancelButtonColor: '#dc3545',
+        confirmButtonText: 'Yes, return it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading state
+            Swal.fire({
+                title: 'Returning Meter...',
+                text: 'Please wait while we process your request.',
+                icon: 'info',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch(`/meters/${meterId}/return`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({
+                    '_method': 'PUT'
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Failed to return meter');
+                    });
+                }
+                return response.json();
+            })
+            .then(response => {
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.message || 'Meter returned successfully!',
+                    icon: 'success',
+                    confirmButtonColor: '#28a745'
+                }).then(() => {
+                    // Reload the page to reflect changes
+                    window.location.reload();
+                });
+            })
+            .catch(error => {
+                console.error('Error returning meter:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message || 'Failed to return meter. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545'
+                });
+            });
+        }
+    });
+};
+
 window.deleteMeter = function(meterId) {
-    if (confirm('Are you sure you want to delete this meter? This action cannot be undone.')) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'You want to delete this meter? This action cannot be undone!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
         fetch(`/meters/${meterId}`, {
             method: 'DELETE',
             headers: {
@@ -580,7 +923,8 @@ window.deleteMeter = function(meterId) {
             console.error('Error deleting meter:', error);
             showAlert('Failed to delete meter: ' + error.message, 'error');
         });
-    }
+        }
+    });
 };
 
 window.searchMeters = function() {
@@ -644,7 +988,10 @@ window.displaySearchResults = function(meters) {
             html += `
                 <tr class="meter-row" data-meter-id="${meter.id}">
                     <td>
-                        <span class="badge bg-info">${meter.meter_brand}</span>
+                        ${(meter.control_type || meter.control_no || meter.account_number) ? 
+                            `<span class="badge bg-success" title="Assigned Meter">${meter.meter_type ? meter.meter_type.meter_brand : 'N/A'}</span><br><small class="text-success"><i class="fas fa-lock"></i> Assigned</small>` : 
+                            `<span class="badge bg-warning text-dark" title="Available Meter">${meter.meter_type ? meter.meter_type.meter_brand : 'N/A'}</span><br><small class="text-warning"><i class="fas fa-unlock"></i> Available</small>`
+                        }
                     </td>
                     <td>
                         <code>${meter.serial_number}</code>
@@ -677,10 +1024,26 @@ window.displaySearchResults = function(meters) {
                                     onclick="viewMeter(${meter.id})" title="View Details">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button type="button" class="btn btn-outline-warning" 
-                                    onclick="editMeter(${meter.id})" title="Edit Meter">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                            ${(!meter.control_type && !meter.control_no && !meter.account_number) ? 
+                                `<button type="button" class="btn btn-outline-warning" 
+                                        onclick="editMeter(${meter.id})" title="Edit Meter">
+                                    <i class="fas fa-edit"></i>
+                                </button>` : 
+                                `<button type="button" class="btn btn-outline-warning disabled" 
+                                        title="Cannot edit assigned meter" disabled>
+                                    <i class="fas fa-edit"></i>
+                                </button>`
+                            }
+                            ${(!meter.control_type && !meter.control_no && !meter.account_number) ? 
+                                `<button type="button" class="btn btn-outline-success" 
+                                        onclick="openAssignMeterModal(${meter.id})" title="Assign Meter">
+                                    <i class="fas fa-link"></i>
+                                </button>` : 
+                                `<button type="button" class="btn btn-outline-secondary" 
+                                        onclick="returnMeter(${meter.id})" title="Return Meter">
+                                    <i class="fas fa-undo"></i>
+                                </button>`
+                            }
                             <button type="button" class="btn btn-outline-info" 
                                     onclick="viewAuditLogs(${meter.id})" title="View Audit Logs">
                                 <i class="fas fa-history"></i>
@@ -725,6 +1088,140 @@ window.refreshMeters = function() {
 
 window.exportMeters = function() {
     showAlert('Export functionality will be implemented soon', 'info');
+};
+
+// Load unassigned meters for dropdown
+window.loadUnassignedMeters = function() {
+    fetch('/meters/search?unassigned=true', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(response => {
+        if (response.success && response.data) {
+            populateUnassignedMetersDropdown(response.data);
+        } else {
+            $('#unassignedMetersDropdown').html('<li><a class="dropdown-item disabled" href="#">No unassigned meters found</a></li>');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading unassigned meters:', error);
+        $('#unassignedMetersDropdown').html('<li><a class="dropdown-item disabled" href="#">Error loading meters</a></li>');
+    });
+};
+
+window.populateUnassignedMetersDropdown = function(meters) {
+    let html = '';
+    
+    if (meters && meters.length > 0) {
+        // Limit to first 10 items to avoid overly long dropdown
+        const limitedMeters = meters.slice(0, 10);
+        
+        limitedMeters.forEach(meter => {
+            const meterBrand = meter.meter_type ? meter.meter_type.meter_brand : 'N/A';
+            const displayText = `${meterBrand} - ${meter.serial_number}`;
+            
+            html += `
+                <li>
+                    <a class="dropdown-item" href="#" onclick="openAssignMeterModal(${meter.id}); return false;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${meterBrand}</strong><br>
+                                <small class="text-muted">Serial: ${meter.serial_number}</small>
+                            </div>
+                            <i class="fas fa-link text-warning"></i>
+                        </div>
+                    </a>
+                </li>
+            `;
+        });
+        
+        if (meters.length > 10) {
+            html += `<li><hr class="dropdown-divider"></li>`;
+            html += `<li><a class="dropdown-item text-center text-muted" href="#">And ${meters.length - 10} more...</a></li>`;
+        }
+    } else {
+        html = '<li><a class="dropdown-item disabled" href="#">No unassigned meters available</a></li>';
+    }
+    
+    $('#unassignedMetersDropdown').html(html);
+};
+
+// Load assigned meters for return dropdown
+window.loadAssignedMeters = function() {
+    fetch('/meters/search?assigned=true', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(response => {
+        if (response.success && response.data) {
+            populateAssignedMetersDropdown(response.data);
+        } else {
+            $('#assignedMetersDropdown').html('<li><a class="dropdown-item disabled" href="#">No assigned meters found</a></li>');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading assigned meters:', error);
+        $('#assignedMetersDropdown').html('<li><a class="dropdown-item disabled" href="#">Error loading meters</a></li>');
+    });
+};
+
+window.populateAssignedMetersDropdown = function(meters) {
+    let html = '';
+    
+    if (meters && meters.length > 0) {
+        // Limit to first 10 items to avoid overly long dropdown
+        const limitedMeters = meters.slice(0, 10);
+        
+        limitedMeters.forEach(meter => {
+            const meterBrand = meter.meter_type ? meter.meter_type.meter_brand : 'N/A';
+            const controlType = meter.control_type || 'N/A';
+            const controlNo = meter.control_no || 'N/A';
+            
+            html += `
+                <li>
+                    <a class="dropdown-item" href="#" onclick="returnMeter(${meter.id}); return false;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${meterBrand}</strong><br>
+                                <small class="text-muted">Serial: ${meter.serial_number}</small><br>
+                                <small class="text-info">${controlType} - ${controlNo}</small>
+                            </div>
+                            <i class="fas fa-undo text-secondary"></i>
+                        </div>
+                    </a>
+                </li>
+            `;
+        });
+        
+        if (meters.length > 10) {
+            html += `<li><hr class="dropdown-divider"></li>`;
+            html += `<li><a class="dropdown-item text-center text-muted" href="#">And ${meters.length - 10} more...</a></li>`;
+        }
+    } else {
+        html = '<li><a class="dropdown-item disabled" href="#">No assigned meters available</a></li>';
+    }
+    
+    $('#assignedMetersDropdown').html(html);
 };
 
 // Audit Logs
@@ -847,6 +1344,9 @@ $(document).ready(function() {
     // Initialize form validation
     initializeValidation();
     
+    // Initialize meter brand description functionality
+    initializeMeterBrandDescription();
+    
     // Search functionality
     let searchTimeout;
     
@@ -892,6 +1392,15 @@ $(document).ready(function() {
         closeMeterModal();
     });
     
+    // Initialize assign meter modal events
+    $('#assignMeterModal').on('hidden.bs.modal', function () {
+        $('#assignMeterForm')[0].reset();
+        $('#meterInfoContent').html('');
+    });
+    
+    $('#assignMeterModal').on('click', '[data-bs-dismiss="modal"]', function() {
+        closeAssignMeterModal();
+    });
 
 });
 
