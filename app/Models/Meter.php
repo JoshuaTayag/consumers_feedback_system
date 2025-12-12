@@ -19,6 +19,11 @@ class Meter extends Model implements Auditable
         return $this->belongsTo(MeterType::class);
     }
 
+    public function changeMeterRequest()
+    {
+        return $this->belongsTo('App\Models\ChangeMeterRequest', 'control_no', 'control_no');
+    }
+
     protected $fillable = ['meter_type_id', 
                         'serial_number',
                         'leyeco_seal_number',

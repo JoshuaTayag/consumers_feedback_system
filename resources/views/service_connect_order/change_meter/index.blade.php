@@ -69,7 +69,7 @@
                                     <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#meterPostingModal" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-area="{{$cm_request->area}}" data-feeder="{{$cm_request->feeder}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
                                   @endif
 
-                                  @if($cm_request->status == null)
+                                  @if($cm_request->status == null && $cm_request->new_meter_no != null)
                                     <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dispatchingModal" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}"><i class="fa fa-truck"></i>&nbsp; Dispatch</a></li>
                                   @endif
 

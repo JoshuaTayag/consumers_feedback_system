@@ -27,7 +27,7 @@ class ChangeMeterApiController extends Controller
         // Fetch change meter requests for the given contractor
         $changeMeterRequests = ChangeMeterRequest::select('id', 'control_no', 'contact_no', 'sitio', 'barangay_id', 'municipality_id','account_number', 'consumer_type', 'remarks', 'old_meter_no', 'new_meter_no', 'care_of', 'location', 'meter_or_number')
             ->selectRaw("CONCAT(last_name, ', ', first_name, ' ', middle_name) as full_name")
-            ->with('municipality', 'barangay')
+            ->with('municipality', 'barangay', 'assignedMeter.meterType')
             ->where('crew', $contractorId)
             ->where('status', '3') // Fetch only dispatched requests
             ->get()
@@ -44,6 +44,13 @@ class ChangeMeterApiController extends Controller
                     'land_mark' => $request->location,
                     'old_meter_no' => $request->old_meter_no,
                     'care_of' => $request->care_of,
+                    'assigned_meter' => $request->assignedMeter ? [
+                        'serial_number' => $request->assignedMeter->serial_number,
+                        'leyeco_seal_number' => $request->assignedMeter->leyeco_seal_number,
+                        'erc_seal_number' => $request->assignedMeter->erc_seal_number,
+                        'meter_brand' => $request->assignedMeter->meterType ? $request->assignedMeter->meterType->meter_brand : null,
+                        'meter_code' => $request->assignedMeter->meterType ? $request->assignedMeter->meterType->meter_code : null,
+                    ] : null,
                 ];
             });
 
@@ -405,7 +412,7 @@ class ChangeMeterApiController extends Controller
             // Fetch change meter request history for the given contractor
             $changeMeterRequests = ChangeMeterRequest::select('id', 'control_no', 'contact_no', 'sitio', 'barangay_id', 'municipality_id','account_number', 'consumer_type', 'remarks', 'old_meter_no', 'new_meter_no', 'care_of', 'location', 'meter_or_number', 'date_time_acted', 'status')
                 ->selectRaw("CONCAT(last_name, ', ', first_name, ' ', middle_name) as full_name")
-                ->with('municipality', 'barangay')
+                ->with('municipality', 'barangay', 'assignedMeter.meterType')
                 ->where('crew', $contractorId)
                 ->when($status !== null, function ($query) use ($status) {
                     return $query->where('status', $status);
@@ -430,7 +437,14 @@ class ChangeMeterApiController extends Controller
                         'new_meter_no' => $request->new_meter_no,
                         'date_time_acted' => $request->date_time_acted,
                         'status' => $request->status,
-                        'account_no' => substr($request->account_number, 0, 2) . '-' . substr($request->account_number, 2, 4) . '-' . substr($request->account_number, 6, 4)
+                        'account_no' => substr($request->account_number, 0, 2) . '-' . substr($request->account_number, 2, 4) . '-' . substr($request->account_number, 6, 4),
+                        'assigned_meter' => $request->assignedMeter ? [
+                            'serial_number' => $request->assignedMeter->serial_number,
+                            'leyeco_seal_number' => $request->assignedMeter->leyeco_seal_number,
+                            'erc_seal_number' => $request->assignedMeter->erc_seal_number,
+                            'meter_brand' => $request->assignedMeter->meterType ? $request->assignedMeter->meterType->meter_brand : null,
+                            'meter_code' => $request->assignedMeter->meterType ? $request->assignedMeter->meterType->meter_code : null,
+                        ] : null,
                     ];
                 }); 
             return response()->json([

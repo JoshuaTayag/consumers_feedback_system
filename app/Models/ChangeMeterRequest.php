@@ -61,6 +61,11 @@ class ChangeMeterRequest extends Model implements Auditable
         return $this->hasOne('App\Models\ChangeMeterRequestContractor' , 'id', 'crew');
     }
 
+    public function assignedMeter()
+    {
+        return $this->hasOne('App\Models\Meter', 'control_no', 'control_no');
+    }
+
     // Add signature relationships
     public function signatures()
     {

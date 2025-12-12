@@ -179,7 +179,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('meters/search', [App\Http\Controllers\MeterController::class, 'search'])->name('meters.search');
     Route::post('meters/validate-serial', [App\Http\Controllers\MeterController::class, 'validateSerialNumber'])->name('meters.validate-serial');
     Route::post('meters/validate-erc-seal', [App\Http\Controllers\MeterController::class, 'validateErcSeal'])->name('meters.validate-erc-seal');
+    Route::post('meters/validate-control-number', [App\Http\Controllers\MeterController::class, 'validateControlNumber'])->name('meters.validate-control-number');
     Route::get('meters/{id}/audit-logs', [App\Http\Controllers\MeterController::class, 'getAuditLogs'])->name('meters.audit-logs');
+    Route::get('meters/change-meter-requests', [App\Http\Controllers\MeterController::class, 'getChangeMeterRequests'])->name('meters.change-meter-requests');
     Route::put('meters/{id}/assign', [App\Http\Controllers\MeterController::class, 'assign'])->name('meters.assign');
     Route::put('meters/{id}/return', [App\Http\Controllers\MeterController::class, 'returnMeter'])->name('meters.return');
     Route::resource('meters', App\Http\Controllers\MeterController::class);
