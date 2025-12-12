@@ -71,8 +71,8 @@ class MeterController extends Controller
 
     public function create()
     {
-        $meter_types = MeterType::all();
-        return view('power_house.warehousing.data_management.meters.create', compact('meter_types'));
+        // $meter_types = MeterType::all();
+        // return view('power_house.warehousing.data_management.meters.create', compact('meter_types'));
     }
 
     public function store(Request $request)

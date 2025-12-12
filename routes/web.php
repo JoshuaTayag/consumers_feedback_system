@@ -221,6 +221,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('payment-transact', App\Http\Controllers\PaymentTransactionController::class);
 
     Route::resource('meter-type', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\MeterTypeController::class);
+    Route::resource('kwh-meter-request', App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class);
     // Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
 });
 

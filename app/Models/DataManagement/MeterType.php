@@ -12,6 +12,11 @@ class MeterType extends Model implements Auditable
     use HasFactory, SoftDeletes;
     use \OwenIt\Auditing\Auditable;
 
+    public function kwhMeterRequests()
+    {
+        return $this->hasMany('App\Models\KwhMeterRequest', 'meter_code_id', 'id');
+    }
+    
     protected $fillable = [
         'meter_brand',
         'meter_code',
