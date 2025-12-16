@@ -24,6 +24,26 @@ class Meter extends Model implements Auditable
         return $this->belongsTo('App\Models\ChangeMeterRequest', 'control_no', 'control_no');
     }
 
+    public function kwhMeterRequestSerialNumbers()
+    {
+        return $this->hasMany(KwhMeterRequestSerialNumber::class, 'meter_id', 'id');
+    }
+
+    // Helper method to get current KWH meter request assignment
+    public function currentKwhMeterRequest()
+    {
+        return $this->hasOneThrough(
+            KwhMeterRequest::class,
+            KwhMeterRequestSerialNumber::class,
+            'meter_id',
+            'id',
+            'id',
+            'kwh_meter_request_id'
+        );
+    }
+
+
+
     protected $fillable = ['meter_type_id', 
                         'serial_number',
                         'leyeco_seal_number',
@@ -31,6 +51,8 @@ class Meter extends Model implements Auditable
                         'control_type',
                         'control_no',
                         'account_number',
+                        'status',
+                        'kwh_meter_request_id',
                         'created_at',
                         'updated_at',
                         'deleted_at'

@@ -203,11 +203,20 @@
                                     <label for="assign_control_no_select"><i class="fas fa-hashtag"></i> Control Number *</label>
                                     <div class="invalid-feedback" id="controlNumberSelectFeedback"></div>
                                 </div>
+                                
+                                <!-- Dropdown for kWh Meter Request type -->
+                                <div class="form-floating" id="bufferDropdown" style="display: none;">
+                                    <select class="form-select" id="assign_buffer_select" name="control_no">
+                                        <option value="">Loading kWh meter requests...</option>
+                                    </select>
+                                    <label for="assign_buffer_select"><i class="fas fa-bolt"></i> kWh Meter Request *</label>
+                                    <div class="invalid-feedback" id="bufferSelectFeedback"></div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Account Number -->
-                        <div class="row mb-3">
+                        <!-- Account Number (Hidden for kWh Meter Request) -->
+                        <div class="row mb-3" id="accountNumberSection">
                             <div class="col-12">
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="assign_account_number" name="account_number" 
@@ -331,6 +340,7 @@
                                     <th><i class="fas fa-cogs"></i> Control Type</th>
                                     <th><i class="fas fa-hashtag"></i> Control No.</th>
                                     <th><i class="fas fa-user"></i> Account No.</th>
+                                    <th><i class="fas fa-user"></i> Meter Request</th>
                                     <th><i class="fas fa-calendar"></i> Created</th>
                                     <th class="text-center"><i class="fas fa-cog"></i> Actions</th>
                                 </tr>
@@ -339,14 +349,14 @@
                                 @forelse($meters as $meter)
                                 <tr class="meter-row" data-meter-id="{{ $meter->id }}">
                                     <td>
-                                        @if(!empty($meter->control_type) || !empty($meter->control_no) || !empty($meter->account_number))
+                                        @if($meter->status == 1)
                                             <span class="badge bg-success" title="Assigned Meter">{{ $meter->meterType->meter_brand ?? 'N/A' }}</span>
                                         @else
                                             <span class="badge bg-warning text-dark" title="Available Meter">{{ $meter->meterType->meter_brand ?? 'N/A' }}</span>
                                         @endif
                                     </td>
                                     <td>
-                                        @if(!empty($meter->control_type) || !empty($meter->control_no) || !empty($meter->account_number))
+                                        @if($meter->status == 1)
                                             <small class="text-success"><i class="fas fa-lock"></i> Assigned</small>
                                         @else
                                             <small class="text-warning"><i class="fas fa-unlock"></i> Available</small>
@@ -379,6 +389,14 @@
                                         <span class="text-muted">{{ $meter->account_number ?: 'N/A' }}</span>
                                     </td>
                                     <td>
+                                        @if ($meter->kwh_meter_request_id)
+                                            <a href="{{ route('kwh-meter-request.show',$meter->kwh_meter_request_id) }}" target="_blank" class="text-decoration-none">View Request</a>
+                                        @else
+                                            <span class="text-muted">N/A</span>
+                                        @endif
+                                        
+                                    </td>
+                                    <td>
                                         <small class="text-muted">{{ $meter->created_at->format('M d, Y') }}</small>
                                     </td>
                                     <td class="text-center">
@@ -387,7 +405,7 @@
                                                     onclick="viewMeter({{ $meter->id }})" title="View Details">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            @if(empty($meter->control_type) && empty($meter->control_no) && empty($meter->account_number))
+                                            @if($meter->status == 0)
                                                 <button type="button" class="btn btn-outline-warning" 
                                                         onclick="editMeter({{ $meter->id }})" title="Edit Meter">
                                                     <i class="fas fa-edit"></i>
@@ -398,7 +416,7 @@
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                             @endif
-                                            @if(empty($meter->control_type) && empty($meter->control_no) && empty($meter->account_number))
+                                            @if($meter->status == 0)
                                                 <button type="button" class="btn btn-outline-success" 
                                                         onclick="openAssignMeterModal({{ $meter->id }})" title="Assign Meter">
                                                     <i class="fas fa-link"></i>
@@ -724,19 +742,50 @@ window.assignMeter = function() {
     const controlType = $('#assign_control_type').val();
     formData.append('control_type', controlType);
     
+    // Get submit button reference for validation
+    const submitButton = document.getElementById('assignMeterBtn');
+    const originalText = submitButton.innerHTML;
+    
     // Get control number from appropriate field
     let controlNo = '';
+    let accountNumber = '';
+    
     if (controlType === 'Change Meter') {
         controlNo = $('#assign_control_no_select').val();
+        accountNumber = $('#assign_account_number').val();
+        
+        // Validate Change Meter selection
+        if (!controlNo) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Please select a control number for Change Meter assignment.'
+            });
+            return;
+        }
+    } else if (controlType === 'kWh Meter Request') {
+        // For kWh Meter Request, send KWH request ID as control_no for server processing
+        controlNo = $('#assign_buffer_select').val(); // KWH Request ID goes to control_no
+        accountNumber = ''; // Will be set automatically by the server
+        
+        // Validate kWh Meter Request selection
+        if (!controlNo) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Please select a kWh meter request for assignment.'
+            });
+            return;
+        }
     } else {
         controlNo = $('#assign_control_no_text').val();
+        accountNumber = $('#assign_account_number').val();
     }
+    
     if (controlNo) {
         formData.append('control_no', controlNo);
     }
     
-    // Get account number
-    const accountNumber = $('#assign_account_number').val();
     if (accountNumber) {
         formData.append('account_number', accountNumber);
     }
@@ -746,9 +795,7 @@ window.assignMeter = function() {
     formData.append('_method', 'PUT');
     
     // Disable submit button
-    const submitButton = document.getElementById('assignMeterBtn');
     submitButton.disabled = true;
-    const originalText = submitButton.innerHTML;
     submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Assigning...';
     
     fetch(`/meters/${meterId}/assign`, {
@@ -790,16 +837,21 @@ window.handleTransactionTypeChange = function() {
     $('#assign_account_number').val('');
     
     // Clear validation states
-    $('#assign_control_no_select, #assign_control_no_text').removeClass('is-invalid');
-    $('#controlNumberSelectFeedback, #controlNumberTextFeedback').text('');
+    $('#assign_control_no_select, #assign_control_no_text, #assign_buffer_select').removeClass('is-invalid');
+    $('#controlNumberSelectFeedback, #controlNumberTextFeedback, #bufferSelectFeedback').text('');
     
     // Reset assign button state
     $('#assignMeterBtn').prop('disabled', false);
     $('#assignMeterBtn').html('<i class="fas fa-link"></i> Assign Meter');
     
+    // Hide all input fields first
+    $('#controlNumberTextInput, #controlNumberDropdown, #bufferDropdown').hide();
+    
+    // Show account number section by default (will be hidden for kWh Meter Request)
+    $('#accountNumberSection').show();
+    
     if (transactionType === 'Change Meter') {
-        // Show dropdown, hide text input
-        $('#controlNumberTextInput').hide();
+        // Show change meter dropdown
         $('#controlNumberDropdown').show();
         
         // Make account number field readonly and add visual indicator
@@ -808,18 +860,27 @@ window.handleTransactionTypeChange = function() {
         
         // Fetch change meter requests
         fetchChangeMeterRequests();
+    } else if (transactionType === 'kWh Meter Request') {
+        // Only show kWh meter request dropdown, hide control number field completely for kWh Meter Request
+        $('#bufferDropdown').show();
+        
+        // Hide account number section completely for kWh Meter Request
+        $('#accountNumberSection').hide();
+        
+        // Fetch KWH meter requests
+        fetchKwhMeterRequests();
     } else {
-        // Show text input, hide dropdown
-        $('#controlNumberDropdown').hide();
+        // Show text input for other transaction types (New Connection, etc.)
         $('#controlNumberTextInput').show();
         
         // Make account number field editable
         $('#assign_account_number').prop('readonly', false).removeClass('bg-light');
         $('#accountNumberHelp').hide();
-        
-        // Clear dropdown
-        $('#assign_control_no_select').html('<option value="">Select Control Number</option>');
     }
+    
+    // Clear all dropdowns
+    $('#assign_control_no_select').html('<option value="">Select Control Number</option>');
+    $('#assign_buffer_select').html('<option value="">Select KWH Meter Request</option>');
 };
 
 window.fetchChangeMeterRequests = function() {
@@ -866,6 +927,66 @@ window.populateControlNumberDropdown = function(requests) {
     }
     
     $('#assign_control_no_select').html(options);
+};
+
+window.fetchKwhMeterRequests = function() {
+    // Show loading state
+    $('#assign_buffer_select').html('<option value="">Loading KWH meter requests...</option>');
+    
+    // Get the current meter ID for type validation
+    const meterId = $('#assign_meter_id').val();
+    
+    fetch(`/meters/kwh-meter-requests?meter_id=${meterId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            populateKwhMeterRequestDropdown(data.data);
+        } else {
+            throw new Error(data.message || 'Failed to fetch KWH meter requests');
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching KWH meter requests:', error);
+        $('#assign_buffer_select').html('<option value="">Failed to load KWH meter requests</option>');
+        
+        // Show user-friendly error
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load KWH meter requests. Please try again.',
+            toast: true,
+            position: 'top-end',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    });
+};
+
+window.populateKwhMeterRequestDropdown = function(requests) {
+    let options = '<option value="">Select KWH Meter Request</option>';
+    
+    if (requests && requests.length > 0) {
+        requests.forEach(request => {
+            const remainingText = request.remaining > 0 ? ` (${request.remaining} remaining)` : ' (FULL)';
+            options += `<option value="${request.id}" data-remaining="${request.remaining}">${request.text}${remainingText}</option>`;
+        });
+    } else {
+        options = '<option value="">No KWH meter requests available</option>';
+    }
+    
+    $('#assign_buffer_select').html(options);
 };
 
 window.handleControlNumberChange = function() {
@@ -1058,7 +1179,7 @@ window.editMeter = function(meterId) {
             const meter = response.data;
             
             // Check if meter is assigned
-            if (meter.control_type || meter.control_no || meter.account_number) {
+            if (meter.status == 1) {
                 Swal.fire({
                     title: 'Cannot Edit Assigned Meter',
                     text: 'This meter is currently assigned to a transaction. Please return the meter first to make changes.',
@@ -1369,20 +1490,24 @@ $(document).ready(function() {
         
         // Reset control number fields to default state
         $('#controlNumberTextInput').show();
-        $('#controlNumberDropdown').hide();
+        $('#controlNumberDropdown, #bufferDropdown').hide();
         $('#assign_control_no_select').html('<option value="">Select Control Number</option>');
+        $('#assign_buffer_select').html('<option value="">Select KWH Meter Request</option>');
         
         // Reset assign button state
         $('#assignMeterBtn').prop('disabled', false);
         $('#assignMeterBtn').html('<i class="fas fa-link"></i> Assign Meter');
         
         // Clear validation states
-        $('#assign_control_no_select, #assign_control_no_text').removeClass('is-invalid');
-        $('#controlNumberSelectFeedback, #controlNumberTextFeedback').text('');
+        $('#assign_control_no_select, #assign_control_no_text, #assign_buffer_select').removeClass('is-invalid');
+        $('#controlNumberSelectFeedback, #controlNumberTextFeedback, #bufferSelectFeedback').text('');
         
         // Reset account number field to editable state
         $('#assign_account_number').prop('readonly', false).removeClass('bg-light');
         $('#accountNumberHelp').hide();
+        
+        // Reset control number text placeholder
+        $('#assign_control_no_text').attr('placeholder', 'Enter control number');
     });
     
     $('#assignMeterModal').on('click', '[data-bs-dismiss="modal"]', function() {
@@ -1411,6 +1536,45 @@ $(document).ready(function() {
         // Reset assign button state when user starts typing
         $('#assignMeterBtn').prop('disabled', false);
         $('#assignMeterBtn').html('<i class="fas fa-link"></i> Assign Meter');
+    });
+
+    // Handle buffer (KWH meter request) selection change
+    $(document).on('change', '#assign_buffer_select', function() {
+        const selectedOption = $(this).find('option:selected');
+        const remaining = selectedOption.data('remaining') || 0;
+        const kwhRequestId = $(this).val();
+        
+        // Auto-fill account number with KWH request ID for Buffer type
+        if (kwhRequestId) {
+            $('#assign_account_number').val(kwhRequestId);
+            
+            // Brief visual feedback that field was auto-filled
+            $('#assign_account_number').addClass('border-success');
+            setTimeout(function() {
+                $('#assign_account_number').removeClass('border-success');
+            }, 1500);
+        } else {
+            $('#assign_account_number').val('');
+        }
+        
+        if (remaining <= 0) {
+            // Show warning that this request is full
+            Swal.fire({
+                icon: 'warning',
+                title: 'Request Full',
+                text: 'This KWH meter request is already fully assigned.',
+                toast: true,
+                position: 'top-end',
+                timer: 3000,
+                showConfirmButton: false
+            });
+            
+            $('#assignMeterBtn').prop('disabled', true);
+            $('#assignMeterBtn').html('<i class="fas fa-exclamation-triangle"></i> Request Full');
+        } else {
+            $('#assignMeterBtn').prop('disabled', false);
+            $('#assignMeterBtn').html('<i class="fas fa-link"></i> Assign Meter');
+        }
     });
 
 });

@@ -20,7 +20,7 @@
                             <a href="{{ route('meters.index') }}" class="btn btn-light btn-sm me-2">
                                 <i class="fas fa-arrow-left me-1"></i>Back to List
                             </a>
-                            @if(empty($meter->control_type) && empty($meter->control_no) && empty($meter->account_number))
+                            @if($meter->status == 0)
                                 <a href="{{ route('meters.edit', $meter->id) }}" class="btn btn-warning btn-sm">
                                     <i class="fas fa-edit me-1"></i>Edit Meter
                                 </a>
@@ -44,7 +44,7 @@
                             <h5 class="text-primary mb-1">
                                 <i class="fas fa-info-circle me-2"></i>Meter Status
                             </h5>
-                            @if(!empty($meter->control_type) || !empty($meter->control_no) || !empty($meter->account_number))
+                            @if($meter->status == 1)
                                 <span class="badge bg-success fs-6">
                                     <i class="fas fa-check-circle me-1"></i>Assigned
                                 </span>
@@ -53,7 +53,7 @@
                                 <span class="badge bg-warning text-dark fs-6">
                                     <i class="fas fa-clock me-1"></i>Available
                                 </span>
-                                <small class="text-muted ms-2">This meter is available for assignment</small>
+                                <small class="text-muted ms-2">This meter is ready for assignment</small>
                             @endif
                         </div>
                     </div>
@@ -126,7 +126,7 @@
             </div>
 
             <!-- Assignment Information Card (Only if assigned) -->
-            @if(!empty($meter->control_type) || !empty($meter->control_no) || !empty($meter->account_number))
+            @if($meter->status == 1)
             <div class="card shadow-sm border-success mb-4">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">

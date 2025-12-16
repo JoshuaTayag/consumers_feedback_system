@@ -182,6 +182,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('meters/validate-control-number', [App\Http\Controllers\MeterController::class, 'validateControlNumber'])->name('meters.validate-control-number');
     Route::get('meters/{id}/audit-logs', [App\Http\Controllers\MeterController::class, 'getAuditLogs'])->name('meters.audit-logs');
     Route::get('meters/change-meter-requests', [App\Http\Controllers\MeterController::class, 'getChangeMeterRequests'])->name('meters.change-meter-requests');
+    Route::get('meters/kwh-meter-requests', [App\Http\Controllers\MeterController::class, 'getKwhMeterRequests'])->name('meters.kwh-meter-requests');
     Route::put('meters/{id}/assign', [App\Http\Controllers\MeterController::class, 'assign'])->name('meters.assign');
     Route::put('meters/{id}/return', [App\Http\Controllers\MeterController::class, 'returnMeter'])->name('meters.return');
     Route::resource('meters', App\Http\Controllers\MeterController::class);
@@ -222,6 +223,12 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::resource('meter-type', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\MeterTypeController::class);
     Route::resource('kwh-meter-request', App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class);
+    Route::get('pending-transactions', [App\Http\Controllers\PendingController::class, 'index'])->name('pending.index');
+    Route::get('pending-transactions/search', [App\Http\Controllers\PendingController::class, 'search'])->name('pending.search');
+    Route::get('pending-transactions/statistics', [App\Http\Controllers\PendingController::class, 'getStatistics'])->name('pending.statistics');
+    Route::get('pending-transactions/{id}/details', [App\Http\Controllers\PendingController::class, 'showDetails'])->name('pending.details');
+    Route::post('pending-transactions/approve', [App\Http\Controllers\PendingController::class, 'approve'])->name('pending.approve');
+    Route::post('pending-transactions/disapprove', [App\Http\Controllers\PendingController::class, 'disapprove'])->name('pending.disapprove');
     // Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
 });
 

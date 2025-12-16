@@ -841,7 +841,7 @@
             ],
             [
                 "id" => 3,
-                "name" => "Buffer"
+                "name" => "kWh Meter Request"
             ]
         ],
     ];

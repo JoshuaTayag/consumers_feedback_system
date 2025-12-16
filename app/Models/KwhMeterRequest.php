@@ -24,15 +24,48 @@ class KwhMeterRequest extends Model implements Auditable
         return $this->belongsTo(MeterType::class, 'meter_code_id');
     }
 
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function kwhMeterRequestSerialNumbers()
+    {
+        return $this->hasMany(KwhMeterRequestSerialNumber::class, 'kwh_meter_request_id');
+    }
+
+    // Helper method to get assigned meters through the tracking table
+    public function assignedMeters()
+    {
+        return $this->hasManyThrough(
+            Meter::class,
+            KwhMeterRequestSerialNumber::class,
+            'kwh_meter_request_id',
+            'id',
+            'id',
+            'meter_id'
+        );
+    }
+
+    // Helper method to check remaining meters that can be assigned
+    public function getRemainingQuantityAttribute()
+    {
+        return $this->quantity - $this->kwhMeterRequestSerialNumbers()->count();
+    }
+
     protected $fillable = [
         'user_id',
         'meter_code_id',
+        'control_no',
         'quantity',
         'purpose',
-        'status',
         'approved_by',
-        'approved_at',
+        'is_liquidated',
         'created_by',
         'updated_by'
+    ];
+
+    protected $casts = [
+        'is_liquidated' => 'boolean',
     ];
 }

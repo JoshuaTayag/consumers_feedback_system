@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('control_type')->nullable();
             $table->string('control_no')->nullable();
             $table->string('account_number')->nullable();
+            $table->unsignedBigInteger('kwh_meter_request_id')->nullable();
+            $table->integer('status')->nullable()->default(0);// 0 = Available, 1 = Assigned;
             $table->timestamps();
             $table->softDeletes();
         });

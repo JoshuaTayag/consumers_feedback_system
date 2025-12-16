@@ -19,7 +19,7 @@
             <div class="card-body">
               <table class="table table-bordered">
                 <tr>
-                  <th>No</th>
+                  <th>Control No.</th>
                   <th>Requested By</th>
                   <th>Purpose</th>
                   <th>Meter Type</th>
@@ -29,7 +29,7 @@
                 </tr>
                 @foreach ($kwh_meter_requests as $key => $kwh_meter_request)
                  <tr>
-                   <td>{{ $loop->iteration }}</td>
+                   <td>{{ $kwh_meter_request->control_no }}</td>
                    <td>{{ $kwh_meter_request->user->name }}</td>
                    <td>{{ $kwh_meter_request->purpose }}</td>
                    <td>{{ $kwh_meter_request->meterType->meter_code }}</td>
@@ -40,6 +40,10 @@
                         <a type="button" class="btn btn-outline-warning" 
                                 href="{{ route('kwh-meter-request.edit',$kwh_meter_request->id) }}" title="Edit Meter Type">
                             <i class="fas fa-edit"></i>
+                        </a>
+                        <a type="button" class="btn btn-outline-info" 
+                                href="{{ route('kwh-meter-request.show',$kwh_meter_request->id) }}" title="View Meter Request">
+                            <i class="fas fa-eye"></i>
                         </a>
                         <button type="button" class="btn btn-outline-danger" 
                                 onclick="confirmDelete({{ $kwh_meter_request->id }}, '{{ $kwh_meter_request->meterType->meter_brand }}')" title="Delete Details">
