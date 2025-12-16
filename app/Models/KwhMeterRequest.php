@@ -34,6 +34,11 @@ class KwhMeterRequest extends Model implements Auditable
         return $this->hasMany(KwhMeterRequestSerialNumber::class, 'kwh_meter_request_id');
     }
 
+    public function changeMeterRequests()
+    {
+        return $this->hasMany(ChangeMeterRequest::class, 'kwh_meter_request_id');
+    }
+
     // Helper method to get assigned meters through the tracking table
     public function assignedMeters()
     {

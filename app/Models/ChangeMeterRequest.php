@@ -96,6 +96,11 @@ class ChangeMeterRequest extends Model implements Auditable
         return $hasCustomer && $hasContractor;
     }
 
+    public function kwhMeterRequest()
+    {
+        return $this->belongsTo(KwhMeterRequest::class, 'kwh_meter_request_id', 'id');
+    }
+
     protected $fillable = [
         'control_no', 'first_name', 'middle_name', 'last_name', 'contact_no',
         'area', 'municipality_id', 'barangay_id', 'sitio', 'account_number',
@@ -103,7 +108,7 @@ class ChangeMeterRequest extends Model implements Auditable
         'meter_or_number', 'meter_or_date', 'new_meter_no', 'type_of_meter',
         'last_reading', 'initial_reading', 'remarks', 'location', 'crew',
         'date_time_acted', 'status', 'damage_cause', 'crew_remarks', 'created_by',
-        'created_at', 'process_date', 'dispatched_date'
+        'created_at', 'process_date', 'dispatched_date', 'kwh_meter_request_id',
     ];
 
     protected $appends = ['crew_full_name'];

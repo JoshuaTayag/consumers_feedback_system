@@ -114,6 +114,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('cm-fetch-accounts-records', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAccountDetails'])->name('cmFetchAccounts');
     Route::get('change-meter-request-audit-logs/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAuditLogs'])->name('cmAuditLogs');
     Route::get('change-meter-request-export-audit-logs/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'exportAuditLogs'])->name('cmExportAuditLogs');
+    
+    // AJAX routes for auto-fill functionality
+    Route::get('kwh-meter-request-details', [App\Http\Controllers\ChangeMeterRequestController::class, 'getKwhMeterRequestDetails'])->name('kwhMeterRequestDetails');
+    Route::get('kwh-meter-serial-numbers', [App\Http\Controllers\ChangeMeterRequestController::class, 'getKwhMeterSerialNumbers'])->name('kwhMeterSerialNumbers');
+    Route::get('meter-seal-details', [App\Http\Controllers\ChangeMeterRequestController::class, 'getMeterSealDetails'])->name('meterSealDetails');
 
     Route::resource('change-meter-request', App\Http\Controllers\ChangeMeterRequestController::class);
     Route::resource('change-meter-contractor', App\Http\Controllers\ChangeMeterRequestContractorController::class);

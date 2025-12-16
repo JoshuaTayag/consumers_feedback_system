@@ -149,11 +149,13 @@
                                 <a href="{{ route('pending.index') }}" class="position-relative text-decoration-none text-dark">
                                     <i class="fa-solid fa-bell fa-lg"></i>
 
-                                    <!-- Notification count -->
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        5
-                                        <span class="visually-hidden">unread notifications</span>
-                                    </span>
+                                    <!-- Dynamic notification count -->
+                                    @if($pendingNotificationCount > 0)
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{ $pendingNotificationCount > 99 ? '99+' : $pendingNotificationCount }}
+                                            <span class="visually-hidden">{{ $pendingNotificationCount }} unread notifications</span>
+                                        </span>
+                                    @endif
                                 </a>
                             </li>
                         @endguest

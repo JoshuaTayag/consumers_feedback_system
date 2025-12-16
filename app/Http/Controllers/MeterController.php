@@ -412,6 +412,8 @@ class MeterController extends Controller
                     // Update meter status and assignment fields
                     $meter->update([
                         'control_type' => $request->control_type,
+                        'control_no' => $request->control_no,
+                        'account_number' => $request->account_number,
                         'status' => 1, // Set status to assigned
                     ]);
 
@@ -456,7 +458,7 @@ class MeterController extends Controller
                             'status' => 0 // 0 = Unliquidated
                         ]);
                         
-                        // Update meter with KWH request ID in account_number field
+                        // Update meter with KWH request ID
                         $meter->update([
                             'control_type' => $request->control_type,
                             'kwh_meter_request_id' => $kwhMeterRequestId,
