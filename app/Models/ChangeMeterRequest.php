@@ -31,6 +31,22 @@ class ChangeMeterRequest extends Model implements Auditable
         return 'No Crew Assigned';
     }
 
+    public function getAddressAttribute()
+    {
+        if ($this->municipality_id && $this->barangay_id) {
+            return $this->sitio . ", BRGY. " . $this->barangay->barangay_name . ', ' . $this->municipality->municipality_name;
+        }
+        return 'No Address Available';
+    }
+
+    public function getFullNameAttribute()
+    {
+        if ($this->last_name && $this->first_name) {
+            return $this->last_name . ", " . $this->first_name . " " . substr($this->middle_name, 0, 1) . ".";
+        }
+        return 'No Name Available';
+    }
+
     public function municipality()
     {
         return $this->belongsTo('App\Models\Municipality', 'municipality_id', 'id');
@@ -112,4 +128,10 @@ class ChangeMeterRequest extends Model implements Auditable
     ];
 
     protected $appends = ['crew_full_name'];
+
+    protected $casts = [
+        'date_time_acted' => 'datetime',
+        'dispatched_date' => 'datetime',
+        'process_date' => 'datetime',
+    ];
 }

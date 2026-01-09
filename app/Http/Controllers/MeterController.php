@@ -48,6 +48,9 @@ class MeterController extends Controller
             } elseif ($request->status === 'assigned') {
                 // Show only assigned meters
                 $query->where('status', 1);
+            } elseif ($request->status === 'unavailable') {
+                // Show only unavailable meters
+                $query->where('status', 2);
             }
         }
         
@@ -465,6 +468,14 @@ class MeterController extends Controller
                             'status' => 1, // Set status to assigned
                         ]);
                     }
+                } else if ($request->control_type === 'New Connection') {
+                    // Update meter status and assignment fields
+                    $meter->update([
+                        'control_type' => $request->control_type,
+                        'control_no' => $request->control_no,
+                        'account_number' => $request->account_number,
+                        'status' => 1, // Set status to assigned
+                    ]);
                 }
             }
 
@@ -506,12 +517,12 @@ class MeterController extends Controller
                 ], 422);
             }
 
-            // check if the status of the corresponding change meter request is already completed
+            // check if the status of the corresponding change meter request is already completed or dispatched
             $changeMeterRequest = ChangeMeterRequest::where('control_no', $meter->control_no)->first();
-            if ($changeMeterRequest && $changeMeterRequest->status == 2) {
+            if ($changeMeterRequest && ($changeMeterRequest->status == 2 || $changeMeterRequest->status == 3)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cannot return meter. The corresponding change meter request is already completed.'
+                    'message' => 'Cannot return meter. The corresponding change meter request is already dispatched or completed.'
                 ], 422);
             }
 
@@ -579,19 +590,81 @@ class MeterController extends Controller
     }
 
     /**
+     * Make an unavailable meter available again
+     */
+    public function makeMeterAvailable(Request $request, $id)
+    {
+        DB::beginTransaction();
+        
+        try {
+            $meter = Meter::findOrFail($id);
+            
+            // Check if meter is currently unavailable
+            if ($meter->status != 2) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This meter is not unavailable. Current status: ' . 
+                                   ($meter->status == 0 ? 'Available' : 'Assigned')
+                    ], 400);
+                }
+                return redirect()->back()->with('error', 'Meter is not unavailable');
+            }
+            
+            // Update meter status to available
+            $meter->update([
+                'status' => 0
+            ]);
+
+            DB::commit();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Meter is now available for assignment!',
+                    'data' => $meter->load('meterType')
+                ]);
+            }
+
+            return redirect()->route('meters.index')->with('success', 'Meter is now available!');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to make meter available: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Failed to make meter available: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Get change meter requests for dropdown
      */
     public function getChangeMeterRequests(Request $request)
     {
         try {
-            $changeMeterRequests = ChangeMeterRequest::where('status', null)
+            $meterId = $request->input('meter_id');
+            $query = ChangeMeterRequest::where('status', null)
                 ->whereNotExists(function ($query) {
                     $query->select(DB::raw(1))
                         ->from('meters')
                         ->whereColumn('meters.control_no', 'change_meter_requests.control_no')
                         ->whereNotNull('meters.control_no');
-                })
-                ->select('id', 'control_no', 'first_name', 'last_name', 'account_number')
+                });
+
+            // If meter_id is provided, filter by meter type compatibility
+            if ($meterId) {
+                $meter = Meter::with('meterType')->find($meterId);
+                if ($meter && $meter->meterType) {
+                    $query->where('type_of_meter', $meter->meterType->meter_code);
+                }
+            }
+
+            $changeMeterRequests = $query->select('id', 'control_no', 'first_name', 'last_name', 'account_number', 'type_of_meter')
                 ->orderBy('control_no', 'desc')
                 ->get();
 
@@ -600,7 +673,7 @@ class MeterController extends Controller
                 'data' => $changeMeterRequests->map(function ($request) {
                     return [
                         'control_no' => $request->control_no,
-                        'display_text' => $request->control_no . ' - ' . $request->first_name . ' ' . $request->last_name,
+                        'display_text' => $request->control_no . ' - ' . $request->first_name . ' ' . $request->last_name . ' (' . $request->type_of_meter . ')',
                         'account_number' => $request->account_number
                     ];
                 })
@@ -689,7 +762,7 @@ class MeterController extends Controller
                 
                 return [
                     'id' => $request->id,
-                    'text' => "ID#{$request->id} - {$request->user->name} - {$request->meterType->meter_code} - Qty: {$request->quantity} (Assigned: {$assignedCount})",
+                    'text' => "{$request->control_no} - {$request->user->name} - {$request->meterType->meter_code} - Qty: {$request->quantity} (Assigned: {$assignedCount})",
                     'user_name' => $request->user->name,
                     'meter_type' => $request->meterType->meter_code,
                     'quantity' => $request->quantity,

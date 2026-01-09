@@ -391,8 +391,12 @@
             [
                 "id" => 13,
                 "name" => "COMELEC / Voter’s ID / COMELEC Registration Form"
+            ],
+            [
+                "id" => 14,
+                "name" => "PRC License ID"
             ]
-            
+
         ],
 
         'area_id' => [
@@ -842,6 +846,34 @@
             [
                 "id" => 3,
                 "name" => "kWh Meter Request"
+            ]
+        ],
+
+        'coverage_areas' => [
+            [
+                "id" => 1,
+                "name" => "A1",
+                "description" => "Area 1"
+            ],
+            [
+                "id" => 2,
+                "name" => "A2",
+                "description" => "Area 2"
+            ],
+            [
+                "id" => 3,
+                "name" => "A3",
+                "description" => "Area 3"
+            ],
+            [
+                "id" => 4,
+                "name" => "A4",
+                "description" => "Area 4"
+            ],
+            [
+                "id" => 5,
+                "name" => "A5",
+                "description" => "Area 5"
             ]
         ],
     ];

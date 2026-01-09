@@ -146,7 +146,7 @@
                                 </div>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('pending.index') }}" class="position-relative text-decoration-none text-dark">
+                                <a href="{{ route('pending.index', ['status' => 0]) }}" class="position-relative text-decoration-none text-dark">
                                     <i class="fa-solid fa-bell fa-lg"></i>
 
                                     <!-- Dynamic notification count -->

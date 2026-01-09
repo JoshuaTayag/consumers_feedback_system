@@ -204,8 +204,8 @@
                             <option value="{{ $type_of_meter->meter_code }}" id="" {{ $change_meter_request->type_of_meter == $type_of_meter->meter_code ? 'selected' : ''}}>
                               <div class="row">
                                 <div class="form-group">
-                                  <label class="col-xs-6">Code: {{ $type_of_meter->meter_code  }} <span class="fw-bold">|</span></label>
-                                  <label class="col-xs-6">Desc: {{ $type_of_meter->meter_description  }}</label>
+                                  <label class="col-xs-6">{{ $type_of_meter->meter_code  }} <span class="fw-bold"> - </span></label>
+                                  <label class="col-xs-6">{{ $type_of_meter->meter_description  }}</label>
                                 </div>
                               </div> 
                             </option>
@@ -243,26 +243,82 @@
               </div>
 
               <div class="col-lg-4 mb-3" id="schedule_of_fees" >
-              <div class="col text-center"><h2>Schedule of Fees</h2></div>
-              @if($change_meter_request->changeMeterRequestTransaction)
-                <span class="text-center fw-bold text-warning fs-3">OR: {{ $change_meter_request->changeMeterRequestTransaction->or_no }}</span>
-                
-                <ol class="list-group list-group-numbered">
-                  @if(isset($change_meter_request->cmr_fees) && $change_meter_request->cmr_fees->isNotEmpty())
-                      @foreach($change_meter_request->cmr_fees as $cm_fees)
-                          <li class="list-group-item bg-secondary text-white text-capitalize fw-bold">
-                              {{ str_replace('_', ' ', $cm_fees->fees) }} - ₱{{ number_format($cm_fees->amount, 2, '.', '') }}
-                          </li>
-                      @endforeach
-                  @else
-                      <!-- <li class="list-group-item bg-secondary text-white text-capitalize fw-bold">No fees available</li> -->
-                  @endif
-                </ol>
+                <div class="col text-center"><h2>Schedule of Fees</h2></div>
+                @if($change_meter_request->changeMeterRequestTransaction)
+                  <span class="text-center fw-bold text-warning fs-3">OR: {{ $change_meter_request->changeMeterRequestTransaction->or_no }}</span>
+                  
+                  <ol class="list-group list-group-numbered">
+                    @if(isset($change_meter_request->cmr_fees) && $change_meter_request->cmr_fees->isNotEmpty())
+                        @foreach($change_meter_request->cmr_fees as $cm_fees)
+                            <li class="list-group-item bg-secondary text-white text-capitalize fw-bold">
+                                {{ str_replace('_', ' ', $cm_fees->fees) }} - ₱{{ number_format($cm_fees->amount, 2, '.', '') }}
+                            </li>
+                        @endforeach
+                    @else
+                        <!-- <li class="list-group-item bg-secondary text-white text-capitalize fw-bold">No fees available</li> -->
+                    @endif
+                  </ol>
 
-              @else
-                @include('service_connect_order.schedule_of_fees')
-              @endif
+                @else
+                  @include('service_connect_order.schedule_of_fees')
+                @endif
               </div>
+
+              {{-- <div class="col-lg-8">
+                <code class="fs-4">Liquidation Details</code>
+                <hr>
+                  <div class="row">
+                    <div class="col-lg-4">
+                      <div class="mb-2">
+                        <label for="kwh_meter_request_control_no" class="form-label mb-1">kWh Meter Request</label>
+                          <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no">
+                            <option value="">Select kWh Meter Request</option>
+                            @foreach ($kwh_meter_requests as $key => $control_no)          
+                              <option value="{{ $key }}" {{ old('kwh_meter_request_control_no') == $control_no ? 'selected' : ''}}>
+                              {{ $control_no }}
+                              </option>
+                            @endforeach 
+                          </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-3">
+                      <div class="mb-2">
+                        <label for="liquidation_requested_by" class="form-label mb-1">Requested By</label>
+                        <input type="text" id="liquidation_requested_by" name="liquidation_requested_by" class="form-control" readonly>
+                      </div>
+                    </div>
+                    <div class="col-lg-5">
+                      <div class="mb-2">
+                        <label for="liquidation_meter_type" class="form-label mb-1">Meter Type</label>
+                        <input type="text" id="liquidation_meter_type" name="liquidation_meter_type" class="form-control" readonly>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-lg-4">
+                      <div class="mb-2">
+                        <label for="meter_serial_number" class="form-label mb-1">Serial Number</label>
+                          <select id="meter_serial_number" class="form-control" name="meter_serial_number">
+                            <option value="">Select Serial Number</option>
+                          </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-4">
+                      <div class="mb-2">
+                        <label for="liquidation_erc_seal" class="form-label mb-1">ERC Seal</label>
+                        <input type="text" id="liquidation_erc_seal" name="liquidation_erc_seal" class="form-control" readonly>
+                      </div>
+                    </div>
+                    <div class="col-lg-4">
+                      <div class="mb-2">
+                        <label for="liquidation_leyeco_seal" class="form-label mb-1">Leyeco 5 Seal</label>
+                        <input type="text" id="liquidation_leyeco_seal" name="liquidation_leyeco_seal" class="form-control" readonly>
+                      </div>
+                    </div>
+                    <input type="hidden" id="liquidation_meter_serial_number" name="liquidation_meter_serial_number" class="form-control" readonly>
+                </div>
+              </div> --}}
 
               <div class="col-xs-12 col-sm-12 col-md-12 text-end">
                   <a class="btn btn-sm btn-primary" href="{{ route('indexCM') }}"><i class="fa fa-arrow-left me-2"></i>Back </a>
@@ -369,6 +425,110 @@
               });
           }
       });
+  });
+
+  // HANDLE THE LIQUIDATION PORTION
+  $(document).ready(function() {
+      // Handle kWh meter request selection change
+      $('#kwh_meter_request_control_no').on('change', function() {
+          const controlNo = $(this).val();
+          
+          // Clear dependent fields
+          $('#liquidation_requested_by').val('');
+          $('#liquidation_meter_type').val('');
+          $('#meter_serial_number').html('<option value="">Select Serial Number</option>');
+          $('#liquidation_erc_seal').val('');
+          $('#liquidation_leyeco_seal').val('');
+          $('#liquidation_meter_serial_number').val('');
+          
+          if (controlNo) {
+              // Fetch kWh meter request details
+              $.ajax({
+                  url: '{{ route("kwhMeterRequestDetails") }}',
+                  type: 'GET',
+                  data: { control_no: controlNo },
+                  success: function(response) {
+                      if (response.success) {
+                          $('#liquidation_requested_by').val(response.data.requested_by);
+                          $('#liquidation_meter_type').val(response.data.meter_type);
+                          
+                          // Load available serial numbers
+                          loadSerialNumbers(controlNo);
+                      } else {
+                          alert('Error: ' + response.message);
+                      }
+                  },
+                  error: function(xhr, status, error) {
+                      console.error('Error fetching kWh meter request details:', error);
+                      alert('Error loading kWh meter request details. Please try again.');
+                  }
+              });
+          }
+      });
+      
+      // Handle serial number selection change
+      $('#meter_serial_number').on('change', function() {
+          const meterId = $(this).val();
+          
+          // Clear seal fields
+          $('#liquidation_erc_seal').val('');
+          $('#liquidation_leyeco_seal').val('');
+          $('#liquidation_meter_serial_number').val('');
+          
+          if (meterId) {
+              // Fetch meter seal details
+              $.ajax({
+                  url: '{{ route("meterSealDetails") }}',
+                  type: 'GET',
+                  data: { meter_id: meterId },
+                  success: function(response) {
+                      if (response.success) {
+                          $('#liquidation_erc_seal').val(response.data.erc_seal || '');
+                          $('#liquidation_leyeco_seal').val(response.data.leyeco_seal || '');
+                          $('#liquidation_meter_serial_number').val(response.data.serial_number || '');
+                      } else {
+                          alert('Error: ' + response.message);
+                      }
+                  },
+                  error: function(xhr, status, error) {
+                      console.error('Error fetching meter seal details:', error);
+                      alert('Error loading meter seal details. Please try again.');
+                  }
+              });
+          }
+      });
+      
+      // Function to load serial numbers for selected kWh meter request
+      function loadSerialNumbers(controlNo) {
+          $('#meter_serial_number').html('<option value="">Loading serial numbers...</option>');
+          
+          $.ajax({
+              url: '{{ route("kwhMeterSerialNumbers") }}',
+              type: 'GET',
+              data: { 
+                  control_no: controlNo, 
+                  change_meter_request_id: '{{ $change_meter_request->id }}'
+              },
+              success: function(response) {
+                  let options = '<option value="">Select Serial Number</option>';
+                  
+                  if (response.success && response.data.length > 0) {
+                      response.data.forEach(function(meter) {
+                          options += `<option value="${meter.id}">${meter.serial_number}</option>`;
+                      });
+                  } else {
+                      options = '<option value="">No available serial numbers</option>';
+                  }
+                  
+                  $('#meter_serial_number').html(options);
+              },
+              error: function(xhr, status, error) {
+                  console.error('Error fetching serial numbers:', error);
+                  $('#meter_serial_number').html('<option value="">Error loading serial numbers</option>');
+                  alert('Error loading serial numbers. Please try again.');
+              }
+          });
+      }
   });
 </script>
 @endsection

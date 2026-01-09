@@ -76,15 +76,13 @@
                   </div>
                   <div class="col-lg-1">
                     <div class="mb-2">
-                        <label for="area" class="form-label mb-1">Area *</label>
-                        <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
-                          <option value=""></option>
-                          <option value="1" {{ old('area') == "A1" ? 'selected' : ''}} >A1</option>
-                          <option value="2" {{ old('area') == "A2" ? 'selected' : ''}} >A2</option>
-                          <option value="3" {{ old('area') == "A3" ? 'selected' : ''}} >A3</option>
-                          <option value="4" {{ old('area') == "A4" ? 'selected' : ''}} >A4</option>
-                          <option value="5" {{ old('area') == "A5" ? 'selected' : ''}} >A5</option>
-                        </select>
+                      <label for="area" class="form-label mb-1">Area *</label>
+                      <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
+                        <option value=""></option>
+                        @foreach (Config::get('constants.coverage_areas') as $area)          
+                          <option value="{{ $area['id'] }}" id="">{{ $area['name'] }}</option>
+                        @endforeach
+                      </select>
                     </div>
                   </div>
                   <div class="col-lg-3">
@@ -153,7 +151,7 @@
                             <option value="{{ $type_of_meter->meter_code }}" id="" {{ old('meter_code_no') == $type_of_meter->meter_code ? 'selected' : ''}}>
                               <div class="row">
                                 <div class="form-group">
-                                  <label class="col-xs-6">{{ $type_of_meter->meter_code  }} <span class="fw-bold">|</span></label>
+                                  <label class="col-xs-6">{{ $type_of_meter->meter_code  }} <span class="fw-bold"> - </span></label>
                                   <label class="col-xs-6">{{ $type_of_meter->meter_description  }}</label>
                                 </div>
                               </div> 
@@ -200,10 +198,10 @@
                 <code class="fs-4">Liquidation Details</code>
                 <hr>
                   <div class="row">
-                    <div class="col-lg-3">
+                    <div class="col-lg-4">
                       <div class="mb-2">
                         <label for="kwh_meter_request_control_no" class="form-label mb-1">kWh Meter Request</label>
-                          <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no" required>
+                          <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no">
                             <option value="">Select kWh Meter Request</option>
                             @foreach ($kwh_meter_requests as $key => $control_no)          
                               <option value="{{ $key }}" {{ old('kwh_meter_request_control_no') == $control_no ? 'selected' : ''}}>
@@ -219,7 +217,7 @@
                         <input type="text" id="liquidation_requested_by" name="liquidation_requested_by" class="form-control" readonly>
                       </div>
                     </div>
-                    <div class="col-lg-6">
+                    <div class="col-lg-5">
                       <div class="mb-2">
                         <label for="liquidation_meter_type" class="form-label mb-1">Meter Type</label>
                         <input type="text" id="liquidation_meter_type" name="liquidation_meter_type" class="form-control" readonly>
@@ -231,7 +229,7 @@
                     <div class="col-lg-4">
                       <div class="mb-2">
                         <label for="meter_serial_number" class="form-label mb-1">Serial Number</label>
-                          <select id="meter_serial_number" class="form-control" name="meter_serial_number" required>
+                          <select id="meter_serial_number" class="form-control" name="meter_serial_number">
                             <option value="">Select Serial Number</option>
                           </select>
                       </div>

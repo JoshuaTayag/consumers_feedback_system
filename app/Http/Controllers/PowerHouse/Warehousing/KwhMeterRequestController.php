@@ -4,22 +4,33 @@ namespace App\Http\Controllers\PowerHouse\Warehousing;
 
 use App\Http\Controllers\Controller;
 use App\Models\KwhMeterRequest;
+use App\Models\KwhMeterRequestSerialNumber;
 use App\Models\Pending;
 use App\Models\User;
 use App\Models\DataManagement\MeterType;
+use App\Services\PendingTransactionService;
 use DB;
 use Illuminate\Http\Request;
 use App\Helpers\Helper;
+use PDF;
 
 class KwhMeterRequestController extends Controller
 {
+    protected $pendingTransactionService;
+
+    public function __construct(PendingTransactionService $pendingTransactionService)
+    {
+        $this->pendingTransactionService = $pendingTransactionService;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $kwh_meter_requests = KwhMeterRequest::orderBy('id', 'DESC')->paginate(15);
-        return view('power_house.warehousing.kwh_meter_request.index', compact('kwh_meter_requests'));
+        $users = User::all(); // Fetch all users for liquidation modal
+        return view('power_house.warehousing.kwh_meter_request.index', compact('kwh_meter_requests', 'users'));
     }
 
     /**
@@ -72,16 +83,11 @@ class KwhMeterRequestController extends Controller
             ]);
 
             //insert in to pending table
-            Pending::create([
-                'transaction' => 'KWH Meter Request',
-                'table_name' => 'kwh_meter_requests',
-                'url' => route('kwh-meter-request.show',$kwhMeterRequest->id),
-                'table_id' => $kwhMeterRequest->id,
-                'sender_user_id' => $validatedData['user_id'],
-                'recipient_user_id' => $validatedData['approved_by'],
-                'approval_step' => 1,
-                'status' => 0,
-            ]);
+            $this->pendingTransactionService->createKwhMeterRequestPending(
+                $kwhMeterRequest->id,
+                $validatedData['user_id'],
+                $validatedData['approved_by']
+            );
 
             DB::commit();
         } catch (\Exception $e) {
@@ -101,7 +107,15 @@ class KwhMeterRequestController extends Controller
         $kwh_meter_request = KwhMeterRequest::with('kwhMeterRequestSerialNumbers')->findOrFail($id);
         $users = User::role(['TSD', 'TSD Manager'])->pluck('name', 'id');
         $meters_types = MeterType::get();
-        return view('power_house.warehousing.kwh_meter_request.show', compact('kwh_meter_request', 'users', 'meters_types'));
+        
+        // Get audit trail from pending table
+        $audit_trail = Pending::where('table_name', 'kwh_meter_requests')
+            ->where('table_id', $id)
+            ->with(['senderUser', 'recipientUser'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+            
+        return view('power_house.warehousing.kwh_meter_request.show', compact('kwh_meter_request', 'users', 'meters_types', 'audit_trail'));
     }
 
     /**
@@ -143,13 +157,11 @@ class KwhMeterRequestController extends Controller
 
             $kwh_meter_request = KwhMeterRequest::findOrFail($id);
 
-            Pending::where('table_name', 'kwh_meter_requests')
-                ->where('table_id', $kwh_meter_request->id)
-                ->update([
-                    'url' => route('kwh-meter-request.show',$id),
-                    'sender_user_id' => $validatedData['user_id'],
-                    'recipient_user_id' => $validatedData['approved_by'],
-                ]);
+            $this->pendingTransactionService->updateKwhMeterRequestPending(
+                $kwh_meter_request->id,
+                $validatedData['user_id'],
+                $validatedData['approved_by']
+            );
 
             $kwh_meter_request->update([
                 'user_id' => $validatedData['user_id'],
@@ -190,17 +202,113 @@ class KwhMeterRequestController extends Controller
 
         DB::beginTransaction();
         try {
-            Pending::where('table_name', 'kwh_meter_requests')
-                ->where('table_id', $kwhMeterRequest->id)
-                ->delete();
+            $this->pendingTransactionService->deletePendingTransaction(
+                'kwh_meter_requests',
+                $kwhMeterRequest->id
+            );
             $kwhMeterRequest->delete();
             DB::commit();
             return redirect()->route('kwh-meter-request.index')->with('success', 'KWH Meter Request deleted successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('kwh-meter-request.index')->withErrors(['error' => 'Failed to delete KWH Meter Request.']);
+            return redirect()->route('kwh-meter-request.index')->withErrors(provider: ['error' => 'Failed to delete KWH Meter Request.']);
         }
        
+    }
+
+    public function generateKwhMeterReport(){
+        $requesitioners = User::role(['TSD', 'TSD Manager'])->get();
+        return view('power_house.warehousing.kwh_meter_request.report')->with(compact('requesitioners'));
+    }
+
+    public function KwhMeterPdfReport(Request $request)
+    {
+        $datas = KwhMeterRequestSerialNumber::with('kwhMeterRequest', 'meter')
+        ->whereHas('kwhMeterRequest', function($query) use ($request) {
+            $query->where('user_id', $request->input('requesitioner'));
+            $query->where('created_at', '>=', $request->input('date_from'));
+            $query->where('created_at', '<=', $request->input('date_to'));
+        })
+        ->orderBy('id', 'DESC')
+        ->get();
+        $requesitioner = User::find($request->input('requesitioner'));
+        $pdf = PDF::loadView('power_house.warehousing.kwh_meter_request.pdf_report', compact('datas', 'requesitioner'));
+        $pdf->setPaper('legal', 'landscape');
+        return $pdf->stream();;
+    }
+
+    /**
+     * Handle liquidation of KWH Meter Request
+     */
+    public function liquidate(Request $request, string $id)
+    {
+        $validatedData = $request->validate([
+            'checked_by' => 'required|exists:users,id',
+            'approved_by_liquidation' => 'required|exists:users,id',
+            'liquidation_remarks' => 'nullable|string|max:500',
+        ]);
+
+        $kwhMeterRequest = KwhMeterRequest::findOrFail($id);
+        $pendingTransaction = Pending::where('table_name', 'kwh_meter_requests')
+                ->where('table_id', $kwhMeterRequest->id)
+                ->where('status', 0) // pending status
+                ->first();
+
+        // Check if the request can be liquidated
+        if ($kwhMeterRequest->is_liquidated) {
+            return redirect()->route('kwh-meter-request.index')
+                ->withErrors(['error' => 'This request has already been liquidated.']);
+        }
+
+        if (!$kwhMeterRequest->approved_at) {
+            return redirect()->route('kwh-meter-request.index')
+                ->withErrors(['error' => 'This request must be approved before liquidation.']);
+        }
+
+        if ($kwhMeterRequest->getLiquidationProgress()['progress_percentage'] < 100) {
+            return redirect()->route('kwh-meter-request.index')
+                ->withErrors(['error' => 'This request is not yet ready for liquidation. Please ensure all meters are assigned.']);
+        }
+
+        if ($pendingTransaction) {
+            return redirect()->route('kwh-meter-request.index')
+                ->withErrors(['error' => 'Liquidation is already pending approval for this request.']);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Update the KWH Meter Request as liquidated
+            $kwhMeterRequest->update([
+                // 'is_liquidated' => true,
+                'liquidated_at' => now(),
+                'checked_by' => $validatedData['checked_by'],
+                'approved_liquidation_by' => $validatedData['approved_by_liquidation'],
+                'liquidation_remarks' => $validatedData['liquidation_remarks'],
+            ]);
+
+            // Update the pending transaction status to approved/completed
+            $this->pendingTransactionService->createPendingTransaction(
+                [
+                    'transaction' => 'KWH Meter Request Liquidation',
+                    'table_name' => 'kwh_meter_requests',
+                    'url' => route('kwh-meter-request.show', $kwhMeterRequest->id),
+                    'table_id' => $kwhMeterRequest->id,
+                    'sender_user_id' => $kwhMeterRequest->user_id,
+                    'recipient_user_id' => $validatedData['checked_by'],
+                    'approval_step' => 1, // first step of liquidation approval
+                    'status' => 0,
+                ]
+            );
+
+            DB::commit();
+            return redirect()->route('kwh-meter-request.index')
+                ->with('success', 'KWH Meter Request has been successfully liquidated.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('kwh-meter-request.index')
+                ->withErrors(['error' => 'Failed to liquidate KWH Meter Request: ' . $e->getMessage()]);
+        }
     }
 
 

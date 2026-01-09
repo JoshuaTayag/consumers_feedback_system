@@ -25,8 +25,7 @@ class ChangeMeterApiController extends Controller
         $contractorId = auth()->user()->change_meter_contractor->id;
 
         // Fetch change meter requests for the given contractor
-        $changeMeterRequests = ChangeMeterRequest::select('id', 'control_no', 'contact_no', 'sitio', 'barangay_id', 'municipality_id','account_number', 'consumer_type', 'remarks', 'old_meter_no', 'new_meter_no', 'care_of', 'location', 'meter_or_number')
-            ->selectRaw("CONCAT(last_name, ', ', first_name, ' ', middle_name) as full_name")
+        $changeMeterRequests = ChangeMeterRequest::select('last_name','first_name','middle_name','id', 'control_no', 'contact_no', 'sitio', 'barangay_id', 'municipality_id','account_number', 'consumer_type', 'remarks', 'old_meter_no', 'new_meter_no', 'care_of', 'location', 'meter_or_number')
             ->with('municipality', 'barangay', 'assignedMeter.meterType')
             ->where('crew', $contractorId)
             ->where('status', '3') // Fetch only dispatched requests
@@ -263,26 +262,27 @@ class ChangeMeterApiController extends Controller
                 'sanctum_user' => auth('sanctum')->id()
             ]);
 
-            // Create posting history record
-            ChangeMeterRequestPostingHistory::create([
-                "sco_no" => $change_meter_request->control_no,
-                "old_meter_no" => $change_meter_request->old_meter_no,
-                "new_meter_no" => $change_meter_request->new_meter_no,
-                "process_date" => date('Y-m-d', strtotime($change_meter_request->created_at)),
-                "date_installed" => $request->date_acted ? date('Y-m-d H:i:s', strtotime($request->date_acted)) : null,
-                "action_status" => $change_meter_request->status,
-                "leyeco_seal_no" => $request->seal_no,
-                "serial_no" => null,
-                "area" => $change_meter_request->area,
-                "feeder" => $change_meter_request->feeder,
-                "erc_seal_no" => $request->erc_seal,
-                "posted_by" => auth()->id(),
-                "created_at" => \Carbon\Carbon::now(),
-                "account_no" => $change_meter_request->account_number,
-            ]);
-
             // Check if posting is installed (status = 2)
             if($change_meter_request->status == 2) {
+
+                // Create posting history record if the status is acted-completed (2)
+                ChangeMeterRequestPostingHistory::create([
+                    "sco_no" => $change_meter_request->control_no,
+                    "old_meter_no" => $change_meter_request->old_meter_no,
+                    "new_meter_no" => $change_meter_request->new_meter_no,
+                    "process_date" => date('Y-m-d', strtotime($change_meter_request->created_at)),
+                    "date_installed" => $request->date_acted ? date('Y-m-d H:i:s', strtotime($request->date_acted)) : null,
+                    "action_status" => $change_meter_request->status,
+                    "leyeco_seal_no" => $request->seal_no,
+                    "serial_no" => null,
+                    "area" => $change_meter_request->area,
+                    "feeder" => $change_meter_request->feeder,
+                    "erc_seal_no" => $request->erc_seal,
+                    "posted_by" => auth()->id(),
+                    "created_at" => \Carbon\Carbon::now(),
+                    "account_no" => $change_meter_request->account_number,
+                ]);
+
                 $existingRemarks = \DB::connection('sqlSrvBilling')
                     ->table('Consumers Table')
                     ->where('Accnt No', $change_meter_request->account_number)

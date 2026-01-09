@@ -289,6 +289,7 @@
                                     <option value="">All Meters</option>
                                     <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Available</option>
                                     <option value="assigned" {{ request('status') == 'assigned' ? 'selected' : '' }}>Assigned</option>
+                                    <option value="unavailable" {{ request('status') == 'unavailable' ? 'selected' : '' }}>Unavailable</option>
                                 </select>
                             </div>
                             <div class="col-lg-4 text-end">
@@ -332,7 +333,7 @@
                         <table class="table table-hover">
                             <thead class="table-dark">
                                 <tr>
-                                    <th><i class="fas fa-industry"></i> Brand</th>
+                                    <th><i class="fas fa-industry"></i> Meter Type</th>
                                     <th><i class="fas fa-info-circle"></i> Status</th>
                                     <th><i class="fas fa-barcode"></i> Serial No.</th>
                                     <th><i class="fas fa-seal"></i> L5 Seal</th>
@@ -350,14 +351,18 @@
                                 <tr class="meter-row" data-meter-id="{{ $meter->id }}">
                                     <td>
                                         @if($meter->status == 1)
-                                            <span class="badge bg-success" title="Assigned Meter">{{ $meter->meterType->meter_brand ?? 'N/A' }}</span>
+                                            <span class="badge bg-success" title="Assigned Meter">{{ $meter->meterType->meter_code ?? 'N/A' }}</span>
+                                        @elseif($meter->status == 2)
+                                            <span class="badge bg-danger" title="Unavailable Meter">{{ $meter->meterType->meter_code ?? 'N/A' }}</span>
                                         @else
-                                            <span class="badge bg-warning text-dark" title="Available Meter">{{ $meter->meterType->meter_brand ?? 'N/A' }}</span>
+                                            <span class="badge bg-warning text-dark" title="Available Meter">{{ $meter->meterType->meter_code ?? 'N/A' }}</span>
                                         @endif
                                     </td>
                                     <td>
                                         @if($meter->status == 1)
                                             <small class="text-success"><i class="fas fa-lock"></i> Assigned</small>
+                                        @elseif($meter->status == 2)
+                                            <small class="text-danger"><i class="fas fa-ban"></i> Unavailable</small>
                                         @else
                                             <small class="text-warning"><i class="fas fa-unlock"></i> Available</small>
                                         @endif
@@ -412,7 +417,7 @@
                                                 </button>
                                             @else
                                                 <button type="button" class="btn btn-outline-warning disabled" 
-                                                        title="Cannot edit assigned meter" disabled>
+                                                        title="Cannot edit {{ $meter->status == 1 ? 'assigned' : 'unavailable' }} meter" disabled>
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                             @endif
@@ -421,11 +426,16 @@
                                                         onclick="openAssignMeterModal({{ $meter->id }})" title="Assign Meter">
                                                     <i class="fas fa-link"></i>
                                                 </button>
-                                            @else
+                                            @elseif($meter->status == 1)
                                                 <button type="button" class="btn btn-outline-secondary" 
                                                         onclick="returnMeter({{ $meter->id }})" title="Return Meter">
                                                     <i class="fas fa-undo"></i>
                                                 </button>
+                                            @elseif($meter->status == 2)
+                                                {{-- <button type="button" class="btn btn-outline-info" 
+                                                        onclick="makeMeterAvailable({{ $meter->id }})" title="Make Available">
+                                                    <i class="fas fa-check"></i>
+                                                </button> --}}
                                             @endif
                                             <button type="button" class="btn btn-outline-info" 
                                                     onclick="viewAuditLogs({{ $meter->id }})" title="View Audit Logs">
@@ -440,7 +450,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="9" class="text-center py-4">
+                                    <td colspan="11" class="text-center py-4">
                                         <div class="text-muted">
                                             <i class="fas fa-inbox fa-3x mb-3"></i>
                                             <p>No meters found. Click "Add New Meter" to get started.</p>
@@ -884,10 +894,19 @@ window.handleTransactionTypeChange = function() {
 };
 
 window.fetchChangeMeterRequests = function() {
-    // Show loading state
-    $('#assign_control_no_select').html('<option value="">Loading change meter requests...</option>');
+    // Get the current meter ID for type filtering
+    const meterId = $('#assign_meter_id').val();
     
-    fetch('/meters/change-meter-requests', {
+    if (!meterId) {
+        $('#assign_control_no_select').html('<option value="">No meter selected</option>');
+        showAlert('No meter selected for assignment', 'error');
+        return;
+    }
+    
+    // Show loading state
+    $('#assign_control_no_select').html('<option value="">Loading compatible change meter requests...</option>');
+    
+    fetch(`/meters/change-meter-requests?meter_id=${meterId}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -910,8 +929,8 @@ window.fetchChangeMeterRequests = function() {
     })
     .catch(error => {
         console.error('Error fetching change meter requests:', error);
-        $('#assign_control_no_select').html('<option value="">Failed to load change meter requests</option>');
-        showAlert('Failed to load change meter requests: ' + error.message, 'error');
+        $('#assign_control_no_select').html('<option value="">Failed to load compatible change meter requests</option>');
+        showAlert('Failed to load compatible change meter requests: ' + error.message, 'error');
     });
 };
 
@@ -923,7 +942,7 @@ window.populateControlNumberDropdown = function(requests) {
             options += `<option value="${request.control_no}" data-account="${request.account_number || ''}">${request.display_text}</option>`;
         });
     } else {
-        options = '<option value="">No pending change meter requests available</option>';
+        options = '<option value="">No compatible change meter requests available</option>';
     }
     
     $('#assign_control_no_select').html(options);
@@ -1178,11 +1197,20 @@ window.editMeter = function(meterId) {
         if (response.success) {
             const meter = response.data;
             
-            // Check if meter is assigned
+            // Check if meter is assigned or unavailable
             if (meter.status == 1) {
                 Swal.fire({
                     title: 'Cannot Edit Assigned Meter',
                     text: 'This meter is currently assigned to a transaction. Please return the meter first to make changes.',
+                    icon: 'warning',
+                    confirmButtonColor: '#6c757d',
+                    confirmButtonText: 'Understood'
+                });
+                return;
+            } else if (meter.status == 2) {
+                Swal.fire({
+                    title: 'Cannot Edit Unavailable Meter',
+                    text: 'This meter is currently unavailable. Please make it available first to edit.',
                     icon: 'warning',
                     confirmButtonColor: '#6c757d',
                     confirmButtonText: 'Understood'
@@ -1310,6 +1338,61 @@ window.deleteMeter = function(meterId) {
             console.error('Error deleting meter:', error);
             showAlert('Failed to delete meter: ' + error.message, 'error');
         });
+        }
+    });
+};
+
+window.makeMeterAvailable = function(meterId) {
+    Swal.fire({
+        title: 'Make Meter Available',
+        text: 'Are you sure you want to make this meter available? This will change its status from unavailable to available.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#dc3545',
+        confirmButtonText: 'Yes, make it available!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/meters/${meterId}/make-available`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({
+                    '_method': 'PUT'
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Failed to make meter available');
+                    });
+                }
+                return response.json();
+            })
+            .then(response => {
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.message || 'Meter is now available!',
+                    icon: 'success',
+                    confirmButtonColor: '#28a745'
+                }).then(() => {
+                    // Reload the page to reflect changes
+                    window.location.reload();
+                });
+            })
+            .catch(error => {
+                console.error('Error making meter available:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message || 'Failed to make meter available. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545'
+                });
+            });
         }
     });
 };

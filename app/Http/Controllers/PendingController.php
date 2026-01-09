@@ -5,9 +5,17 @@ use App\Models\Pending;
 use App\Models\KwhMeterRequest;
 use DB;
 use Illuminate\Http\Request;
+use App\Services\PendingTransactionService;
 
 class PendingController extends Controller
 {
+    protected $pendingTransactionService;
+
+    public function __construct(PendingTransactionService $pendingTransactionService)
+    {
+        $this->pendingTransactionService = $pendingTransactionService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -63,10 +71,11 @@ class PendingController extends Controller
 
     public function approve(Request $request)
     {
+        
         try {
             DB::beginTransaction();
             $pending = Pending::find($request->input('pending_id'));
-            
+
             if (!$pending) {
                 if ($request->expectsJson()) {
                     return response()->json([
@@ -91,12 +100,57 @@ class PendingController extends Controller
             $pending->save();
             
             // update the transaction status
-            if ($pending->table_name === 'kwh_meter_requests') {
+            if ($pending->table_name === 'kwh_meter_requests' && $pending->transaction === 'KWH Meter Request') {
                 $kwhMeterRequest = KwhMeterRequest::find($pending->table_id);
                 if ($kwhMeterRequest) {
                     $kwhMeterRequest->approved_at = now();
                     $kwhMeterRequest->save();
                 }
+            } else if ($pending->table_name === 'kwh_meter_requests' && $pending->transaction === 'KWH Meter Request Liquidation') {
+                
+
+                // check the approval step
+                if ($pending->approval_step == 1) {
+                    // find the related KWH Meter Request
+                    $kwhMeterRequest = KwhMeterRequest::find($pending->table_id);
+
+                    // add checked_by date and time for liquidation
+                    if ($kwhMeterRequest) {
+                        $kwhMeterRequest->checked_by = auth()->id();
+                        $kwhMeterRequest->checked_at = now();
+                        $kwhMeterRequest->save();
+                    }
+
+                    // add next approval step
+                    //insert in to pending table
+                    $this->pendingTransactionService->createPendingTransaction(
+                        [
+                            'transaction' => 'KWH Meter Request Liquidation',
+                            'table_name' => 'kwh_meter_requests',
+                            'url' => route('kwh-meter-request.show', $kwhMeterRequest->id),
+                            'table_id' => $kwhMeterRequest->id,
+                            'sender_user_id' => auth()->id(),
+                            'recipient_user_id' => $kwhMeterRequest->approved_liquidation_by, // send to approver
+                            'approval_step' => 2,
+                            'status' => 0,
+                        ]
+                    );
+                    
+                }
+                if ($pending->approval_step == 2) {
+                    // find the related KWH Meter Request
+                    $kwhMeterRequest = KwhMeterRequest::find($pending->table_id);
+
+                    // add approved_liquidation_by date and time for liquidation
+                    if ($kwhMeterRequest) {
+                        $kwhMeterRequest->approved_liquidation_by = auth()->id();
+                        $kwhMeterRequest->approved_liquidation_at = now();
+                        $kwhMeterRequest->is_liquidated = true;
+                        $kwhMeterRequest->save();
+                    }
+                    
+                }
+
             }
             DB::commit();
             if ($request->expectsJson()) {
@@ -147,7 +201,15 @@ class PendingController extends Controller
             
             $pending->status = 2; // 2 = disapproved
             $pending->save();
-            
+
+            // update the transaction status
+            if ($pending->table_name === 'kwh_meter_requests') {
+                $kwhMeterRequest = KwhMeterRequest::find($pending->table_id);
+                if ($kwhMeterRequest) {
+                    $kwhMeterRequest->disapproved_at = now();
+                    $kwhMeterRequest->save();
+                }
+            }
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,

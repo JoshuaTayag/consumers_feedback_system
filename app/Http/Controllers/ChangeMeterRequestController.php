@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DataManagement\MeterType;
 use App\Models\KwhMeterRequest;
 use App\Models\KwhMeterRequestSerialNumber;
 use App\Models\Meter;
@@ -72,13 +73,31 @@ class ChangeMeterRequestController extends Controller
         ->orderBy('occupancy_name', 'asc')
         ->get();
 
-        $type_of_meters = DB::connection('sqlSrvHousewiring')
-        ->table('khw_meter_types')
-        ->select('*')
-        ->orderBy('meter_code', 'asc')
-        ->get();
+        $type_of_meters = MeterType::orderBy('meter_code', 'asc')->get();
 
-        $kwh_meter_requests = KwhMeterRequest::orderBy('id', 'DESC')->where('approved_at', '!=', null)->pluck('control_no', 'id');
+        // fetch all meter requests with approved_at and have available serials
+        $kwh_meter_requests = KwhMeterRequest::select('id', 'control_no', 'quantity')
+        ->orderBy('id', 'DESC')
+        ->where('approved_at', '!=', null)
+        ->with(['kwhMeterRequestSerialNumbers' => function($query) {
+            $query->where('status', 0)
+                ->whereNull('change_meter_request_id')
+                ->whereNull('deleted_at');
+        }])
+        ->get()
+        ->filter(function($request) {
+            // Only include requests that have available serials
+            return $request->kwhMeterRequestSerialNumbers->count() > 0;
+        })
+        ->mapWithKeys(function($request) {
+            $availableCount = $request->kwhMeterRequestSerialNumbers->count();
+            $totalQuantity = $request->quantity;
+            
+            // Format: "Control No - (Available: X/Total: Y)"
+            $displayText = $request->control_no . ' - (Available: ' . $availableCount . '/' . $totalQuantity . ')';
+            
+            return [$request->id => $displayText];
+        });
         
         // dd($kwh_meter_requests);
         return view('service_connect_order.change_meter.create')->with(compact( 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters', 'kwh_meter_requests'));
@@ -117,8 +136,8 @@ class ChangeMeterRequestController extends Controller
                 'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo'],
                 
                 // Liquidation fields validation
-                'kwh_meter_request_control_no' => ['required', 'string'],
-                'meter_serial_number' => ['required', 'integer'],
+                'kwh_meter_request_control_no' => ['nullable', 'string'],
+                'meter_serial_number' => ['required_with:kwh_meter_request_control_no'],
             ]);
 
             $year = date("y");
@@ -283,13 +302,36 @@ class ChangeMeterRequestController extends Controller
             ->orderBy('occupancy_name', 'asc')
             ->get();
 
-            $type_of_meters = DB::connection('sqlSrvHousewiring')
-            ->table('khw_meter_types')
-            ->select('*')
-            ->orderBy('meter_code', 'asc')
-            ->get();
+            // fetch all meter requests with approved_at and have available serials
+            $kwh_meter_requests = KwhMeterRequest::select('id', 'control_no', 'quantity')
+            ->orderBy('id', 'DESC')
+            ->where('approved_at', '!=', null)
+            ->with(['kwhMeterRequestSerialNumbers' => function($query) use ($id) {
+                $query->where('status', 0)
+                    ->where(function($subQuery) use ($id) {
+                        $subQuery->whereNull('change_meter_request_id')
+                                ->orWhere('change_meter_request_id', $id);
+                    })
+                    ->whereNull('deleted_at');
+            }])
+            ->get()
+            ->filter(function($request) {
+                // Only include requests that have available serials
+                return $request->kwhMeterRequestSerialNumbers->count() > 0;
+            })
+            ->mapWithKeys(function($request) {
+                $availableCount = $request->kwhMeterRequestSerialNumbers->count();
+                $totalQuantity = $request->quantity;
+                
+                // Format: "Control No - (Available: X/Total: Y)"
+                $displayText = $request->control_no . ' - (Available: ' . $availableCount . '/' . $totalQuantity . ')';
+                
+                return [$request->id => $displayText];
+            });
+
+            $type_of_meters = MeterType::orderBy('meter_code', 'asc')->get();
             
-            return view('service_connect_order.change_meter.edit')->with(compact('change_meter_request', 'barangays', 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters'));
+            return view('service_connect_order.change_meter.edit')->with(compact('change_meter_request', 'barangays', 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters', 'kwh_meter_requests'));
         }
     }
 
@@ -598,13 +640,22 @@ class ChangeMeterRequestController extends Controller
 
                 $newRemarks = substr($existingRemarks . $completeRemarks, 0);
 
+                // update Consumers Table serial no and remarks
                 DB::connection('sqlSrvBilling')
                 ->table('Consumers Table')
                 ->where('Accnt No', $change_meter_request->account_number)
                 ->update([
                     'Serial No' => $change_meter_request->new_meter_no,
-                    'Remarks' => $newRemarks,
+                    // 'Remarks' => $newRemarks,
                 ]);
+
+                // update meter status to unavailable if the old meter is posted and existing
+                $oldMeter = Meter::where('serial_number', $change_meter_request->old_meter_no)->first();
+                if ($oldMeter) {
+                    $oldMeter->update([
+                        'status' => 2, // unavailable
+                    ]);
+                }
 
             }
 
@@ -614,6 +665,9 @@ class ChangeMeterRequestController extends Controller
                 $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
                     ->where('change_meter_request_id', $change_meter_request->id)
                     ->update(['status' => 1]); // Assuming '1' indicates 'posted'
+
+                // Check and update liquidation status
+                // $change_meter_request->kwhMeterRequest->checkAndUpdateLiquidationStatus();
             }
             
 
@@ -770,9 +824,25 @@ class ChangeMeterRequestController extends Controller
 
         // Execute the query and get the results
         $change_meter_requests = $query->get();
+        
+        // Get all request IDs
+        $requestIds = $change_meter_requests->pluck('id')->toArray();
+        
+        // Get all signatures at once (this depends on your SignatureService implementation)
+        $allSignatures = [];
+        if (!empty($requestIds)) {
+            // You might need to modify your SignatureService to support batch retrieval
+            foreach ($requestIds as $requestId) {
+                $signatureResponse = $this->signatureService->getSignatures($requestId);
+                if ($signatureResponse['success']) {
+                    $allSignatures[$requestId] = collect($signatureResponse['data']);
+                }
+            }
+        }
 
         view()->share('datas', $change_meter_requests);
-        $pdf = PDF::loadView('service_connect_order.change_meter.pdf_reports')->setPaper('a4', 'landscape');
+        view()->share('signatures', $allSignatures);
+        $pdf = PDF::loadView('service_connect_order.change_meter.pdf_reports')->setPaper('legal', 'landscape');
         return $pdf->stream();
     }
 
@@ -1007,7 +1077,7 @@ class ChangeMeterRequestController extends Controller
                 'success' => true,
                 'data' => [
                     'requested_by' => $kwhMeterRequest->user->name,
-                    'meter_type' => $kwhMeterRequest->meterType ? $kwhMeterRequest->meterType->meter_type : 'N/A',
+                    'meter_type' => $kwhMeterRequest->meterType ? $kwhMeterRequest->meterType->meter_brand.' - '.$kwhMeterRequest->meterType->meter_code : 'N/A',
                     'quantity' => $kwhMeterRequest->quantity,
                     'remaining' => $kwhMeterRequest->remaining_quantity
                 ]
@@ -1026,8 +1096,10 @@ class ChangeMeterRequestController extends Controller
      */
     public function getKwhMeterSerialNumbers(Request $request)
     {
+        
         try {
             $controlNo = $request->get('control_no');
+            $changeMeterRequestId = $request->get('change_meter_request_id'); // Get the change meter request ID if editing
             
             $kwhMeterRequest = KwhMeterRequest::where('id', $controlNo)->first();
             
@@ -1043,7 +1115,12 @@ class ChangeMeterRequestController extends Controller
                 ->where('kwh_meter_request_serial_numbers.kwh_meter_request_id', $kwhMeterRequest->id)
                 ->where('kwh_meter_request_serial_numbers.status', 0) // Unliquidated
                 ->whereNull('kwh_meter_request_serial_numbers.deleted_at')
-                ->whereNull('kwh_meter_request_serial_numbers.change_meter_request_id') // Not yet liquidated
+                ->where(function($query) use ($changeMeterRequestId) {
+                    $query->whereNull('kwh_meter_request_serial_numbers.change_meter_request_id');
+                    if ($changeMeterRequestId) {
+                        $query->orWhere('kwh_meter_request_serial_numbers.change_meter_request_id', $changeMeterRequestId);
+                    }
+                })
                 ->select('meters.id', 'meters.serial_number', 'meters.erc_seal_number', 'meters.leyeco_seal_number')
                 ->get();
             

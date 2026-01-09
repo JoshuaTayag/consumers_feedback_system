@@ -134,7 +134,7 @@
                         <tr>
                           <th><i class="fas fa-hashtag"></i> No.</th>
                           <th><i class="fas fa-exchange-alt"></i> Transaction</th>
-                          <th><i class="fas fa-table"></i> Table</th>
+                          <th><i class="fas fa-barcode"></i> Control No.</th>
                           <th><i class="fas fa-flag"></i> Status</th>
                           <th><i class="fas fa-user"></i> Requested By</th>
                           <th><i class="fas fa-calendar"></i> Date</th>
@@ -150,7 +150,7 @@
                                 <span class="fw-bold">{{ $pending->transaction }}</span>
                             </td>
                             <td>
-                                <span class="badge bg-secondary">{{ $pending->table_name ?? 'N/A' }}</span>
+                                <span>{{ $pending->kwhMeterRequest->control_no ?? 'N/A' }}</span>
                             </td>
                             <td>
                                 @php
@@ -175,7 +175,7 @@
                                     <i class="{{ $statusIcon }}"></i>{{ $statusText }}
                                 </span>
                             </td>
-                            <td>{{ $pending->requested_by ?? 'N/A' }}</td>
+                            <td>{{ $pending->related_record->user->name ?? 'N/A' }}</td>
                             <td>
                                 <small class="text-muted">{{ $pending->created_at->format('M d, Y H:i') }}</small>
                             </td>
@@ -207,7 +207,7 @@
                           </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4">
+                                <td colspan="8" class="text-center py-4">
                                     <div class="text-muted">
                                         <i class="fas fa-inbox fa-3x mb-3"></i>
                                         <p>No pending transactions found.</p>

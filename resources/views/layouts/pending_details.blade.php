@@ -23,6 +23,10 @@
                                 <table class="table table-borderless">
                                     <tbody>
                                         <tr>
+                                            <td><strong>Control No.:</strong></td>
+                                            <td class="text-danger fw-bold">{{ $data->control_no ?? 'N/A' }}</td>
+                                        </tr>
+                                        <tr>
                                             <td><strong>Requested By:</strong></td>
                                             <td>{{ $data->user->name ?? 'N/A' }}</td>
                                         </tr>
@@ -98,9 +102,12 @@
                                         <thead class="table-dark">
                                             <tr>
                                                 <th>No.</th>
+                                                <th>Old Meter</th>
                                                 <th>Meter Serial No.</th>
                                                 <th>Leyeco Seal No.</th>
                                                 <th>ERC Seal No.</th>
+                                                <th>CM Control No.</th>
+                                                <th>Date Installed</th>
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
@@ -108,15 +115,14 @@
                                             @foreach($data->kwhMeterRequestSerialNumbers as $assignment)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
+                                                <td class="text-danger fw-bold">{{ $assignment->changeMeterRequest->old_meter_no ?? 'N/A' }}</td>
                                                 <td>{{ $assignment->meter->serial_number ?? 'N/A' }}</td>
                                                 <td>{{ $assignment->meter->leyeco_seal_number ?? 'N/A' }}</td>
                                                 <td>{{ $assignment->meter->erc_seal_number ?? 'N/A' }}</td>
+                                                <td>{{ $assignment->changeMeterRequest->control_no ?? 'N/A' }}</td>
+                                                <td>{{ $assignment->changeMeterRequest->date_time_acted ? $assignment->changeMeterRequest->date_time_acted->format('M d, Y') : 'N/A' }}</td>
                                                 <td>
-                                                    @if($assignment->status == 0)
-                                                        <span class="badge bg-warning text-dark">Unliquidated</span>
-                                                    @else
-                                                        <span class="badge bg-success">Liquidated</span>
-                                                    @endif
+                                                    <span class="badge {{ $assignment->status == 0 ? 'bg-warning' : 'bg-success' }}">{{ $assignment->status == 0 &&  !$assignment->change_meter_request_id ? 'Unassigned' : ($assignment->changeMeterRequest->status == 2 ? 'Installed' : 'Unacted') }}</span>
                                                 </td>
                                             </tr>
                                             @endforeach

@@ -166,13 +166,13 @@
     <h2 class="heading">LEYTE V ELECTRIC COOPERATIVE, INC.</h2>
     <p class="sub-heading">
       Brgy. San Pablo, Ormoc City, Leyte<br>
-      CUSTOMER WELFARE DESK (ISD)
+      TECHNICAL SERVICES DEPARTMENT (TSD)
     </p>
   </header>
   <hr class="blue">
   <hr class="yellow">
   <div class="div" style="margin-top: 10px;">
-    <h4 class="text-center">CHANGE METER REQUEST REPORT</h4>
+    <h4 class="text-center">KWH-METER LIQUIDATION REPORT (CHANGE METER)</h4>
     <h4 class="text-center">From: {{ date('m/d/Y', strtotime(request('date_from'))) }} to {{ date('m/d/Y', strtotime(request('date_to'))) }}</h4>
   </div>
   
@@ -187,106 +187,54 @@
     <table class="styled-table" style="font-size: 11px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
       <thead>
         <tr>
-          <th rowspan="2">No.</th>
-          <th rowspan="2">Control No.</th>
-          <th rowspan="2">Name</th>
-          <th rowspan="2">Address</th>
-          <th colspan="3">OLD KWH METER</th>
-          <th colspan="3">NEW KWH METER</th>
-          <th rowspan="2">Date Installed</th>
-          <th rowspan="2">Signature</th>
-        </tr>
-        <tr>
-          <th>Account #</th>
-          <th>Meter #</th>
-          <th>Last Reading</th>
-          <th>Meter #</th>
-          <th>ERC Seal</th>
-          <th>Leyeco 5 Seal</th>
+          <th>No.</th>
+          <th>CM Request Control No.</th>
+          <th>Name</th>
+          <th>Address</th>
+          <th>Date Installed</th>
+          <th style="background-color: rgb(255, 103, 103)">Old Meter</th>
+          <th>New Meter</th>
+          <th>L5 Seal No</th>
+          <th>ERC Seal No</th>
+          <th>Remarks</th>
         </tr>
       </thead>
       <tbody>
           @foreach($datas as $index => $data)
-          <tr>
+          <tr style="background-color: {{ $data->changeMeterRequest ? 'white' : 'rgb(250, 220, 150)' }}">
             <td>{{ $loop->iteration }}</td>
-            <td>{{$data->control_no}}</td>
-            <td>{{$data->last_name.', '.$data->first_name}}</td>
-            <td>{{$data->sitio.', '.$data->barangay->barangay_name.', '. $data->municipality->municipality_name}}</td>
-            <td>{{ substr($data->account_number, 0, 2) }}-{{ substr($data->account_number, 2, 4) }}-{{ substr($data->account_number, 6, 4) }}</td>
-            <td>{{$data->old_meter_no}}</td>
-            <td>{{$data->last_reading}}</td>
-            <td>{{$data->new_meter_no}}</td>
-            <td>{{$data->postedMeterHistory->erc_seal_no}}</td>
-            <td>{{$data->postedMeterHistory->leyeco_seal_no}}</td>
-            <td>{{$data->postedMeterHistory->date_installed}}</td>
-            <td class="signature-cell">
-              @if(isset($signatures[$data->id]) && $signatures[$data->id]->isNotEmpty())
-                @php
-                  // Find consumer signature first, or use the first available signature
-                  $displaySignature = null;
-                  foreach($signatures[$data->id] as $signature) {
-                    if(isset($signature['signature_type']) && $signature['signature_type'] === 'consumer' && !empty($signature['signature_data'])) {
-                      $displaySignature = $signature;
-                      break;
-                    }
-                  }
-                  // If no consumer signature, use first available
-                  if(!$displaySignature) {
-                    foreach($signatures[$data->id] as $signature) {
-                      if(!empty($signature['signature_data'])) {
-                        $displaySignature = $signature;
-                        break;
-                      }
-                    }
-                  }
-                @endphp
-                
-                @if($displaySignature && !empty($displaySignature['signature_data']))
-                  @php
-                    // Clean up the base64 data
-                    $signatureData = $displaySignature['signature_data'];
-                    // Remove data URI prefix if present
-                    if (strpos($signatureData, 'data:image/') === 0) {
-                      $signatureData = substr($signatureData, strpos($signatureData, ',') + 1);
-                    }
-                    // Clean any whitespace
-                    $signatureData = str_replace([' ', '\n', '\r'], '', $signatureData);
-                  @endphp
-                  
-                  <img src="data:image/png;base64,{{ $signatureData }}" 
-                      alt="Signature" 
-                      class="signature-image"
-                      style="max-height: 40px; max-width: 50px; display: block; margin: 0 auto;">
-                @else
-                  <small>No Signature</small>
-                @endif
-              @else
-                <small>No Signature</small>
-              @endif
-            </td>
+            <td>{{ $data->changeMeterRequest ? $data->changeMeterRequest->control_no : $data->kwhMeterRequest->control_no }}</td>
+            <td>{{ $data->changeMeterRequest ? $data->changeMeterRequest->full_name : 'N/A' }}</td>
+            <td>{{ $data->changeMeterRequest ? $data->changeMeterRequest->address : 'N/A' }}</td>
+            <td>{{ $data->changeMeterRequest && $data->changeMeterRequest->date_time_acted ? date('m/d/Y', strtotime($data->changeMeterRequest->date_time_acted)) : 'N/A' }}</td>
+            <td>{{ $data->changeMeterRequest ? $data->changeMeterRequest->old_meter_no : 'N/A' }}</td>
+            <td>{{ $data->meter->serial_number }}</td>
+            <td>{{ $data->meter->leyeco_seal_number }}</td>
+            <td>{{ $data->meter->erc_seal_number }}</td>
+            <td>{{ $data->changeMeterRequest ? ($data->changeMeterRequest->status == 2 ? 'INSTALLED' : 'UNINSTALLED') : 'N/A' }}</td>
           </tr>
           @endforeach
       </tbody>
     </table>
   </div>
 
-  <div class="text-align" style="margin-top: 0px; padding-top: 50px;">
-    <table class="signature-table" style="font-size: 11px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
+  <div class="text-align" style="margin-top: 0px; padding-top: 80px;">
+    <table class="signature-table" style="font-size: 13px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
       <tbody>
         <tr>
+          <th class="signature-header">Prepared By:</th>
           <th class="signature-header">Checked By:</th>
-          <th class="signature-header">Noted By:</th>
           <th class="signature-header">Approved By:</th>
         </tr>
         <tr>
-          <th class="signature-name">NIÑO REY C. PONIENTE / ELMA G. MAÑACAP</th>
-          <th class="signature-name">GHANDA R. BERNANDINO, DPA</th>
-          <th class="signature-name">ANA MARIA LOURDES M. PASTOR, MBM</th>
+          <th class="signature-name">{{ $requesitioner->employee ? $requesitioner->employee->full_name : 'Please complete employee details' }}</th>
+          <th class="signature-name">Genevieve J. Salgarino</th>
+          <th class="signature-name">Engr. Ricardo R. Lequin, REE, RME</th>
         </tr>
         <tr>
-          <th class="signature-position">CWD Analyst</th>
-          <th class="signature-position">MSD Chief</th>
-          <th class="signature-position">ISD Manager</th>
+          <th class="signature-position">{{ $requesitioner->employee ? $requesitioner->employee->position : 'Please complete employee details' }}</th>
+          <th class="signature-position">MMS Head</th>
+          <th class="signature-position">TSD Manager</th>
         </tr>
       </tbody>
     </table>
