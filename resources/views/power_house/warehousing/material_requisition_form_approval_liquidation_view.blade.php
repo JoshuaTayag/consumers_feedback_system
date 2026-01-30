@@ -360,8 +360,8 @@
             <div class="col">
               <div id="carouselBefore" class="carousel slide carousel-fade" data-bs-ride="carousel">
                 <div class="carousel-inner">
-                  @if ($mrf->image_name)
-                    @foreach($mrf->image_name->where('type', 'BEFORE') as $key => $image)
+                  @if ($mrf->liquidationImages)
+                    @foreach($mrf->liquidationImages->where('type', 'BEFORE') as $key => $image)
                       <div class="carousel-item {{ $loop->iteration == 1 ? 'active' : '' }}">
                         <img src="{{ asset($image->image_path)}}" class="d-block w-100" alt="...">
                       </div>
@@ -398,8 +398,8 @@
             <div class="col">
               <div id="carouselAfter" class="carousel slide carousel-fade" data-bs-ride="carousel">
                 <div class="carousel-inner">
-                  @if ($mrf->image_name)
-                    @foreach($mrf->image_name->where('type', "AFTER") as $key => $image)
+                  @if ($mrf->liquidationImages)
+                    @foreach($mrf->liquidationImages->where('type', 'AFTER') as $key => $image)
                       <div class="carousel-item {{ $loop->iteration == 1 ? 'active' : '' }}">
                         <img src="{{ asset($image->image_path)}}" class="d-block w-100" alt="...">
                       </div>

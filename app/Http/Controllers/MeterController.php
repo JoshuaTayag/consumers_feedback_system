@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use DB;
+use Exception;
 
 class MeterController extends Controller
 {
@@ -58,8 +59,12 @@ class MeterController extends Controller
                        ->appends($request->query());
         
         $meters_types = MeterType::get();
+
+        $meter_stats = $this->getBulkMeterAvailabilityStats();
+
+        // dd($meter_stats);
         
-        return view('power_house.warehousing.data_management.meters.index', compact('meters', 'meters_types'));
+        return view('power_house.warehousing.data_management.meters.index', compact('meters', 'meters_types', 'meter_stats'));
     }
 
     public function create()
@@ -111,7 +116,7 @@ class MeterController extends Controller
 
             return redirect()->route('meters.index')->with('success', 'Meter created successfully');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollback();
             
             if ($request->expectsJson()) {
@@ -229,7 +234,7 @@ class MeterController extends Controller
 
             return redirect()->route('meters.index')->with('success', 'Meter updated successfully');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollback();
             
             if ($request->expectsJson()) {
@@ -273,7 +278,7 @@ class MeterController extends Controller
 
             return redirect()->route('meters.index')->with('success', 'Meter deleted successfully');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollback();
             
             if (request()->expectsJson()) {
@@ -344,7 +349,7 @@ class MeterController extends Controller
                 'total' => $audits->count()
             ]);
             
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch audit logs: ' . $e->getMessage()
@@ -491,7 +496,7 @@ class MeterController extends Controller
 
             return redirect()->route('meters.index')->with('success', 'Meter assigned successfully!');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollback();
             
             if ($request->expectsJson()) {
@@ -576,7 +581,7 @@ class MeterController extends Controller
 
             return redirect()->route('meters.index')->with('success', 'Meter returned successfully!');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollback();
             
             if ($request->expectsJson()) {
@@ -628,7 +633,7 @@ class MeterController extends Controller
 
             return redirect()->route('meters.index')->with('success', 'Meter is now available!');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollback();
             
             if ($request->expectsJson()) {
@@ -660,7 +665,7 @@ class MeterController extends Controller
             if ($meterId) {
                 $meter = Meter::with('meterType')->find($meterId);
                 if ($meter && $meter->meterType) {
-                    $query->where('type_of_meter', $meter->meterType->meter_code);
+                    $query->where('type_of_meter', $meter->meterType->id);
                 }
             }
 
@@ -679,7 +684,7 @@ class MeterController extends Controller
                 })
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch change meter requests: ' . $e->getMessage()
@@ -779,11 +784,152 @@ class MeterController extends Controller
                 'data' => $formattedRequests
             ]);
             
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch KWH meter requests: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function getBulkMeterAvailabilityStats($meterTypeIds = [], $excludeChangeMeterRequestId = null)
+    {
+        try {
+            $results = [];
+
+            // If no specific meter types provided, get all meter types
+            if (empty($meterTypeIds)) {
+                $meterTypeIds = MeterType::whereNull('deleted_at')->pluck('id')->toArray();
+            }
+
+            foreach ($meterTypeIds as $meterTypeId) {
+                $result = $this->getMeterAvailabilityStats($meterTypeId, $excludeChangeMeterRequestId);
+                
+                if ($result['success']) {
+                    // Get meter type details
+                    $meterType = MeterType::find($meterTypeId);
+                    $result['data']['meter_type'] = $meterType ? [
+                        'id' => $meterType->id,
+                        'meter_code' => $meterType->meter_code,
+                        'meter_brand' => $meterType->meter_brand,
+                        'meter_description' => $meterType->meter_description
+                    ] : null;
+                    
+                    $results[] = $result['data'];
+                } else {
+                    // Include failed results with error information
+                    $results[] = [
+                        'meter_type_id' => $meterTypeId,
+                        'error' => $result['message']
+                    ];
+                }
+            }
+
+            // dd($results);
+
+            // Calculate summary statistics
+            $totalStats = [
+                'total_meter_types' => count($results),
+                'total_available_meters' => array_sum(array_column($results, 'total_available_meters')),
+                'total_reserved_by_change_meter' => array_sum(array_column($results, 'reserved_by_change_meter_requests')),
+                'total_reserved_by_kwh_meter' => array_sum(array_column($results, 'reserved_by_kwh_meter_requests')),
+                'total_reserved' => array_sum(array_column($results, 'total_reserved')),
+                'total_truly_available' => array_sum(array_column($results, 'truly_available'))
+            ];
+
+
+            
+            return [
+                'success' => true,
+                'data' => [
+                    'meter_types' => $results,
+                    'summary' => $totalStats
+                ]
+            ];
+
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error calculating bulk meter availability: ' . $e->getMessage(),
+                'error' => $e
+            ];
+        }
+    }
+
+    public function getMeterAvailabilityStats($meterTypeId, $excludeChangeMeterRequestId = null)
+    {
+        try {
+            // Count total available meters (status = 0, no account, not deleted)
+            $availableMeters = Meter::where('meter_type_id', $meterTypeId)
+                ->where('status', 0)
+                ->whereNull('account_number')
+                ->whereNull('deleted_at')
+                ->count();
+
+            // Count reserved meters from change meter requests (pending/unacted requests)
+            $reservedByChangeMeterQuery = ChangeMeterRequest::where('type_of_meter', $meterTypeId)
+                ->where(function($query) {
+                    $query->whereNull('status') // pending
+                          ->orWhere('status', '!=', 2); // not completed
+                })
+                ->whereNull('deleted_at')
+                ->whereNull('new_meter_no');
+
+            // Exclude specific change meter request if provided (for edit scenarios)
+            if ($excludeChangeMeterRequestId) {
+                $reservedByChangeMeterQuery->where('id', '!=', $excludeChangeMeterRequestId);
+            }
+
+            $reservedByChangeMeter = $reservedByChangeMeterQuery->count();
+
+            // Count reserved meters from kwh meter requests (unliquidated serials)
+            // $reservedByKwhMeterRequests = DB::table('kwh_meter_request_serial_numbers as krs')
+            //     ->join('meters as m', 'krs.meter_id', '=', 'm.id')
+            //     ->where('m.meter_type_id', $meterTypeId)
+            //     ->where('krs.status', 0) // unliquidated
+            //     ->whereNull('krs.change_meter_request_id') // not yet used in change meter
+            //     ->whereNull('krs.deleted_at')
+            //     ->count();
+
+            $reservedByKwhMeterRequests = DB::table('kwh_meter_requests as kmr')
+                ->selectRaw('COALESCE(SUM(kmr.quantity - COALESCE(assigned.meter_count, 0)), 0) as remaining_quantity')
+                ->leftJoin(DB::raw('(
+                    SELECT kwh_meter_request_id, COUNT(*) as meter_count 
+                    FROM kwh_meter_request_serial_numbers 
+                    WHERE deleted_at IS NULL 
+                    GROUP BY kwh_meter_request_id
+                ) as assigned'), 'kmr.id', '=', 'assigned.kwh_meter_request_id')
+                ->where('kmr.meter_code_id', $meterTypeId)
+                ->where('kmr.is_liquidated', false)
+                ->whereNull('kmr.deleted_at')
+                ->value('remaining_quantity') ?? 0;
+
+
+            // Calculate truly available meters
+            $totalReserved = $reservedByChangeMeter + $reservedByKwhMeterRequests;
+            $trulyAvailable = $availableMeters - $totalReserved;
+
+            // dd($trulyAvailable);
+
+            return [
+                'success' => true,
+                'data' => [
+                    'meter_type_id' => $meterTypeId,
+                    'total_available_meters' => $availableMeters,
+                    'reserved_by_change_meter_requests' => $reservedByChangeMeter,
+                    'reserved_by_kwh_meter_requests' => $reservedByKwhMeterRequests,
+                    'total_reserved' => $totalReserved,
+                    'truly_available' => max(0, $trulyAvailable), // Ensure non-negative
+                    'is_available' => $trulyAvailable > 0
+                ]
+            ];
+
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error calculating meter availability: ' . $e->getMessage(),
+                'error' => $e
+            ];
         }
     }
 }

@@ -99,7 +99,7 @@ class PendingController extends Controller
             $pending->status = 1; // 1 = approved
             $pending->save();
             
-            // update the transaction status
+            // update the transaction status if kwh meter request
             if ($pending->table_name === 'kwh_meter_requests' && $pending->transaction === 'KWH Meter Request') {
                 $kwhMeterRequest = KwhMeterRequest::find($pending->table_id);
                 if ($kwhMeterRequest) {
@@ -116,7 +116,7 @@ class PendingController extends Controller
 
                     // add checked_by date and time for liquidation
                     if ($kwhMeterRequest) {
-                        $kwhMeterRequest->checked_by = auth()->id();
+                        // $kwhMeterRequest->checked_by = auth()->id();
                         $kwhMeterRequest->checked_at = now();
                         $kwhMeterRequest->save();
                     }
@@ -130,7 +130,7 @@ class PendingController extends Controller
                             'url' => route('kwh-meter-request.show', $kwhMeterRequest->id),
                             'table_id' => $kwhMeterRequest->id,
                             'sender_user_id' => auth()->id(),
-                            'recipient_user_id' => $kwhMeterRequest->approved_liquidation_by, // send to approver
+                            'recipient_user_id' => $kwhMeterRequest->audited_by, // send to approver
                             'approval_step' => 2,
                             'status' => 0,
                         ]
@@ -138,6 +138,33 @@ class PendingController extends Controller
                     
                 }
                 if ($pending->approval_step == 2) {
+                    // find the related KWH Meter Request
+                    $kwhMeterRequest = KwhMeterRequest::find($pending->table_id);
+
+                    // add checked_by date and time for liquidation
+                    if ($kwhMeterRequest) {
+                        // $kwhMeterRequest->checked_by = auth()->id();
+                        $kwhMeterRequest->audited_at = now();
+                        $kwhMeterRequest->save();
+                    }
+
+                    // add next approval step
+                    //insert in to pending table
+                    $this->pendingTransactionService->createPendingTransaction(
+                        [
+                            'transaction' => 'KWH Meter Request Liquidation',
+                            'table_name' => 'kwh_meter_requests',
+                            'url' => route('kwh-meter-request.show', $kwhMeterRequest->id),
+                            'table_id' => $kwhMeterRequest->id,
+                            'sender_user_id' => auth()->id(),
+                            'recipient_user_id' => $kwhMeterRequest->approved_liquidation_by, // send to approver
+                            'approval_step' => 3,
+                            'status' => 0,
+                        ]
+                    );
+                    
+                }
+                if ($pending->approval_step == 3) {
                     // find the related KWH Meter Request
                     $kwhMeterRequest = KwhMeterRequest::find($pending->table_id);
 
@@ -177,6 +204,7 @@ class PendingController extends Controller
     public function disapprove(Request $request)
     {
         try {
+            DB::beginTransaction();
             $pending = Pending::find($request->input('pending_id'));
             
             if (!$pending) {
@@ -199,7 +227,8 @@ class PendingController extends Controller
                 return redirect()->back()->with('error', 'You are not authorized to disapprove this transaction.');
             }
             
-            $pending->status = 2; // 2 = disapproved
+            $pending->status = 2; // 2 = 
+            $pending->remarks = $request->input('remarks');
             $pending->save();
 
             // update the transaction status
@@ -210,6 +239,9 @@ class PendingController extends Controller
                     $kwhMeterRequest->save();
                 }
             }
+
+            DB::commit();
+            
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
@@ -218,16 +250,15 @@ class PendingController extends Controller
                 ]);
             }
             
-            return redirect()->back()->with('success', 'Transaction disapproved successfully.');
-            
         } catch (\Exception $e) {
+            DB::rollBack();
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to disapprove transaction: ' . $e->getMessage()
                 ], 500);
             }
-            return redirect()->back()->with('error', 'Failed to disapprove transaction: ' . $e->getMessage());
+            
         }
     }
 

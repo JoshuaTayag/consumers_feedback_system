@@ -63,7 +63,8 @@ class Pending extends Model
         'approval_step',
         'status',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'remarks'
     ];
 
     protected $table = 'pending';

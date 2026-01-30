@@ -29,6 +29,11 @@ class KwhMeterRequest extends Model implements Auditable
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function auditedBy()
+    {
+        return $this->belongsTo(User::class, 'audited_by');
+    }
+
     public function checkedBy()
     {
         return $this->belongsTo(User::class, 'checked_by');
@@ -148,7 +153,9 @@ class KwhMeterRequest extends Model implements Auditable
         'approved_liquidation_at',
         'liquidation_remarks',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'audited_by',
+        'audited_at',
     ];
 
     protected $casts = [
@@ -159,6 +166,7 @@ class KwhMeterRequest extends Model implements Auditable
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'checked_at' => 'datetime',
+        'audited_at' => 'datetime',
         'approved_liquidation_at' => 'datetime',
     ];
 }

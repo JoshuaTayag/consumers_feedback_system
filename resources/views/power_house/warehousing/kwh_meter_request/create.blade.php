@@ -33,11 +33,18 @@
               <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="meter_code_id" class="form-label mb-1">Meter Type</label>
-                    <select class="form-select" id="meter_code_id" name="meter_code_id" required>
-                      <option value="">Select Meter Type</option>
-                      @foreach($meters_types as $meter_type)
-                          <option value="{{ $meter_type->id }}">{{ $meter_type->meter_description }}</option>
-                      @endforeach
+                    <select id="meter_code_id" class="form-control" name="meter_code_id" required>
+                      <option value=""></option>
+                        @foreach ($type_of_meters as $type_of_meter)          
+                          <option value="{{ $type_of_meter->id }}" 
+                                  id="" 
+                                  {{ old('meter_code_id') == $type_of_meter->meter_code ? 'selected' : ''}}
+                                  {{ $type_of_meter->available_count <= 0 ? 'disabled' : '' }}
+                                  data-available-count="{{ $type_of_meter->available_count }}">
+                            {{ $type_of_meter->meter_code }} - {{ $type_of_meter->meter_description }} 
+                            (Available: {{ $type_of_meter->available_count }})
+                          </option>
+                        @endforeach 
                     </select>
                 </div>
               </div>
@@ -82,4 +89,65 @@
     </div>
   </div>
 </div>
+@endsection
+
+@section('style')
+
+<style>
+  /* Style for disabled meter options */
+  #meter_code_id option:disabled {
+      color: #999;
+      background-color: #f5f5f5;
+      font-style: italic;
+  }
+
+  /* Style for available meter count display */
+  .meter-availability-info {
+      font-size: 12px;
+      color: #666;
+  }
+
+  .meter-unavailable {
+      color: #dc3545 !important;
+  }
+
+  .meter-available {
+      color: #28a745 !important;
+  }
+</style>
+
+@endsection
+@section('script')
+  <script>
+    $(document).ready(function() {
+        // Add event handler for meter type selection
+        $('#meter_code_id').on('change', function() {
+            var selectedOption = $(this).find('option:selected');
+            var availableCount = selectedOption.data('available-count');
+            
+            // Check if the selected meter type has available meters
+            if (availableCount <= 0 && selectedOption.val() !== '') {
+                alert('Warning: No meters available for the selected meter type. Please choose a different meter type.');
+                $(this).val(''); // Clear the selection
+                return false;
+            }
+
+            // Update max quantity based on availability
+            $('#quantity').val(''); // Clear previous quantity
+            $('#quantity').attr('max', availableCount > 10 ? 10 : availableCount);
+            console.log('Max quantity set to: ' + $('#quantity').attr('max'));
+        });
+        
+        // Style options based on availability when page loads
+        $('#meter_code_id option').each(function() {
+            var availableCount = $(this).data('available-count');
+            if (availableCount <= 0 && $(this).val() !== '') {
+                $(this).addClass('meter-unavailable');
+                $(this).append(' - OUT OF STOCK');
+            } else if ($(this).val() !== '') {
+                $(this).addClass('meter-available');
+            }
+        });
+    });
+  </script>
 @endsection

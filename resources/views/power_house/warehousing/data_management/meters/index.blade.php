@@ -242,6 +242,125 @@
         </div>
     </div>
 
+    <!-- Dashboard for available and reserved meters -->
+    <div class="row">
+        <!-- Available Meters Card -->
+        <div class="col-lg-4 mb-3">
+            <div class="card border-success shadow-sm h-100">
+                <div class="card-body bg-success bg-opacity-10">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-success fw-semibold">
+                                <i class="fas fa-unlock me-1"></i> Truly Available Meters
+                            </h6>
+                            <h2 class="text-success fw-bold mb-1">{{ number_format($meter_stats['data']['summary']['total_truly_available']) }}</h2>
+                            <small class="text-muted">Ready for assignment</small>
+                        </div>
+                        <div class="text-success opacity-25">
+                            <i class="fas fa-unlock" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                    <hr class="my-3">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Physical Available</small>
+                            <strong class="text-success">{{ number_format($meter_stats['data']['summary']['total_available_meters']) }}</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Meter Types</small>
+                            <strong class="text-success">{{ count($meter_stats['data']['meter_types']) }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reserved Meters Card -->
+        <div class="col-lg-4 mb-3">
+            <div class="card border-warning shadow-sm h-100">
+                <div class="card-body bg-warning bg-opacity-10">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-warning fw-semibold">
+                                <i class="fas fa-lock me-1"></i> Reserved Meters
+                            </h6>
+                            <h2 class="text-warning fw-bold mb-1">{{ number_format($meter_stats['data']['summary']['total_reserved']) }}</h2>
+                            <small class="text-muted">Pending assignments</small>
+                        </div>
+                        <div class="text-warning opacity-25">
+                            <i class="fas fa-lock" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                    <hr class="my-3">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Change Meter</small>
+                            <strong class="text-warning">{{ number_format($meter_stats['data']['summary']['total_reserved_by_change_meter']) }}</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">KWH Requests</small>
+                            <strong class="text-warning">{{ number_format($meter_stats['data']['summary']['total_reserved_by_kwh_meter']) }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Overview Card -->
+        <div class="col-lg-4 mb-3">
+            <div class="card border-primary shadow-sm h-100">
+                <div class="card-body bg-primary bg-opacity-10">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-primary fw-semibold">
+                                <i class="fas fa-chart-pie me-1"></i> Total Overview
+                            </h6>
+                            <h2 class="text-primary fw-bold mb-1">
+                                {{ number_format($meter_stats['data']['summary']['total_available_meters']) }}
+                            </h2>
+                            <small class="text-muted">Total meters in inventory</small>
+                        </div>
+                        <div class="text-primary opacity-25">
+                            <i class="fas fa-tachometer-alt" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                    <hr class="my-3">
+                    @php
+                        $totalMeters = $meter_stats['data']['summary']['total_available_meters'];
+                        $availablePercentage = $totalMeters > 0 ? ($meter_stats['data']['summary']['total_truly_available'] / $totalMeters) * 100 : 0;
+                        $reservedPercentage = $totalMeters > 0 ? ($meter_stats['data']['summary']['total_reserved'] / $totalMeters) * 100 : 0;
+                    @endphp
+                    <div class="progress mb-2" style="height: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                            style="width: {{ $availablePercentage }}%" 
+                            aria-valuenow="{{ $availablePercentage }}" 
+                            aria-valuemin="0" 
+                            aria-valuemax="100"
+                            title="Available: {{ number_format($availablePercentage, 1) }}%">
+                        </div>
+                        <div class="progress-bar bg-warning" role="progressbar" 
+                            style="width: {{ $reservedPercentage }}%" 
+                            aria-valuenow="{{ $reservedPercentage }}" 
+                            aria-valuemin="0" 
+                            aria-valuemax="100"
+                            title="Reserved: {{ number_format($reservedPercentage, 1) }}%">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between small">
+                        <span class="text-success">
+                            <i class="fas fa-circle me-1" style="font-size: 8px;"></i>
+                            {{ number_format($availablePercentage, 1) }}% Available
+                        </span>
+                        <span class="text-warning">
+                            <i class="fas fa-circle me-1" style="font-size: 8px;"></i>
+                            {{ number_format($reservedPercentage, 1) }}% Reserved
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <div class="row">
         <div class="col-12">

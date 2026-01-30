@@ -16,6 +16,11 @@ class MeterType extends Model implements Auditable
     {
         return $this->hasMany('App\Models\KwhMeterRequest', 'meter_code_id', 'id');
     }
+
+    public function meters()
+    {
+        return $this->hasMany('App\Models\Meter', 'meter_type_id', 'id');
+    }
     
     protected $fillable = [
         'meter_brand',

@@ -13,7 +13,7 @@ class Employee extends Model
     {
         return trim("{$this->prefix} {$this->first_name} " . 
                     ($this->middle_name ? substr($this->middle_name, 0, 1) . ". " : "") . 
-                    "{$this->last_name} {$this->suffix}");
+                    "{$this->last_name}{$this->suffix}");
     }
 
     public function user()

@@ -13,14 +13,17 @@ use DB;
 use Illuminate\Http\Request;
 use App\Helpers\Helper;
 use PDF;
+use App\Services\ChangeMeterService;
 
 class KwhMeterRequestController extends Controller
 {
     protected $pendingTransactionService;
+    protected $changeMeterService;
 
-    public function __construct(PendingTransactionService $pendingTransactionService)
+    public function __construct(PendingTransactionService $pendingTransactionService, ChangeMeterService $changeMeterService)
     {
         $this->pendingTransactionService = $pendingTransactionService;
+        $this->changeMeterService = $changeMeterService;
     }
 
     /**
@@ -39,9 +42,9 @@ class KwhMeterRequestController extends Controller
     public function create()
     {
         $users = User::role(['TSD', 'TSD Manager'])->pluck('name', 'id');
-        $meters_types = MeterType::get();
-        // dd($users);
-        return view('power_house.warehousing.kwh_meter_request.create', compact('users', 'meters_types'));
+        // Get meter types with available meter counts using service
+        $type_of_meters = $this->changeMeterService->getMeterTypesWithAvailability();
+        return view('power_house.warehousing.kwh_meter_request.create', compact('users', 'type_of_meters'));
     }
 
     /**
@@ -125,8 +128,8 @@ class KwhMeterRequestController extends Controller
     {
         $kwh_meter_request = KwhMeterRequest::findOrFail($id);
         $users = User::role(['TSD', 'TSD Manager'])->pluck('name', 'id');
-        $meters_types = MeterType::get();
-        return view('power_house.warehousing.kwh_meter_request.edit', compact('kwh_meter_request', 'users', 'meters_types'));
+        $type_of_meters = $this->changeMeterService->getMeterTypesWithAvailability(null, $id);
+        return view('power_house.warehousing.kwh_meter_request.edit', compact('kwh_meter_request', 'users', 'type_of_meters'));
     }
 
     /**
@@ -244,6 +247,7 @@ class KwhMeterRequestController extends Controller
     {
         $validatedData = $request->validate([
             'checked_by' => 'required|exists:users,id',
+            'audited_by' => 'required|exists:users,id',
             'approved_by_liquidation' => 'required|exists:users,id',
             'liquidation_remarks' => 'nullable|string|max:500',
         ]);
@@ -283,6 +287,7 @@ class KwhMeterRequestController extends Controller
                 'liquidated_at' => now(),
                 'checked_by' => $validatedData['checked_by'],
                 'approved_liquidation_by' => $validatedData['approved_by_liquidation'],
+                'audited_by' => $validatedData['audited_by'],
                 'liquidation_remarks' => $validatedData['liquidation_remarks'],
             ]);
 

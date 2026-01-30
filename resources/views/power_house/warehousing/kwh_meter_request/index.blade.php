@@ -98,7 +98,7 @@
                     </div>
                     
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="checked_by" class="form-label">
                                     <i class="fas fa-warehouse me-1"></i>Checked By (Warehouse)
@@ -115,7 +115,24 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="audited_by" class="form-label">
+                                    <i class="fas fa-pencil me-1"></i>Audited By (IAD)
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="audited_by" name="audited_by" required>
+                                    <option value="">Select IAD Staff</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select an IAD staff member.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="approved_by_liquidation" class="form-label">
                                     <i class="fas fa-user-tie me-1"></i>Approved By (TSD Manager)

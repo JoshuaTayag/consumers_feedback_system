@@ -27,7 +27,7 @@
                                 <div class="mb-2">
                                     <label for="project_name" class="form-label mb-1">Project Name *</label>
                                     <input type="text" class="form-control" id="project_name" name="project_name"
-                                        {{ old('project_name') }} required>
+                                        value="{{ old('project_name') }}" required>
                                 </div>
                             </div>
                             <div class="col-lg-3">

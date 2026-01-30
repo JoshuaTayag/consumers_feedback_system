@@ -306,7 +306,23 @@ window.confirmApproval = function(pendingId) {
 window.confirmDisapproval = function(pendingId) {
     Swal.fire({
         title: 'Disapprove Transaction?',
-        text: 'Are you sure you want to disapprove this pending transaction? This action cannot be undone.',
+        html: `
+            <p>Are you sure you want to disapprove this pending transaction?</p>
+            <div class="mt-3">
+                <label for="disapproval_remarks" class="form-label text-start d-block">
+                    <strong>Reason for Disapproval: <span class="text-danger">*</span></strong>
+                </label>
+                <textarea 
+                    id="disapproval_remarks" 
+                    class="form-control" 
+                    rows="4" 
+                    placeholder="Please provide a reason for disapproving this transaction..."
+                    maxlength="500"
+                    required
+                ></textarea>
+                <small class="text-muted d-block mt-1">Maximum 500 characters</small>
+            </div>
+        `,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#dc3545',
@@ -316,13 +332,74 @@ window.confirmDisapproval = function(pendingId) {
         reverseButtons: true,
         showLoaderOnConfirm: true,
         preConfirm: () => {
-            return disapprovePending(pendingId);
+            const remarks = document.getElementById('disapproval_remarks').value.trim();
+            if (!remarks) {
+                Swal.showValidationMessage('Please provide a reason for disapproval');
+                return false;
+            }
+            if (remarks.length < 10) {
+                Swal.showValidationMessage('Please provide at least 10 characters for the reason');
+                return false;
+            }
+            return disapprovePending(pendingId, remarks);
         },
-        allowOutsideClick: () => !Swal.isLoading()
+        allowOutsideClick: () => !Swal.isLoading(),
+        didOpen: () => {
+            // Focus on textarea when modal opens
+            document.getElementById('disapproval_remarks').focus();
+        }
     }).then((result) => {
         if (result.isConfirmed) {
             // Success is handled in the disapprovePending function
         }
+    });
+};
+
+window.disapprovePending = function(pendingId, remarks) {
+    const formData = new FormData();
+    formData.append('pending_id', pendingId);
+    formData.append('remarks', remarks);
+    formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+
+    return fetch('{{ route("pending.disapprove") }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Transaction Disapproved!',
+                text: data.message,
+                icon: 'success',
+                confirmButtonColor: '#007bff',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Reload the page to reflect changes
+                window.location.reload();
+            });
+        } else {
+            throw new Error(data.message || 'Failed to disapprove transaction');
+        }
+    })
+    .catch(error => {
+        console.error('Error disapproving transaction:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: error.message || 'Failed to disapprove transaction. Please try again.',
+            icon: 'error',
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'OK'
+        });
+        throw error; // Re-throw to prevent "success" handling
     });
 };
 
@@ -373,52 +450,6 @@ window.approvePending = function(pendingId) {
     });
 };
 
-window.disapprovePending = function(pendingId) {
-    const formData = new FormData();
-    formData.append('pending_id', pendingId);
-    formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
-
-    return fetch('{{ route("pending.disapprove") }}', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            Swal.fire({
-                title: 'Success!',
-                text: data.message,
-                icon: 'success',
-                confirmButtonColor: '#007bff',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                // Reload the page to reflect changes
-                window.location.reload();
-            });
-        } else {
-            throw new Error(data.message || 'Failed to disapprove transaction');
-        }
-    })
-    .catch(error => {
-        console.error('Error disapproving transaction:', error);
-        Swal.fire({
-            title: 'Error!',
-            text: error.message || 'Failed to disapprove transaction. Please try again.',
-            icon: 'error',
-            confirmButtonColor: '#dc3545',
-            confirmButtonText: 'OK'
-        });
-        throw error; // Re-throw to prevent "success" handling
-    });
-};
 
 window.refreshPage = function() {
     window.location.reload();

@@ -2,6 +2,154 @@
 
 @section('content')
 <div class="container">
+  <!-- Dashboard for available and reserved meters -->
+  <div class="row">
+      <!-- Unacted Requests Card -->
+      <div class="col-lg-3 mb-3">
+          <div class="card border-danger shadow-sm h-100">
+              <div class="card-body bg-danger bg-opacity-10">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                          <h6 class="card-subtitle mb-2 text-danger fw-semibold">
+                              <i class="fas fa-unlock me-1"></i> Unacted Requests
+                          </h6>
+                          <h2 class="text-danger fw-bold mb-1">
+                          {{ $change_meter_status_count->getData()->data->total->unacted ?? 0 }}
+                          </h2>
+                          {{-- <small class="text-muted">asd</small> --}}
+                      </div>
+                      <div class="text-danger opacity-25">
+                          <i class="fas fa-clipboard-list" style="font-size: 3rem;"></i>
+                      </div>
+                  </div>
+                  <hr class="my-3">
+                  <div class="row text-center">
+                      <div class="col-4">
+                          <small class="text-muted d-block">Today</small>
+                          <strong class="text-danger">{{ $change_meter_status_count->getData()->data->today->unacted ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Yesterday</small>
+                          <strong class="text-danger">{{ $change_meter_status_count->getData()->data->yesterday->unacted ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Old</small>
+                          <strong class="text-danger">{{ $change_meter_status_count->getData()->data->old_transactions->unacted ?? 0 }}</strong>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Dispatched Requests Card -->
+      <div class="col-lg-3 mb-3">
+          <div class="card border-warning shadow-sm h-100">
+              <div class="card-body bg-warning bg-opacity-10">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                          <h6 class="card-subtitle mb-2 text-warning fw-semibold">
+                              <i class="fas fa-lock me-1"></i> Dispatched Requests
+                          </h6>
+                          <h2 class="text-warning fw-bold mb-1">
+                            {{ $change_meter_status_count->getData()->data->total->dispatched ?? 0 }}
+                          </h2>
+                      </div>
+                      <div class="text-warning opacity-25">
+                          <i class="fas fa-truck" style="font-size: 3rem;"></i>
+                      </div>
+                  </div>
+                  <hr class="my-3">
+                  <div class="row text-center">
+                      <div class="col-4">
+                          <small class="text-muted d-block">Today</small>
+                          <strong class="text-warning">{{ $change_meter_status_count->getData()->data->today->dispatched ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Yesterday</small>
+                          <strong class="text-warning">{{ $change_meter_status_count->getData()->data->yesterday->dispatched ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Old</small>
+                          <strong class="text-warning">{{ $change_meter_status_count->getData()->data->old_transactions->dispatched ?? 0 }}</strong>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Acted - Not Completed Requests Card -->
+      <div class="col-lg-3 mb-3">
+          <div class="card border-primary shadow-sm h-100">
+              <div class="card-body bg-primary bg-opacity-10">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                          <h6 class="card-subtitle mb-2 text-primary fw-semibold">
+                              <i class="fas fa-exclamation-circle me-1"></i> Acted - Not Completed Requests
+                          </h6>
+                          <h2 class="text-primary fw-bold mb-1">
+                            {{ $change_meter_status_count->getData()->data->total->acted_not_completed ?? 0 }}
+                          </h2>
+                      </div>
+                      <div class="text-primary opacity-25">
+                          <i class="fas fa-exclamation-circle" style="font-size: 3rem;"></i>
+                      </div>
+                  </div>
+                  <hr class="my-3">
+                  <div class="row text-center">
+                      <div class="col-4">
+                          <small class="text-muted d-block">Today</small>
+                          <strong class="text-primary">{{ $change_meter_status_count->getData()->data->today->acted_not_completed ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Yesterday</small>
+                          <strong class="text-primary">{{ $change_meter_status_count->getData()->data->yesterday->acted_not_completed ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Old</small>
+                          <strong class="text-primary">{{ $change_meter_status_count->getData()->data->old_transactions->acted_not_completed ?? 0 }}</strong>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Total Overview Card -->
+      <div class="col-lg-3 mb-3">
+          <div class="card border-success shadow-sm h-100">
+              <div class="card-body bg-success bg-opacity-10">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                          <h6 class="card-subtitle mb-2 text-success fw-semibold">
+                              <i class="fas fa-check-circle me-1"></i> Acted Requests - Completed
+                          </h6>
+                          <h2 class="text-success fw-bold mb-1">
+                            {{ $change_meter_status_count->getData()->data->total->acted_completed ?? 0 }}
+                          </h2>
+                      </div>
+                      <div class="text-success opacity-25">
+                          <i class="fas fa-check-circle" style="font-size: 3rem;"></i>
+                      </div>
+                  </div>
+                  <hr class="my-3">
+                  <div class="row text-center">
+                      <div class="col-4">
+                          <small class="text-muted d-block">Today</small>
+                          <strong class="text-success">{{ $change_meter_status_count->getData()->data->today->acted_completed ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Yesterday</small>
+                          <strong class="text-success">{{ $change_meter_status_count->getData()->data->yesterday->acted_completed ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Old</small>
+                          <strong class="text-success">{{ $change_meter_status_count->getData()->data->old_transactions->acted_completed ?? 0 }}</strong>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
   <div class="row justify-content-center">
       <div class="col-lg-12">
           <div class="card">

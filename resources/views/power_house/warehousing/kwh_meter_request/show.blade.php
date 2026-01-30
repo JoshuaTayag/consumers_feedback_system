@@ -86,7 +86,7 @@
                     <i class="fas fa-check-circle me-2"></i>Liquidation Status
                 </h5>
                 <div class="row g-4">
-                    <div class="col-lg-4 col-md-6">
+                    <div class="col-lg-3 col-md-6">
                         <div class="border rounded-3 p-3 h-100 bg-light">
                             <div class="d-flex align-items-center mb-2">
                                 <div class="bg-primary text-white rounded-circle py-1 px-2 me-3">
@@ -106,7 +106,27 @@
                         </div>
                     </div>
 
-                    <div class="col-lg-4 col-md-6">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="border rounded-3 p-3 h-100 bg-light">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-primary text-white rounded-circle py-1 px-2 me-3">
+                                    <i class="fas fa-warehouse"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 text-muted">Audited By (IAD)</h6>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-1">
+                                {{ $kwh_meter_request->auditedBy ? $kwh_meter_request->auditedBy->employee->full_name : 'Not yet audited' }}
+                            </h5>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                {{ $kwh_meter_request->audited_at ? $kwh_meter_request->audited_at->format('M d, Y g:i A') : 'Pending' }}
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
                         <div class="border rounded-3 p-3 h-100 bg-light">
                             <div class="d-flex align-items-center mb-2">
                                 <div class="bg-primary text-white rounded-circle py-1 px-2 me-3">
@@ -126,7 +146,7 @@
                         </div>
                       </div>
 
-                      <div class="col-lg-4 col-md-12">
+                      <div class="col-lg-3 col-md-12">
                           <div class="border rounded-3 p-3 h-100 bg-light">
                               <div class="d-flex align-items-center mb-2">
                                   <div class="bg-primary text-white rounded-circle py-1 px-2 me-3">
@@ -213,7 +233,10 @@
                                   <i class="fas fa-calendar me-1"></i>Date
                               </th>
                               <th class="border-0">
-                                  <i class="fas fa-comment me-1"></i>Action
+                                  <i class="fas fa-wrench me-1"></i>Action
+                              </th>
+                              <th class="border-0">
+                                  <i class="fas fa-comment me-1"></i>Notes
                               </th>
                             </tr>
                           </thead>
@@ -295,6 +318,8 @@
                                   </span>
                                 @endif
                               </td>
+                              <td class="fw-bold">
+                                <textarea name="remarks" id="remarks" class="form-control" readonly>{{ $audit->remarks }}</textarea></td>
                             </tr>
                             @empty
                             <tr>

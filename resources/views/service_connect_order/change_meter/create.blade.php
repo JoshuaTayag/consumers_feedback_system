@@ -148,13 +148,13 @@
                         <select id="meter_code_no" class="form-control" name="meter_code_no" required>
                           <option value=""></option>
                           @foreach ($type_of_meters as $type_of_meter)          
-                            <option value="{{ $type_of_meter->meter_code }}" id="" {{ old('meter_code_no') == $type_of_meter->meter_code ? 'selected' : ''}}>
-                              <div class="row">
-                                <div class="form-group">
-                                  <label class="col-xs-6">{{ $type_of_meter->meter_code  }} <span class="fw-bold"> - </span></label>
-                                  <label class="col-xs-6">{{ $type_of_meter->meter_description  }}</label>
-                                </div>
-                              </div> 
+                            <option value="{{ $type_of_meter->id }}" 
+                                    id="" 
+                                    {{ old('meter_code_no') == $type_of_meter->meter_code ? 'selected' : ''}}
+                                    {{ $type_of_meter->available_count <= 0 ? 'disabled' : '' }}
+                                    data-available-count="{{ $type_of_meter->available_count }}">
+                              {{ $type_of_meter->meter_code }} - {{ $type_of_meter->meter_description }} 
+                              (Available: {{ $type_of_meter->available_count }})
                             </option>
                           @endforeach 
                         </select>
@@ -198,7 +198,7 @@
                 <code class="fs-4">Liquidation Details</code>
                 <hr>
                   <div class="row">
-                    <div class="col-lg-4">
+                    <div class="col-lg-5">
                       <div class="mb-2">
                         <label for="kwh_meter_request_control_no" class="form-label mb-1">kWh Meter Request</label>
                           <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no">
@@ -217,7 +217,7 @@
                         <input type="text" id="liquidation_requested_by" name="liquidation_requested_by" class="form-control" readonly>
                       </div>
                     </div>
-                    <div class="col-lg-5">
+                    <div class="col-lg-4">
                       <div class="mb-2">
                         <label for="liquidation_meter_type" class="form-label mb-1">Meter Type</label>
                         <input type="text" id="liquidation_meter_type" name="liquidation_meter_type" class="form-control" readonly>
@@ -397,10 +397,55 @@
       border-radius: 8px;
       background-color: #e19a00;
   }
+
+  /* Style for disabled meter options */
+  #meter_code_no option:disabled {
+      color: #999;
+      background-color: #f5f5f5;
+      font-style: italic;
+  }
+
+  /* Style for available meter count display */
+  .meter-availability-info {
+      font-size: 12px;
+      color: #666;
+  }
+
+  .meter-unavailable {
+      color: #dc3545 !important;
+  }
+
+  .meter-available {
+      color: #28a745 !important;
+  }
 </style>
 
 <script>
 $(document).ready(function() {
+    // Add event handler for meter type selection
+    $('#meter_code_no').on('change', function() {
+        var selectedOption = $(this).find('option:selected');
+        var availableCount = selectedOption.data('available-count');
+        
+        // Check if the selected meter type has available meters
+        if (availableCount <= 0 && selectedOption.val() !== '') {
+            alert('Warning: No meters available for the selected meter type. Please choose a different meter type.');
+            $(this).val(''); // Clear the selection
+            return false;
+        }
+    });
+    
+    // Style options based on availability when page loads
+    $('#meter_code_no option').each(function() {
+        var availableCount = $(this).data('available-count');
+        if (availableCount <= 0 && $(this).val() !== '') {
+            $(this).addClass('meter-unavailable');
+            $(this).append(' - OUT OF STOCK');
+        } else if ($(this).val() !== '') {
+            $(this).addClass('meter-available');
+        }
+    });
+
     // Handle kWh meter request selection change
     $('#kwh_meter_request_control_no').on('change', function() {
         const controlNo = $(this).val();
@@ -435,6 +480,13 @@ $(document).ready(function() {
                     alert('Error loading kWh meter request details. Please try again.');
                 }
             });
+        }
+
+        // remove type of meter required validation
+        if (controlNo) {
+            $('#meter_code_no').prop('required', false);
+        } else {
+            $('#meter_code_no').prop('required', true);
         }
     });
     
