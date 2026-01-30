@@ -54,11 +54,17 @@
                         <div class="row">
                             <div class="col-md-10 mx-auto fs-3">
                             <ul class="">
-                                <li>Consumers Feedback Survey</li>
-                                <li>Membership / Pre-membership</li>
-                                <li>Lifeline</li>
-                                <li>MER</li>
-                                <li>Barangay Electrician</li>
+                                <li>Housewiring</li>
+                                    <ol>* Pre-membership</ol>
+                                    <ol>* Membership</ol>
+                                    {{-- <ol class="text-muted">* Service Connect Order</ol> --}}
+                                    <ol>* Change Meter Request</ol>
+                                    <ol>* Lifeline</ol>
+                                    <ol>* Barangay Electrician </ol>
+                                <li>Warehousing</li>
+                                    <ol>* Material Equipment Request</ol>
+                                    <ol>* kWh Meter Request</ol>
+                                    <ol>* kWh Meter Management</ol>
                             </ul>
                             </div>
                         </div>
