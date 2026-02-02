@@ -64,15 +64,20 @@ class PermissionTableSeeder extends Seeder
             // 'change-meter-request-edit',
             // 'change-meter-request-delete',
 
-            'meter-type-list',
-            'meter-type-create',
-            'meter-type-edit',
-            'meter-type-delete',
+            // 'kwh-meter-type-list',
+            // 'kwh-meter-type-create',
+            // 'kwh-meter-type-edit',
+            // 'kwh-meter-type-delete',
 
-            'meter-list',
-            'meter-create',
-            'meter-edit',
-            'meter-delete',
+            // 'kwh-meter-list',
+            // 'kwh-meter-create',
+            // 'kwh-meter-edit',
+            // 'kwh-meter-delete',
+
+            // 'kwh-meter-request-list',
+            // 'kwh-meter-request-create',
+            // 'kwh-meter-request-edit',
+            // 'kwh-meter-request-delete',
          ];
       
          foreach ($permissions as $permission) {

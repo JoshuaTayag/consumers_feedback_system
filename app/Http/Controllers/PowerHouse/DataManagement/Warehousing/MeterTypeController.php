@@ -8,6 +8,12 @@ use App\Models\DataManagement\MeterType;
 
 class MeterTypeController extends Controller
 {
+    public function __construct() {
+        $this->middleware('permission:kwh-meter-type-list|kwh-meter-type-create|kwh-meter-type-edit|kwh-meter-type-delete', ['only' => ['index']]);
+        $this->middleware('permission:kwh-meter-type-create', ['only' => ['create', 'store', 'liquidate']]);
+        $this->middleware('permission:kwh-meter-type-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:kwh-meter-type-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      */

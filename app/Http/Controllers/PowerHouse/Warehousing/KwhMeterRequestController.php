@@ -22,6 +22,11 @@ class KwhMeterRequestController extends Controller
 
     public function __construct(PendingTransactionService $pendingTransactionService, ChangeMeterService $changeMeterService)
     {
+        $this->middleware('permission:kwh-meter-request-list|kwh-meter-request-create|kwh-meter-request-edit|kwh-meter-request-delete', ['only' => ['index']]);
+        $this->middleware('permission:kwh-meter-request-create', ['only' => ['create', 'store', 'liquidate']]);
+        $this->middleware('permission:kwh-meter-request-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:kwh-meter-request-delete', ['only' => ['destroy']]);
+
         $this->pendingTransactionService = $pendingTransactionService;
         $this->changeMeterService = $changeMeterService;
     }
