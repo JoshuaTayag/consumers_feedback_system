@@ -425,7 +425,11 @@
         </div>
       </div>
     </div>
-
+    <div class="col-lg-12 text-end mt-4">
+      <a href="{{ route('material-requisition-form.index') }}" class="btn btn-primary btn-sm fw-bold">
+        BACK
+      </a>
+    </div>
   </div>
 
   <div class="row mb-4">
