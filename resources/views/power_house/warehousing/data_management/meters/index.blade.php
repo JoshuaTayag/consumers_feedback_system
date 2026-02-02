@@ -92,7 +92,7 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                    <label for="meter_type_id"><i class="fas fa-industry"></i> Meter Type *</label>
+                                    <label for="meter_type_id"><i class="fas fa-tachometer"></i> Meter Type *</label>
                                 </div>
                                 <small class="text-muted mt-1" id="meter_description"></small>
                             </div>
@@ -116,7 +116,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="erc_seal_number" name="erc_seal_number" 
                                            placeholder="Enter ERC seal number" required>
-                                    <label for="erc_seal_number"><i class="fas fa-certificate"></i> ERC Seal Number *</label>
+                                    <label for="erc_seal_number"><img src="{{asset('images/erc_logo.png')}}" alt="seal" width="16" height="16" class="me-1"> ERC Seal Number *</label>
                                 </div>
                                 <div id="erc_validation" class="validation-message"></div>
                             </div>
@@ -128,7 +128,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="leyeco_seal_number" name="leyeco_seal_number" 
                                            placeholder="Enter LEYECO seal number" required>
-                                    <label for="leyeco_seal_number"><i class="fas fa-seal"></i> LEYECO Seal Number *</label>
+                                    <label for="leyeco_seal_number"><img src="{{asset('images/logo.png')}}" alt="seal" width="16" height="16" class="me-1"> LEYECO V Seal Number *</label>
                                 </div>
                                 <div id="leyeco_validation" class="validation-message"></div>
                             </div>
@@ -1216,6 +1216,13 @@ window.initializeValidation = function() {
             validateField('erc_seal_number', value);
         }
     });
+
+    $('#leyeco_seal_number').on('blur', function() {
+        const value = $(this).val();
+        if (value) {
+            validateField('leyeco_seal_number', value);
+        }
+    });
 };
 
 window.validateField = function(fieldType, value) {
@@ -1226,6 +1233,8 @@ window.validateField = function(fieldType, value) {
         endpoint = '/meters/validate-serial';
     } else if (fieldType === 'erc_seal_number') {
         endpoint = '/meters/validate-erc-seal';
+    }  else if (fieldType === 'leyeco_seal_number') {
+        endpoint = '/meters/validate-leyeco-seal';
     } else {
         return;
     }
@@ -1241,7 +1250,9 @@ window.validateField = function(fieldType, value) {
     
     $.post(endpoint, data)
     .done(function(response) {
-        let validationElementId = fieldType === 'serial_number' ? 'serial_validation' : 'erc_validation';
+        let validationElementId = fieldType === 'serial_number' ? 'serial_validation' : 
+                                  fieldType === 'erc_seal_number' ? 'erc_validation' : 
+                                   fieldType === 'leyeco_seal_number' ? 'leyeco_validation' : '';
         const messageElement = $(`#${validationElementId}`);
         
         if (response.valid) {
@@ -1251,7 +1262,9 @@ window.validateField = function(fieldType, value) {
         }
     })
     .fail(function(xhr) {
-        let validationElementId = fieldType === 'serial_number' ? 'serial_validation' : 'erc_validation';
+        let validationElementId = fieldType === 'serial_number' ? 'serial_validation' : 
+                                  fieldType === 'erc_seal_number' ? 'erc_validation' : 
+                                   fieldType === 'leyeco_seal_number' ? 'leyeco_validation' : '';
         let errorMsg = 'Validation failed';
         
         if (xhr.status === 401) {

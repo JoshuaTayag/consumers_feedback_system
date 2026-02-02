@@ -713,7 +713,7 @@ class MaterialRequisitionFormController extends Controller
                             "material_requisition_form_id" => $mrf_id,
                             "item_id" => $item_id,
                             "quantity" => 1,
-                            "unit_cost" => $item->price,
+                            "unit_cost" => $item->price ?? 0,
                             )
                 );
             }

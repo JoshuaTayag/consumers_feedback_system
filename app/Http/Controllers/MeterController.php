@@ -17,6 +17,10 @@ class MeterController extends Controller
 {
     public function __construct()
     {
+        $this->middleware('permission:kwh-meter-list|kwh-meter-create|kwh-meter-edit|kwh-meter-delete', ['only' => ['index']]);
+        $this->middleware('permission:kwh-meter-create', ['only' => ['store', 'liquidate']]);
+        $this->middleware('permission:kwh-meter-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:kwh-meter-delete', ['only' => ['destroy']]);
         $this->middleware('auth');
     }
 
@@ -328,6 +332,25 @@ class MeterController extends Controller
         return response()->json([
             'valid' => !$exists,
             'message' => $exists ? 'ERC seal number already exists' : 'ERC seal number is available'
+        ]);
+    }
+
+    public function validateLeyecoSeal(Request $request)
+    {
+        $leyecoSeal = $request->input('leyeco_seal_number');
+        $meterId = $request->input('meter_id'); // For updates
+        
+        $query = Meter::where('leyeco_seal_number', $leyecoSeal);
+        
+        if ($meterId) {
+            $query->where('id', '!=', $meterId);
+        }
+        
+        $exists = $query->exists();
+        
+        return response()->json([
+            'valid' => !$exists,
+            'message' => $exists ? 'Seal number already exists' : 'Seal number is available'
         ]);
     }
 
