@@ -47,13 +47,19 @@
                 <div class="row justify-content-center">
                     <div class="col-md-6 fw-bold pt-5" style="font-family: 'Bacasime Antique', serif;">
                         <div class="row">
-                            <div class="col-md-10 mx-auto">
-                            <img src="{{asset('images/logo.png')}}" class="img-fluid mx-auto" style="max-width:25%;" alt="..."><span class="" style="font-size: 50px;"> LEYECO V </span>
+                            <div class="col-md-3">
+                            <img src="{{asset('images/logo.png')}}" class="img-fluid mx-auto" style="max-width:100%;" alt="...">
+                            </div>
+                            <div class="col-md-9 text-center">
+                                <span style="font-size: 50px;"> LICS</span><br>
+                                <span style="font-size: 30px;"> Linked Internal Core Systems </span><br>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row mt-4">
                             <div class="col-md-10 mx-auto fs-3">
                             <ul class="">
+                                <li>Billing</li>
+                                    <ol>* Ledger</ol>
                                 <li>Housewiring</li>
                                     <ol>* Pre-membership</ol>
                                     <ol>* Membership</ol>
