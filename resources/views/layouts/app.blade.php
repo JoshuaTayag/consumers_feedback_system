@@ -59,12 +59,15 @@
         margin-bottom: 10px;
         margin-top: 10px;
       }
+      .container{
+        max-width: 1800px;
+      }
     </style>
     @yield('style')
 </head>
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+        <nav class="navbar navbar-expand-md navbar-light shadow-sm" style="background-color: #e3f2fd;">
             <div class="container">
                 {{-- <a class="navbar-brand" href="{{ url('home') }}">
                     LEYTE V ELECTRIC COOPERATIVE, INC.
@@ -145,13 +148,26 @@
                                     </form>
                                 </div>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('pending.index', ['status' => 0]) }}" class="position-relative text-decoration-none text-dark">
+                                    <i class="fa-solid fa-bell fa-lg"></i>
+
+                                    <!-- Dynamic notification count -->
+                                    @if($pendingNotificationCount > 0)
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{ $pendingNotificationCount > 99 ? '99+' : $pendingNotificationCount }}
+                                            <span class="visually-hidden">{{ $pendingNotificationCount }} unread notifications</span>
+                                        </span>
+                                    @endif
+                                </a>
+                            </li>
                         @endguest
                     </ul>
                 </div>
             </div>
         </nav>
 
-        <main class="py-4">
+        <main class="py-4 bg-dark bg-opacity-10 min-vh-100">
             <div class="container">
                 @if ($errors->any())
                     <div class="alert alert-danger">
@@ -164,6 +180,11 @@
                 @endif
             </div>
             @yield('content')
+            <div class="container text-end my-3">
+                Copyright @ 2024 Leyte V Electric Cooperative, Inc. All rights reserved. <br>
+                V1.0.0
+            </div>
+            
         </main>
     </div>
     @include('sweetalert::alert')

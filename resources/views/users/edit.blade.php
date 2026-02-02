@@ -47,7 +47,14 @@
                 <div class="col-xs-12 col-sm-12 col-md-12 mb-2">
                     <div class="form-group">
                         <strong>Role:</strong>
-                        {!! Form::select('roles[]', $roles,$userRole, array('class' => 'form-control')) !!}
+                        @if($isEditingSelf)
+                            {!! Form::select('roles[]', $roles,$userRole, array('class' => 'form-control', 'readonly' => 'readonly')) !!}
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> You cannot modify your own roles. Contact an administrator if changes are needed.
+                            </small>
+                        @else
+                            {!! Form::select('roles[]', $roles,$userRole, array('class' => 'form-control')) !!}
+                        @endif
                     </div>
                 </div>
                 <div class="col-xs-12 col-sm-12 col-md-12 text-center">

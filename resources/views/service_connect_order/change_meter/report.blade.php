@@ -40,14 +40,12 @@
 
                 <div class="col-lg-2">
                   <div class="mb-2">
-                      {{ Form::label('area', 'Area') }}
+                      <label for="area" class="form-label mb-1">Area</label>
                       <select id="area" class="form-control" name="area" value="{{ old('area')}}">
                         <option value="">ALL</option>
-                        <option value="1" {{ old('area') == "A1" ? 'selected' : ''}} >A1</option>
-                        <option value="2" {{ old('area') == "A2" ? 'selected' : ''}} >A2</option>
-                        <option value="3" {{ old('area') == "A3" ? 'selected' : ''}} >A3</option>
-                        <option value="4" {{ old('area') == "A4" ? 'selected' : ''}} >A4</option>
-                        <option value="5" {{ old('area') == "A5" ? 'selected' : ''}} >A5</option>
+                        @foreach (Config::get('constants.coverage_areas') as $area)          
+                          <option value="{{ $area['id'] }}" id="">{{ $area['description'] }}</option>
+                        @endforeach
                       </select>
                   </div>
                 </div>

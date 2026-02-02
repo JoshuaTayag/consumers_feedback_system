@@ -47,18 +47,30 @@
                 <div class="row justify-content-center">
                     <div class="col-md-6 fw-bold pt-5" style="font-family: 'Bacasime Antique', serif;">
                         <div class="row">
-                            <div class="col-md-10 mx-auto">
-                            <img src="{{asset('images/logo.png')}}" class="img-fluid mx-auto" style="max-width:25%;" alt="..."><span class="" style="font-size: 50px;"> LEYECO V </span>
+                            <div class="col-md-3">
+                            <img src="{{asset('images/logo.png')}}" class="img-fluid mx-auto" style="max-width:100%;" alt="...">
+                            </div>
+                            <div class="col-md-9 text-center">
+                                <span style="font-size: 50px;"> LICS</span><br>
+                                <span style="font-size: 30px;"> Linked Internal Core Systems </span><br>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row mt-4">
                             <div class="col-md-10 mx-auto fs-3">
                             <ul class="">
-                                <li>Consumers Feedback Survey</li>
-                                <li>Membership / Pre-membership</li>
-                                <li>Lifeline</li>
-                                <li>MER</li>
-                                <li>Barangay Electrician</li>
+                                <li>Billing</li>
+                                    <ol>* Ledger</ol>
+                                <li>Housewiring</li>
+                                    <ol>* Pre-membership</ol>
+                                    <ol>* Membership</ol>
+                                    {{-- <ol class="text-muted">* Service Connect Order</ol> --}}
+                                    <ol>* Change Meter Request</ol>
+                                    <ol>* Lifeline</ol>
+                                    <ol>* Barangay Electrician </ol>
+                                <li>Warehousing</li>
+                                    <ol>* Material Equipment Request</ol>
+                                    <ol>* kWh Meter Request</ol>
+                                    <ol>* kWh Meter Management</ol>
                             </ul>
                             </div>
                         </div>

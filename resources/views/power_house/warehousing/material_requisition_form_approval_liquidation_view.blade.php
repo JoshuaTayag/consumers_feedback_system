@@ -360,11 +360,17 @@
             <div class="col">
               <div id="carouselBefore" class="carousel slide carousel-fade" data-bs-ride="carousel">
                 <div class="carousel-inner">
-                  @foreach($mrf->image_name->where('type', 'BEFORE') as $key => $image)
-                    <div class="carousel-item {{ $loop->iteration == 1 ? 'active' : '' }}">
-                      <img src="{{ asset($image->image_path)}}" class="d-block w-100" alt="...">
+                  @if ($mrf->liquidationImages)
+                    @foreach($mrf->liquidationImages->where('type', 'BEFORE') as $key => $image)
+                      <div class="carousel-item {{ $loop->iteration == 1 ? 'active' : '' }}">
+                        <img src="{{ asset($image->image_path)}}" class="d-block w-100" alt="...">
+                      </div>
+                    @endforeach
+                  @else
+                    <div class="col text-center">
+                      <h4 class="text-danger fw-bold">No Image Available</h4>
                     </div>
-                  @endforeach
+                  @endif
                 </div>
                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselBefore" data-bs-slide="prev">
                   <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -392,11 +398,17 @@
             <div class="col">
               <div id="carouselAfter" class="carousel slide carousel-fade" data-bs-ride="carousel">
                 <div class="carousel-inner">
-                  @foreach($mrf->image_name->where('type', "AFTER") as $key => $image)
-                    <div class="carousel-item {{ $loop->iteration == 1 ? 'active' : '' }}">
-                      <img src="{{ asset($image->image_path)}}" class="d-block w-100" alt="...">
+                  @if ($mrf->liquidationImages)
+                    @foreach($mrf->liquidationImages->where('type', 'AFTER') as $key => $image)
+                      <div class="carousel-item {{ $loop->iteration == 1 ? 'active' : '' }}">
+                        <img src="{{ asset($image->image_path)}}" class="d-block w-100" alt="...">
+                      </div>
+                    @endforeach
+                  @else
+                    <div class="col text-center">
+                      <h4 class="text-danger fw-bold">No Image Available</h4>
                     </div>
-                  @endforeach
+                  @endif
                 </div>
                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselAfter" data-bs-slide="prev">
                   <span class="carousel-control-prev-icon" aria-hidden="true"></span>

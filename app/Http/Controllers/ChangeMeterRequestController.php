@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DataManagement\MeterType;
+use App\Models\KwhMeterRequest;
+use App\Models\KwhMeterRequestSerialNumber;
+use App\Models\Meter;
 use Illuminate\Http\Request;
 use App\Models\ChangeMeterRequest;
 use App\Models\ChangeMeterRequestFees;
 use App\Models\ChangeMeterRequestPostingHistory;
+use App\Models\User;
 use App\Services\ChangeMeterService;
 use App\Services\SignatureService;
 use DB;
 use App\Helpers\Helper;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use PDO;
 
 class ChangeMeterRequestController extends Controller
@@ -35,12 +40,15 @@ class ChangeMeterRequestController extends Controller
      */
     public function index()
     {
-        $cm_requests = ChangeMeterRequest::with('municipality', 'barangay')->orderBy('id','desc')->paginate(9);
+        $cm_requests = ChangeMeterRequest::with('municipality', 'barangay', 'assignedMeter')->orderBy('id','desc')->paginate(9);
         $ref_employees = DB::table('change_meter_contractors')
         ->select(DB::raw("CONCAT(last_name, ', ', first_name) AS full_name"), 'id')
+        ->whereNotNull('user_id')
         ->orderBy('last_name', 'ASC')
         ->get();
-        return view('service_connect_order.change_meter.index',compact('cm_requests', 'ref_employees'));
+        $change_meter_status_count = $this->getChangeMeterRequestStatusCounts();
+        // dd($change_meter_status_count);
+        return view('service_connect_order.change_meter.index',compact('cm_requests', 'ref_employees', 'change_meter_status_count'));
     }
 
     /**
@@ -67,14 +75,35 @@ class ChangeMeterRequestController extends Controller
         ->orderBy('occupancy_name', 'asc')
         ->get();
 
-        $type_of_meters = DB::connection('sqlSrvHousewiring')
-        ->table('khw_meter_types')
-        ->select('*')
-        ->orderBy('meter_code', 'asc')
-        ->get();
+        // Get meter types with available meter counts using service
+        $type_of_meters = $this->changeMeterService->getMeterTypesWithAvailability();
+
+        // fetch all meter requests with approved_at and have available serials
+        $kwh_meter_requests = KwhMeterRequest::select('id', 'control_no', 'quantity', 'user_id')
+        ->orderBy('id', 'DESC')
+        ->where('approved_at', '!=', null)
+        ->with(['kwhMeterRequestSerialNumbers' => function($query) {
+            $query->where('status', 0)
+                ->whereNull('change_meter_request_id')
+                ->whereNull('deleted_at');
+        }])
+        ->get()
+        ->filter(function($request) {
+            // Only include requests that have available serials
+            return $request->kwhMeterRequestSerialNumbers->count() > 0;
+        })
+        ->mapWithKeys(function($request) {
+            $availableCount = $request->kwhMeterRequestSerialNumbers->count();
+            $totalQuantity = $request->quantity;
+            
+            // Format: "Control No - (Available: X/Total: Y)"
+            $displayText = $request->control_no .' (' . $request->user->name . ') - (Available: ' . $availableCount . '/' . $totalQuantity . ')';
+            
+            return [$request->id => $displayText];
+        });
         
-        // dd($districts);
-        return view('service_connect_order.change_meter.create')->with(compact( 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters'));
+        // dd($kwh_meter_requests);
+        return view('service_connect_order.change_meter.create')->with(compact( 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters', 'kwh_meter_requests'));
     }
     
 
@@ -83,110 +112,189 @@ class ChangeMeterRequestController extends Controller
      */
     public function store(Request $request)
     {
+        
         $change_meter_request_exists = ChangeMeterRequest::where('account_number', $request->electric_service_detail)
         ->where('status', null);
-        // dd($change_meter_request_exists->first('control_no')->control_no);
+        
 
         if ($change_meter_request_exists->exists()) {
             // Record exists
             return redirect(route('indexCM'))->withWarning('This account has pending request! </br> Control No:'.$change_meter_request_exists->first('control_no')->control_no);
-        } else { 
+        }
 
-            // validate requests
-            $this->validate($request, [
-                'electric_service_detail' => ['required', 'string', 'max:255'],
-                'first_name' => ['required', 'string', 'max:255'],
-                'last_name' => ['required', 'string', 'max:255'],
-                'area' => ['required'],
-                'barangay' => ['required'],
-                'municipality' => ['required'],
-                'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
-                'membership_or' => ['required'],
-                // 'membership_date' => ['required'],
-                // 'consumer_type' => ['required'],
-                'meter_code_no' => ['required'],
-                'process_date' => ['required'],
-                'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo'],
-            ]);
+        // validate requests
+        $this->validate($request, [
+            'electric_service_detail' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'area' => ['required'],
+            'barangay' => ['required'],
+            'municipality' => ['required'],
+            'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
+            'membership_or' => ['required'],
+            // 'membership_date' => ['required'],
+            // 'consumer_type' => ['required'],
+            'meter_code_no' => ['required_without:kwh_meter_request_control_no'], 
+            'process_date' => ['required'],
+            'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo'],
+            
+            // Liquidation fields validation
+            'kwh_meter_request_control_no' => ['nullable', 'string'],
+            'meter_serial_number' => ['required_with:kwh_meter_request_control_no'],
+        ]);
 
-            $year = date("y");
+        // validate the meter type if the transaction is not kwh meter request liquidation
+        if ($request->kwh_meter_request_control_no == null) {
+            // check if the selected meter types have available meters
+            $availableMeterCount = Meter::where('meter_type_id', $request->meter_code_no)
+                ->where('status', 0) // available status
+                ->whereNull('account_number')
+                ->whereNull('deleted_at')
+                ->count();
 
-            $control_id = Helper::IDGeneratorChangeMeter(new ChangeMeterRequest, 'control_no', 5, $year, 'CM');
+            // check for unacted change meter requests using the same meter type
+            $unactedRequestsCount = ChangeMeterRequest::where('type_of_meter', $request->meter_code_no)
+                ->where('status', '!=', 2) // unacted requests
+                ->count();
 
-            DB::beginTransaction();
-            try {
-                // Perform the first operation (creating a record in ServiceConnectOrder)
-                $change_meter_request = ChangeMeterRequest::create([
-                    "control_no" => $control_id,
-                    "first_name" => $request->first_name,
-                    "middle_name" => null,
-                    "last_name" => $request->last_name,
-                    "contact_no" => $request->contact_no,
-                    "area" => $request->area,
-                    "municipality_id" => $request->municipality,
-                    "barangay_id" => $request->barangay,
-                    "sitio" => $request->sitio,
-                    "account_number" => $request->electric_service_detail,
-                    "care_of" => $request->care_of,
-                    "feeder" => $request->feeder,
-                    "membership_or" => $request->membership_or,
-                    "consumer_type" => $request->consumer_type ? $request->consumer_type : 'N/A',
-                    "old_meter_no" => $request->old_meter,
-                    "meter_or_number" => $request->meter_or_no,
-                    "meter_or_date" => null,
-                    "new_meter_no" => null,
-                    "type_of_meter" => $request->meter_code_no,
-                    "last_reading" => $request->last_reading,
-                    "initial_reading" => $request->reading_initial,
-                    "remarks" => $request->remarks,
-                    "location" => $request->location,
-                    "crew" => null,
-                    "date_time_acted" => null,
-                    "status" => null,
-                    "damage_cause" => null,
-                    "crew_remarks" => null,
-                    "created_by" => Auth::id(),
-                    "created_at" => Carbon::today(),
-                    "process_date" => $request->process_date,
+            // Calculate truly available meters (total available - reserved by unacted requests)
+            $trulyAvailableCount = $availableMeterCount - $unactedRequestsCount;
+
+            if ($trulyAvailableCount <= 0) {
+                $message = $availableMeterCount <= 0 
+                    ? 'The selected meter type has no available meters.' 
+                    : "The selected meter type has {$availableMeterCount} available meters, but {$unactedRequestsCount} are reserved by pending requests.";
+                
+                return redirect()->back()->withInput()->withErrors([
+                    'meter_code_no' => $message . ' Please choose a different type or wait for pending requests to be processed.'
                 ]);
-
-                
-                $feeFields = [
-                    'membership', 'energy_deposit', 'conn_fee', 'xformer_rental', 'xformer_test',
-                    'xformer_installation', 'xformer_removal', 'consumer_xfmr', 'consumer_pole',
-                    'grounding_clamp', 'grounding_rod', 'meter_seal', 'hotline_clamp',
-                    'meter_accessories', 'discredit_fee', 'calibration_fee', 'others',
-                    'housewiring_kit', 'excess_conductor', 'conductor_duplex', 'circuit_breaker'
-                ];
-
-                foreach ($feeFields as $feeField) {
-                    if ($request->$feeField > 0) {
-                        // $vat = $request->$feeField * .12;
-                        // $vatable_value = $feeField == 'meter_accessories' ? $request->$feeField + $vat : $request->$feeField;
-                        ChangeMeterRequestFees::create([
-                            'cm_control_no' => $change_meter_request->id,
-                            'fees' => $feeField,
-                            'amount' => $request->$feeField
-                        ]);
-                    }
-                }
-
-                DB::commit();
-
-                return redirect(route('indexCM'))->withSuccess('Record Successfully Created! </br> SCO No:'.$control_id);
-
-            } catch (\Exception $e) {
-                // If an exception occurs during the transaction, rollback all changes
-                DB::rollback();
-                
-                // Optionally, handle the exception (log it, display an error message, etc.)
-                // For example:
-                // Log::error($e->getMessage());
-                return response()->$e;
             }
+            
+        } else {
+            // get meter type from kwh meter request serial number
+            $type_of_meter = KwhMeterRequest::find($request->kwh_meter_request_control_no)->pluck('meter_code_id')->first();
+            $request->merge(['meter_code_no' => $type_of_meter]);
+            
         }
 
         
+
+        $year = date("y");
+
+        $control_id = Helper::IDGeneratorChangeMeter(new ChangeMeterRequest, 'control_no', 5, $year, 'CM');
+
+        DB::beginTransaction();
+        try {
+            // Perform the first operation (creating a record in ServiceConnectOrder)
+            $change_meter_request = ChangeMeterRequest::create([
+                "control_no" => $control_id,
+                "first_name" => $request->first_name,
+                "middle_name" => null,
+                "last_name" => $request->last_name,
+                "contact_no" => $request->contact_no,
+                "area" => $request->area,
+                "municipality_id" => $request->municipality,
+                "barangay_id" => $request->barangay,
+                "sitio" => $request->sitio,
+                "account_number" => $request->electric_service_detail,
+                "care_of" => $request->care_of,
+                "feeder" => $request->feeder,
+                "membership_or" => $request->membership_or,
+                "consumer_type" => $request->consumer_type ? $request->consumer_type : 'N/A',
+                "old_meter_no" => $request->old_meter,
+                "meter_or_number" => $request->meter_or_no,
+                "meter_or_date" => null,
+                "new_meter_no" => $request->liquidation_meter_serial_number ? $request->liquidation_meter_serial_number : null, // ADD SERIAL NUMBER IF LIQUIDATION
+                "type_of_meter" => $request->meter_code_no,
+                "last_reading" => $request->last_reading,
+                "initial_reading" => $request->reading_initial,
+                "remarks" => $request->remarks,
+                "location" => $request->location,
+                "crew" => null,
+                "date_time_acted" => null,
+                "status" => null,
+                "damage_cause" => null,
+                "crew_remarks" => null,
+                "created_by" => Auth::id(),
+                "created_at" => Carbon::today(),
+                "process_date" => $request->process_date,
+                "kwh_meter_request_id" => $request->kwh_meter_request_control_no,
+            ]);
+
+            // Handle liquidation details if provided
+            if ($request->kwh_meter_request_control_no && $request->meter_serial_number) {
+                $kwhMeterRequest = KwhMeterRequest::where('id', $request->kwh_meter_request_control_no)->first();
+                $meter = Meter::find($request->meter_serial_number);
+                
+                if ($kwhMeterRequest && $meter) {
+                    // Update the tracking record to link with this change meter request
+                    $tracking = KwhMeterRequestSerialNumber::where('kwh_meter_request_id', $kwhMeterRequest->id)
+                        ->where('meter_id', $meter->id)
+                        ->whereNull('change_meter_request_id')
+                        ->first();
+                        
+                    if ($tracking) {
+                        $tracking->update([
+                            'change_meter_request_id' => $change_meter_request->id
+                        ]);
+                    }
+
+                    // assign control number and account number in meter details
+                    $meter->update([
+                        'control_type' => 'Change Meter',
+                        'control_no' => $control_id,
+                        'account_number' => $request->electric_service_detail,
+                    ]);
+                }
+            }
+
+            // check if there is a payment for meter accessories or calibration fee
+            if ($request->meter_accessories > 0 || $request->calibration_fee > 0) {
+                DB::connection('sqlSrvHousewiring')
+                ->table('Transaction Table')
+                ->insert([
+                        "SCONo" => $control_id,
+                        "Kwhm Deposit" => $request->meter_accessories,
+                        "Calibration" => $request->calibration_fee,
+                        "VATPercentage" => 0.12,
+                        "WireUnitCost" => 29.00,
+                        "MeterSeal" => 0.00,
+                ]);
+            }
+            
+            $feeFields = [
+                'membership', 'energy_deposit', 'conn_fee', 'xformer_rental', 'xformer_test',
+                'xformer_installation', 'xformer_removal', 'consumer_xfmr', 'consumer_pole',
+                'grounding_clamp', 'grounding_rod', 'meter_seal', 'hotline_clamp',
+                'meter_accessories', 'discredit_fee', 'calibration_fee', 'others',
+                'housewiring_kit', 'excess_conductor', 'conductor_duplex', 'circuit_breaker'
+            ];
+
+            foreach ($feeFields as $feeField) {
+                if ($request->$feeField > 0) {
+                    // $vat = $request->$feeField * .12;
+                    // $vatable_value = $feeField == 'meter_accessories' ? $request->$feeField + $vat : $request->$feeField;
+                    ChangeMeterRequestFees::create([
+                        'cm_control_no' => $change_meter_request->id,
+                        'fees' => $feeField,
+                        'amount' => $request->$feeField
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect(route('indexCM'))->withSuccess('Record Successfully Created! </br> SCO No:'.$control_id);
+
+        } catch (\Exception $e) {
+            // If an exception occurs during the transaction, rollback all changes
+            DB::rollback();
+            
+            // Optionally, handle the exception (log it, display an error message, etc.)
+            // For example:
+            // Log::error($e->getMessage());
+            return response()->$e;
+        }
     }
 
     /**
@@ -202,7 +310,7 @@ class ChangeMeterRequestController extends Controller
      */
     public function edit(string $id)
     {
-        $change_meter_request = ChangeMeterRequest::with('cmr_fees')->find($id);
+        $change_meter_request = ChangeMeterRequest::with('cmr_fees','kwhMeterRequestSerialNumbers.meter.meterType')->find($id);
         if ($change_meter_request->date_time_acted) {
             return redirect(route('indexCM'))->withWarning("Can't Update Record!");
         } else {
@@ -230,13 +338,37 @@ class ChangeMeterRequestController extends Controller
             ->orderBy('occupancy_name', 'asc')
             ->get();
 
-            $type_of_meters = DB::connection('sqlSrvHousewiring')
-            ->table('khw_meter_types')
-            ->select('*')
-            ->orderBy('meter_code', 'asc')
-            ->get();
+            // fetch all meter requests with approved_at and have available serials
+            $kwh_meter_requests = KwhMeterRequest::select('id', 'control_no', 'quantity')
+            ->orderBy('id', 'DESC')
+            ->where('approved_at', '!=', null)
+            ->with(['kwhMeterRequestSerialNumbers' => function($query) use ($id) {
+                $query->where('status', 0)
+                    ->where(function($subQuery) use ($id) {
+                        $subQuery->whereNull('change_meter_request_id')
+                                ->orWhere('change_meter_request_id', $id);
+                    })
+                    ->whereNull('deleted_at');
+            }])
+            ->get()
+            ->filter(function($request) {
+                // Only include requests that have available serials
+                return $request->kwhMeterRequestSerialNumbers->count() > 0;
+            })
+            ->mapWithKeys(function($request) {
+                $availableCount = $request->kwhMeterRequestSerialNumbers->count();
+                $totalQuantity = $request->quantity;
+                
+                // Format: "Control No - (Available: X/Total: Y)"
+                $displayText = $request->control_no . ' - (Available: ' . $availableCount . '/' . $totalQuantity . ')';
+                
+                return [$request->id => $displayText];
+            });
+
+            // Get meter types with available meter counts using service (exclude current request)
+            $type_of_meters = $this->changeMeterService->getMeterTypesWithAvailability($id, null);
             
-            return view('service_connect_order.change_meter.edit')->with(compact('change_meter_request', 'barangays', 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters'));
+            return view('service_connect_order.change_meter.edit')->with(compact('change_meter_request', 'barangays', 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters', 'kwh_meter_requests'));
         }
     }
 
@@ -245,6 +377,8 @@ class ChangeMeterRequestController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        
+        // dd($request);
         // Validate requests
         $this->validate($request, [
             'first_name' => ['required', 'string', 'max:255'],
@@ -256,10 +390,85 @@ class ChangeMeterRequestController extends Controller
             'membership_or' => ['required'],
             // 'membership_date' => ['required'],
             'consumer_type' => ['required'],
-            'meter_code_no' => ['required'],
             'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo,' . $id . ',id'], // Ensure uniqueness except for the current record
+            
+            'meter_code_no' => ['required_without:kwh_meter_request_control_no'], 
+            'process_date' => ['required'],
+            
+            // Liquidation fields validation
+            'kwh_meter_request_control_no' => ['nullable', 'string'],
+            'meter_serial_number' => ['required_with:kwh_meter_request_control_no'],
         ]);
 
+        // validate the meter type if the transaction is not kwh meter request liquidation
+        if ($request->kwh_meter_request_control_no == null && $request->meter_serial_number == null) {
+            // check if the selected meter types have available meters
+            $availableMeterCount = Meter::where('meter_type_id', $request->meter_code_no)
+                ->where('status', 0) // available status
+                ->whereNull('account_number')
+                ->whereNull('deleted_at')
+                ->count();
+
+            // check for unacted change meter requests using the same meter type
+            $unactedRequestsCount = ChangeMeterRequest::where('type_of_meter', $request->meter_code_no)
+                ->where('status', '!=', 2) // unacted requests
+                ->count();
+
+            // Calculate truly available meters (total available - reserved by unacted requests)
+            $trulyAvailableCount = $availableMeterCount - $unactedRequestsCount;
+
+            if ($trulyAvailableCount <= 0) {
+                $message = $availableMeterCount <= 0 
+                    ? 'The selected meter type has no available meters.' 
+                    : "The selected meter type has {$availableMeterCount} available meters, but {$unactedRequestsCount} are reserved by pending requests.";
+                
+                return redirect()->back()->withInput()->withErrors([
+                    'meter_code_no' => $message . ' Please choose a different type or wait for pending requests to be processed.'
+                ]);
+            }
+
+            // remove the change meter request id in the kwh meter request serials if previously linked
+            KwhMeterRequestSerialNumber::where('change_meter_request_id', $id)->update(['change_meter_request_id' => null]);
+
+            //remove the control number and account number in meter details if previously linked
+            $control_type = ChangeMeterRequest::find($id)->kwhMeterRequest()->exists() ? 'kWh Meter Request' : null;
+            ChangeMeterRequest::find($id)->assignedMeter()->update([
+                'control_type' => $control_type,
+                'control_no' => null,
+                'account_number' => null,
+            ]);
+            
+        } else {
+            // get meter type from kwh meter request serial number
+            $kwhMeterRequest = KwhMeterRequest::find($request->kwh_meter_request_control_no);
+            if (!$kwhMeterRequest) {
+                return redirect()->back()->withInput()->withErrors([
+                    'kwh_meter_request_control_no' => 'The selected kWh meter request does not exist.'
+                ]);
+            }
+            $type_of_meter = $kwhMeterRequest->meter_code_id;
+            $request->merge(['meter_code_no' => $type_of_meter]);
+
+            // Handle liquidation details if provided
+                $kwhMeterRequest = KwhMeterRequest::where('id', $request->kwh_meter_request_control_no)->first();
+                $meter = Meter::find($request->meter_serial_number);
+                
+                if ($kwhMeterRequest && $meter) {
+                    // Update the tracking record to link with this change meter request
+                    $tracking = KwhMeterRequestSerialNumber::where('kwh_meter_request_id', $kwhMeterRequest->id)
+                        ->where('meter_id', $meter->id)
+                        ->first();
+                        
+                    if ($tracking) {
+                        $tracking->update([
+                            'change_meter_request_id' => $id
+                        ]);
+                    }
+                }
+            
+            
+        }
+        // dd($request->all());
         DB::beginTransaction();
         try {
             // Find the existing record
@@ -296,6 +505,7 @@ class ChangeMeterRequestController extends Controller
                 "crew_remarks" => null,
                 "created_by" => Auth::id(),
                 "created_at" => Carbon::today(),
+                "kwh_meter_request_id" => $request->kwh_meter_request_control_no,
             ]);
 
             // Delete existing fees and re-add them
@@ -368,10 +578,40 @@ class ChangeMeterRequestController extends Controller
         DB::beginTransaction();
         try {
             $change_meter_request = ChangeMeterRequest::find($id);
+
+            // throw an error if there is an assign meter
+            if ($change_meter_request->new_meter_no) {
+                return redirect(route('indexCM'))->withWarning("Can't Archive Record with Assigned Meter!");
+            }
+
+            // remove linked change meter in kwh meter request serials if liquidation
+            if ($change_meter_request->kwh_meter_request_id) {
+                $change_meter_request->kwhMeterRequestSerialNumbers()
+                    ->where('change_meter_request_id', $change_meter_request->id)
+                    ->update(['change_meter_request_id' => null]); // unlinked the change meter request id
+            }
+
+
             $change_meter_request->delete();
 
             $change_meter_request_fees = ChangeMeterRequestFees::where('cm_control_no', $id);
             $change_meter_request_fees->delete();
+
+            // unliked meter details
+            // if ($change_meter_request->kwh_meter_request_id) {
+            //     // change kwh meter request serial status to unlinked
+            //     $change_meter_request->assignedMeter()->update([
+            //         'control_type' => 'kWh Meter Request', // if kwh_meter_request_id is not null then the type is kWh Meter Request
+            //         'control_no' => null,
+            //         'account_number' => null,
+            //     ]);
+
+            //     $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
+            //         ->where('change_meter_request_id', $change_meter_request->id)
+            //         ->update(['change_meter_request_id' => null]); // unlinked the change meter request id
+            // }
+            
+            
 
             DB::commit();
             
@@ -531,14 +771,34 @@ class ChangeMeterRequestController extends Controller
 
                 $newRemarks = substr($existingRemarks . $completeRemarks, 0);
 
+                // update Consumers Table serial no and remarks
                 DB::connection('sqlSrvBilling')
                 ->table('Consumers Table')
                 ->where('Accnt No', $change_meter_request->account_number)
                 ->update([
                     'Serial No' => $change_meter_request->new_meter_no,
-                    'Remarks' => $newRemarks,
+                    // 'Remarks' => $newRemarks,
                 ]);
 
+                // update meter status to unavailable if the old meter is posted and existing
+                $oldMeter = Meter::where('serial_number', $change_meter_request->old_meter_no)->first();
+                if ($oldMeter) {
+                    $oldMeter->update([
+                        'status' => 2, // unavailable
+                    ]);
+                }
+
+            }
+
+            // check if this change meter request is linked to a kwh meter request for liquidation purposes
+            if ($change_meter_request->kwh_meter_request_id) {
+                // change kwh meter request serial status to posted
+                $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
+                    ->where('change_meter_request_id', $change_meter_request->id)
+                    ->update(['status' => 1]); // Assuming '1' indicates 'posted'
+
+                // Check and update liquidation status
+                // $change_meter_request->kwhMeterRequest->checkAndUpdateLiquidationStatus();
             }
             
 
@@ -640,8 +900,11 @@ class ChangeMeterRequestController extends Controller
         // Get signature data if it exists
         $signatureResponse = $this->signatureService->getSignatures($id);
         $signatures = $signatureResponse['success'] ? collect($signatureResponse['data']) : collect();
+
+        // Get audit logs for this change meter request
+        $audits = $cm_request->audits()->with('user')->orderBy('created_at', 'desc')->get();
         
-        return view('service_connect_order.change_meter.view_acted_request', compact('cm_request', 'signatures'));
+        return view('service_connect_order.change_meter.view_acted_request', compact('cm_request', 'signatures', 'audits'));
     }
 
     public function viewReport(Request $request)
@@ -692,9 +955,25 @@ class ChangeMeterRequestController extends Controller
 
         // Execute the query and get the results
         $change_meter_requests = $query->get();
+        
+        // Get all request IDs
+        $requestIds = $change_meter_requests->pluck('id')->toArray();
+        
+        // Get all signatures at once (this depends on your SignatureService implementation)
+        $allSignatures = [];
+        if (!empty($requestIds)) {
+            // You might need to modify your SignatureService to support batch retrieval
+            foreach ($requestIds as $requestId) {
+                $signatureResponse = $this->signatureService->getSignatures($requestId);
+                if ($signatureResponse['success']) {
+                    $allSignatures[$requestId] = collect($signatureResponse['data']);
+                }
+            }
+        }
 
         view()->share('datas', $change_meter_requests);
-        $pdf = PDF::loadView('service_connect_order.change_meter.pdf_reports')->setPaper('a4', 'landscape');
+        view()->share('signatures', $allSignatures);
+        $pdf = PDF::loadView('service_connect_order.change_meter.pdf_reports')->setPaper('legal', 'landscape');
         return $pdf->stream();
     }
 
@@ -702,11 +981,11 @@ class ChangeMeterRequestController extends Controller
         $search = $request->search;
 
             if($search == ''){
-                $accounts = DB::table('Consumers Table as ct')
+                $accounts = DB::connection('sqlSrvBilling')->table('Consumers Table as ct')
                 ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No', 'ct.Cons Type');
 
             } else{
-                $accounts = DB::table('Consumers Table as ct')
+                $accounts = DB::connection('sqlSrvBilling')->table('Consumers Table as ct')
                 ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No', 'ct.Cons Type')
                 ->where('ct.Accnt No', 'like', '%' .$search . '%');
             }
@@ -714,6 +993,385 @@ class ChangeMeterRequestController extends Controller
         $data = $accounts->paginate(10, ['*'], 'page', $request->page);
         // dd($data);
         return response()->json($data); 
-    } 
+    }
 
+    /**
+     * Get audit logs for a specific change meter request
+     */
+    public function getAuditLogs(string $id)
+    {
+        try {
+            $cm_request = ChangeMeterRequest::findOrFail($id);
+            $audits = $cm_request->audits()->with('user')->orderBy('created_at', 'desc')->get();
+            
+            $formattedAudits = $audits->map(function ($audit) {
+                $changes = [];
+                $createdData = [];
+                
+                if ($audit->event == 'created' && $audit->new_values) {
+                    // For created events, show important initial values
+                    $importantFields = [
+                        'control_no', 'first_name', 'last_name', 'account_number', 
+                        'area', 'municipality_id', 'barangay_id', 'old_meter_no', 
+                        'type_of_meter', 'created_by'
+                    ];
+                    
+                    foreach ($importantFields as $field) {
+                        if (array_key_exists($field, $audit->new_values)) {
+                            $createdData[] = [
+                                'field' => ucwords(str_replace('_', ' ', $field)),
+                                'value' => is_null($audit->new_values[$field]) ? 'NULL' : $audit->new_values[$field]
+                            ];
+                        }
+                    }
+                    
+                    // If no important fields found, show first 8 fields
+                    if (empty($createdData)) {
+                        $count = 0;
+                        foreach ($audit->new_values as $key => $value) {
+                            if ($count >= 8) break;
+                            $createdData[] = [
+                                'field' => ucwords(str_replace('_', ' ', $key)),
+                                'value' => is_null($value) ? 'NULL' : $value
+                            ];
+                            $count++;
+                        }
+                    }
+                }
+                
+                if ($audit->event == 'updated' && $audit->old_values && $audit->new_values) {
+                    foreach ($audit->new_values as $key => $newValue) {
+                        if (array_key_exists($key, $audit->old_values) && $audit->old_values[$key] != $newValue) {
+                            $changes[] = [
+                                'field' => ucwords(str_replace('_', ' ', $key)),
+                                'old_value' => is_null($audit->old_values[$key]) ? 'NULL' : $audit->old_values[$key],
+                                'new_value' => is_null($newValue) ? 'NULL' : $newValue
+                            ];
+                        }
+                    }
+                }
+                
+                return [
+                    'id' => $audit->id,
+                    'event' => $audit->event,
+                    'user_name' => $audit->user ? $audit->user->name : 'System',
+                    'created_at' => $audit->created_at->format('M d, Y h:i A'),
+                    'changes' => $changes,
+                    'created_data' => $createdData,
+                    'ip_address' => $audit->ip_address,
+                    'user_agent' => $audit->user_agent
+                ];
+            });
+            
+            return response()->json([
+                'success' => true,
+                'data' => $formattedAudits,
+                'total' => $audits->count()
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch audit logs: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Export audit logs for a specific change meter request to CSV
+     */
+    public function exportAuditLogs(string $id)
+    {
+        try {
+            $cm_request = ChangeMeterRequest::findOrFail($id);
+            $audits = $cm_request->audits()->with('user')->orderBy('created_at', 'desc')->get();
+            
+            $filename = 'change_meter_audit_logs_' . $cm_request->control_no . '_' . date('Y-m-d_H-i-s') . '.csv';
+            
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ];
+            
+            $callback = function() use ($audits, $cm_request) {
+                $file = fopen('php://output', 'w');
+                
+                // Add CSV headers
+                fputcsv($file, [
+                    'Control No', 'Date & Time', 'User', 'Event', 'Field Changed', 
+                    'Old Value', 'New Value', 'IP Address', 'User Agent'
+                ]);
+                
+                foreach ($audits as $audit) {
+                    if ($audit->event == 'created' && $audit->new_values) {
+                        // For created events, export important initial values
+                        $importantFields = [
+                            'control_no', 'first_name', 'last_name', 'account_number', 
+                            'area', 'old_meter_no', 'type_of_meter'
+                        ];
+                        
+                        foreach ($importantFields as $field) {
+                            if (array_key_exists($field, $audit->new_values)) {
+                                fputcsv($file, [
+                                    $cm_request->control_no,
+                                    $audit->created_at->format('M d, Y h:i A'),
+                                    $audit->user ? $audit->user->name : 'System',
+                                    ucfirst($audit->event),
+                                    ucwords(str_replace('_', ' ', $field)),
+                                    '-',
+                                    is_null($audit->new_values[$field]) ? 'NULL' : $audit->new_values[$field],
+                                    $audit->ip_address,
+                                    $audit->user_agent
+                                ]);
+                            }
+                        }
+                    } elseif ($audit->event == 'updated' && $audit->old_values && $audit->new_values) {
+                        foreach ($audit->new_values as $key => $newValue) {
+                            if (array_key_exists($key, $audit->old_values) && $audit->old_values[$key] != $newValue) {
+                                fputcsv($file, [
+                                    $cm_request->control_no,
+                                    $audit->created_at->format('M d, Y h:i A'),
+                                    $audit->user ? $audit->user->name : 'System',
+                                    ucfirst($audit->event),
+                                    ucwords(str_replace('_', ' ', $key)),
+                                    is_null($audit->old_values[$key]) ? 'NULL' : $audit->old_values[$key],
+                                    is_null($newValue) ? 'NULL' : $newValue,
+                                    $audit->ip_address,
+                                    $audit->user_agent
+                                ]);
+                            }
+                        }
+                    } elseif ($audit->event == 'deleted' && $audit->old_values) {
+                        // For deleted events, show key fields that were deleted
+                        $keyFields = ['control_no', 'first_name', 'last_name', 'account_number', 'status'];
+                        foreach ($keyFields as $field) {
+                            if (array_key_exists($field, $audit->old_values)) {
+                                fputcsv($file, [
+                                    $cm_request->control_no,
+                                    $audit->created_at->format('M d, Y h:i A'),
+                                    $audit->user ? $audit->user->name : 'System',
+                                    ucfirst($audit->event),
+                                    ucwords(str_replace('_', ' ', $field)),
+                                    is_null($audit->old_values[$field]) ? 'NULL' : $audit->old_values[$field],
+                                    '-',
+                                    $audit->ip_address,
+                                    $audit->user_agent
+                                ]);
+                            }
+                        }
+                    } else {
+                        // For other events or events without detailed data
+                        fputcsv($file, [
+                            $cm_request->control_no,
+                            $audit->created_at->format('M d, Y h:i A'),
+                            $audit->user ? $audit->user->name : 'System',
+                            ucfirst($audit->event),
+                            $audit->event == 'created' ? 'Record Created' : 'Record ' . ucfirst($audit->event),
+                            '-',
+                            '-',
+                            $audit->ip_address,
+                            $audit->user_agent
+                        ]);
+                    }
+                }
+                
+                fclose($file);
+            };
+            
+            return response()->stream($callback, 200, $headers);
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to export audit logs: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get KWH meter request details for auto-fill
+     */
+    public function getKwhMeterRequestDetails(Request $request)
+    {
+        try {
+            $controlNo = $request->get('control_no');
+
+            $kwhMeterRequest = KwhMeterRequest::with(['user', 'meterType'])
+                ->where('id', $controlNo)
+                ->first();
+            
+            if (!$kwhMeterRequest) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'KWH meter request not found'
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'requested_by' => $kwhMeterRequest->user->name,
+                    'meter_type' => $kwhMeterRequest->meterType ? $kwhMeterRequest->meterType->meter_brand.' - '.$kwhMeterRequest->meterType->meter_code : 'N/A',
+                    'quantity' => $kwhMeterRequest->quantity,
+                    'remaining' => $kwhMeterRequest->remaining_quantity
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching KWH meter request details: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Get available meter serial numbers for a KWH meter request
+     */
+    public function getKwhMeterSerialNumbers(Request $request)
+    {
+        
+        try {
+            $controlNo = $request->get('control_no');
+            $changeMeterRequestId = $request->get('change_meter_request_id'); // Get the change meter request ID if editing
+            
+            $kwhMeterRequest = KwhMeterRequest::where('id', $controlNo)->first();
+            
+            if (!$kwhMeterRequest) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'KWH meter request not found'
+                ]);
+            }
+            
+            // Get meters assigned to this KWH meter request
+            $assignedMeters = Meter::join('kwh_meter_request_serial_numbers', 'meters.id', '=', 'kwh_meter_request_serial_numbers.meter_id')
+                ->where('kwh_meter_request_serial_numbers.kwh_meter_request_id', $kwhMeterRequest->id)
+                ->where('kwh_meter_request_serial_numbers.status', 0) // Unliquidated
+                ->whereNull('kwh_meter_request_serial_numbers.deleted_at')
+                ->where(function($query) use ($changeMeterRequestId) {
+                    $query->whereNull('kwh_meter_request_serial_numbers.change_meter_request_id');
+                    if ($changeMeterRequestId) {
+                        $query->orWhere('kwh_meter_request_serial_numbers.change_meter_request_id', $changeMeterRequestId);
+                    }
+                })
+                ->select('meters.id', 'meters.serial_number', 'meters.erc_seal_number', 'meters.leyeco_seal_number')
+                ->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $assignedMeters
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching meter serial numbers: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Get meter seal details by meter ID
+     */
+    public function getMeterSealDetails(Request $request)
+    {
+        try {
+            $meterId = $request->get('meter_id');
+            
+            $meter = Meter::find($meterId);
+            
+            if (!$meter) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Meter not found'
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'serial_number' => $meter->serial_number,
+                    'erc_seal' => $meter->erc_seal_number,
+                    'leyeco_seal' => $meter->leyeco_seal_number
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching meter seal details: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function getChangeMeterRequestStatusCounts()
+    {
+        try {
+            $today_count = [
+                'unacted' => ChangeMeterRequest::whereNull('status')
+                    ->whereDate('created_at', '=', Carbon::today()->toDateString())
+                    ->count(),
+                'acted_completed' => ChangeMeterRequest::where('status', 2)
+                    ->whereDate('created_at', '=', Carbon::today()->toDateString())
+                    ->count(),
+                'acted_not_completed' => ChangeMeterRequest::where('status', 1)
+                    ->whereDate('created_at', '=', Carbon::today()->toDateString())
+                    ->count(),
+                'dispatched' => ChangeMeterRequest::where('status', 3)
+                    ->whereDate('created_at', '=', Carbon::today()->toDateString())
+                    ->count(),
+            ];
+
+            $yesterday_count = [
+                'unacted' => ChangeMeterRequest::whereNull('status')
+                    ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
+                    ->count(),
+                'acted_completed' => ChangeMeterRequest::where('status', 2)
+                    ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
+                    ->count(),
+                'acted_not_completed' => ChangeMeterRequest::where('status', 1)
+                    ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
+                    ->count(),
+                'dispatched' => ChangeMeterRequest::where('status', 3)
+                    ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
+                    ->count(),
+            ];
+
+            $old_transaction_count = [
+                'unacted' => ChangeMeterRequest::whereNull('status')
+                    ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
+                    ->count(),
+                'acted_completed' => ChangeMeterRequest::where('status', 2)
+                    ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
+                    ->count(),
+                'acted_not_completed' => ChangeMeterRequest::where('status', 1)
+                    ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
+                    ->count(),
+                'dispatched' => ChangeMeterRequest::where('status', 3)
+                    ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
+                    ->count(),
+            ];
+
+            $total_count = [
+                'unacted' => ChangeMeterRequest::whereNull('status')->count(),
+                'acted_completed' => ChangeMeterRequest::where('status', 2)->count(),
+                'acted_not_completed' => ChangeMeterRequest::where('status', 1)->count(),
+                'dispatched' => ChangeMeterRequest::where('status', 3)->count(),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'today' => $today_count,
+                    'yesterday' => $yesterday_count,
+                    'old_transactions' => $old_transaction_count,
+                    'total' => $total_count
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching status counts: ' . $e->getMessage()
+            ]);
+        }
+    }
 }

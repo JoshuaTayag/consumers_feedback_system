@@ -9,6 +9,13 @@ class Employee extends Model
 {
     use HasFactory;
 
+    public function getFullNameAttribute()
+    {
+        return trim("{$this->prefix} {$this->first_name} " . 
+                    ($this->middle_name ? substr($this->middle_name, 0, 1) . ". " : "") . 
+                    "{$this->last_name}{$this->suffix}");
+    }
+
     public function user()
     {
         return $this->belongsTo('App\Models\User');

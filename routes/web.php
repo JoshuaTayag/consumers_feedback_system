@@ -84,6 +84,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('users', [App\Http\Controllers\Auth\UserController::class, 'store'])->name('userStore');
     Route::get('users/{id}/edit', [App\Http\Controllers\Auth\UserController::class, 'edit'])->name('users.edit');
     Route::put('users/update/{id}', [App\Http\Controllers\Auth\UserController::class, 'update'])->name('userUpdate');
+    Route::post('users/{id}/toggle-status', [App\Http\Controllers\Auth\UserController::class, 'toggleStatus'])->name('users.toggleStatus');
     Route::delete('users/{id}', [App\Http\Controllers\Auth\UserController::class, 'destroy'])->name('userDestroy');
 
     // employees
@@ -111,6 +112,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('change-meter-request-report', [App\Http\Controllers\ChangeMeterRequestController::class, 'viewReport'])->name('viewReport');
     Route::get('change-meter-request-report/pdf', [App\Http\Controllers\ChangeMeterRequestController::class, 'generateReport'])->name('generateReport');
     Route::get('cm-fetch-accounts-records', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAccountDetails'])->name('cmFetchAccounts');
+    Route::get('change-meter-request-audit-logs/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAuditLogs'])->name('cmAuditLogs');
+    Route::get('change-meter-request-export-audit-logs/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'exportAuditLogs'])->name('cmExportAuditLogs');
+    
+    // AJAX routes for auto-fill functionality
+    Route::get('kwh-meter-request-details', [App\Http\Controllers\ChangeMeterRequestController::class, 'getKwhMeterRequestDetails'])->name('kwhMeterRequestDetails');
+    Route::get('kwh-meter-serial-numbers', [App\Http\Controllers\ChangeMeterRequestController::class, 'getKwhMeterSerialNumbers'])->name('kwhMeterSerialNumbers');
+    Route::get('meter-seal-details', [App\Http\Controllers\ChangeMeterRequestController::class, 'getMeterSealDetails'])->name('meterSealDetails');
 
     Route::resource('change-meter-request', App\Http\Controllers\ChangeMeterRequestController::class);
     Route::resource('change-meter-contractor', App\Http\Controllers\ChangeMeterRequestContractorController::class);
@@ -171,6 +179,20 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('edit-material-cost', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItemCost'])->name('updateItemCost');
     Route::delete('delete-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'deleteItem'])->name('removeItem');
 
+    // METER MANAGEMENT
+    // Specific routes must come before resource routes to avoid conflicts
+    Route::get('meters/search', [App\Http\Controllers\MeterController::class, 'search'])->name('meters.search');
+    Route::post('meters/validate-serial', [App\Http\Controllers\MeterController::class, 'validateSerialNumber'])->name('meters.validate-serial');
+    Route::post('meters/validate-erc-seal', [App\Http\Controllers\MeterController::class, 'validateErcSeal'])->name('meters.validate-erc-seal');
+    Route::post('meters/validate-control-number', [App\Http\Controllers\MeterController::class, 'validateControlNumber'])->name('meters.validate-control-number');
+    Route::get('meters/{id}/audit-logs', [App\Http\Controllers\MeterController::class, 'getAuditLogs'])->name('meters.audit-logs');
+    Route::get('meters/change-meter-requests', [App\Http\Controllers\MeterController::class, 'getChangeMeterRequests'])->name('meters.change-meter-requests');
+    Route::get('meters/kwh-meter-requests', [App\Http\Controllers\MeterController::class, 'getKwhMeterRequests'])->name('meters.kwh-meter-requests');
+    Route::put('meters/{id}/assign', [App\Http\Controllers\MeterController::class, 'assign'])->name('meters.assign');
+    Route::put('meters/{id}/return', [App\Http\Controllers\MeterController::class, 'returnMeter'])->name('meters.return');
+    Route::put('meters/{id}/make-available', [App\Http\Controllers\MeterController::class, 'makeMeterAvailable'])->name('meters.makeAvailable');
+    Route::resource('meters', App\Http\Controllers\MeterController::class);
+
     // ELECTRICIAN
     Route::resource('electrician', App\Http\Controllers\ElectricianController::class);
     Route::get('electrician-complaints', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintIndex'])->name('electricianComplaintIndex');
@@ -204,6 +226,18 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('change-meter-request-pay/receipt/{id}', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'changeMeterReceipt'])->name('changeMeterReceipt');
 
     Route::resource('payment-transact', App\Http\Controllers\PaymentTransactionController::class);
+
+    Route::resource('meter-type', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\MeterTypeController::class);
+    Route::resource('kwh-meter-request', App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class);
+    Route::post('kwh-meter-request/{id}/liquidate', [App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class, 'liquidate'])->name('kwh-meter-request.liquidate');
+    Route::get('pending-transactions', [App\Http\Controllers\PendingController::class, 'index'])->name('pending.index');
+    Route::get('pending-transactions/search', [App\Http\Controllers\PendingController::class, 'search'])->name('pending.search');
+    Route::get('pending-transactions/statistics', [App\Http\Controllers\PendingController::class, 'getStatistics'])->name('pending.statistics');
+    Route::get('pending-transactions/{id}/details', [App\Http\Controllers\PendingController::class, 'showDetails'])->name('pending.details');
+    Route::post('pending-transactions/approve', [App\Http\Controllers\PendingController::class, 'approve'])->name('pending.approve');
+    Route::post('pending-transactions/disapprove', [App\Http\Controllers\PendingController::class, 'disapprove'])->name('pending.disapprove');
+    Route::get('kwh-meter-request-report', [App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class, 'generateKwhMeterReport'])->name('generateKwhMeterReport');
+    Route::get('kwh-meter-request-report-pdf', [App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class, 'KwhMeterPdfReport'])->name('KwhMeterPdfReport');
     // Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
 });
 

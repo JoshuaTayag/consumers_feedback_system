@@ -16,70 +16,57 @@
           </div>
         </div>
         <div class="card-body" style="background-color: #fafafa">
-          {!! Form::open(array('route' => 'storeCM','method'=>'POST')) !!}
+          <form action="{{ route('storeCM') }}" method="POST">
+            @csrf
             <div class="row">
               <div class="col-lg-8">
                 <div class="row">
                   <div class="col-lg-8">
                     <div class="mb-2">
-                        <!-- {{ Form::label('account_no', 'Account No') }}
-                        {{ Form::text('account_no', null, array('placeholder' => 'Ex: 0111111','class' => 'form-control')) }} -->
                         <label for="electric_service_detail" class="form-label mb-1">Account Number *</label><br>
                         <select class="form-control" id="electric_service_detail" name="electric_service_detail" style="width: 100%" required></select>
                     </div>
                   </div>
                   <div class="col-lg-4">
                     <div class="mb-2">
-                        {{ Form::label('old_meter', 'Old Meter') }}
-                        {{ Form::text('old_meter', null, array('class' => 'form-control', 'readonly')) }}
+                        <label for="old_meter" class="form-label mb-1">Old Meter</label>
+                        <input type="text" id="old_meter" name="old_meter" class="form-control" readonly>
                     </div>
                   </div>
                 </div>
 
+                <code class="fs-4">Consumer Details</code>
                 <hr>
 
                 <div class="row">
-                  <!-- <div class="col-lg-2">
-                    <div class="mb-2">
-                        {{ Form::label('sco', 'SCO No') }}
-                        {{ Form::text('sco', null, array('class' => 'form-control', 'disabled')) }}
-                    </div>
-                  </div> -->
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('last_name', 'Last Name') }}
-                        {{ Form::text('last_name', null, array('class' => 'form-control', 'required')) }}
+                        <label for="last_name" class="form-label mb-1">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" class="form-control" required>
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('first_name', 'First Name') }}
-                        {{ Form::text('first_name', null, array('class' => 'form-control', 'required')) }}
+                        <label for="first_name" class="form-label mb-1">First Name</label>
+                        <input type="text" id="first_name" name="first_name" class="form-control" required>
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('contact_no', 'Contact No.') }}
-                        {{ Form::text('contact_no', null, array('class' => 'form-control')) }}
+                        <label for="contact_no" class="form-label mb-1">Contact No.</label>
+                        <input type="text" id="contact_no" name="contact_no" class="form-control">
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('care_of', 'Care of') }}
-                        {{ Form::text('care_of', null, array('class' => 'form-control')) }}
+                        <label for="care_of" class="form-label mb-1">Care of</label>
+                        <input type="text" id="care_of" name="care_of" class="form-control">
                     </div>
                   </div>
                 </div>
                 <div class="row">
-                  <!-- <div class="col-lg-2">
-                    <div class="mb-2">
-                        {{ Form::label('or_number', 'OR number') }}
-                        {{ Form::text('or_number', null, array('class' => 'form-control', 'readonly')) }}
-                    </div>
-                  </div> -->
                   <div class="col-lg-2">
-                    <label for="feeder">Feeder *</label>
-                    <!-- <input type="text" value="" id="care_of" name="care_of" class="form-control" readonly> -->
+                    <label for="feeder" class="form-label mb-1">Feeder *</label>
                     <select id="feeder" class="form-control" name="feeder" required>
                       <option value=""></option>
                       @foreach (Config::get('constants.feeders') as $feeder)          
@@ -89,15 +76,13 @@
                   </div>
                   <div class="col-lg-1">
                     <div class="mb-2">
-                        {{ Form::label('area', 'Area *') }}
-                        <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
-                          <option value=""></option>
-                          <option value="1" {{ old('area') == "A1" ? 'selected' : ''}} >A1</option>
-                          <option value="2" {{ old('area') == "A2" ? 'selected' : ''}} >A2</option>
-                          <option value="3" {{ old('area') == "A3" ? 'selected' : ''}} >A3</option>
-                          <option value="4" {{ old('area') == "A4" ? 'selected' : ''}} >A4</option>
-                          <option value="5" {{ old('area') == "A5" ? 'selected' : ''}} >A5</option>
-                        </select>
+                      <label for="area" class="form-label mb-1">Area *</label>
+                      <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
+                        <option value=""></option>
+                        @foreach (Config::get('constants.coverage_areas') as $area)          
+                          <option value="{{ $area['id'] }}" id="">{{ $area['name'] }}</option>
+                        @endforeach
+                      </select>
                     </div>
                   </div>
                   <div class="col-lg-3">
@@ -119,97 +104,57 @@
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                      {{ Form::label('sitio', 'Sitio *') }}
-                      {{ Form::text('sitio', null, array('class' => 'form-control', 'required')) }}
+                      <label for="sitio" class="form-label mb-1">Sitio *</label>
+                      <input type="text" id="sitio" name="sitio" class="form-control" required>
                     </div>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-lg-2">
                     <div class="mb-2">
-                        {{ Form::label('membership_or', 'Membership OR *') }}
-                        {{ Form::text('membership_or', null, array('class' => 'form-control', 'readonly')) }}
+                      <label for="membership_or" class="form-label mb-1">Membership OR *</label>
+                        <input type="text" id="membership_or" name="membership_or" class="form-control" readonly>
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('membership_date', 'Membership Date *') }}
-                        {{ Form::date('membership_date', null, array('class' => 'form-control', 'readonly')) }}
+                      <label for="membership_date" class="form-label mb-1">Membership Date *</label>
+                      <input type="date" id="membership_date" name="membership_date" class="form-control" readonly>
                     </div>
                   </div>
                   <div class="col-lg-1">
                     <div class="mb-2">
-                        {{ Form::label('consumer_type', 'Type *') }}
-                        {{ Form::text('consumer_type', null, array('class' => 'form-control', 'readonly')) }}
-                        {{-- <select id="consumer_type" class="form-control" name="consumer_type" value="{{ old('consumer_type')}}" required>
-                          <option value=""></option>
-                          @foreach (Config::get('constants.consumer_types') as $consumer_type)          
-                            <option value="{{ $consumer_type['id'] }}" id="">{{ $consumer_type['name'] }}</option>
-                          @endforeach 
-                        </select> --}}
-                    </div>
-                  </div>
-                  <!-- <div class="col-lg-3">
-                    <div class="mb-2">
-                        {{ Form::label('occupancy_type', 'Occupancy Type') }}
-                        <select id="occupancy_type" class="form-control" name="occupancy_type">
-                          <option value=""></option>
-                          @foreach ($occupancy_types as $occupancy_type)          
-                            <option value="{{ $occupancy_type->occupancy_name }}" >{{ $occupancy_type->occupancy_name }}</option>
-                          @endforeach 
-                        </select>
-                    </div>
-                  </div> -->
-                  <!-- <div class="col-lg-2">
-                    <div class="mb-2">
-                        {{ Form::label('line_type', 'Line Type') }}
-                        <select id="line_type" class="form-control" name="line_type">
-                          <option value=""></option>
-                          @foreach (Config::get('constants.line_types') as $line_type)          
-                            <option value="{{ $line_type['name'] }}" id="">{{ $line_type['name'] }}</option>
-                          @endforeach 
-                        </select>
-                    </div>
-                  </div> -->
-                  <!-- <div class="col-lg-2">
-                    <div class="mb-2">
-                        {{ Form::label('meter_no', 'Meter No') }}
-                        {{ Form::text('meter_no', null, array('class' => 'form-control')) }}
-                    </div>
-                  </div> -->
-                  <!-- <div class="col-lg-2">
-                    <div class="mb-2">
-                        {{ Form::label('date_installed', 'Date Installed') }}
-                        {{ Form::date('date_installed', null, array('class' => 'form-control')) }}
-                    </div>
-                  </div> -->
-                  <div class="col-lg-3">
-                    <div class="mb-2">
-                        {{ Form::label('meter_or_no', 'Meter OR #') }}
-                        {{ Form::text('meter_or_no', null, array('class' => 'form-control')) }}
+                      <label for="consumer_type" class="form-label mb-1">Type *</label>
+                      <input type="text" id="consumer_type" name="consumer_type" class="form-control" readonly>
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('process_date', 'Process Date *') }}
-                        {{ Form::date('process_date', null, array('class' => 'form-control', 'required')) }}
+                      <label for="meter_or_no" class="form-label mb-1">Meter OR #</label>
+                      <input type="text" id="meter_or_no" name="meter_or_no" class="form-control">
+                    </div>
+                  </div>
+                  <div class="col-lg-3">
+                    <div class="mb-2">
+                      <label for="process_date" class="form-label mb-1">Process Date *</label>
+                      <input type="date" id="process_date" name="process_date" class="form-control" required>
                     </div>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-lg-8">
                     <div class="mb-2">
-                        {{ Form::label('meter_code_no', 'Type Of Meter*') }}
+                      <label for="meter_code_no" class="form-label mb-1">Type Of Meter*</label>
                         <select id="meter_code_no" class="form-control" name="meter_code_no" required>
                           <option value=""></option>
                           @foreach ($type_of_meters as $type_of_meter)          
-                            <option value="{{ $type_of_meter->meter_code }}" id="" {{ old('meter_code_no') == $type_of_meter->meter_code ? 'selected' : ''}}>
-                              <div class="row">
-                                <div class="form-group">
-                                  <label class="col-xs-6">{{ $type_of_meter->meter_code  }} <span class="fw-bold">|</span></label>
-                                  <label class="col-xs-6">{{ $type_of_meter->meter_description  }}</label>
-                                </div>
-                              </div> 
+                            <option value="{{ $type_of_meter->id }}" 
+                                    id="" 
+                                    {{ old('meter_code_no') == $type_of_meter->meter_code ? 'selected' : ''}}
+                                    {{ $type_of_meter->available_count <= 0 ? 'disabled' : '' }}
+                                    data-available-count="{{ $type_of_meter->available_count }}">
+                              {{ $type_of_meter->meter_code }} - {{ $type_of_meter->meter_description }} 
+                              (Available: {{ $type_of_meter->available_count }})
                             </option>
                           @endforeach 
                         </select>
@@ -217,14 +162,14 @@
                   </div>
                   <div class="col-lg-2">
                     <div class="mb-2">
-                        {{ Form::label('last_reading', 'Last Reading') }}
-                        {{ Form::number('last_reading', null, array('class' => 'form-control', 'readonly')) }}
+                      <label for="last_reading" class="form-label mb-1">Last Reading</label>
+                      <input type="number" id="last_reading" name="last_reading" class="form-control" readonly>
                     </div>
                   </div>
                   <div class="col-lg-2">
                     <div class="mb-2">
-                        {{ Form::label('reading_initial', 'Initial Reading') }}
-                        {{ Form::number('reading_initial', null, array('class' => 'form-control')) }}
+                      <label for="reading_initial" class="form-label mb-1">Initial Reading</label>
+                      <input type="number" id="reading_initial" name="reading_initial" class="form-control">
                     </div>
                   </div>
                 </div>
@@ -245,8 +190,64 @@
               </div>
 
               <div class="col-lg-4 mb-3" id="schedule_of_fees" >
-              <div class="col text-center"><h2>Schedule of Fees</h2></div>
+                <div class="col text-center"><h2>Schedule of Fees</h2></div>
                 @include('service_connect_order.schedule_of_fees')
+              </div>
+
+              <div class="col-lg-8">
+                <code class="fs-4">Liquidation Details</code>
+                <hr>
+                  <div class="row">
+                    <div class="col-lg-5">
+                      <div class="mb-2">
+                        <label for="kwh_meter_request_control_no" class="form-label mb-1">kWh Meter Request</label>
+                          <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no">
+                            <option value="">Select kWh Meter Request</option>
+                            @foreach ($kwh_meter_requests as $key => $control_no)          
+                              <option value="{{ $key }}" {{ old('kwh_meter_request_control_no') == $control_no ? 'selected' : ''}}>
+                              {{ $control_no }}
+                              </option>
+                            @endforeach 
+                          </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-3">
+                      <div class="mb-2">
+                        <label for="liquidation_requested_by" class="form-label mb-1">Requested By</label>
+                        <input type="text" id="liquidation_requested_by" name="liquidation_requested_by" class="form-control" readonly>
+                      </div>
+                    </div>
+                    <div class="col-lg-4">
+                      <div class="mb-2">
+                        <label for="liquidation_meter_type" class="form-label mb-1">Meter Type</label>
+                        <input type="text" id="liquidation_meter_type" name="liquidation_meter_type" class="form-control" readonly>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-lg-4">
+                      <div class="mb-2">
+                        <label for="meter_serial_number" class="form-label mb-1">Serial Number</label>
+                          <select id="meter_serial_number" class="form-control" name="meter_serial_number">
+                            <option value="">Select Serial Number</option>
+                          </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-4">
+                      <div class="mb-2">
+                        <label for="liquidation_erc_seal" class="form-label mb-1">ERC Seal</label>
+                        <input type="text" id="liquidation_erc_seal" name="liquidation_erc_seal" class="form-control" readonly>
+                      </div>
+                    </div>
+                    <div class="col-lg-4">
+                      <div class="mb-2">
+                        <label for="liquidation_leyeco_seal" class="form-label mb-1">Leyeco 5 Seal</label>
+                        <input type="text" id="liquidation_leyeco_seal" name="liquidation_leyeco_seal" class="form-control" readonly>
+                      </div>
+                    </div>
+                    <input type="hidden" id="liquidation_meter_serial_number" name="liquidation_meter_serial_number" class="form-control" readonly>
+                </div>
               </div>
 
               <div class="col-xs-12 col-sm-12 col-md-12 text-end">
@@ -254,7 +255,7 @@
                   <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-check me-2"></i>Submit</button>
               </div>
             </div>
-          {!! Form::close() !!}
+          </form>
         </div>
       </div>
     </div>
@@ -396,5 +397,160 @@
       border-radius: 8px;
       background-color: #e19a00;
   }
+
+  /* Style for disabled meter options */
+  #meter_code_no option:disabled {
+      color: #999;
+      background-color: #f5f5f5;
+      font-style: italic;
+  }
+
+  /* Style for available meter count display */
+  .meter-availability-info {
+      font-size: 12px;
+      color: #666;
+  }
+
+  .meter-unavailable {
+      color: #dc3545 !important;
+  }
+
+  .meter-available {
+      color: #28a745 !important;
+  }
 </style>
+
+<script>
+$(document).ready(function() {
+    // Add event handler for meter type selection
+    $('#meter_code_no').on('change', function() {
+        var selectedOption = $(this).find('option:selected');
+        var availableCount = selectedOption.data('available-count');
+        
+        // Check if the selected meter type has available meters
+        if (availableCount <= 0 && selectedOption.val() !== '') {
+            alert('Warning: No meters available for the selected meter type. Please choose a different meter type.');
+            $(this).val(''); // Clear the selection
+            return false;
+        }
+    });
+    
+    // Style options based on availability when page loads
+    $('#meter_code_no option').each(function() {
+        var availableCount = $(this).data('available-count');
+        if (availableCount <= 0 && $(this).val() !== '') {
+            $(this).addClass('meter-unavailable');
+            $(this).append(' - OUT OF STOCK');
+        } else if ($(this).val() !== '') {
+            $(this).addClass('meter-available');
+        }
+    });
+
+    // Handle kWh meter request selection change
+    $('#kwh_meter_request_control_no').on('change', function() {
+        const controlNo = $(this).val();
+        
+        // Clear dependent fields
+        $('#liquidation_requested_by').val('');
+        $('#liquidation_meter_type').val('');
+        $('#meter_serial_number').html('<option value="">Select Serial Number</option>');
+        $('#liquidation_erc_seal').val('');
+        $('#liquidation_leyeco_seal').val('');
+        $('#liquidation_meter_serial_number').val('');
+        
+        if (controlNo) {
+            // Fetch kWh meter request details
+            $.ajax({
+                url: '{{ route("kwhMeterRequestDetails") }}',
+                type: 'GET',
+                data: { control_no: controlNo },
+                success: function(response) {
+                    if (response.success) {
+                        $('#liquidation_requested_by').val(response.data.requested_by);
+                        $('#liquidation_meter_type').val(response.data.meter_type);
+                        
+                        // Load available serial numbers
+                        loadSerialNumbers(controlNo);
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching kWh meter request details:', error);
+                    alert('Error loading kWh meter request details. Please try again.');
+                }
+            });
+        }
+
+        // remove type of meter required validation
+        if (controlNo) {
+            $('#meter_code_no').prop('required', false);
+        } else {
+            $('#meter_code_no').prop('required', true);
+        }
+    });
+    
+    // Handle serial number selection change
+    $('#meter_serial_number').on('change', function() {
+        const meterId = $(this).val();
+        
+        // Clear seal fields
+        $('#liquidation_erc_seal').val('');
+        $('#liquidation_leyeco_seal').val('');
+        $('#liquidation_meter_serial_number').val('');
+        
+        if (meterId) {
+            // Fetch meter seal details
+            $.ajax({
+                url: '{{ route("meterSealDetails") }}',
+                type: 'GET',
+                data: { meter_id: meterId },
+                success: function(response) {
+                    if (response.success) {
+                        $('#liquidation_erc_seal').val(response.data.erc_seal || '');
+                        $('#liquidation_leyeco_seal').val(response.data.leyeco_seal || '');
+                        $('#liquidation_meter_serial_number').val(response.data.serial_number || '');
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching meter seal details:', error);
+                    alert('Error loading meter seal details. Please try again.');
+                }
+            });
+        }
+    });
+    
+    // Function to load serial numbers for selected kWh meter request
+    function loadSerialNumbers(controlNo) {
+        $('#meter_serial_number').html('<option value="">Loading serial numbers...</option>');
+        
+        $.ajax({
+            url: '{{ route("kwhMeterSerialNumbers") }}',
+            type: 'GET',
+            data: { control_no: controlNo },
+            success: function(response) {
+                let options = '<option value="">Select Serial Number</option>';
+                
+                if (response.success && response.data.length > 0) {
+                    response.data.forEach(function(meter) {
+                        options += `<option value="${meter.id}">${meter.serial_number}</option>`;
+                    });
+                } else {
+                    options = '<option value="">No available serial numbers</option>';
+                }
+                
+                $('#meter_serial_number').html(options);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching serial numbers:', error);
+                $('#meter_serial_number').html('<option value="">Error loading serial numbers</option>');
+                alert('Error loading serial numbers. Please try again.');
+            }
+        });
+    }
+});
+</script>
+
 @endsection

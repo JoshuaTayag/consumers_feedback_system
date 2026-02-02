@@ -2,6 +2,154 @@
 
 @section('content')
 <div class="container">
+  <!-- Dashboard for available and reserved meters -->
+  <div class="row">
+      <!-- Unacted Requests Card -->
+      <div class="col-lg-3 mb-3">
+          <div class="card border-danger shadow-sm h-100">
+              <div class="card-body bg-danger bg-opacity-10">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                          <h6 class="card-subtitle mb-2 text-danger fw-semibold">
+                              <i class="fas fa-unlock me-1"></i> Unacted Requests
+                          </h6>
+                          <h2 class="text-danger fw-bold mb-1">
+                          {{ $change_meter_status_count->getData()->data->total->unacted ?? 0 }}
+                          </h2>
+                          {{-- <small class="text-muted">asd</small> --}}
+                      </div>
+                      <div class="text-danger opacity-25">
+                          <i class="fas fa-clipboard-list" style="font-size: 3rem;"></i>
+                      </div>
+                  </div>
+                  <hr class="my-3">
+                  <div class="row text-center">
+                      <div class="col-4">
+                          <small class="text-muted d-block">Today</small>
+                          <strong class="text-danger">{{ $change_meter_status_count->getData()->data->today->unacted ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Yesterday</small>
+                          <strong class="text-danger">{{ $change_meter_status_count->getData()->data->yesterday->unacted ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Old</small>
+                          <strong class="text-danger">{{ $change_meter_status_count->getData()->data->old_transactions->unacted ?? 0 }}</strong>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Dispatched Requests Card -->
+      <div class="col-lg-3 mb-3">
+          <div class="card border-warning shadow-sm h-100">
+              <div class="card-body bg-warning bg-opacity-10">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                          <h6 class="card-subtitle mb-2 text-warning fw-semibold">
+                              <i class="fas fa-lock me-1"></i> Dispatched Requests
+                          </h6>
+                          <h2 class="text-warning fw-bold mb-1">
+                            {{ $change_meter_status_count->getData()->data->total->dispatched ?? 0 }}
+                          </h2>
+                      </div>
+                      <div class="text-warning opacity-25">
+                          <i class="fas fa-truck" style="font-size: 3rem;"></i>
+                      </div>
+                  </div>
+                  <hr class="my-3">
+                  <div class="row text-center">
+                      <div class="col-4">
+                          <small class="text-muted d-block">Today</small>
+                          <strong class="text-warning">{{ $change_meter_status_count->getData()->data->today->dispatched ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Yesterday</small>
+                          <strong class="text-warning">{{ $change_meter_status_count->getData()->data->yesterday->dispatched ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Old</small>
+                          <strong class="text-warning">{{ $change_meter_status_count->getData()->data->old_transactions->dispatched ?? 0 }}</strong>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Acted - Not Completed Requests Card -->
+      <div class="col-lg-3 mb-3">
+          <div class="card border-primary shadow-sm h-100">
+              <div class="card-body bg-primary bg-opacity-10">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                          <h6 class="card-subtitle mb-2 text-primary fw-semibold">
+                              <i class="fas fa-exclamation-circle me-1"></i> Acted - Not Completed Requests
+                          </h6>
+                          <h2 class="text-primary fw-bold mb-1">
+                            {{ $change_meter_status_count->getData()->data->total->acted_not_completed ?? 0 }}
+                          </h2>
+                      </div>
+                      <div class="text-primary opacity-25">
+                          <i class="fas fa-exclamation-circle" style="font-size: 3rem;"></i>
+                      </div>
+                  </div>
+                  <hr class="my-3">
+                  <div class="row text-center">
+                      <div class="col-4">
+                          <small class="text-muted d-block">Today</small>
+                          <strong class="text-primary">{{ $change_meter_status_count->getData()->data->today->acted_not_completed ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Yesterday</small>
+                          <strong class="text-primary">{{ $change_meter_status_count->getData()->data->yesterday->acted_not_completed ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Old</small>
+                          <strong class="text-primary">{{ $change_meter_status_count->getData()->data->old_transactions->acted_not_completed ?? 0 }}</strong>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Total Overview Card -->
+      <div class="col-lg-3 mb-3">
+          <div class="card border-success shadow-sm h-100">
+              <div class="card-body bg-success bg-opacity-10">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                          <h6 class="card-subtitle mb-2 text-success fw-semibold">
+                              <i class="fas fa-check-circle me-1"></i> Acted Requests - Completed
+                          </h6>
+                          <h2 class="text-success fw-bold mb-1">
+                            {{ $change_meter_status_count->getData()->data->total->acted_completed ?? 0 }}
+                          </h2>
+                      </div>
+                      <div class="text-success opacity-25">
+                          <i class="fas fa-check-circle" style="font-size: 3rem;"></i>
+                      </div>
+                  </div>
+                  <hr class="my-3">
+                  <div class="row text-center">
+                      <div class="col-4">
+                          <small class="text-muted d-block">Today</small>
+                          <strong class="text-success">{{ $change_meter_status_count->getData()->data->today->acted_completed ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Yesterday</small>
+                          <strong class="text-success">{{ $change_meter_status_count->getData()->data->yesterday->acted_completed ?? 0 }}</strong>
+                      </div>
+                      <div class="col-4">
+                          <small class="text-muted d-block">Old</small>
+                          <strong class="text-success">{{ $change_meter_status_count->getData()->data->old_transactions->acted_completed ?? 0 }}</strong>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
   <div class="row justify-content-center">
       <div class="col-lg-12">
           <div class="card">
@@ -66,10 +214,10 @@
 
                                   @if($cm_request->status == 3)
                                     <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#transferRequestModal" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-crew-id="{{$cm_request->crew}}"><i class="fa fa-shuffle"></i>&nbsp; Transfer Request</a></li>
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#meterPostingModal" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-area="{{$cm_request->area}}" data-feeder="{{$cm_request->feeder}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#meterPostingModal" data-assign-meter="{{ $cm_request->assignedMeter }}" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
                                   @endif
 
-                                  @if($cm_request->status == null)
+                                  @if($cm_request->status == null && $cm_request->new_meter_no != null)
                                     <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dispatchingModal" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}"><i class="fa fa-truck"></i>&nbsp; Dispatch</a></li>
                                   @endif
 
@@ -172,25 +320,73 @@
   var transferRequestModal = document.getElementById('transferRequestModal');
 
   meterPostingModal.addEventListener('show.bs.modal', function (event) {
-    var button = event.relatedTarget;
+      var button = event.relatedTarget;
 
-    var sco = button.getAttribute('data-sco');
-    var full_name = button.getAttribute('data-name');
-    var process_date = button.getAttribute('data-process-date');
-    var area = button.getAttribute('data-area');
-    var feeder = button.getAttribute('data-feeder');
-    var cm_id = button.getAttribute('data-id');
+      var sco = button.getAttribute('data-sco');
+      var full_name = button.getAttribute('data-name');
+      var process_date = button.getAttribute('data-process-date');
+      var cm_id = button.getAttribute('data-id');
+      var assigned_meter = button.getAttribute('data-assign-meter');
 
-    // console.log(feeder)
-    var modal_sco = meterPostingModal.querySelector('#sco');
-    var modal_name = meterPostingModal.querySelector('#full_name');
-    var modal_process_date = meterPostingModal.querySelector('#process_date');
-    var modal_cm_id = meterPostingModal.querySelector('#cm_id');
+      // Parse the JSON data from assigned_meter
+      var meterDetails = null;
+      try {
+          if (assigned_meter && assigned_meter !== 'null' && assigned_meter !== '') {
+              meterDetails = JSON.parse(assigned_meter);
+          }
+      } catch (e) {
+          console.error('Error parsing meter details:', e);
+          meterDetails = null;
+      }
 
-    modal_sco.value = sco;
-    modal_name.value = full_name;
-    modal_process_date.value = process_date;
-    modal_cm_id.value = cm_id;
+      // Get modal elements
+      var modal_sco = meterPostingModal.querySelector('#sco');
+      var modal_name = meterPostingModal.querySelector('#full_name');
+      var modal_process_date = meterPostingModal.querySelector('#process_date');
+      var modal_cm_id = meterPostingModal.querySelector('#cm_id');
+      var modal_meter_no = meterPostingModal.querySelector('#meter_no');
+      var modal_seal_no = meterPostingModal.querySelector('#seal_no');
+      var modal_erc_seal = meterPostingModal.querySelector('#erc_seal');
+
+      // Set basic fields
+      modal_sco.value = sco;
+      modal_name.value = full_name;
+      modal_process_date.value = process_date;
+      modal_cm_id.value = cm_id;
+
+      // Set meter details from parsed JSON and handle readonly attribute
+      if (meterDetails) {
+          // Populate fields with meter details
+          modal_meter_no.value = meterDetails.serial_number || '';
+          modal_seal_no.value = meterDetails.leyeco_seal_number || '';
+          modal_erc_seal.value = meterDetails.erc_seal_number || '';
+          
+          // Add readonly attribute to prevent editing
+          modal_meter_no.setAttribute('readonly', true);
+          modal_seal_no.setAttribute('readonly', true);
+          modal_erc_seal.setAttribute('readonly', true);
+          
+          // Optional: Add visual styling to indicate readonly state
+          modal_meter_no.classList.add('bg-light');
+          modal_seal_no.classList.add('bg-light');
+          modal_erc_seal.classList.add('bg-light');
+          
+      } else {
+          // Clear fields if no meter details available
+          modal_meter_no.value = '';
+          modal_seal_no.value = '';
+          modal_erc_seal.value = '';
+          
+          // Remove readonly attribute to allow editing
+          modal_meter_no.removeAttribute('readonly');
+          modal_seal_no.removeAttribute('readonly');
+          modal_erc_seal.removeAttribute('readonly');
+          
+          // Remove visual styling
+          modal_meter_no.classList.remove('bg-light');
+          modal_seal_no.classList.remove('bg-light');
+          modal_erc_seal.classList.remove('bg-light');
+      }
   });
 
   transferRequestModal.addEventListener('show.bs.modal', function (event) {

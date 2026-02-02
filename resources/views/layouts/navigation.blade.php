@@ -173,10 +173,19 @@
             <a class="dropdown-item" href="{{ route('material-requisition-form.index') }}">MER</a>
           </li>
           <li>
+            <a class="dropdown-item" href="{{ route('kwh-meter-request.index') }}">KWH METER REQUESTS</a>
+          </li>
+          <li>
             <a class="dropdown-item" href="#">DATA MANAGEMENT &raquo; </a>
             <ul class="dropdown-menu dropdown-submenu">
               <li>
                 <a class="dropdown-item" href="{{ route('structure.index') }}">STRUCTURE</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('meters.index') }}">KWH METERS</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('meter-type.index') }}">KWH METER TYPES</a>
               </li>
             </ul>
           </li>

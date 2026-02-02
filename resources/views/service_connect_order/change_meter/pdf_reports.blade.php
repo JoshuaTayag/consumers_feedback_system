@@ -104,6 +104,59 @@
     .styled-table, th, td {
       border: 1px solid rgb(0, 0, 0);
     }
+
+    .signature-table {
+      border-collapse: collapse;
+      border: none !important;
+    }
+    
+    .signature-table th,
+    .signature-table td {
+      border: none !important;
+    }
+    
+    .signature-header {
+      width: 33.33%; 
+      padding-bottom: 70px; 
+      border: none !important;
+      text-align: center;
+    }
+    
+    .signature-name {
+      text-decoration: underline; 
+      width: 33.33%; 
+      border: none !important;
+      text-align: center;
+    }
+    
+    .signature-position {
+      width: 33.33%; 
+      border: none !important;
+      text-align: center;
+    }
+
+    /* Add these CSS rules for the footer */
+    @page {
+      margin: 15px 20px 15px 20px; /* top, right, bottom, left */
+    }
+
+    .page-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      /* height: 0px; */
+      text-align: right;
+      font-size: 10px;
+      color: #666;
+      /* padding: 10px; */
+      background-color: white;
+      border-top: 1px solid #ddd;
+    }
+
+    .page-number:after {
+      content: "Page " counter(page) " of " counter(pages);
+    }
   </style>
 </head>
 <body>
@@ -131,42 +184,118 @@
   </div> -->
 
   <div class="text-align" style="margin-top: 0px; padding-top: 0px;">
-    <table class="styled-table" style="font-size: 12px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
+    <table class="styled-table" style="font-size: 11px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
       <thead>
         <tr>
-          <th>Control No.</th>
-          <th>Name</th>
+          <th rowspan="2">No.</th>
+          <th rowspan="2">Control No.</th>
+          <th rowspan="2">Name</th>
+          <th rowspan="2">Address</th>
+          <th colspan="3">OLD KWH METER</th>
+          <th colspan="3">NEW KWH METER</th>
+          <th rowspan="2">Date Installed</th>
+          <th rowspan="2">Signature</th>
+        </tr>
+        <tr>
           <th>Account #</th>
-          <th>Old Meter #</th>
-          <th>New Meter #</th>
-          <th>Area</th>
-          <th>Address</th>
-          <th>Status</th>
-          <th>Damage Cause</th>
-          <th>Crew Remarks</th>
-          <th>Process Date</th>
+          <th>Meter #</th>
+          <th>Last Reading</th>
+          <th>Meter #</th>
+          <th>ERC Seal</th>
+          <th>Leyeco 5 Seal</th>
         </tr>
       </thead>
       <tbody>
           @foreach($datas as $index => $data)
           <tr>
+            <td>{{ $loop->iteration }}</td>
             <td>{{$data->control_no}}</td>
             <td>{{$data->last_name.', '.$data->first_name}}</td>
+            <td>{{$data->sitio.', '.$data->barangay->barangay_name.', '. $data->municipality->municipality_name}}</td>
             <td>{{ substr($data->account_number, 0, 2) }}-{{ substr($data->account_number, 2, 4) }}-{{ substr($data->account_number, 6, 4) }}</td>
             <td>{{$data->old_meter_no}}</td>
+            <td>{{$data->last_reading}}</td>
             <td>{{$data->new_meter_no}}</td>
-            <td>A{{$data->area}}</td>
-            <td>{{$data->sitio.', '.$data->barangay->barangay_name.', '. $data->municipality->municipality_name}}</td>
-            <td>{{$data->status == 1 ? 'ACTED - NOT COMPLETED' : ($data->status == 2 ? 'ACTED - COMPLETED' : ($data->status == 3 ? 'DISPATCHED' : 'UNACTED')) }}</td>
-            <td>{{$data->damage_cause}}</td>
-            <td>{{$data->crew_remarks}}</td>
-            <td>{{ date('m/d/Y', strtotime($data->created_at)) }}</td>
+            <td>{{$data->postedMeterHistory->erc_seal_no}}</td>
+            <td>{{$data->postedMeterHistory->leyeco_seal_no}}</td>
+            <td>{{$data->postedMeterHistory->date_installed}}</td>
+            <td class="signature-cell">
+              @if(isset($signatures[$data->id]) && $signatures[$data->id]->isNotEmpty())
+                @php
+                  // Find consumer signature first, or use the first available signature
+                  $displaySignature = null;
+                  foreach($signatures[$data->id] as $signature) {
+                    if(isset($signature['signature_type']) && $signature['signature_type'] === 'consumer' && !empty($signature['signature_data'])) {
+                      $displaySignature = $signature;
+                      break;
+                    }
+                  }
+                  // If no consumer signature, use first available
+                  if(!$displaySignature) {
+                    foreach($signatures[$data->id] as $signature) {
+                      if(!empty($signature['signature_data'])) {
+                        $displaySignature = $signature;
+                        break;
+                      }
+                    }
+                  }
+                @endphp
+                
+                @if($displaySignature && !empty($displaySignature['signature_data']))
+                  @php
+                    // Clean up the base64 data
+                    $signatureData = $displaySignature['signature_data'];
+                    // Remove data URI prefix if present
+                    if (strpos($signatureData, 'data:image/') === 0) {
+                      $signatureData = substr($signatureData, strpos($signatureData, ',') + 1);
+                    }
+                    // Clean any whitespace
+                    $signatureData = str_replace([' ', '\n', '\r'], '', $signatureData);
+                  @endphp
+                  
+                  <img src="data:image/png;base64,{{ $signatureData }}" 
+                      alt="Signature" 
+                      class="signature-image"
+                      style="max-height: 40px; max-width: 50px; display: block; margin: 0 auto;">
+                @else
+                  <small>No Signature</small>
+                @endif
+              @else
+                <small>No Signature</small>
+              @endif
+            </td>
           </tr>
           @endforeach
       </tbody>
     </table>
   </div>
-  <p style="text-align:right; margin-top: 80px">Date and Time Generated: {{ date('m/d/Y h:i:a') }}</p>
+
+  <div class="text-align" style="margin-top: 0px; padding-top: 50px;">
+    <table class="signature-table" style="font-size: 11px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
+      <tbody>
+        <tr>
+          <th class="signature-header">Checked By:</th>
+          <th class="signature-header">Noted By:</th>
+          <th class="signature-header">Approved By:</th>
+        </tr>
+        <tr>
+          <th class="signature-name">NIÑO REY C. PONIENTE / ELMA G. MAÑACAP</th>
+          <th class="signature-name">GHANDA R. BERNANDINO, DPA</th>
+          <th class="signature-name">ANA MARIA LOURDES M. PASTOR, MBM</th>
+        </tr>
+        <tr>
+          <th class="signature-position">CWD Analyst</th>
+          <th class="signature-position">MSD Chief</th>
+          <th class="signature-position">ISD Manager</th>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-footer">
+    <p>Note: This is a system generated report | Date and Time Generated: {{ date('m/d/Y h:i:a') }} | <span class="page-number"></span></p>
+  </div>
+  
 
 </body>
 </html>
