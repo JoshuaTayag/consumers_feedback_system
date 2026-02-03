@@ -73,11 +73,11 @@
                             Action
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                            @if ($mrf->status != 11 and $mrf->status != 3)
+                            @if ($mrf->status != 11 and $mrf->status != 3 and $mrf->status != 10)
                                 <li><a href="{{ route('material-requisition-form.edit', $mrf->id) }}"
                                         class="dropdown-item"><i class="fa fa-eye"></i>
                                         View</a></li>
-                            @elseif ($mrf->status == 12 || $mrf->status == 3)
+                            @elseif ($mrf->status == 11 || $mrf->status == 3 || $mrf->status == 10)
                                 <li><a href="{{ route('mrfLiquidationApprovalView', $mrf->id) }}"
                                         class="dropdown-item"><i class="fa fa-eye"></i>
                                         View</a></li>
