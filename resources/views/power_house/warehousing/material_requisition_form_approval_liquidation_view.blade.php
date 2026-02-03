@@ -151,6 +151,32 @@
           <div class="row">
             <div class="col-lg-4">
               <div class="d-flex justify-content-between">
+                  <span>Liquidation Confirmed By</span><span class="text-end">:</span>
+              </div>
+            </div>
+            <div class="col-lg-8 fw-bold">
+              {{ $mrf->confirmed_by ? $mrf->user_confirmed->name : '' }} <span class="text-danger"> ({{ $mrf->confirmed_date ? date('F d, Y h:i A', strtotime($mrf->confirmed_date)) : '' }})</span>
+            </div>
+          </div>
+
+          <hr class="my-1">
+
+          <div class="row">
+            <div class="col-lg-4">
+              <div class="d-flex justify-content-between">
+                  <span>Liquidation Approved by</span><span class="text-end">:</span>
+              </div>
+            </div>
+            <div class="col-lg-8 fw-bold">
+              {{ $mrf->audit_by ? $mrf->user_audited->name : '' }} <span class="text-danger"> ({{ $mrf->audited_date ? date('F d, Y h:i A', strtotime($mrf->audited_date)) : '' }})</span>
+            </div>
+          </div>
+
+          <hr class="my-1">
+
+          <div class="row">
+            <div class="col-lg-4">
+              <div class="d-flex justify-content-between">
                   <span>References</span><span class="text-end">:</span>
               </div>
             </div>
