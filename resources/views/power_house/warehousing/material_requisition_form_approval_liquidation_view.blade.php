@@ -425,16 +425,17 @@
         </div>
       </div>
     </div>
-    <div class="col-lg-12 text-end mt-4">
-      <a href="{{ route('material-requisition-form.index') }}" class="btn btn-primary btn-sm fw-bold">
-        BACK
-      </a>
-    </div>
   </div>
 
   <div class="row mb-4">
     @if ($mrf->status != 11 && Auth::user()->hasRole('TSD (Richard)') || Auth::user()->hasRole('TSD Manager'))
       <div class="col-lg-12 text-end">
+          <div class="d-inline-block">
+              <button onclick="window.close()" class="btn btn-primary btn-sm fw-bold">
+                BACK
+              </button>
+          </div>
+
           <div class="d-inline-block">
               <button class="btn btn-danger btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#disApproved">
                 <i class="fas fa-times"></i> DISAPPROVED
@@ -450,6 +451,12 @@
                   </button>
               </form>
           </div>
+      </div>
+    @else
+      <div class="col-lg-12 text-end">
+          <a href="{{ route('material-requisition-form.index') }}" class="btn btn-primary btn-sm fw-bold">
+                BACK
+              </a>
       </div>
     @endif
   </div>
