@@ -28,10 +28,11 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = RouteServiceProvider::HOME;
+    // protected $redirectTo = RouteServiceProvider::HOME;
 
     protected function authenticated()
     {
+        return redirect()->route('home');
         // if (Auth::user()->hasRole('AGMM VERIFIER')) {
         //     return redirect()->route('agmmAccounts');
         // } else if (Auth::user()->hasRole('AGMM ALLOWANCE DISBURSER')) {

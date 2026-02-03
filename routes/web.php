@@ -24,12 +24,13 @@ Route::get('agmm/qr-print/guest/{id}', [App\Http\Controllers\AgmmController::cla
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', function () {
-        if(Auth::user()->hasRole('Consumer')){
-            return view('consumer.dashboard');
-        }
-        else{
-            return view('home');
-        }
+        
+        // if(Auth::user()->hasRole('Consumer')){
+        //     return view('consumer.dashboard');
+        // }
+        // else{
+        //     return view('home');
+        // }
     });
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     
