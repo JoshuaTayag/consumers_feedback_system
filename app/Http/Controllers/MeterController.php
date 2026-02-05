@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Meter;
 use App\Models\ChangeMeterRequest;
 use App\Models\KwhMeterRequest;
+use App\Models\User;
 use App\Models\KwhMeterRequestSerialNumber;
 use App\Models\DataManagement\MeterType;
 use Illuminate\Http\Request;
@@ -67,9 +68,17 @@ class MeterController extends Controller
 
         $meter_stats = $this->getBulkMeterAvailabilityStats();
 
-        // dd($meter_stats);
+        $users = User::get();
+
+        $serivs = DB::connection('pgsql')
+            ->table('seriv')
+            ->select('*')
+            ->where('approval_status', 2)
+            ->get();
+
+        // dd($serivs);
         
-        return view('power_house.warehousing.data_management.meters.index', compact('meters', 'meters_types', 'meter_stats'));
+        return view('power_house.warehousing.data_management.meters.index', compact('meters', 'meters_types', 'meter_stats', 'users','serivs'));
     }
 
     public function create()
@@ -399,10 +408,13 @@ class MeterController extends Controller
 
     public function assign(Request $request, $id)
     {
+        // dd($request->all());
         try {
             // Dynamic validation based on control type
             $rules = [
                 'control_type' => 'required|string|max:255',
+                'withdrawn_by' => 'required|integer|exists:users,id',
+                'seriv_number' => 'required|string|max:255'
             ];
             
             if ($request->control_type === 'kWh Meter Request') {
@@ -463,6 +475,8 @@ class MeterController extends Controller
                         'control_no' => $request->control_no,
                         'account_number' => $request->account_number,
                         'status' => 1, // Set status to assigned
+                        'withdrawn_by' => $request->withdrawn_by,
+                        'seriv_number' => $request->seriv_number,
                     ]);
 
                     // Find change meter request by control_no and update the meter details
@@ -511,6 +525,8 @@ class MeterController extends Controller
                             'control_type' => $request->control_type,
                             'kwh_meter_request_id' => $kwhMeterRequestId,
                             'status' => 1, // Set status to assigned
+                            'withdrawn_by' => $request->withdrawn_by,
+                            'seriv_number' => $request->seriv_number,
                         ]);
                     }
                 } else if ($request->control_type === 'New Connection') {
@@ -520,6 +536,8 @@ class MeterController extends Controller
                         'control_no' => $request->control_no,
                         'account_number' => $request->account_number,
                         'status' => 1, // Set status to assigned
+                        'withdrawn_by' => $request->withdrawn_by,
+                        'seriv_number' => $request->seriv_number,
                     ]);
                 }
             }

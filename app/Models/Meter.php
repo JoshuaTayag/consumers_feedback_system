@@ -55,6 +55,8 @@ class Meter extends Model implements Auditable
                         'kwh_meter_request_id',
                         'created_at',
                         'updated_at',
-                        'deleted_at'
+                        'deleted_at',
+                        'withdrawn_by',
+                        'seriv_number'
                     ];
 }
