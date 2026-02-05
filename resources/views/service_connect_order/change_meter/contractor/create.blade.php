@@ -3,71 +3,95 @@
 
 @section('content')
 
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-lg-12">
-      <div class="card">
-        <div class="card-header">
-          <div class="row align-items-center">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="row align-items-center">
               <div class="col-lg-6">
-                  <span class="mb-0 align-middle fs-3">Create New Record</span>
-              </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <form action="{{ route('change-meter-contractor.store') }}" method="POST">
-            @csrf
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-4 mb-2">
-                <div class="form-group">
-                  <strong>First Name:</strong>
-                  <input type="text" name="first_name" placeholder="First Name" class="form-control" required>
-                </div>
-                </div>
-                <div class="col-xs-12 col-sm-12 col-md-4 mb-2">
-                <div class="form-group">
-                  <strong>Middle Name:</strong>
-                  <input type="text" name="middle_name" placeholder="Middle Name" class="form-control">
-                </div>
-                </div>
-                <div class="col-xs-12 col-sm-12 col-md-4 mb-2">
-                <div class="form-group">
-                  <strong>Last Name:</strong>
-                  <input type="text" name="last_name" placeholder="Last Name" class="form-control" required>
-                </div>
-                </div>
-                <div class="col-xs-12 col-sm-12 col-md-4 mb-2">
-                <div class="form-group">
-                  <strong>Address:</strong>
-                  <input type="text" name="address" placeholder="Address" class="form-control" required>
-                </div>
-                </div>
-                <div class="col-xs-12 col-sm-12 col-md-4 mb-2">
-                <div class="form-group">
-                  <strong>Mobile No.:</strong>
-                  <input type="text" name="mobile_number" placeholder="Mobile Number" class="form-control" required>
-                </div>
-                </div>
-                <div class="col-xs-12 col-sm-12 col-md-4 mb-2">
-                <div class="form-group">
-                  <strong>Account:</strong>
-                  <select name="user_id" id="user_id" class="form-control">
-                    <option value="">Select Account</option>
-                    @foreach ($users as $id => $email)
-                      <option value="{{ $id }}">{{ $email }}</option>
-                    @endforeach
-                  </select>
-                </div>
-                </div>
-              <div class="col-xs-12 col-sm-12 col-md-12 text-end">
-                <a class="btn btn-warning" href="{{ route('change-meter-contractor.index') }}"><i class="fa fa-times"></i> Cancel </a>
-                <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Submit</button>
+                <span class="mb-0 align-middle fs-3">Create New Record</span>
               </div>
             </div>
-          </form>
+          </div>
+          <div class="card-body">
+            <form action="{{ route('change-meter-contractor.store') }}" method="POST">
+              @csrf
+              <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-3 mb-2">
+                  <div class="form-group">
+                    <strong>First Name:</strong>
+                    <input type="text" name="first_name" placeholder="First Name" value="{{ old('first_name') }}" class="form-control" required>
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-3 mb-2">
+                  <div class="form-group">
+                    <strong>Middle Name:</strong>
+                    <input type="text" name="middle_name" placeholder="Middle Name" value="{{ old('middle_name') }}" class="form-control">
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-3 mb-2">
+                  <div class="form-group">
+                    <strong>Last Name:</strong>
+                    <input type="text" name="last_name" placeholder="Last Name" value="{{ old('last_name') }}" class="form-control" required>
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-3 mb-2">
+                  <div class="form-group">
+                    <strong>Address:</strong>
+                    <input type="text" name="address" placeholder="Address" value="{{ old('address') }}" class="form-control" required>
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-3 mb-2">
+                  <div class="form-group">
+                    <strong>Mobile No.:</strong>
+                    <input type="text" name="mobile_number" placeholder="Mobile Number" value="{{ old('mobile_number') }}" class="form-control" required>
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-3 mb-2">
+                  <div class="form-group">
+                    <strong>Lead Contractor</strong>
+                    <select name="team_leader_id" id="team_leader_id" class="form-control">
+                      <option value="">Select Account</option>
+                      @foreach ($lead_contractors as $contractor)
+                        <option value="{{ $contractor->id }}">{{ $contractor->contractor_team_leader_full_name }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-3 mb-2">
+                  <div class="form-group">
+                    <strong>Account:</strong>
+                    <select name="user_id" id="user_id" class="form-control">
+                      <option value="">Select Account</option>
+                      @foreach ($users as $id => $email)
+                        <option value="{{ $id }}">{{ $email }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-3 mb-2">
+                  <div class="form-group">
+                    <strong>Status</strong>
+                    <select name="status" id="status" class="form-control" required>
+                      <option value="">Select Status</option>
+                      @foreach (Config::get('constants.contractor_status') as $status)
+                        <option value="{{ $status['id'] }}" id=""
+                              {{ old('status') ? 'selected' : '' }}>{{ $status['name'] }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-12 text-end">
+                  <a class="btn btn-warning" href="{{ route('change-meter-contractor.index') }}"><i
+                      class="fa fa-times"></i> Cancel </a>
+                  <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Submit</button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 @endsection

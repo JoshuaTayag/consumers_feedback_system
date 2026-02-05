@@ -29,7 +29,7 @@ Route::group(['middleware' => 'auth'], function () {
         //     return view('consumer.dashboard');
         // }
         // else{
-        //     return view('home');
+            return view('home');
         // }
     });
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -123,6 +123,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::resource('change-meter-request', App\Http\Controllers\ChangeMeterRequestController::class);
     Route::resource('change-meter-contractor', App\Http\Controllers\ChangeMeterRequestContractorController::class);
+    Route::resource('change-meter-lead-contractor', App\Http\Controllers\ChangeMeterLeadContractorController::class);
 
     // lifeline
     Route::resource('lifeline', App\Http\Controllers\LifelineController::class);

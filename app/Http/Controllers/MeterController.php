@@ -677,12 +677,14 @@ class MeterController extends Controller
         try {
             $meterId = $request->input('meter_id');
             $query = ChangeMeterRequest::where('status', null)
-                ->whereNotExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('meters')
-                        ->whereColumn('meters.control_no', 'change_meter_requests.control_no')
-                        ->whereNotNull('meters.control_no');
-                });
+            ->whereNull('kwh_meter_request_id')
+            ->whereNull('new_meter_no')
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('meters')
+                    ->whereColumn('meters.control_no', 'change_meter_requests.control_no')
+                    ->whereNotNull('meters.control_no');
+            });
 
             // If meter_id is provided, filter by meter type compatibility
             if ($meterId) {

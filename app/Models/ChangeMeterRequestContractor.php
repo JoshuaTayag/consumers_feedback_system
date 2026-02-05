@@ -38,6 +38,11 @@ class ChangeMeterRequestContractor extends Model implements Auditable
         return $this->belongsTo('App\Models\User');
     }
 
+    public function teamLeadContractor()
+    {
+        return $this->belongsTo('App\Models\ChangeMeterLeadContractor', 'team_leader_id', 'id');
+    }
+
     protected $table = 'change_meter_contractors';
 
     protected $fillable = [
@@ -45,6 +50,8 @@ class ChangeMeterRequestContractor extends Model implements Auditable
         'last_name',
         'address',
         'mobile_number',
-        'user_id'
+        'user_id',
+        'team_leader_id',
+        'status',
     ];
 }

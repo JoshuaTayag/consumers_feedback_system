@@ -876,6 +876,16 @@
                 "description" => "Area 5"
             ]
         ],
+        'contractor_status' => [
+            [
+                "id" => 0,
+                "name" => "Inactive"
+            ],
+            [
+                "id" => 1,
+                "name" => "Active"
+            ]
+        ],
     ];
 
 ?>
