@@ -8,6 +8,7 @@ use App\Models\KwhMeterRequestSerialNumber;
 use App\Models\Meter;
 use Illuminate\Http\Request;
 use App\Models\ChangeMeterRequest;
+use App\Models\ChangeMeterRequestContractor;
 use App\Models\ChangeMeterRequestFees;
 use App\Models\ChangeMeterRequestPostingHistory;
 use App\Models\User;
@@ -41,11 +42,26 @@ class ChangeMeterRequestController extends Controller
     public function index()
     {
         $cm_requests = ChangeMeterRequest::with('municipality', 'barangay', 'assignedMeter')->orderBy('id','desc')->paginate(9);
-        $ref_employees = DB::table('change_meter_contractors')
-        ->select(DB::raw("CONCAT(last_name, ', ', first_name) AS full_name"), 'id')
-        ->whereNotNull('user_id')
-        ->orderBy('last_name', 'ASC')
-        ->get();
+        $ref_employees = ChangeMeterRequestContractor::with('teamLeadContractor')
+            ->where('status', 1)
+            ->orderBy('last_name', 'ASC')
+            ->get()
+            ->map(function ($contractor) {
+                $fullName = $contractor->last_name . ', ' . $contractor->first_name;
+                if ($contractor->teamLeadContractor && $contractor->teamLeadContractor->contractor_team_leader_full_name) {
+                    $fullName .= ' (' . $contractor->teamLeadContractor->contractor_team_leader_full_name . ')';
+                }
+                return [
+                    'id' => $contractor->id,
+                    'full_name' => $fullName
+                ];
+            });
+        //     $ref_employees = DB::table('change_meter_contractors')
+        // ->select(DB::raw("CONCAT(last_name, ', ', first_name) AS full_name"), 'id')
+        // ->where('status', 1)
+        // ->orderBy('last_name', 'ASC')
+        // ->get();
+        //     dd($ref_employees);
         $change_meter_status_count = $this->getChangeMeterRequestStatusCounts();
         // dd($change_meter_status_count);
         return view('service_connect_order.change_meter.index',compact('cm_requests', 'ref_employees', 'change_meter_status_count'));
@@ -377,8 +393,6 @@ class ChangeMeterRequestController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        
-        // dd($request);
         // Validate requests
         $this->validate($request, [
             'first_name' => ['required', 'string', 'max:255'],
@@ -400,8 +414,9 @@ class ChangeMeterRequestController extends Controller
             'meter_serial_number' => ['required_with:kwh_meter_request_control_no'],
         ]);
 
-        // validate the meter type if the transaction is not kwh meter request liquidation
-        if ($request->kwh_meter_request_control_no == null && $request->meter_serial_number == null) {
+        $change_meter_request = ChangeMeterRequest::findOrFail($id);
+
+        if ($request->kwh_meter_request_control_no == null && $request->meter_serial_number == null) { // if not liquidation
             // check if the selected meter types have available meters
             $availableMeterCount = Meter::where('meter_type_id', $request->meter_code_no)
                 ->where('status', 0) // available status
@@ -438,7 +453,7 @@ class ChangeMeterRequestController extends Controller
                 'account_number' => null,
             ]);
             
-        } else {
+        } else { // if liquidation
             // get meter type from kwh meter request serial number
             $kwhMeterRequest = KwhMeterRequest::find($request->kwh_meter_request_control_no);
             if (!$kwhMeterRequest) {
@@ -450,22 +465,28 @@ class ChangeMeterRequestController extends Controller
             $request->merge(['meter_code_no' => $type_of_meter]);
 
             // Handle liquidation details if provided
-                $kwhMeterRequest = KwhMeterRequest::where('id', $request->kwh_meter_request_control_no)->first();
-                $meter = Meter::find($request->meter_serial_number);
-                
-                if ($kwhMeterRequest && $meter) {
-                    // Update the tracking record to link with this change meter request
-                    $tracking = KwhMeterRequestSerialNumber::where('kwh_meter_request_id', $kwhMeterRequest->id)
-                        ->where('meter_id', $meter->id)
-                        ->first();
-                        
-                    if ($tracking) {
-                        $tracking->update([
-                            'change_meter_request_id' => $id
-                        ]);
-                    }
+            $kwhMeterRequest = KwhMeterRequest::where('id', $request->kwh_meter_request_control_no)->first();
+            $meter = Meter::find($request->meter_serial_number);
+
+            if ($kwhMeterRequest && $meter) {
+                // Update the tracking record to link with this change meter request
+                $tracking = KwhMeterRequestSerialNumber::where('kwh_meter_request_id', $kwhMeterRequest->id)
+                    ->where('meter_id', $meter->id)
+                    ->first();
+                    
+                if ($tracking) {
+                    $tracking->update([
+                        'change_meter_request_id' => $id
+                    ]);
                 }
-            
+
+                // assign control number and account number in meter details
+                $meter->update([
+                    'control_type' => 'Change Meter',
+                    'control_no' => $change_meter_request->control_no,
+                    'account_number' => $change_meter_request->account_number,
+                ]);
+            }       
             
         }
         // dd($request->all());
@@ -492,7 +513,7 @@ class ChangeMeterRequestController extends Controller
                 "old_meter_no" => $request->old_meter,
                 "meter_or_number" => $request->meter_or_no,
                 "meter_or_date" => null,
-                "new_meter_no" => null,
+                "new_meter_no" => $request->liquidation_meter_serial_number,
                 "type_of_meter" => $request->meter_code_no,
                 "last_reading" => $request->last_reading,
                 "initial_reading" => $request->reading_initial,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChangeMeterRequestContractor;
+use App\Models\ChangeMeterLeadContractor;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,8 @@ class ChangeMeterRequestContractorController extends Controller
     public function create()
     {
         $users = User::pluck('email', 'id');
-        return view('service_connect_order.change_meter.contractor.create', compact('users'));
+        $lead_contractors = ChangeMeterLeadContractor::orderBy('contractor_team_leader_full_name','asc')->get();
+        return view('service_connect_order.change_meter.contractor.create', compact('users', 'lead_contractors'));
     }
 
     public function store(Request $request)
@@ -28,6 +30,8 @@ class ChangeMeterRequestContractorController extends Controller
             'address' => 'required|string|max:500',
             'mobile_number' => 'required|string|max:20',
             'user_id' => 'nullable|exists:users,id',
+            'team_leader_id' => 'nullable|exists:change_meter_lead_contractors,id',
+            'status' => 'required',
         ]);
 
         ChangeMeterRequestContractor::create($request->all());

@@ -20,7 +20,7 @@
               <label for="crew_dispatched_from">From:</label>
               <select id="crew_dispatched_from" class="form-control" name="crew_dispatched_from" disabled>
                 @foreach ($ref_employees as $employee)          
-                  <option value="{{ $employee->id }}">{{ $employee->full_name }}</option>
+                  <option value="{{ $employee['id'] }}">{{ $employee['full_name'] }}</option>
                 @endforeach
               </select>
             </div>
@@ -29,7 +29,7 @@
               <select id="crew_dispatched_to" class="form-control" name="crew_dispatched_to" required>
                 <option value=""></option>
                 @foreach ($ref_employees as $employee)          
-                  <option value="{{ $employee->id }}" id="">{{ $employee->full_name }}</option>
+                  <option value="{{ $employee['id'] }}" id="">{{ $employee['full_name'] }}</option>
                 @endforeach
               </select>
             </div>
