@@ -29,7 +29,7 @@ Route::group(['middleware' => 'auth'], function () {
         //     return view('consumer.dashboard');
         // }
         // else{
-        //     return view('home');
+            return view('home');
         // }
     });
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
