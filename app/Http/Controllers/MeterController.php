@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use DB;
 use Exception;
+use Illuminate\Validation\Rule;
 
 class MeterController extends Controller
 {
@@ -79,11 +80,27 @@ class MeterController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all());
         $validator = Validator::make($request->all(), [
             'meter_type_id' => 'required|integer|exists:meter_types,id',
-            'serial_number' => 'required|string|max:255|unique:meters,serial_number',
-            'erc_seal_number' => 'required|string|max:255|unique:meters,erc_seal_number',
-            'leyeco_seal_number' => 'required|string|max:255|unique:meters,leyeco_seal_number',
+            'serial_number' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('meters', 'serial_number')->whereNull('deleted_at')
+            ],
+            'erc_seal_number' => [
+                'required',
+                'string', 
+                'max:255',
+                Rule::unique('meters', 'erc_seal_number')->whereNull('deleted_at')
+            ],
+            'leyeco_seal_number' => [
+                'required',
+                'string',
+                'max:255', 
+                Rule::unique('meters', 'leyeco_seal_number')->whereNull('deleted_at')
+            ],
         ]);
 
         if ($validator->fails()) {
