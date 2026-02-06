@@ -194,6 +194,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('meters/{id}/assign', [App\Http\Controllers\MeterController::class, 'assign'])->name('meters.assign');
     Route::put('meters/{id}/return', [App\Http\Controllers\MeterController::class, 'returnMeter'])->name('meters.return');
     Route::put('meters/{id}/make-available', [App\Http\Controllers\MeterController::class, 'makeMeterAvailable'])->name('meters.makeAvailable');
+    Route::get('meters/mass-assignment', [App\Http\Controllers\MeterController::class, 'massAssignmentIndex'])->name('meters.massAssignmentIndex');
+    Route::post('meters/mass-assignment/assign', [App\Http\Controllers\MeterController::class, 'massAssignmentAssign'])->name('meters.massAssignmentAssign');
+    Route::get('meters/mass-assignment/assigned-meters', [App\Http\Controllers\MeterController::class, 'massAssignmentGetAssignedMeters'])->name('meters.massAssignmentGetAssignedMeters');
+    Route::delete('meters/mass-assignment/remove', [App\Http\Controllers\MeterController::class, 'massAssignmentRemove'])->name('meters.massAssignmentRemove');
     Route::resource('meters', App\Http\Controllers\MeterController::class);
 
     // ELECTRICIAN

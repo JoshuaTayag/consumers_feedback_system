@@ -445,9 +445,9 @@
                                         <i class="fas fa-times"></i> Clear All
                                     </a>
                                 @endif
-                                <button type="button" class="btn btn-outline-primary" onclick="exportMeters()">
-                                    <i class="fas fa-download"></i> Export CSV
-                                </button>
+                                <a type="button" class="btn btn-outline-primary" href="{{ route('meters.massAssignmentIndex') }}">
+                                    <i class="fas fa-tasks"></i> Meter Mass Assignment
+                                </a>
                             </div>
                         </div>
                     </form>
