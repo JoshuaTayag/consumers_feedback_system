@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Meter;
 use App\Models\ChangeMeterRequest;
 use App\Models\KwhMeterRequest;
+use App\Models\User;
 use App\Models\KwhMeterRequestSerialNumber;
 use App\Models\DataManagement\MeterType;
 use Illuminate\Http\Request;
@@ -67,9 +68,17 @@ class MeterController extends Controller
 
         $meter_stats = $this->getBulkMeterAvailabilityStats();
 
-        // dd($meter_stats);
+        $users = User::get();
+
+        $serivs = DB::connection('pgsql')
+            ->table('seriv')
+            ->select('*')
+            ->where('approval_status', 2)
+            ->get();
+
+        // dd($serivs);
         
-        return view('power_house.warehousing.data_management.meters.index', compact('meters', 'meters_types', 'meter_stats'));
+        return view('power_house.warehousing.data_management.meters.index', compact('meters', 'meters_types', 'meter_stats', 'users','serivs'));
     }
 
     public function create()
@@ -399,10 +408,13 @@ class MeterController extends Controller
 
     public function assign(Request $request, $id)
     {
+        // dd($request->all());
         try {
             // Dynamic validation based on control type
             $rules = [
                 'control_type' => 'required|string|max:255',
+                'withdrawn_by' => 'required|integer|exists:users,id',
+                'seriv_number' => 'required|string|max:255'
             ];
             
             if ($request->control_type === 'kWh Meter Request') {
@@ -463,6 +475,8 @@ class MeterController extends Controller
                         'control_no' => $request->control_no,
                         'account_number' => $request->account_number,
                         'status' => 1, // Set status to assigned
+                        'withdrawn_by' => $request->withdrawn_by,
+                        'seriv_number' => $request->seriv_number,
                     ]);
 
                     // Find change meter request by control_no and update the meter details
@@ -511,6 +525,8 @@ class MeterController extends Controller
                             'control_type' => $request->control_type,
                             'kwh_meter_request_id' => $kwhMeterRequestId,
                             'status' => 1, // Set status to assigned
+                            'withdrawn_by' => $request->withdrawn_by,
+                            'seriv_number' => $request->seriv_number,
                         ]);
                     }
                 } else if ($request->control_type === 'New Connection') {
@@ -520,6 +536,8 @@ class MeterController extends Controller
                         'control_no' => $request->control_no,
                         'account_number' => $request->account_number,
                         'status' => 1, // Set status to assigned
+                        'withdrawn_by' => $request->withdrawn_by,
+                        'seriv_number' => $request->seriv_number,
                     ]);
                 }
             }
@@ -590,7 +608,7 @@ class MeterController extends Controller
             ]);
 
             // Handle different control types when returning
-            if ($controlType === 'Change Meter' && $controlNo) {
+            if ($controlType === 'Change Meter' && $controlNo && $kwhMeterRequestId === null) {
                 // Clear the meter assignment in the corresponding change meter request
                 $changeMeterRequest = ChangeMeterRequest::where('control_no', $controlNo)->first();
                 if ($changeMeterRequest) {
@@ -598,7 +616,7 @@ class MeterController extends Controller
                         'new_meter_no' => null,
                     ]);
                 }
-            } elseif ($controlType === 'kWh Meter Request') {
+            } elseif ($controlType === 'kWh Meter Request' && $kwhMeterRequestId !== null) {
                 // For kWh Meter Request assignments, use the account_number field which contains the KWH request ID
                 if ($kwhMeterRequestId) {
                     // dd($meter->id);
@@ -607,6 +625,11 @@ class MeterController extends Controller
                         ->where('kwh_meter_request_id', $kwhMeterRequestId)
                         ->delete();
                 }
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot return meter. The meter has a linked transaction in '.$controlType.' with control number '.$controlNo.'. Please check the transaction details before returning this meter.'
+                ], 422);
             }
 
             DB::commit();
@@ -972,6 +995,269 @@ class MeterController extends Controller
                 'message' => 'Error calculating meter availability: ' . $e->getMessage(),
                 'error' => $e
             ];
+        }
+    }
+
+    public function massAssignmentIndex(){
+        // Get approved kwh meter requests that still need meters assigned
+        $kwhMeterRequests = KwhMeterRequest::with(['meterType', 'user', 'kwhMeterRequestSerialNumbers.meter'])
+            ->whereNotNull('approved_at')
+            ->where('is_liquidated', false)
+            ->whereHas('meterType') // Ensure meter type exists
+            ->get()
+            ->filter(function($request) {
+                // Only show requests that need more meters
+                $assignedCount = $request->kwhMeterRequestSerialNumbers()->count();
+                return $assignedCount < $request->quantity;
+            })
+            ->map(function($request) {
+                $assignedCount = $request->kwhMeterRequestSerialNumbers()->count();
+                return [
+                    'id' => $request->id,
+                    'control_no' => $request->control_no,
+                    'user_name' => $request->user->name,
+                    'meter_type' => $request->meterType->meter_code . ' - ' . $request->meterType->meter_description,
+                    'meter_type_id' => $request->meterType->id,
+                    'requested_quantity' => $request->quantity,
+                    'assigned_count' => $assignedCount,
+                    'remaining_count' => $request->quantity - $assignedCount,
+                    'purpose' => $request->purpose,
+                ];
+            });
+
+        // Get users who have contractor records for withdrawn_by selection
+        $employees = User::pluck('name', 'id');
+        return view('power_house.warehousing.data_management.meters.mass_assignment.index', compact('kwhMeterRequests', 'employees'));
+    }
+
+    public function massAssignmentAssign(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'kwh_meter_request_id' => 'required|integer|exists:kwh_meter_requests,id',
+            'serial_number' => 'required|string',
+            'withdrawn_by' => 'required|integer|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $kwhMeterRequest = KwhMeterRequest::with(['meterType', 'kwhMeterRequestSerialNumbers'])->findOrFail($request->kwh_meter_request_id);
+            
+            // Check if request is still valid for assignment
+            if (!$kwhMeterRequest->approved_at || $kwhMeterRequest->is_liquidated) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'kWh meter request is not approved or already liquidated'
+                ], 400);
+            }
+
+            // Check if we've already reached the quantity
+            $currentAssignedCount = $kwhMeterRequest->kwhMeterRequestSerialNumbers()->count();
+            if ($currentAssignedCount >= $kwhMeterRequest->quantity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'kWh meter request quantity already fulfilled'
+                ], 400);
+            }
+
+            // Find the meter by serial number
+            $meter = Meter::where('serial_number', $request->serial_number)
+                ->whereNull('deleted_at')
+                ->first();
+
+            if (!$meter) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Meter with serial number "' . $request->serial_number . '" not found'
+                ], 404);
+            }
+
+            // Check meter type compatibility
+            if ($meter->meter_type_id != $kwhMeterRequest->meter_code_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Meter type mismatch. Expected: ' . $kwhMeterRequest->meterType->meter_code . ', Found: ' . ($meter->meterType->meter_code ?? 'Unknown')
+                ], 400);
+            }
+
+            // Check if meter is available
+            if ($meter->status != 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Meter is not available (Status: ' . $this->getMeterStatusText($meter->status) . ')'
+                ], 400);
+            }
+
+            // Check if meter is already assigned to this request
+            $existingAssignment = KwhMeterRequestSerialNumber::where('kwh_meter_request_id', $kwhMeterRequest->id)
+                ->where('meter_id', $meter->id)
+                ->first();
+
+            if ($existingAssignment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Meter already assigned to this kWh meter request'
+                ], 400);
+            }
+
+            // Check if meter is assigned to any other kWh meter request
+            $otherAssignment = KwhMeterRequestSerialNumber::where('meter_id', $meter->id)
+                ->whereNull('deleted_at')
+                ->first();
+
+            if ($otherAssignment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Meter is already assigned to another kWh meter request'
+                ], 400);
+            }
+
+            // Assign meter to kWh meter request
+            KwhMeterRequestSerialNumber::create([
+                'kwh_meter_request_id' => $kwhMeterRequest->id,
+                'meter_id' => $meter->id,
+                'status' => 0, // Unliquidated
+            ]);
+
+            // Update meter assignment details
+            $meter->update([
+                'control_type' => 'kWh Meter Request',
+                'control_no' => $kwhMeterRequest->control_no,
+                'kwh_meter_request_id' => $kwhMeterRequest->id,
+                'withdrawn_by' => $request->withdrawn_by,
+                'status' => 1, // Assigned
+            ]);
+
+            DB::commit();
+
+            // Get updated counts (don't add +1 since count() already includes the newly created record)
+            $newAssignedCount = $kwhMeterRequest->kwhMeterRequestSerialNumbers()->count();
+            $remainingCount = $kwhMeterRequest->quantity - $newAssignedCount;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Meter assigned successfully',
+                'data' => [
+                    'meter_serial' => $meter->serial_number,
+                    'assigned_count' => $newAssignedCount,
+                    'remaining_count' => $remainingCount,
+                    'is_complete' => $remainingCount <= 0,
+                ]
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to assign meter: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function massAssignmentGetAssignedMeters(Request $request)
+    {
+        try {
+            $kwhMeterRequestId = $request->input('kwh_meter_request_id');
+            
+            $assignedMeters = KwhMeterRequestSerialNumber::with(['meter.meterType'])
+                ->where('kwh_meter_request_id', $kwhMeterRequestId)
+                ->whereNull('deleted_at')
+                ->get()
+                ->map(function($assignment) {
+                    return [
+                        'id' => $assignment->id,
+                        'meter_id' => $assignment->meter_id,
+                        'serial_number' => $assignment->meter->serial_number,
+                        'erc_seal' => $assignment->meter->erc_seal_number,
+                        'leyeco_seal' => $assignment->meter->leyeco_seal_number,
+                        'meter_type' => $assignment->meter->meterType->meter_code,
+                        'status' => $assignment->status,
+                        'assigned_at' => $assignment->created_at->format('M d, Y h:i A'),
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $assignedMeters
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch assigned meters: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function massAssignmentRemove(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $assignmentId = $request->input('assignment_id');
+            $assignment = KwhMeterRequestSerialNumber::with(['meter', 'kwhMeterRequest'])->findOrFail($assignmentId);
+
+            // Check if assignment is already liquidated
+            if ($assignment->status == 1) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot remove liquidated meter assignment'
+                ], 400);
+            }
+
+            // Update meter back to available
+            if ($assignment->meter) {
+                $assignment->meter->update([
+                    'control_type' => null,
+                    'control_no' => null,
+                    'kwh_meter_request_id' => null,
+                    'status' => 0, // Available
+                ]);
+            }
+
+            // Remove the assignment
+            $assignment->delete();
+
+            // Get updated counts
+            $kwhMeterRequest = $assignment->kwhMeterRequest;
+            $newAssignedCount = $kwhMeterRequest->kwhMeterRequestSerialNumbers()->count();
+            $remainingCount = $kwhMeterRequest->quantity - $newAssignedCount;
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Meter assignment removed successfully',
+                'data' => [
+                    'assigned_count' => $newAssignedCount,
+                    'remaining_count' => $remainingCount,
+                    'is_complete' => $remainingCount <= 0,
+                ]
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove assignment: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function getMeterStatusText($status)
+    {
+        switch ($status) {
+            case 0: return 'Available';
+            case 1: return 'Assigned';
+            case 2: return 'Unavailable';
+            default: return 'Unknown';
         }
     }
 }

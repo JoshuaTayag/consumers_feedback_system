@@ -228,6 +228,34 @@
                                 </small>
                             </div>
                         </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <select class="form-select" id="withdrawn_by" name="withdrawn_by" required>
+                                        <option value="">Withdrawn By</option>
+                                        @foreach($users as $user)
+                                            <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <label for="assign_control_type"><i class="fas fa-cogs"></i> Withdrawn By *</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <select class="form-select" id="seriv_number" name="seriv_number" required>
+                                        <option value="">Seriv Number</option>
+                                        @foreach($serivs as $seriv)
+                                            <option value="{{ $seriv->seriv_number }}">{{ $seriv->seriv_number }}</option>
+                                        @endforeach
+                                    </select>
+                                    <label for="assign_control_type"><i class="fas fa-cogs"></i> Seriv Number *</label>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -417,9 +445,9 @@
                                         <i class="fas fa-times"></i> Clear All
                                     </a>
                                 @endif
-                                <button type="button" class="btn btn-outline-primary" onclick="exportMeters()">
-                                    <i class="fas fa-download"></i> Export CSV
-                                </button>
+                                <a type="button" class="btn btn-outline-primary" href="{{ route('meters.massAssignmentIndex') }}">
+                                    <i class="fas fa-tasks"></i> Meter Mass Assignment
+                                </a>
                             </div>
                         </div>
                     </form>
@@ -870,6 +898,10 @@ window.assignMeter = function() {
     // Get control type
     const controlType = $('#assign_control_type').val();
     formData.append('control_type', controlType);
+
+    
+    const withdrawnBy = $('#withdrawn_by').val();
+    const serivNumber = $('#seriv_number').val();
     
     // Get submit button reference for validation
     const submitButton = document.getElementById('assignMeterBtn');
@@ -878,7 +910,7 @@ window.assignMeter = function() {
     // Get control number from appropriate field
     let controlNo = '';
     let accountNumber = '';
-    
+
     if (controlType === 'Change Meter') {
         controlNo = $('#assign_control_no_select').val();
         accountNumber = $('#assign_account_number').val();
@@ -907,8 +939,35 @@ window.assignMeter = function() {
             return;
         }
     } else {
+
         controlNo = $('#assign_control_no_text').val();
+        if (!controlNo) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Please fill up the control number.'
+            });
+            return;
+        }
         accountNumber = $('#assign_account_number').val();
+    }
+
+    if (!withdrawnBy) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please select a withdrawn by.'
+        });
+        return;
+    }
+
+    if (!serivNumber) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please select a seriv number.'
+        });
+        return;
     }
     
     if (controlNo) {
@@ -917,6 +976,14 @@ window.assignMeter = function() {
     
     if (accountNumber) {
         formData.append('account_number', accountNumber);
+    }
+
+    if (withdrawnBy) {
+        formData.append('withdrawn_by', withdrawnBy);
+    }
+
+    if (serivNumber) {
+        formData.append('seriv_number', serivNumber);
     }
     
     // Add CSRF token and method

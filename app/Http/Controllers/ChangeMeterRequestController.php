@@ -130,11 +130,11 @@ class ChangeMeterRequestController extends Controller
     {
         
         $change_meter_request_exists = ChangeMeterRequest::where('account_number', $request->electric_service_detail)
-        ->where('status', null);
-        
+            ->where('status', null)
+            ->whereNull('deleted_at'); // exclude archived records
 
         if ($change_meter_request_exists->exists()) {
-            // Record exists
+            // Record exists and is not archived
             return redirect(route('indexCM'))->withWarning('This account has pending request! </br> Control No:'.$change_meter_request_exists->first('control_no')->control_no);
         }
 
