@@ -344,7 +344,7 @@
                                 <i class="fas fa-chart-pie me-1"></i> Total Overview
                             </h6>
                             <h2 class="text-primary fw-bold mb-1">
-                                {{ number_format($meter_stats['data']['summary']['total_available_meters']) }}
+                                {{ number_format($meter_stats['data']['summary']['total_meters']) }}
                             </h2>
                             <small class="text-muted">Total meters in inventory</small>
                         </div>
@@ -354,7 +354,7 @@
                     </div>
                     <hr class="my-3">
                     @php
-                        $totalMeters = $meter_stats['data']['summary']['total_available_meters'];
+                        $totalMeters = $meter_stats['data']['summary']['total_meters'];
                         $availablePercentage = $totalMeters > 0 ? ($meter_stats['data']['summary']['total_truly_available'] / $totalMeters) * 100 : 0;
                         $reservedPercentage = $totalMeters > 0 ? ($meter_stats['data']['summary']['total_reserved'] / $totalMeters) * 100 : 0;
                     @endphp

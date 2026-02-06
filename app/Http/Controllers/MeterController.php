@@ -890,7 +890,9 @@ class MeterController extends Controller
                 }
             }
 
-            // dd($results);
+            $totalMeters = Meter::whereNull('deleted_at')->count();
+
+            // dd($totalMeters);
 
             // Calculate summary statistics
             $totalStats = [
@@ -899,7 +901,8 @@ class MeterController extends Controller
                 'total_reserved_by_change_meter' => array_sum(array_column($results, 'reserved_by_change_meter_requests')),
                 'total_reserved_by_kwh_meter' => array_sum(array_column($results, 'reserved_by_kwh_meter_requests')),
                 'total_reserved' => array_sum(array_column($results, 'total_reserved')),
-                'total_truly_available' => array_sum(array_column($results, 'truly_available'))
+                'total_truly_available' => array_sum(array_column($results, 'truly_available')),
+                'total_meters' => $totalMeters
             ];
 
 
@@ -947,15 +950,6 @@ class MeterController extends Controller
 
             $reservedByChangeMeter = $reservedByChangeMeterQuery->count();
 
-            // Count reserved meters from kwh meter requests (unliquidated serials)
-            // $reservedByKwhMeterRequests = DB::table('kwh_meter_request_serial_numbers as krs')
-            //     ->join('meters as m', 'krs.meter_id', '=', 'm.id')
-            //     ->where('m.meter_type_id', $meterTypeId)
-            //     ->where('krs.status', 0) // unliquidated
-            //     ->whereNull('krs.change_meter_request_id') // not yet used in change meter
-            //     ->whereNull('krs.deleted_at')
-            //     ->count();
-
             $reservedByKwhMeterRequests = DB::table('kwh_meter_requests as kmr')
                 ->selectRaw('COALESCE(SUM(kmr.quantity - COALESCE(assigned.meter_count, 0)), 0) as remaining_quantity')
                 ->leftJoin(DB::raw('(
@@ -967,6 +961,7 @@ class MeterController extends Controller
                 ->where('kmr.meter_code_id', $meterTypeId)
                 ->where('kmr.is_liquidated', false)
                 ->whereNull('kmr.deleted_at')
+                ->whereNull('kmr.disapproved_at')
                 ->value('remaining_quantity') ?? 0;
 
 
