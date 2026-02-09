@@ -300,6 +300,8 @@ class ChangeMeterApiController extends Controller
                     ->where('Accnt No', $change_meter_request->account_number)
                     ->update([
                         'Serial No' => $change_meter_request->new_meter_no,
+                        'Brand' => $change_meter_request->assignedMeter && $change_meter_request->assignedMeter->meterType ? $change_meter_request->assignedMeter->meterType->meter_brand : null,
+                        'TypeMtr' => $change_meter_request->assignedMeter && $change_meter_request->assignedMeter->meterType ? $change_meter_request->assignedMeter->meterType->meter_code : null,
                         'Remarks' => $newRemarks,
                     ]);
             }
