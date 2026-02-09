@@ -128,7 +128,7 @@ class ChangeMeterRequestController extends Controller
      */
     public function store(Request $request)
     {
-        
+
         $change_meter_request_exists = ChangeMeterRequest::where('account_number', $request->electric_service_detail)
             ->where('status', null)
             ->whereNull('deleted_at'); // exclude archived records
@@ -393,6 +393,7 @@ class ChangeMeterRequestController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        //  dd($request);
         // Validate requests
         $this->validate($request, [
             'first_name' => ['required', 'string', 'max:255'],
@@ -463,6 +464,7 @@ class ChangeMeterRequestController extends Controller
             }
             $type_of_meter = $kwhMeterRequest->meter_code_id;
             $request->merge(['meter_code_no' => $type_of_meter]);
+            $request->merge(['meter_or_no' => $request->meter_serial_number]); // assign meter serial number to meter OR number
 
             // Handle liquidation details if provided
             $kwhMeterRequest = KwhMeterRequest::where('id', $request->kwh_meter_request_control_no)->first();
