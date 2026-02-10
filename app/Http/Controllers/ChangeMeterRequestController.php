@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChangeMeterLeadContractor;
 use App\Models\DataManagement\MeterType;
 use App\Models\KwhMeterRequest;
 use App\Models\KwhMeterRequestSerialNumber;
@@ -938,7 +939,9 @@ class ChangeMeterRequestController extends Controller
         ->orderBy('municipality_name', 'asc')
         ->get();
 
-        return view('service_connect_order.change_meter.report', compact('municipalities'));
+        $contractors = ChangeMeterLeadContractor::pluck('contractor_team_leader_full_name', 'id');
+        // dd($contractors);
+        return view('service_connect_order.change_meter.report', compact('municipalities', 'contractors'));
     }
 
     public function generateReport(Request $request)
@@ -974,6 +977,12 @@ class ChangeMeterRequestController extends Controller
 
         if ($request->barangay) {
             $query->where('barangay_id', $request->barangay);
+        }
+
+        if ($request->contractor_id) {
+            // get all crew of this contractor
+            $crews = ChangeMeterRequestContractor::where('team_leader_id', $request->contractor_id)->pluck('id')->toArray();
+            $query->whereIn('crew', $crews);
         }
 
         // Execute the query and get the results
