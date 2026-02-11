@@ -40,6 +40,7 @@
                   @endforeach
                 </tbody>
                </table>
+               <div id="pagination">{{ $mrfs->links() }}</div>
                <div class="row">
                 <div class="col-lg-12">
                   {{-- <a href="#" class="btn btn-success btn-sm" id="approvedAll"><i class="fa fa-check"></i>Approved</a> --}}
