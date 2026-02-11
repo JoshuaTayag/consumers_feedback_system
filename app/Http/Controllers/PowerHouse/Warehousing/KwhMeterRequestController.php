@@ -46,7 +46,7 @@ class KwhMeterRequestController extends Controller
      */
     public function create()
     {
-        $users = User::role(['TSD', 'TSD Manager'])->pluck('name', 'id');
+        $users = User::role(['TSD', 'TSD Manager', 'ISD Manager', 'CWD Analyst'])->pluck('name', 'id');
         // Get meter types with available meter counts using service
         $type_of_meters = $this->changeMeterService->getMeterTypesWithAvailability();
         return view('power_house.warehousing.kwh_meter_request.create', compact('users', 'type_of_meters'));
@@ -61,16 +61,20 @@ class KwhMeterRequestController extends Controller
         $unliquidatedCount = KwhMeterRequest::where('user_id', $request->user_id)
             ->where('is_liquidated', false)
             ->count();
-
-        if ($unliquidatedCount >= 2) {
+        // if role is TSD add a maximum request count of 4 for unliquidated requests
+        if ($unliquidatedCount >= env('TSD_KWH_METER_MAX_REQUESTS', 4) && auth()->user()->hasRole('TSD')) {
             return redirect()->back()->withErrors(['user_id' => 'You have unliquidated requests. Please liquidate them before submitting a new one.'])->withInput();
+        }
+
+        if ($request->quantity > env('TSD_MAX_METER_REQUEST', 10) && auth()->user()->hasRole('TSD')) {
+            return redirect()->back()->withErrors(['quantity' => 'TSD can only request a maximum of ' . env('TSD_MAX_METER_REQUEST', 10) . ' meters per request.'])->withInput();
         }
 
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
             'purpose' => 'required|string|max:500',
             'meter_code_id' => 'required|exists:meter_types,id',
-            'quantity' => 'required|integer|min:1|max:10',
+            'quantity' => 'required|integer|min:1',
             'approved_by' => 'required|exists:users,id',
         ]);
 

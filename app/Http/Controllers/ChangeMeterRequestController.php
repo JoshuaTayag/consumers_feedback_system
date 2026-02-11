@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChangeMeterLeadContractor;
 use App\Models\DataManagement\MeterType;
 use App\Models\KwhMeterRequest;
 use App\Models\KwhMeterRequestSerialNumber;
@@ -128,7 +129,7 @@ class ChangeMeterRequestController extends Controller
      */
     public function store(Request $request)
     {
-        
+
         $change_meter_request_exists = ChangeMeterRequest::where('account_number', $request->electric_service_detail)
             ->where('status', null)
             ->whereNull('deleted_at'); // exclude archived records
@@ -393,6 +394,7 @@ class ChangeMeterRequestController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        //  dd($request);
         // Validate requests
         $this->validate($request, [
             'first_name' => ['required', 'string', 'max:255'],
@@ -463,6 +465,7 @@ class ChangeMeterRequestController extends Controller
             }
             $type_of_meter = $kwhMeterRequest->meter_code_id;
             $request->merge(['meter_code_no' => $type_of_meter]);
+            $request->merge(['meter_or_no' => $request->meter_serial_number]); // assign meter serial number to meter OR number
 
             // Handle liquidation details if provided
             $kwhMeterRequest = KwhMeterRequest::where('id', $request->kwh_meter_request_control_no)->first();
@@ -936,7 +939,9 @@ class ChangeMeterRequestController extends Controller
         ->orderBy('municipality_name', 'asc')
         ->get();
 
-        return view('service_connect_order.change_meter.report', compact('municipalities'));
+        $contractors = ChangeMeterLeadContractor::pluck('contractor_team_leader_full_name', 'id');
+        // dd($contractors);
+        return view('service_connect_order.change_meter.report', compact('municipalities', 'contractors'));
     }
 
     public function generateReport(Request $request)
@@ -972,6 +977,12 @@ class ChangeMeterRequestController extends Controller
 
         if ($request->barangay) {
             $query->where('barangay_id', $request->barangay);
+        }
+
+        if ($request->contractor_id) {
+            // get all crew of this contractor
+            $crews = ChangeMeterRequestContractor::where('team_leader_id', $request->contractor_id)->pluck('id')->toArray();
+            $query->whereIn('crew', $crews);
         }
 
         // Execute the query and get the results

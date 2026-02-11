@@ -20,6 +20,7 @@
               <table class="table table-bordered">
                 <tr>
                   <th>No.</th>
+                  <th>Team Lead</th>
                   <th>Name</th>
                   <th>Address</th>
                   <th>Mobile No.</th>
@@ -29,6 +30,7 @@
                 @foreach ($contractors as $key => $contractor)
                  <tr>
                    <td>{{ $loop->iteration }}</td>
+                   <td>{{ $contractor->teamLeadContractor->contractor_team_leader_full_name ?? '' }}</td>
                    <td>{{ $contractor->full_name }}</td>
                    <td>{{ $contractor->address }}</td>
                    <td>{{ $contractor->mobile_number }}</td>

@@ -43,7 +43,7 @@
               <div class="col-lg-1">
                 <div class="mb-2">
                   <label for="quantity" class="form-label mb-1">Quantity</label>
-                    <input type="number" class="form-control" id="quantity" value="{{ $kwh_meter_request->quantity }}" max="10" name="quantity" old="quantity" disabled>
+                    <input type="number" class="form-control" id="quantity" value="{{ $kwh_meter_request->quantity }}" max="{{ env('TSD_MAX_METER_REQUEST', 10) }}" name="quantity" old="quantity" disabled>
                 </div>
               </div>
 
@@ -194,7 +194,7 @@
                           <td>{{ $serialNumber->meter->leyeco_seal_number }}</td>
                           <td>{{ $serialNumber->meter->erc_seal_number }}</td>
                           <td>{{ $serialNumber->changeMeterRequest ? $serialNumber->changeMeterRequest->control_no : 'N/A' }}</td>
-                          <td><span class="badge {{ $serialNumber->status == 0 ? 'bg-warning' : 'bg-success' }}">{{ $serialNumber->status == 0 &&  !$serialNumber->change_meter_request_id ? 'Unassigned' : ($serialNumber->changeMeterRequest->status == 2 ? 'Installed' : 'Unacted') }}</span></td>
+                          <td><span class="badge {{ $serialNumber->status == 0 &&  !$serialNumber->change_meter_request_id ? 'bg-info' : ($serialNumber->changeMeterRequest->status == 2 ? 'bg-success' : 'bg-warning') }}">{{ $serialNumber->status == 0 &&  !$serialNumber->change_meter_request_id ? 'Unassigned' : ($serialNumber->changeMeterRequest->status == 2 ? 'Installed' : 'Unacted') }}</span></td>
                         </tr>
                       @endforeach
                     </tbody>
