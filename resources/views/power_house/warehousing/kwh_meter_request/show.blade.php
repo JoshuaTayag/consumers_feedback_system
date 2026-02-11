@@ -43,7 +43,7 @@
               <div class="col-lg-1">
                 <div class="mb-2">
                   <label for="quantity" class="form-label mb-1">Quantity</label>
-                    <input type="number" class="form-control" id="quantity" value="{{ $kwh_meter_request->quantity }}" max="10" name="quantity" old="quantity" disabled>
+                    <input type="number" class="form-control" id="quantity" value="{{ $kwh_meter_request->quantity }}" max="{{ env('TSD_MAX_METER_REQUEST', 10) }}" name="quantity" old="quantity" disabled>
                 </div>
               </div>
 

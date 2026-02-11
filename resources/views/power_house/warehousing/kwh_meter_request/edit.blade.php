@@ -59,7 +59,7 @@
               <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="quantity" class="form-label mb-1">Quantity</label>
-                    <input type="number" class="form-control" id="quantity" value="{{ $kwh_meter_request->quantity }}" max="10" name="quantity" old="quantity" required>
+                    <input type="number" class="form-control" id="quantity" value="{{ $kwh_meter_request->quantity }}" name="quantity" old="quantity" required>
                 </div>
               </div>
 
@@ -129,7 +129,13 @@
         // add quantity validation on load
         var selectedOption = $('#meter_code_id').find('option:selected');
         var availableCount = selectedOption.data('available-count');
-        $('#quantity').attr('max', availableCount > 10 ? 10 : availableCount);
+        let authenticatedRole = '{{ auth()->user()->roles->first()->name }}';
+
+        if (authenticatedRole == "TSD") {
+          $('#quantity').attr('max', availableCount > {{ env('TSD_MAX_METER_REQUEST', 10) }} ? {{ env('TSD_MAX_METER_REQUEST', 10) }} : availableCount);
+        } else {
+          $('#quantity').attr('max', availableCount);
+        }
 
         
         // Add event handler for meter type selection
@@ -146,7 +152,11 @@
 
             // Update max quantity based on availability
             $('#quantity').val(''); // Clear previous quantity
-            $('#quantity').attr('max', availableCount > 10 ? 10 : availableCount);
+            if (authenticatedRole == "TSD") {
+              $('#quantity').attr('max', availableCount > {{ env('TSD_MAX_METER_REQUEST', 10) }} ? {{ env('TSD_MAX_METER_REQUEST', 10) }} : availableCount);
+            } else {
+              $('#quantity').attr('max', availableCount);
+            }
             console.log('Max quantity set to: ' + $('#quantity').attr('max'));
         });
         

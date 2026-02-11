@@ -4,6 +4,10 @@
 @section('content')
 
 <div class="container">
+  {{-- note for TSD staff --}}
+  <div class="alert alert-info" role="alert">
+    <strong>Note:</strong>TSD staff can only request a maximum of {{ env('TSD_MAX_METER_REQUEST', 10) }} meters per request and maximum of {{ env('TSD_KWH_METER_MAX_REQUESTS', 4) }} requests.
+  </div>
   <div class="row justify-content-center">
     <div class="col-lg-12">
       <div class="card">
@@ -52,7 +56,7 @@
               <div class="col-lg-3">
                 <div class="mb-2">
                   <label for="quantity" class="form-label mb-1">Quantity</label>
-                    <input type="number" class="form-control" id="quantity" max="10" name="quantity" old="quantity" required>
+                    <input type="number" class="form-control" id="quantity" name="quantity" old="quantity" required>
                 </div>
               </div>
 
@@ -124,6 +128,7 @@
         $('#meter_code_id').on('change', function() {
             var selectedOption = $(this).find('option:selected');
             var availableCount = selectedOption.data('available-count');
+            let authenticatedRole = '{{ auth()->user()->roles->first()->name }}';
             
             // Check if the selected meter type has available meters
             if (availableCount <= 0 && selectedOption.val() !== '') {
@@ -134,8 +139,12 @@
 
             // Update max quantity based on availability
             $('#quantity').val(''); // Clear previous quantity
-            $('#quantity').attr('max', availableCount > 10 ? 10 : availableCount);
-            console.log('Max quantity set to: ' + $('#quantity').attr('max'));
+            if (authenticatedRole == "TSD") {
+              $('#quantity').attr('max', availableCount > {{ env('TSD_MAX_METER_REQUEST', 10) }} ? {{ env('TSD_MAX_METER_REQUEST', 10) }} : availableCount);
+            } else {
+              $('#quantity').attr('max', availableCount);
+            }
+            // console.log('Max quantity set to: ' + $('#quantity').attr('max') + ' | Authenticated Role: ' + authenticatedRole);
         });
         
         // Style options based on availability when page loads
