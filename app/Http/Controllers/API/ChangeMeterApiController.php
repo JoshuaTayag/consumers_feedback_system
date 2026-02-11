@@ -255,6 +255,12 @@ class ChangeMeterApiController extends Controller
             // Update the existing record with new data
             $change_meter_request->update($dataToUpdate);
 
+            // if the changemeter is for liquidation update the status of kwh meter serial number to 1 (active) in the kwh meter inventory
+            if($change_meter_request->kwh_meter_request_id) {
+                $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
+                    ->where('change_meter_request_id', $change_meter_request->id)
+                    ->update(['status' => 1]); // Assuming '1' indicates 'posted'
+            }
             // Debug logging after update
             \Log::info('API Audit Debug - After Update', [
                 'updated_fields' => $dataToUpdate,

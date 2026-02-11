@@ -135,7 +135,7 @@
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="approved_by_liquidation" class="form-label">
-                                    <i class="fas fa-user-tie me-1"></i>Approved By (TSD Manager)
+                                    <i class="fas fa-user-tie me-1"></i>Approved By (Manager)
                                     <span class="text-danger">*</span>
                                 </label>
                                 <select class="form-select" id="approved_by_liquidation" name="approved_by_liquidation" required>
@@ -145,7 +145,7 @@
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback">
-                                    Please select a TSD Manager.
+                                    Please select a Manager.
                                 </div>
                             </div>
                         </div>
