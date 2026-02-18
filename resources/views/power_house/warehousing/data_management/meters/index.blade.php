@@ -290,11 +290,15 @@
                     </div>
                     <hr class="my-3">
                     <div class="row text-center">
-                        <div class="col-6">
+                        <div class="col-4">
                             <small class="text-muted d-block">Physical Available</small>
                             <strong class="text-success">{{ number_format($meter_stats['data']['summary']['total_available_meters']) }}</strong>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
+                            <small class="text-muted d-block">Assigned Meter</small>
+                            <strong class="text-success">{{ number_format($meter_stats['data']['summary']['total_assigned_meters']) }}</strong>
+                        </div>
+                        <div class="col-4">
                             <small class="text-muted d-block">Meter Types</small>
                             <strong class="text-success">{{ count($meter_stats['data']['meter_types']) }}</strong>
                         </div>

@@ -892,12 +892,16 @@ class MeterController extends Controller
 
             $totalMeters = Meter::whereNull('deleted_at')->count();
 
-            // dd($totalMeters);
+            // Count assigned meters
+            $assignedMeters = Meter::where('status', 1) // Assigned
+                ->whereNull('deleted_at')
+                ->count();
 
             // Calculate summary statistics
             $totalStats = [
                 'total_meter_types' => count($results),
                 'total_available_meters' => array_sum(array_column($results, 'total_available_meters')),
+                'total_assigned_meters' => $assignedMeters,
                 'total_reserved_by_change_meter' => array_sum(array_column($results, 'reserved_by_change_meter_requests')),
                 'total_reserved_by_kwh_meter' => array_sum(array_column($results, 'reserved_by_kwh_meter_requests')),
                 'total_reserved' => array_sum(array_column($results, 'total_reserved')),
