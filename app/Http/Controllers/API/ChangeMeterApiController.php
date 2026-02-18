@@ -418,7 +418,7 @@ class ChangeMeterApiController extends Controller
             $status = $request->input('status');
 
             // Fetch change meter request history for the given contractor
-            $changeMeterRequests = ChangeMeterRequest::select('id', 'control_no', 'contact_no', 'sitio', 'barangay_id', 'municipality_id','account_number', 'consumer_type', 'remarks', 'old_meter_no', 'new_meter_no', 'care_of', 'location', 'meter_or_number', 'date_time_acted', 'status')
+            $changeMeterRequests = ChangeMeterRequest::select('id', 'last_name', 'first_name', 'middle_name', 'control_no', 'contact_no', 'sitio', 'barangay_id', 'municipality_id','account_number', 'consumer_type', 'remarks', 'old_meter_no', 'new_meter_no', 'care_of', 'location', 'meter_or_number', 'date_time_acted', 'status')
                 ->selectRaw("CONCAT(last_name, ', ', first_name, ' ', middle_name) as full_name")
                 ->with('municipality', 'barangay', 'assignedMeter.meterType')
                 ->where('crew', $contractorId)
