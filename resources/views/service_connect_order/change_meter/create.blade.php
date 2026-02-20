@@ -20,6 +20,9 @@
             @csrf
             <div class="row">
               <div class="col-lg-8">
+                <div class="alert alert-warning">
+                  Note: if the account number is not showing, this means that the account has pending change meter request.
+                </div>
                 <div class="row">
                   <div class="col-lg-8">
                     <div class="mb-2">

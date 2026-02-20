@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChangeMeterLeadContractor;
+use App\Models\ConsumersTable;
 use App\Models\DataManagement\MeterType;
 use App\Models\KwhMeterRequest;
 use App\Models\KwhMeterRequestSerialNumber;
@@ -1012,18 +1013,26 @@ class ChangeMeterRequestController extends Controller
     public function getAccountDetails(Request $request){
         $search = $request->search;
 
-            if($search == ''){
-                $accounts = DB::connection('sqlSrvBilling')->table('Consumers Table as ct')
-                ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No', 'ct.Cons Type');
+        // Query Consumers Table with subquery to exclude blocked accounts
+        $accounts = DB::table('Consumers Table')
+            ->whereNotIn('Accnt No', function($query) {
+                $query->select('account_number')
+                    ->from('change_meter_requests')
+                    ->where(function($q) {
+                        $q->whereNull('status')
+                          ->orWhere('status', 0);
+                    })
+                    ->whereNull('deleted_at')
+                    ->distinct();
+            });
 
-            } else{
-                $accounts = DB::connection('sqlSrvBilling')->table('Consumers Table as ct')
-                ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No', 'ct.Cons Type')
-                ->where('ct.Accnt No', 'like', '%' .$search . '%');
-            }
+        if($search !== ''){
+            $accounts->where('Accnt No', 'like', '%' . $search . '%');
+        }
+
+        $accounts->select('Accnt No as id', 'Name', 'Address', 'OR No', 'Date', 'Prev Reading', 'Serial No', 'Cons Type');
 
         $data = $accounts->paginate(10, ['*'], 'page', $request->page);
-        // dd($data);
         return response()->json($data); 
     }
 
