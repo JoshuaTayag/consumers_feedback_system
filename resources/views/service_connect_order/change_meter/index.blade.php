@@ -288,6 +288,10 @@
                         <div class="col-lg-7 text-{{$cm_request->date_time_acted ? '' : 'danger'}}">{{ $cm_request->date_time_acted ? date('F d, Y h:i A', strtotime($cm_request->date_time_acted)) : 'N/A' }}</div>
                       </div>
                       <div class="row border-bottom">
+                        <div class="col-lg-5 border-end">Landmark:</div>
+                        <div class="col-lg-7">{{$cm_request->location}}</div>
+                      </div>
+                      <div class="row border-bottom">
                         <div class="col-lg-5 border-end">Remarks:</div>
                         <div class="col-lg-7">{{$cm_request->remarks}}</div>
                       </div>

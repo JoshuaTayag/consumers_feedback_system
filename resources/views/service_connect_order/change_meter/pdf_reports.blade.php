@@ -216,9 +216,9 @@
             <td>{{$data->old_meter_no}}</td>
             <td>{{$data->last_reading}}</td>
             <td>{{$data->new_meter_no}}</td>
-            <td>{{$data->postedMeterHistory->erc_seal_no}}</td>
-            <td>{{$data->postedMeterHistory->leyeco_seal_no}}</td>
-            <td>{{$data->postedMeterHistory->date_installed}}</td>
+            <td>{{$data->assignedMeter ? $data->assignedMeter->erc_seal_number : 'N/A'}}</td>
+            <td>{{$data->assignedMeter ? $data->assignedMeter->leyeco_seal_number : 'N/A'}}</td>
+            <td>{{$data->postedMeterHistory ? $data->postedMeterHistory->date_installed : 'N/A'}}</td>
             <td class="signature-cell">
               @if(isset($signatures[$data->id]) && $signatures[$data->id]->isNotEmpty())
                 @php

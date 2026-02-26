@@ -9,6 +9,8 @@ use App\Models\ChangeMeterRequest;
 use App\Models\ChangeMeterRequestPostingHistory;
 use App\Services\ChangeMeterService;
 use App\Services\SignatureService;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\ChangeMeterCompletedNotification;
 
 class ChangeMeterApiController extends Controller
 {
@@ -29,11 +31,56 @@ class ChangeMeterApiController extends Controller
             ->with('municipality', 'barangay', 'assignedMeter.meterType')
             ->where('crew', $contractorId)
             ->where('status', '3') // Fetch only dispatched requests
+            ->orderBy('municipality_id')
+            ->orderBy('dispatched_date')
             ->get()
             ->map(function ($request) {
                 return [
                     'cm_id' => $request->id,
                     'control_no' => $request->control_no,
+                    'account_no' => substr($request->account_number, 0, 2) . '-' . substr($request->account_number, 2, 4) . '-' . substr($request->account_number, 6, 4),
+                    'full_name' => $request->full_name,
+                    'contact_no' => $request->contact_no,
+                    'address' => $request->sitio .', '. $request->barangay->barangay_name .', '. $request->municipality->municipality_name,
+                    'consumer_type' => $request->consumer_type,
+                    'meter_or' => $request->meter_or_number,
+                    'remarks' => $request->remarks,
+                    'land_mark' => $request->location,
+                    'old_meter_no' => $request->old_meter_no,
+                    'care_of' => $request->care_of,
+                    'assigned_meter' => $request->assignedMeter ? [
+                        'serial_number' => $request->assignedMeter->serial_number,
+                        'leyeco_seal_number' => $request->assignedMeter->leyeco_seal_number,
+                        'erc_seal_number' => $request->assignedMeter->erc_seal_number,
+                        'meter_brand' => $request->assignedMeter->meterType ? $request->assignedMeter->meterType->meter_brand : null,
+                        'meter_code' => $request->assignedMeter->meterType ? $request->assignedMeter->meterType->meter_code : null,
+                    ] : null,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $changeMeterRequests,
+        ]);
+    }
+
+    public function fetchFilteredChangeMeterDataPerContractor(Request $request)
+    {
+        $contractorId = auth()->user()->change_meter_contractor->id;
+
+        // Fetch change meter requests for the given contractor
+        $changeMeterRequests = ChangeMeterRequest::select('last_name','first_name','middle_name','id', 'control_no', 'contact_no', 'sitio', 'barangay_id', 'municipality_id','account_number', 'consumer_type', 'remarks', 'old_meter_no', 'new_meter_no', 'care_of', 'location', 'meter_or_number')
+            ->with('municipality', 'barangay', 'assignedMeter.meterType')
+            ->where('crew', $contractorId)
+            ->where('status', '3') // Fetch only dispatched requests
+            ->orderBy('municipality_id')
+            ->orderBy('dispatched_date')
+            ->get()
+            ->map(function ($request) {
+                return [
+                    'cm_id' => $request->id,
+                    'control_no' => $request->control_no,
+                    'account_no' => substr($request->account_number, 0, 2) . '-' . substr($request->account_number, 2, 4) . '-' . substr($request->account_number, 6, 4),
                     'full_name' => $request->full_name,
                     'contact_no' => $request->contact_no,
                     'address' => $request->sitio .', '. $request->barangay->barangay_name .', '. $request->municipality->municipality_name,
@@ -83,6 +130,7 @@ class ChangeMeterApiController extends Controller
                 'seal_no' => 'required|string',
                 'erc_seal' => 'required|string',
                 'crew_remarks' => 'nullable|string',
+                'email' => 'nullable|email',
 
                 'consumer_signature_data' => 'nullable|string', // Base64 encoded image
                 'consumer_name' => 'required_with:consumer_signature_data|string|max:255',
@@ -244,7 +292,8 @@ class ChangeMeterApiController extends Controller
                 "crew" => $crew_id,
                 "status" => $request->status,
                 "damage_cause" => $request->damage_cause,
-                "crew_remarks" => $request->crew_remarks
+                "crew_remarks" => $request->crew_remarks,
+                "email" => $request->email,
             ];
 
             // Remove any null values from the update array
@@ -293,6 +342,15 @@ class ChangeMeterApiController extends Controller
                     ->table('Consumers Table')
                     ->where('Accnt No', $change_meter_request->account_number)
                     ->value('Remarks') ?? '';
+
+                // check if the account has email address
+                $existingEmail = \DB::connection('sqlSrvBilling')
+                ->table('Consumers Table')
+                ->where('Accnt No', $change_meter_request->account_number)
+                ->value('emailadd') ?? '';
+
+                // if the consumers does not have email address in the billing system and the consumer position is owner, use the email address from the request to update the billing system and use it for sending email notification
+                $emailAddress = $existingEmail == null && $request->consumer_position == 'Owner' ? $request->email : $existingEmail;
                 
                 // Remove leading and trailing spaces
                 $existingRemarks = trim($existingRemarks);
@@ -309,7 +367,19 @@ class ChangeMeterApiController extends Controller
                         'Brand' => $change_meter_request->assignedMeter && $change_meter_request->assignedMeter->meterType ? $change_meter_request->assignedMeter->meterType->meter_brand : null,
                         'TypeMtr' => $change_meter_request->assignedMeter && $change_meter_request->assignedMeter->meterType ? $change_meter_request->assignedMeter->meterType->meter_code : null,
                         'Remarks' => $newRemarks,
+                        'emailadd' => $emailAddress,
                     ]);
+            }
+
+            // Send email notification if email exists
+            if (!empty($change_meter_request->email)) {
+                try {
+                    Notification::route('mail', $change_meter_request->email)
+                        ->notify(new ChangeMeterCompletedNotification($change_meter_request, $this->signatureService));
+                } catch (\Exception $e) {
+                    // Log email error but don't fail the transaction
+                    \Log::error('Failed to send change meter completion email: ' . $e->getMessage());
+                }
             }
 
             \DB::commit();
@@ -345,6 +415,14 @@ class ChangeMeterApiController extends Controller
             'cm_id' => 'required|exists:change_meter_requests,id',
             'new_crew_id' => 'required|integer'
         ]);
+
+        $crew = ChangeMeterRequestContractor::find($request->new_crew_id);
+        if (!$crew) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The specified crew does not exist.'
+            ], 404);
+        }
 
         // Check if the request crew is different from the logged-in user (ensure integer comparison)
         if ((int)$request->new_crew_id == (int)auth()->user()->change_meter_contractor->id) {
@@ -384,10 +462,13 @@ class ChangeMeterApiController extends Controller
 
     public function fetchChangeMeterRequestContractors(Request $request)
     {
+        $team_leader_id = auth()->user()->change_meter_contractor->team_leader_id;
+
         try {
             $contractors = ChangeMeterRequestContractor::select('id', 'first_name', 'last_name')
                 ->orderBy('first_name', 'asc')
                 ->whereNotNull('user_id')
+                ->where('team_leader_id', $team_leader_id)
                 ->get()
                 ->map(function ($contractor) {
                     return [
