@@ -16,25 +16,25 @@
           </div>
         </div>
         <div class="card-body" style="background-color: #fafafa">
-          {!! Form::open(array('route' => ['updateCM', $change_meter_request->id],'method'=>'PUT')) !!}
+          <form action="{{ route('updateCM', $change_meter_request->id) }}" method="POST">
+            @csrf
+            @method('PUT')
             <div class="row">
-              <div class="col-lg-8">
+              <div class="col-lg-9">
                 <div class="row">
                   <div class="col-lg-12 mb-3">
                     <span class="fs-4 fw-bold">Control #: <span class="text-danger">{{$change_meter_request->control_no}}</span></span>
                   </div>
                   <div class="col-lg-6">
                     <div class="mb-2">
-                        <!-- {{ Form::label('account_no', 'Account No') }}
-                        {{ Form::text('account_no', null, array('placeholder' => 'Ex: 0111111','class' => 'form-control')) }} -->
-                        {{ Form::label('electric_service_details', 'Account Number') }}
-                        {{ Form::text('electric_service_details', $change_meter_request->account_number, array('class' => 'form-control', 'disabled')) }}
+                        <label for="electric_service_details" class="form-label mb-1">Account Number</label>
+                        <input type="text" id="electric_service_details" name="electric_service_details" class="form-control" value="{{ $change_meter_request->account_number }}" disabled>
                     </div>
                   </div>
                   <div class="col-lg-4">
                     <div class="mb-2">
-                        {{ Form::label('old_meter', 'Old Meter') }}
-                        {{ Form::text('old_meter', $change_meter_request->old_meter_no, array('class' => 'form-control')) }}
+                        <label for="old_meter" class="form-label mb-1">Old Meter</label>
+                        <input type="text" id="old_meter" name="old_meter" class="form-control" value="{{ $change_meter_request->old_meter_no }}">
                     </div>
                   </div>
                 </div>
@@ -44,26 +44,32 @@
                 <div class="row">
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('last_name', 'Last Name') }}
-                        {{ Form::text('last_name', $change_meter_request->last_name, array('class' => 'form-control', 'readonly', 'required')) }}
+                        <label for="last_name" class="form-label mb-1">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" class="form-control" value="{{ $change_meter_request->last_name }}">
+                    </div>
+                  </div>
+                  <div class="col-lg-2">
+                    <div class="mb-2">
+                        <label for="first_name" class="form-label mb-1">First Name</label>
+                        <input type="text" id="first_name" name="first_name" class="form-control" value="{{ $change_meter_request->first_name }}">
+                    </div>
+                  </div>
+                  <div class="col-lg-2">
+                    <div class="mb-2">
+                        <label for="contact_no" class="form-label mb-1">Contact No.</label>
+                        <input type="text" id="contact_no" name="contact_no" class="form-control" value="{{ $change_meter_request->contact_no }}">
+                    </div>
+                  </div>
+                  <div class="col-lg-2">
+                    <div class="mb-2">
+                        <label for="email" class="form-label mb-1">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-control" value="{{ $change_meter_request->email }}">
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('first_name', 'First Name') }}
-                        {{ Form::text('first_name', $change_meter_request->first_name, array('class' => 'form-control', 'required')) }}
-                    </div>
-                  </div>
-                  <div class="col-lg-3">
-                    <div class="mb-2">
-                        {{ Form::label('contact_no', 'Contact No.') }}
-                        {{ Form::text('contact_no', $change_meter_request->contact_no, array('class' => 'form-control')) }}
-                    </div>
-                  </div>
-                  <div class="col-lg-3">
-                    <div class="mb-2">
-                        {{ Form::label('care_of', 'Care of') }}
-                        {{ Form::text('care_of', $change_meter_request->care_of, array('class' => 'form-control')) }}
+                        <label for="care_of" class="form-label mb-1">Care of</label>
+                        <input type="text" id="care_of" name="care_of" class="form-control" value="{{ $change_meter_request->care_of }}">
                     </div>
                   </div>
                 </div>
@@ -80,7 +86,7 @@
                   </div>
                   <div class="col-lg-1">
                     <div class="mb-2">
-                        {{ Form::label('area', 'Area *') }}
+                        <label for="area" class="form-label mb-1">Area *</label>
                         <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
                           <option value=""></option>
                           <option value="1" {{ $change_meter_request->area == "1" ? 'selected' : ''}} >A1</option>
@@ -93,7 +99,7 @@
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('municipality', 'Municipality *') }}
+                        <label for="municipality" class="form-label mb-1">Municipality *</label>
                         <select id="municipality" class="form-control" name="municipality" value="{{ old('municipality')}}" required>
                           <option value=""></option>
                           @foreach ($municipalities as $municipality)          
@@ -104,7 +110,7 @@
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('barangay', 'Barangays *') }}
+                        <label for="barangay" class="form-label mb-1">Barangays *</label>
                         <select id="barangay" class="form-control" name="barangay" required>
                           <!-- <option value=""></option> -->
                           <option value="{{ $change_meter_request->barangay_id }}" id="{{ $change_meter_request->barangay_id }}">{{$change_meter_request->barangay_id ? $change_meter_request->barangay->barangay_name : null }}</option>
@@ -116,41 +122,41 @@
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('sitio', 'Sitio *') }}
-                        {{ Form::text('sitio', $change_meter_request->sitio, array('class' => 'form-control', 'required')) }}
+                        <label for="sitio" class="form-label mb-1">Sitio *</label>
+                        <input type="text" id="sitio" name="sitio" class="form-control" value="{{ $change_meter_request->sitio }}" required>
                     </div>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-lg-2">
                     <div class="mb-2">
-                        {{ Form::label('membership_or', 'Membership OR *') }}
-                        {{ Form::text('membership_or', $change_meter_request->membership_or, array('class' => 'form-control', 'readonly')) }}
+                        <label for="membership_or" class="form-label mb-1">Membership OR *</label>
+                        <input type="text" id="membership_or" name="membership_or" class="form-control" value="{{ $change_meter_request->membership_or }}" readonly>
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
                       {{ $change_meter_request->{'Membership Date'} }}
-                        {{ Form::label('membership_date', 'Membership Date *') }}
-                        {{ Form::date('membership_date', date('Y-m-d', strtotime($change_meter_request->{'Membership Date'})) , array('class' => 'form-control', 'readonly')) }}
+                        <label for="membership_date" class="form-label mb-1">Membership Date *</label>
+                        <input type="date" id="membership_date" name="membership_date" class="form-control" value="{{ date('Y-m-d', strtotime($change_meter_request->{'Membership Date'})) }}" readonly>
                     </div>
                   </div>
                   <div class="col-lg-1">
                     <div class="mb-2">
-                        {{ Form::label('consumer_type', 'Type *') }}
-                        {{ Form::text('consumer_type', $change_meter_request->consumer_type, array('class' => 'form-control', 'readonly')) }}
+                        <label for="consumer_type" class="form-label mb-1">Type *</label>
+                        <input type="text" id="consumer_type" name="consumer_type" class="form-control" value="{{ $change_meter_request->consumer_type }}" readonly>
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('meter_or_no', 'Meter OR #') }}
-                        {{ Form::text('meter_or_no', $change_meter_request->meter_or_number, array('class' => 'form-control')) }}
+                        <label for="meter_or_no" class="form-label mb-1">Meter OR #</label>
+                        <input type="text" id="meter_or_no" name="meter_or_no" class="form-control" value="{{ $change_meter_request->meter_or_number }}">
                     </div>
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        {{ Form::label('process_date', 'Process Date *') }}
-                        {{ Form::date('process_date', $change_meter_request->process_date, array('class' => 'form-control', 'required')) }}
+                        <label for="process_date" class="form-label mb-1">Process Date *</label>
+                        <input type="date" id="process_date" name="process_date" class="form-control" value="{{ date('Y-m-d', strtotime($change_meter_request->process_date)) }}" required>
                     </div>
                   </div>
                 </div>
@@ -161,32 +167,32 @@
                   @if ($change_meter_request->new_meter_no != null && $change_meter_request->kwh_meter_request_id == null)
                     <div class="col-lg-2" id="meter_type_section" style="display: {{ $change_meter_request->kwh_meter_request_id ? 'none' : 'block' }};">
                       <div class="mb-2">
-                        {{ Form::label('meter_code_no', 'Meter Type') }}
-                        {{ Form::text('meter_code_no', $change_meter_request->assignedMeter->meterType->meter_code, array('class' => 'form-control')) }}
+                        <label for="meter_code_no" class="form-label mb-1">Meter Type</label>
+                        <input type="text" id="meter_code_no" name="meter_code_no" class="form-control" value="{{ $change_meter_request->assignedMeter->meterType->meter_code }}">
                       </div>
                     </div>
                     <div class="col-lg-2" id="meter_type_section" style="display: {{ $change_meter_request->kwh_meter_request_id ? 'none' : 'block' }};">
                       <div class="mb-2">
-                        {{ Form::label('meter_code_no', 'Meter No') }}
-                        {{ Form::text('meter_code_no', $change_meter_request->new_meter_no, array('class' => 'form-control')) }}
+                        <label for="meter_code_no" class="form-label mb-1">Meter No</label>
+                        <input type="text" id="meter_code_no" name="meter_code_no" class="form-control" value="{{ $change_meter_request->new_meter_no }}">
                       </div>
                     </div>
                     <div class="col-lg-2" id="meter_type_section" style="display: {{ $change_meter_request->kwh_meter_request_id ? 'none' : 'block' }};">
                       <div class="mb-2">
-                        {{ Form::label('meter_code_no', 'ERC Seal') }}
-                        {{ Form::text('meter_code_no', $change_meter_request->assignedMeter->erc_seal_number, array('class' => 'form-control')) }}
+                        <label for="erc_seal" class="form-label mb-1">ERC Seal</label>
+                        <input type="text" id="erc_seal" name="erc_seal" class="form-control" value="{{ $change_meter_request->assignedMeter->erc_seal_number }}">
                       </div>
                     </div>
                     <div class="col-lg-2" id="meter_type_section" style="display: {{ $change_meter_request->kwh_meter_request_id ? 'none' : 'block' }};">
                       <div class="mb-2">
-                        {{ Form::label('meter_code_no', 'Leyeco V Seal') }}
-                        {{ Form::text('meter_code_no', $change_meter_request->assignedMeter->leyeco_seal_number, array('class' => 'form-control')) }}
+                        <label for="leyeco_v_seal" class="form-label mb-1">Leyeco V Seal</label>
+                        <input type="text" id="leyeco_v_seal" name="leyeco_v_seal" class="form-control" value="{{ $change_meter_request->assignedMeter->leyeco_seal_number }}">
                       </div>
                     </div>
                   @else
                     <div class="col-lg-8" id="meter_type_section" style="display: {{ $change_meter_request->kwh_meter_request_id ? 'none' : 'block' }};">
                       <div class="mb-2">
-                        {{ Form::label('meter_code_no', 'Type Of Meter*') }}
+                        <label for="meter_code_no" class="form-label mb-1">Type Of Meter*</label>
                         <select id="meter_code_no" class="form-control" name="meter_code_no" {{ $change_meter_request->kwh_meter_request_id ? '' : 'required' }}>
                           <option value=""></option>
                           @foreach ($type_of_meters as $type_of_meter)          
@@ -205,14 +211,14 @@
                   @endif
                   <div class="col-lg-2">
                     <div class="mb-2">
-                        {{ Form::label('last_reading', 'Last Reading') }}
-                        {{ Form::number('last_reading', $change_meter_request->last_reading, array('class' => 'form-control', 'readonly')) }}
+                        <label for="last_reading" class="form-label mb-1">Last Reading</label>
+                        <input type="number" id="last_reading" name="last_reading" class="form-control" value="{{ $change_meter_request->last_reading }}" readonly>
                     </div>
                   </div>
                   <div class="col-lg-2">
                     <div class="mb-2">
-                        {{ Form::label('reading_initial', 'Initial Reading') }}
-                        {{ Form::number('reading_initial', $change_meter_request->initial_reading, array('class' => 'form-control')) }}
+                        <label for="reading_initial" class="form-label mb-1">Initial Reading</label>
+                        <input type="number" id="reading_initial" name="reading_initial" class="form-control" value="{{ $change_meter_request->initial_reading }}">
                     </div>
                   </div>
                 </div>
@@ -232,7 +238,7 @@
                 </div>
               </div>
 
-              <div class="col-lg-4 mb-3" id="schedule_of_fees" >
+              <div class="col-lg-3 mb-3" id="schedule_of_fees" >
                 <div class="col text-center"><h2>Schedule of Fees</h2></div>
                 @if($change_meter_request->changeMeterRequestTransaction)
                   <span class="text-center fw-bold text-warning fs-3">OR: {{ $change_meter_request->changeMeterRequestTransaction->or_no }}</span>
@@ -258,6 +264,11 @@
                 <div class="col-lg-8">
                   <code class="fs-4">Liquidation Details</code>
                   <hr>
+                  @if ($change_meter_request->new_meter_no != null && $change_meter_request->kwh_meter_request_id == null)
+                    <div class="alert alert-info">
+                      This change meter request is already assigned with a meter number. 
+                    </div>
+                  @else
                     <div class="row">
                       <div class="col-lg-4">
                         <div class="mb-2">
@@ -287,7 +298,6 @@
                         </div>
                       </div>
                     </div>
-
                     <div class="row">
                       <div class="col-lg-4">
                         <div class="mb-2">
@@ -316,7 +326,8 @@
                         </div>
                       </div>
                       <input type="hidden" id="liquidation_meter_serial_number" value="@if($change_meter_request->kwhMeterRequestSerialNumbers->count() > 0 && $change_meter_request->kwhMeterRequestSerialNumbers->first()->meter){{ $change_meter_request->kwhMeterRequestSerialNumbers->first()->meter->serial_number }}@endif" name="liquidation_meter_serial_number" class="form-control" readonly>
-                  </div>
+                    </div>
+                  @endif   
                 </div>
               {{-- @endif --}}
 
@@ -325,7 +336,7 @@
                   <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-check me-2"></i>Submit</button>
               </div>
             </div>
-          {!! Form::close() !!}
+          </form>
         </div>
       </div>
     </div>

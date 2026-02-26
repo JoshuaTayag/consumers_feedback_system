@@ -130,6 +130,7 @@ class ChangeMeterRequest extends Model implements Auditable
         'last_reading', 'initial_reading', 'remarks', 'location', 'crew',
         'date_time_acted', 'status', 'damage_cause', 'crew_remarks', 'created_by',
         'created_at', 'process_date', 'dispatched_date', 'kwh_meter_request_id',
+        'email',
     ];
 
     protected $appends = ['crew_full_name'];
@@ -138,5 +139,6 @@ class ChangeMeterRequest extends Model implements Auditable
         'date_time_acted' => 'datetime',
         'dispatched_date' => 'datetime',
         'process_date' => 'datetime',
+        'team_leader_id' => 'integer',
     ];
 }

@@ -21,6 +21,8 @@ use App\Helpers\Helper;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\ChangeMeterCompletedNotification;
 use PDO;
 
 class ChangeMeterRequestController extends Controller
@@ -132,7 +134,10 @@ class ChangeMeterRequestController extends Controller
     {
 
         $change_meter_request_exists = ChangeMeterRequest::where('account_number', $request->electric_service_detail)
-            ->where('status', null)
+            ->where(function($query) {
+                $query->where('status', null)
+                      ->orWhere('status', 3); // dispatched to crew or pending for posting
+            })
             ->whereNull('deleted_at'); // exclude archived records
 
         if ($change_meter_request_exists->exists()) {
@@ -150,6 +155,7 @@ class ChangeMeterRequestController extends Controller
             'municipality' => ['required'],
             'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
             'membership_or' => ['required'],
+            'email' => ['nullable', 'email', 'max:255'],
             // 'membership_date' => ['required'],
             // 'consumer_type' => ['required'],
             'meter_code_no' => ['required_without:kwh_meter_request_control_no'], 
@@ -237,6 +243,7 @@ class ChangeMeterRequestController extends Controller
                 "created_at" => Carbon::today(),
                 "process_date" => $request->process_date,
                 "kwh_meter_request_id" => $request->kwh_meter_request_control_no,
+                "email" => $request->email,
             ]);
 
             // Handle liquidation details if provided
@@ -405,6 +412,7 @@ class ChangeMeterRequestController extends Controller
             'municipality' => ['required'],
             'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
             'membership_or' => ['required'],
+            'email' => ['nullable', 'email', 'max:255'],
             // 'membership_date' => ['required'],
             'consumer_type' => ['required'],
             'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo,' . $id . ',id'], // Ensure uniqueness except for the current record
@@ -421,40 +429,48 @@ class ChangeMeterRequestController extends Controller
 
         if ($request->kwh_meter_request_control_no == null && $request->meter_serial_number == null) { // if not liquidation
             // check if the selected meter types have available meters
-            $availableMeterCount = Meter::where('meter_type_id', $request->meter_code_no)
-                ->where('status', 0) // available status
-                ->whereNull('account_number')
-                ->whereNull('deleted_at')
-                ->count();
+            // dd($request->all());
+            if (!$request->erc_seal && !$request->leyeco_v_seal) {
+                $availableMeterCount = Meter::where('meter_type_id', $request->meter_code_no)
+                    ->where('status', 0) // available status
+                    ->whereNull('account_number')
+                    ->whereNull('deleted_at')
+                    ->count();
 
-            // check for unacted change meter requests using the same meter type
-            $unactedRequestsCount = ChangeMeterRequest::where('type_of_meter', $request->meter_code_no)
-                ->where('status', '!=', 2) // unacted requests
-                ->count();
+                // check for unacted change meter requests using the same meter type
+                $unactedRequestsCount = ChangeMeterRequest::where('type_of_meter', $request->meter_code_no)
+                    ->where('status', '!=', 2) // unacted requests
+                    ->count();
 
-            // Calculate truly available meters (total available - reserved by unacted requests)
-            $trulyAvailableCount = $availableMeterCount - $unactedRequestsCount;
+                // Calculate truly available meters (total available - reserved by unacted requests)
+                $trulyAvailableCount = $availableMeterCount - $unactedRequestsCount;
 
-            if ($trulyAvailableCount <= 0) {
-                $message = $availableMeterCount <= 0 
-                    ? 'The selected meter type has no available meters.' 
-                    : "The selected meter type has {$availableMeterCount} available meters, but {$unactedRequestsCount} are reserved by pending requests.";
-                
-                return redirect()->back()->withInput()->withErrors([
-                    'meter_code_no' => $message . ' Please choose a different type or wait for pending requests to be processed.'
+                if ($trulyAvailableCount <= 0) {
+                    $message = $availableMeterCount <= 0 
+                        ? 'The selected meter type has no available meters.' 
+                        : "The selected meter type has {$availableMeterCount} available meters, but {$unactedRequestsCount} are reserved by pending requests.";
+                    
+                    return redirect()->back()->withInput()->withErrors([
+                        'meter_code_no' => $message . ' Please choose a different type or wait for pending requests to be processed.'
+                    ]);
+                }
+
+                // remove the change meter request id in the kwh meter request serials if previously linked
+                KwhMeterRequestSerialNumber::where('change_meter_request_id', $id)->update(['change_meter_request_id' => null]);
+
+                //remove the control number and account number in meter details if previously linked
+                $control_type = ChangeMeterRequest::find($id)->kwhMeterRequest()->exists() ? 'kWh Meter Request' : null;
+                ChangeMeterRequest::find($id)->assignedMeter()->update([
+                    'control_type' => $control_type,
+                    'control_no' => null,
+                    'account_number' => null,
+                    'status' => 0, // set meter status to available
+
                 ]);
+            } else {
+                $request->merge(['liquidation_meter_serial_number' => $request->meter_code_no]); // if the existing meter is already assigned with a meter serial number, assign the new meter serial number to the liquidation_meter_serial_number field to avoid validation error for unique meter serial number in the service connect table
             }
 
-            // remove the change meter request id in the kwh meter request serials if previously linked
-            KwhMeterRequestSerialNumber::where('change_meter_request_id', $id)->update(['change_meter_request_id' => null]);
-
-            //remove the control number and account number in meter details if previously linked
-            $control_type = ChangeMeterRequest::find($id)->kwhMeterRequest()->exists() ? 'kWh Meter Request' : null;
-            ChangeMeterRequest::find($id)->assignedMeter()->update([
-                'control_type' => $control_type,
-                'control_no' => null,
-                'account_number' => null,
-            ]);
             
         } else { // if liquidation
             // get meter type from kwh meter request serial number
@@ -484,6 +500,14 @@ class ChangeMeterRequestController extends Controller
                     ]);
                 }
 
+                // if ($request->kwh_meter_request_control_no == null && $request->meter_serial_number == null && $change_meter_request->kwh_meter_request_id) {
+                //     $meter->update([
+                //         'control_type' => null,
+                //         'control_no' => null,
+                //         'account_number' => null,
+                //     ]);
+                // }
+
                 // assign control number and account number in meter details
                 $meter->update([
                     'control_type' => 'Change Meter',
@@ -493,7 +517,6 @@ class ChangeMeterRequestController extends Controller
             }       
             
         }
-        // dd($request->all());
         DB::beginTransaction();
         try {
             // Find the existing record
@@ -531,6 +554,7 @@ class ChangeMeterRequestController extends Controller
                 "created_by" => Auth::id(),
                 "created_at" => Carbon::today(),
                 "kwh_meter_request_id" => $request->kwh_meter_request_control_no,
+                "email" => $request->email,
             ]);
 
             // Delete existing fees and re-add them
@@ -668,6 +692,12 @@ class ChangeMeterRequestController extends Controller
         $change_meter_request->latitude = $coordinates->latitude ?? null;
         $change_meter_request->longitude = $coordinates->longitude ?? null;
 
+        // Get signature data if it exists
+        $signatureResponse = $this->signatureService->getSignatures($id);
+        $signatures = $signatureResponse['success'] ? collect($signatureResponse['data']) : collect();
+        $change_meter_request->signatures = $signatures;
+
+        // dd($change_meter_request);
         view()->share('data', $change_meter_request);
         $pdf = PDF::loadView('service_connect_order.change_meter.print_cm_request_pdf');
         return $pdf->stream();
@@ -811,6 +841,17 @@ class ChangeMeterRequestController extends Controller
                     $oldMeter->update([
                         'status' => 2, // unavailable
                     ]);
+                }
+
+                // Send email notification if email exists
+                if (!empty($change_meter_request->email)) {
+                    try {
+                        Notification::route('mail', $change_meter_request->email)
+                            ->notify(new ChangeMeterCompletedNotification($change_meter_request, $this->signatureService));
+                    } catch (\Exception $e) {
+                        // Log email error but don't fail the transaction
+                        \Log::error('Failed to send change meter completion email: ' . $e->getMessage());
+                    }
                 }
 
             }
@@ -1020,7 +1061,8 @@ class ChangeMeterRequestController extends Controller
                     ->from('change_meter_requests')
                     ->where(function($q) {
                         $q->whereNull('status')
-                          ->orWhere('status', 0);
+                          ->orWhere('status', 0)
+                          ->orWhere('status', 3);
                     })
                     ->whereNull('deleted_at')
                     ->distinct();

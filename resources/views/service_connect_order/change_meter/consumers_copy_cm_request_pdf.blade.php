@@ -130,36 +130,6 @@
   </style>
 </head>
 <body>
-  {{-- <header>
-    <img src="{{ public_path('images/logo.png') }}" alt="" class="img-logo">
-    <img src="{{ public_path('images/iso.png') }}" alt="" class="img-iso">
-    <h2 class="heading">LEYTE V ELECTRIC COOPERATIVE, INC.</h2>
-    <p class="sub-heading">
-      (LEYECO V)<br>
-      Brgy. San Pablo, Ormoc City, Leyte
-    </p>
-  </header> --}}
-
-    {{-- <div class="header">
-        <div class="header-left">
-            <h1>LEYTE V ELECTRIC COOPERATIVE, INC.</h1>
-            <p>Brgy. San Pablo, Ormoc City, Leyte<br>
-            Telephone Nos.: PLDT: (053) 839-3920 to 3921 / Globe: (053) 561-4466<br>
-            Cellular Phone Nos. Calls Only: Smart: 0998-964-3804; Globe: 0917-836-3895<br>
-            Website: www.leyeco-v.com.ph    eMail Address: info@leyeco-v.com.ph</p>
-        </div>
-        <div class="header-right">
-            <p>ISO 9001<br>Quality Management<br>Certified</p>
-        </div>
-    </div>
-    <div class="info">
-        <div>Document No.: FM-MSD-012</div>
-        <div>Revision No.: 001</div>
-        <div>Effectivity Date:</div>
-    </div>
-    <div class="title">
-        Request for Change Meter
-    </div> --}}
     <table class="new-header">
       <tbody>
         <tr>
@@ -226,7 +196,7 @@
           <td class="text-center" style="font-size: 14px;">Approved By:</td>
         </tr>
         <tr>
-          <td class="text-center"></td>
+          <td class="text-center"><img src="images/signatures/elma_manacap.GIF"  alt="" class="img-signature" style="opacity: 0.7"></td>
           <td class="text-center"><img src="images/signatures/bernandino.GIF"  alt="" class="img-signature"></td>
           <td class="text-center"><img src="images/signatures/pastor.GIF"  alt="" class="img-signature"></td>
         </tr>
@@ -248,38 +218,50 @@
       <tbody>
         <tr><td>Crew: {{$data->changeMeterRequestCrew ? $data->changeMeterRequestCrew->last_name.', '.$data->changeMeterRequestCrew->first_name : null}}</td></tr>
         <tr>
-          <td>Action Taken:</td>
-          <td>( ) Acted</td>
-          <td>( ) Not Completed</td>
-          <td>( ) Rejected</td>
+          <td>Action Taken: {{$data->status == 1 ? 'ACTED - NOT COMPLETED' : ($data->status == 2 ? 'ACTED - COMPLETED' : ($data->status == 3 ? 'DISPATCHED' : 'UNACTED')) }}</td>
         </tr>
       </tbody>
     </table>
-    <table class="styled-table" style="font-size: 14px; width: 100%; padding-top: 0px; padding-bottom: 10px;">
+    <table class="styled-table" style="font-size: 14px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
       <tbody>
-        <tr><td>Remarks: {{$data->Remarks}}</td></tr>
-        <tr><td>Last Reading: {{$data->LastRdg}}</td></tr>
+        <tr><td>Crew Remarks: {{$data->crew_remarks}}</td></tr>
+        <tr><td>Last Reading: {{$data->last_reading}}</td></tr>
         <tr>
-          <td>New Meter #: {{$data->new_meter_no}}</td>
-          <td>LEYECO V Seal #: {{$data->SealNo}}</td>
-          <td>ERC Seal #: {{$data->{'ERC Seal#'} }}</td>
+          <td>New Meter #: {{$data->assignedMeter->serial_number}}</td>
+          <td>LEYECO V Seal #: {{$data->assignedMeter->leyeco_seal_number}}</td>
+          <td>ERC Seal #: {{$data->assignedMeter->erc_seal_number}}</td>
         </tr>
         <tr>
-          <td>Date Installed: {{$data->{'Date Installed'} ? date('F d, Y', strtotime($data->{'Date Installed'})) : ''}}</td>
-          <td>Time: {{$data->KvaType}}</td>
+          <td>Date Installed: {{$data->date_time_acted ? date('F d, Y', strtotime($data->date_time_acted)) : ''}}</td>
+          <td>Time: {{$data->date_time_acted ? date('h:i A', strtotime($data->date_time_acted)) : ''}}</td>
         </tr>
-        <tr><td>Kwh meter damage/cause: {{$data->Ownership }}</td></tr>
+      </tbody>
+    </table>
+    <table class="styled-table" style="font-size: 14px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
+      <tbody>
+        <tr><td>Kwh meter damage/cause: {{$data->damage_cause }}</td></tr>
       </tbody>
     </table>
     <hr class="black">
-    <table class="styled-table" style="font-size: 14px; width: 100%; padding-top: 10px; padding-bottom: 0px;">
+    <table class="styled-table" style="font-size: 14px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
       <tbody>
-        <tr><td>I acknowledge having received the above service.</td></tr>
-        <tr><td>SIGNATURE OVER PRINTED NAME: ___________________________</td></tr>
-        <tr><td>Relationship Account Holder: _______________________________</td></tr>
+        <tr><td><div style="position: relative; z-index: 1; padding-bottom: 40px;">I acknowledge having received the above service.</div></td></tr>
+        <tr>
+          <td style="position: relative; min-height: 60px;">
+            @if(isset($data->signatures) && count($data->signatures) > 0)
+              <img src="{{ $data->signatures[0]->signature_image_url }}" 
+                   alt="Consumer Signature" 
+                   style="max-height: 60px; max-width: 200px; position: absolute; top: -35px; left: 250px; z-index: 1; opacity: 0.8;">
+            @endif
+            <div style="position: relative; z-index: 2;">
+              SIGNATURE OVER PRINTED NAME: <span style="text-decoration: underline; font-weight: bold;">{{$data->signatures[0]->signatory_name ?? '__________'}}</span>
+            </div>
+          </td>
+        </tr>
+        <tr><td>Relationship Account Holder: <span style="text-decoration: underline; font-weight: bold;">{{$data->signatures[0]->signatory_position ?? '__________'}}</span></td></tr>
       </tbody>
     </table>
   </div>
-  <p style="text-align:right; margin-top: 70px">Date and Time Generated: {{ date('m/d/Y h:i:a') }}</p>
+  <p style="text-align:right; margin-top: 40px">Date and Time Generated: {{ date('m/d/Y h:i:a') }}</p>
 </body>
 </html>

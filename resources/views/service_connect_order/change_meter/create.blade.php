@@ -19,7 +19,7 @@
           <form action="{{ route('storeCM') }}" method="POST">
             @csrf
             <div class="row">
-              <div class="col-lg-8">
+              <div class="col-lg-9">
                 <div class="alert alert-warning">
                   Note: if the account number is not showing, this means that the account has pending change meter request.
                 </div>
@@ -54,13 +54,19 @@
                         <input type="text" id="first_name" name="first_name" class="form-control" required>
                     </div>
                   </div>
-                  <div class="col-lg-3">
+                  <div class="col-lg-2">
                     <div class="mb-2">
                         <label for="contact_no" class="form-label mb-1">Contact No.</label>
                         <input type="text" id="contact_no" name="contact_no" class="form-control">
                     </div>
                   </div>
-                  <div class="col-lg-3">
+                  <div class="col-lg-2">
+                    <div class="mb-2">
+                        <label for="email" class="form-label mb-1">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-control">
+                    </div>
+                  </div>
+                  <div class="col-lg-2">
                     <div class="mb-2">
                         <label for="care_of" class="form-label mb-1">Care of</label>
                         <input type="text" id="care_of" name="care_of" class="form-control">
@@ -192,7 +198,7 @@
                 </div>
               </div>
 
-              <div class="col-lg-4 mb-3" id="schedule_of_fees" >
+              <div class="col-lg-3 mb-3" id="schedule_of_fees" >
                 <div class="col text-center"><h2>Schedule of Fees</h2></div>
                 @include('service_connect_order.schedule_of_fees')
               </div>
