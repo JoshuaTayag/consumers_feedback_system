@@ -4,13 +4,8 @@
 <table class="header-table">
     <tr>
         <td class="header-logo-left">
-            @php
-                $logoPath = public_path('images/logo.png');
-                $logoData = file_exists($logoPath) ? base64_encode(file_get_contents($logoPath)) : '';
-            @endphp
-            @if($logoData)
-                <img src="data:image/png;base64,{{ $logoData }}" alt="LEYECO V Logo">
-            @endif
+            {{-- Use public URL for Gmail compatibility --}}
+            <img src="https://leyeco-v.com.ph/images/logo.png" alt="LEYECO V Logo" style="max-width: 70px; height: auto;">
         </td>
         <td class="header-content">
             <div>
@@ -22,13 +17,8 @@
             </div>
         </td>
         <td class="header-logo-right">
-            @php
-                $isoPath = public_path('images/iso.png');
-                $isoData = file_exists($isoPath) ? base64_encode(file_get_contents($isoPath)) : '';
-            @endphp
-            @if($isoData)
-                <img src="data:image/png;base64,{{ $isoData }}" alt="ISO Certification">
-            @endif
+            {{-- Use public URL for Gmail compatibility --}}
+            <img src="https://leyeco-v.com.ph/images/iso.jpg" alt="ISO Certification" style="max-width: 70px; height: auto;">
         </td>
     </tr>
 </table>

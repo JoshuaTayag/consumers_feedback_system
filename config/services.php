@@ -14,6 +14,13 @@ return [
     |
     */
 
+    'microsoft_graph' => [
+        'client_id'     => env('MICROSOFT_GRAPH_CLIENT_ID'),
+        'client_secret' => env('MICROSOFT_GRAPH_CLIENT_SECRET'),
+        'tenant_id'     => env('MICROSOFT_GRAPH_TENANT_ID'),
+        'user_email'    => env('MICROSOFT_GRAPH_USER_EMAIL'),
+    ],
+
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
         'secret' => env('MAILGUN_SECRET'),

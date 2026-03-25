@@ -34,6 +34,10 @@ return [
     */
 
     'mailers' => [
+        'microsoft_graph' => [
+            'transport' => 'microsoft_graph',
+        ],
+        
         'smtp' => [
             'transport' => 'smtp',
             'url' => env('MAIL_URL'),
