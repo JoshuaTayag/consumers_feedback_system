@@ -375,7 +375,7 @@ class ChangeMeterApiController extends Controller
             if (!empty($change_meter_request->email)) {
                 try {
                     Notification::route('mail', $change_meter_request->email)
-                        ->notify(new ChangeMeterCompletedNotification($change_meter_request, $this->signatureService));
+                        ->notify(new ChangeMeterCompletedNotification($change_meter_request));
                 } catch (\Exception $e) {
                     // Log email error but don't fail the transaction
                     \Log::error('Failed to send change meter completion email: ' . $e->getMessage());

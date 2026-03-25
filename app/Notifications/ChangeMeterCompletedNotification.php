@@ -16,12 +16,11 @@ class ChangeMeterCompletedNotification extends Notification implements ShouldQue
     use Queueable;
 
     protected $changeMeterRequest;
-    protected $signatureService;
+    // Don't store SignatureService - will resolve it when needed to avoid serialization issues
 
-    public function __construct(ChangeMeterRequest $changeMeterRequest,  SignatureService $signatureService)
+    public function __construct(ChangeMeterRequest $changeMeterRequest)
     {
         $this->changeMeterRequest = $changeMeterRequest;
-        $this->signatureService = $signatureService;
     }
 
 
@@ -73,8 +72,9 @@ class ChangeMeterCompletedNotification extends Notification implements ShouldQue
         $change_meter_request->latitude = $coordinates->latitude ?? null;
         $change_meter_request->longitude = $coordinates->longitude ?? null;
 
-        // Get signature data if it exists
-        $signatureResponse = $this->signatureService->getSignatures($change_meter_request->id);
+        // Get signature data if it exists - resolve SignatureService from container
+        $signatureService = app(SignatureService::class);
+        $signatureResponse = $signatureService->getSignatures($change_meter_request->id);
         $signatures = $signatureResponse['success'] ? collect($signatureResponse['data']) : collect();
         $change_meter_request->signatures = $signatures;
 

@@ -85,9 +85,7 @@
                         <div class="row mt-3">
                             <div class="col-12">
                                 <h6><i class="fas fa-clipboard me-2"></i>Purpose:</h6>
-                                <div class="bg-light p-3 rounded">
-                                    {{ $data->purpose }}
-                                </div>
+                                <textarea name="purpose" id="purpose" class="form-control" rows="3" readonly>{{ $data->purpose }}</textarea>
                             </div>
                         </div>
                         @endif

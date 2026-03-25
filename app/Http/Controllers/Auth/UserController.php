@@ -191,4 +191,27 @@ class UserController extends Controller
             ], 500);
         }
     }
+    public function showChangePasswordForm() {
+        $user = auth()->user();
+        return view('auth.change_password', compact('user'));
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'old_password' => 'required',
+            'password' => 'required|min:8|same:confirm-password',
+        ]);
+
+        $user = auth()->user();
+
+        if (!Hash::check($request->old_password, $user->password)) {
+            return back()->withErrors(['old_password' => 'Old password does not match']);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return redirect()->route('home')->with('success', 'Password changed successfully');
+    }
 }

@@ -33,6 +33,9 @@ Route::group(['middleware' => 'auth'], function () {
         // }
     });
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+    Route::get('change-password', [App\Http\Controllers\Auth\UserController::class, 'showChangePasswordForm'])->name('changePasswordForm');
+    Route::put('change-password', [App\Http\Controllers\Auth\UserController::class, 'changePassword'])->name('changePassword');
     
     Route::get('agmm/verify', [App\Http\Controllers\AgmmController::class, 'agmmAccounts'])->name('agmmAccounts');
     Route::post('agmm/verify/{id}', [App\Http\Controllers\AgmmController::class, 'agmmVerifyAccount'])->name('agmmVerifyAccount');
