@@ -14,7 +14,7 @@
                               <i class="fas fa-unlock me-1"></i> Unacted Requests
                           </h6>
                           <h2 class="text-danger fw-bold mb-1">
-                          {{ $change_meter_status_count->getData()->data->total->unacted ?? 0 }}
+                          {{ $change_meter_status_count['total']['unacted'] ?? 0 }}
                           </h2>
                           {{-- <small class="text-muted">asd</small> --}}
                       </div>
@@ -26,15 +26,15 @@
                   <div class="row text-center">
                       <div class="col-4">
                           <small class="text-muted d-block">Today</small>
-                          <strong class="text-danger">{{ $change_meter_status_count->getData()->data->today->unacted ?? 0 }}</strong>
+                          <strong class="text-danger">{{ $change_meter_status_count['today']['unacted'] ?? 0 }}</strong>
                       </div>
                       <div class="col-4">
                           <small class="text-muted d-block">Yesterday</small>
-                          <strong class="text-danger">{{ $change_meter_status_count->getData()->data->yesterday->unacted ?? 0 }}</strong>
+                          <strong class="text-danger">{{ $change_meter_status_count['yesterday']['unacted'] ?? 0 }}</strong>
                       </div>
                       <div class="col-4">
                           <small class="text-muted d-block">Old</small>
-                          <strong class="text-danger">{{ $change_meter_status_count->getData()->data->old_transactions->unacted ?? 0 }}</strong>
+                          <strong class="text-danger">{{ $change_meter_status_count['old_transactions']['unacted'] ?? 0 }}</strong>
                       </div>
                   </div>
               </div>
@@ -51,7 +51,7 @@
                               <i class="fas fa-lock me-1"></i> Dispatched Requests
                           </h6>
                           <h2 class="text-warning fw-bold mb-1">
-                            {{ $change_meter_status_count->getData()->data->total->dispatched ?? 0 }}
+                            {{ $change_meter_status_count['total']['dispatched'] ?? 0 }}
                           </h2>
                       </div>
                       <div class="text-warning opacity-25">
@@ -62,15 +62,15 @@
                   <div class="row text-center">
                       <div class="col-4">
                           <small class="text-muted d-block">Today</small>
-                          <strong class="text-warning">{{ $change_meter_status_count->getData()->data->today->dispatched ?? 0 }}</strong>
+                          <strong class="text-warning">{{ $change_meter_status_count['today']['dispatched'] ?? 0 }}</strong>
                       </div>
                       <div class="col-4">
                           <small class="text-muted d-block">Yesterday</small>
-                          <strong class="text-warning">{{ $change_meter_status_count->getData()->data->yesterday->dispatched ?? 0 }}</strong>
+                          <strong class="text-warning">{{ $change_meter_status_count['yesterday']['dispatched'] ?? 0 }}</strong>
                       </div>
                       <div class="col-4">
                           <small class="text-muted d-block">Old</small>
-                          <strong class="text-warning">{{ $change_meter_status_count->getData()->data->old_transactions->dispatched ?? 0 }}</strong>
+                          <strong class="text-warning">{{ $change_meter_status_count['old_transactions']['dispatched'] ?? 0 }}</strong>
                       </div>
                   </div>
               </div>
@@ -87,7 +87,7 @@
                               <i class="fas fa-exclamation-circle me-1"></i> Acted - Not Completed Requests
                           </h6>
                           <h2 class="text-primary fw-bold mb-1">
-                            {{ $change_meter_status_count->getData()->data->total->acted_not_completed ?? 0 }}
+                            {{ $change_meter_status_count['total']['acted_not_completed'] ?? 0 }}
                           </h2>
                       </div>
                       <div class="text-primary opacity-25">
@@ -98,15 +98,15 @@
                   <div class="row text-center">
                       <div class="col-4">
                           <small class="text-muted d-block">Today</small>
-                          <strong class="text-primary">{{ $change_meter_status_count->getData()->data->today->acted_not_completed ?? 0 }}</strong>
+                          <strong class="text-primary">{{ $change_meter_status_count['today']['acted_not_completed'] ?? 0 }}</strong>
                       </div>
                       <div class="col-4">
                           <small class="text-muted d-block">Yesterday</small>
-                          <strong class="text-primary">{{ $change_meter_status_count->getData()->data->yesterday->acted_not_completed ?? 0 }}</strong>
+                          <strong class="text-primary">{{ $change_meter_status_count['yesterday']['acted_not_completed'] ?? 0 }}</strong>
                       </div>
                       <div class="col-4">
                           <small class="text-muted d-block">Old</small>
-                          <strong class="text-primary">{{ $change_meter_status_count->getData()->data->old_transactions->acted_not_completed ?? 0 }}</strong>
+                          <strong class="text-primary">{{ $change_meter_status_count['old_transactions']['acted_not_completed'] ?? 0 }}</strong>
                       </div>
                   </div>
               </div>
@@ -123,7 +123,7 @@
                               <i class="fas fa-check-circle me-1"></i> Acted Requests - Completed
                           </h6>
                           <h2 class="text-success fw-bold mb-1">
-                            {{ $change_meter_status_count->getData()->data->total->acted_completed ?? 0 }}
+                            {{ $change_meter_status_count['total']['acted_completed'] ?? 0 }}
                           </h2>
                       </div>
                       <div class="text-success opacity-25">
@@ -134,15 +134,15 @@
                   <div class="row text-center">
                       <div class="col-4">
                           <small class="text-muted d-block">Today</small>
-                          <strong class="text-success">{{ $change_meter_status_count->getData()->data->today->acted_completed ?? 0 }}</strong>
+                          <strong class="text-success">{{ $change_meter_status_count['today']['acted_completed'] ?? 0 }}</strong>
                       </div>
                       <div class="col-4">
                           <small class="text-muted d-block">Yesterday</small>
-                          <strong class="text-success">{{ $change_meter_status_count->getData()->data->yesterday->acted_completed ?? 0 }}</strong>
+                          <strong class="text-success">{{ $change_meter_status_count['yesterday']['acted_completed'] ?? 0 }}</strong>
                       </div>
                       <div class="col-4">
                           <small class="text-muted d-block">Old</small>
-                          <strong class="text-success">{{ $change_meter_status_count->getData()->data->old_transactions->acted_completed ?? 0 }}</strong>
+                          <strong class="text-success">{{ $change_meter_status_count['old_transactions']['acted_completed'] ?? 0 }}</strong>
                       </div>
                   </div>
               </div>
