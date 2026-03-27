@@ -949,10 +949,20 @@ class ChangeMeterRequestController extends Controller
         }
         $cm_requests = $cm_request->orderBy('control_no','DESC')->paginate(9);
 
-        $ref_employees = DB::table('change_meter_contractors')
-        ->select(DB::raw("CONCAT(last_name, ', ', first_name) AS full_name"), 'id')
-        ->orderBy('last_name', 'ASC')
-        ->get();
+        $ref_employees = ChangeMeterRequestContractor::with('teamLeadContractor')
+            ->where('status', 1)
+            ->orderBy('last_name', 'ASC')
+            ->get()
+            ->map(function ($contractor) {
+                $fullName = $contractor->last_name . ', ' . $contractor->first_name;
+                if ($contractor->teamLeadContractor && $contractor->teamLeadContractor->contractor_team_leader_full_name) {
+                    $fullName .= ' (' . $contractor->teamLeadContractor->contractor_team_leader_full_name . ')';
+                }
+                return [
+                    'id' => $contractor->id,
+                    'full_name' => $fullName
+                ];
+            });
 
         $change_meter_status_count = $this->getStatusCountsArray();
 
