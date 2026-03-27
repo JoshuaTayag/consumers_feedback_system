@@ -2,80 +2,77 @@
 
 @section('styles')
 <style>
-.status-badge {
-    font-size: 0.875rem;
-    min-width: 80px;
-    text-align: center;
-}
-.table-responsive {
-    border-radius: 0.375rem;
-}
-.btn-group-sm > .btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-}
-
-/* Ensure badge colors are properly displayed */
-.badge.bg-success {
-    background-color: #198754 !important;
-    color: white !important;
-}
-.badge.bg-danger {
-    background-color: #dc3545 !important;
-    color: white !important;
-}
-.badge.bg-warning {
-    background-color: #ffc107 !important;
-    color: #212529 !important;
-}
-.badge.bg-secondary {
-    background-color: #6c757d !important;
-    color: white !important;
+/* Mobile-specific enhancements */
+@media (max-width: 767.98px) {
+    .mobile-card {
+        margin-bottom: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+    }
+    .mobile-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    /* Make SweetAlert responsive */
+    .swal2-popup {
+        width: 90% !important;
+        font-size: 0.9rem !important;
+    }
+    .swal2-title {
+        font-size: 1.3rem !important;
+    }
+    .swal2-actions {
+        flex-direction: column-reverse !important;
+        gap: 0.5rem !important;
+    }
+    .swal2-actions button {
+        width: 100% !important;
+        margin: 0 !important;
+    }
 }
 </style>
 @endsection
 
 @section('content')
 
-<div class="container">
+<div class="container-fluid px-2 px-md-3">
   <div class="row justify-content-center">
-    <div class="col-lg-12">
+    <div class="col-12">
       <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-          <div class="row align-items-center">
-              <div class="col-md-6">
-                  <h4 class="mb-0">
+          <div class="row align-items-center g-2">
+              <div class="col-8 col-md-6">
+                  <h4 class="mb-0 fs-5 fs-md-4">
                       <i class="fas fa-clock me-2"></i>Pending Requests
                   </h4>
               </div>
-              <div class="col-md-6 text-end">
+              <div class="col-4 col-md-6 text-end">
                   <button type="button" class="btn btn-light btn-sm" onclick="refreshPage()">
-                      <i class="fas fa-sync-alt"></i> Refresh
+                      <i class="fas fa-sync-alt d-md-none"></i>
+                      <span class="d-none d-md-inline"><i class="fas fa-sync-alt"></i> Refresh</span>
                   </button>
               </div>
           </div>
         </div>
         <div class="card-body">
             <!-- Search and Filter Form -->
-            <form method="GET" action="{{ route('pending.index') }}" class="mb-4">
-                <div class="row">
-                    <div class="col-md-6">
+            <form method="GET" action="{{ route('pending.index') }}" class="mb-3 mb-md-4">
+                <div class="row g-2">
+                    <div class="col-12 col-md-6">
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
                             <input type="text" class="form-control" name="search" 
-                                   placeholder="Search by transaction, table name, or status..."
+                                   placeholder="Search transactions..."
                                    value="{{ request('search') }}">
-                            <button class="btn btn-outline-secondary" type="submit">
-                                <i class="fas fa-search"></i> Search
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search d-md-none"></i>
+                                <span class="d-none d-md-inline"><i class="fas fa-search"></i> Search</span>
                             </button>
-                            @if(request('search') || request('status'))
-                                <a href="{{ route('pending.index') }}" class="btn btn-outline-danger">
-                                    <i class="fas fa-times"></i> Clear
-                                </a>
-                            @endif
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-12 col-sm-6 col-md-3">
                         <select class="form-select" name="status" onchange="this.form.submit()">
                             <option value="">All Status</option>
                             <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Pending</option>
@@ -83,9 +80,9 @@
                             <option value="2" {{ request('status') == '2' ? 'selected' : '' }}>Disapproved</option>
                         </select>
                     </div>
-                    <div class="col-md-3 text-end">
+                    <div class="col-12 col-sm-6 col-md-3">
                         @if(request('search') || request('status'))
-                            <a href="{{ route('pending.index') }}" class="btn btn-outline-secondary" title="Clear All Filters">
+                            <a href="{{ route('pending.index') }}" class="btn btn-outline-secondary w-100" title="Clear All Filters">
                                 <i class="fas fa-times"></i> Clear All
                             </a>
                         @endif
@@ -96,30 +93,36 @@
             <!-- Search Results Indicator -->
             @if(request('search') || request('status'))
                 <div class="alert alert-info mb-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                        <div class="w-100 w-md-auto">
                             <i class="fas fa-filter"></i> 
                             <strong>Active Filters:</strong>
-                            @if(request('search'))
-                                Search: "<em>{{ request('search') }}</em>"
-                            @endif
-                            @if(request('status'))
-                                @if(request('search')) | @endif
-                                Status: <span class="badge bg-primary">
-                                    @if(request('status') == '0')
-                                        Pending
-                                    @elseif(request('status') == '1')
-                                        Approved
-                                    @elseif(request('status') == '2')
-                                        Disapproved
-                                    @else
-                                        {{ request('status') }}
-                                    @endif
-                                </span>
-                            @endif
-                            <small class="text-muted">({{ $pendings->total() }} {{ Str::plural('result', $pendings->total()) }} found)</small>
+                            <div class="mt-1">
+                                @if(request('search'))
+                                    <span class="d-inline-block">Search: "<em>{{ request('search') }}</em>"</span>
+                                @endif
+                                @if(request('status'))
+                                    @if(request('search')) <span class="d-none d-md-inline">|</span> @endif
+                                    <span class="d-block d-md-inline mt-1 mt-md-0">
+                                        Status: <span class="badge bg-primary">
+                                            @if(request('status') == '0')
+                                                Pending
+                                            @elseif(request('status') == '1')
+                                                Approved
+                                            @elseif(request('status') == '2')
+                                                Disapproved
+                                            @else
+                                                {{ request('status') }}
+                                            @endif
+                                        </span>
+                                    </span>
+                                @endif
+                                <small class="text-muted d-block mt-1">
+                                    ({{ $pendings->total() }} {{ Str::plural('result', $pendings->total()) }} found)
+                                </small>
+                            </div>
                         </div>
-                        <a href="{{ route('pending.index') }}" class="btn btn-sm btn-outline-secondary">
+                        <a href="{{ route('pending.index') }}" class="btn btn-sm btn-outline-secondary w-100 w-md-auto">
                             <i class="fas fa-times"></i> Clear All Filters
                         </a>
                     </div>
@@ -127,9 +130,10 @@
             @endif
 
             <div class="row">
-              <div class="col-lg-12">
-                <div class="table-responsive">
-                    <table class="table table-hover">
+              <div class="col-12">
+                <!-- Desktop Table View -->
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table table-hover align-middle">
                       <thead class="table-dark">
                         <tr>
                           <th><i class="fas fa-hashtag"></i> No.</th>
@@ -138,7 +142,6 @@
                           <th><i class="fas fa-flag"></i> Status</th>
                           <th><i class="fas fa-user"></i> Requested By</th>
                           <th><i class="fas fa-calendar"></i> Date</th>
-                          <th><i class="fas fa-eye"></i> View Details</th>
                           <th class="text-center"><i class="fas fa-cog"></i> Action</th>
                         </tr>
                       </thead>
@@ -154,15 +157,14 @@
                             </td>
                             <td>
                                 @php
-                                    // Convert status to integer for proper matching
                                     $statusValue = (int) $pending->status;
                                     
                                     if ($statusValue === 1) {
-                                        $statusClass = 'bg-success text-white';
+                                        $statusClass = 'bg-success';
                                         $statusIcon = 'fas fa-check me-1';
                                         $statusText = 'Approved';
                                     } elseif ($statusValue === 2) {
-                                        $statusClass = 'bg-danger text-white';
+                                        $statusClass = 'bg-danger';
                                         $statusIcon = 'fas fa-times me-1';
                                         $statusText = 'Disapproved';
                                     } else {
@@ -171,7 +173,7 @@
                                         $statusText = 'Pending';
                                     }
                                 @endphp
-                                <span class="badge {{ $statusClass }} status-badge">
+                                <span class="badge {{ $statusClass }}">
                                     <i class="{{ $statusIcon }}"></i>{{ $statusText }}
                                 </span>
                             </td>
@@ -179,35 +181,33 @@
                             <td>
                                 <small class="text-muted">{{ $pending->created_at->format('M d, Y H:i') }}</small>
                             </td>
-                            <td>
-                              <button type="button" class="btn btn-info btn-sm" onclick="openDetailsModal('{{ route('pending.details', $pending->id) }}', '{{ $pending->transaction }}')">
-                                  <i class="fas fa-eye"></i> View
-                              </button>
-                            </td>
                             <td class="text-center">
-                              @if($pending->status == 0 || $pending->status === null)
-                                  <div class="btn-group btn-group-sm" role="group">
-                                      <button type="button" class="btn btn-outline-success" 
+                              <div class="d-flex gap-2 justify-content-center">
+                                  <button type="button" class="btn btn-info btn-sm" onclick="openDetailsModal('{{ route('pending.details', $pending->id) }}', '{{ $pending->transaction }}')">
+                                      <i class="fas fa-eye"></i> View
+                                  </button>
+                                  @if($pending->status == 0 || $pending->status === null)
+                                      <button type="button" class="btn btn-success btn-sm" 
                                               onclick="confirmApproval({{ $pending->id }})" 
-                                              title="Approve Transaction">
-                                          <i class="fas fa-check"></i> Approve
+                                              title="Approve">
+                                          <i class="fas fa-check"></i>
                                       </button>
-                                      <button type="button" class="btn btn-outline-danger" 
+                                      <button type="button" class="btn btn-danger btn-sm" 
                                               onclick="confirmDisapproval({{ $pending->id }})" 
-                                              title="Disapprove Transaction">
-                                          <i class="fas fa-times"></i> Disapprove
+                                              title="Disapprove">
+                                          <i class="fas fa-times"></i>
                                       </button>
-                                  </div>
-                              @else
-                                  <span class="text-muted">
-                                      <i class="fas fa-check-circle"></i> Processed
-                                  </span>
-                              @endif
+                                  @else
+                                      <span class="badge bg-secondary">
+                                          <i class="fas fa-check-circle"></i> Processed
+                                      </span>
+                                  @endif
+                              </div>
                             </td> 
                           </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4">
+                                <td colspan="7" class="text-center py-4">
                                     <div class="text-muted">
                                         <i class="fas fa-inbox fa-3x mb-3"></i>
                                         <p>No pending transactions found.</p>
@@ -224,16 +224,99 @@
                     </table>
                 </div>
 
+                <!-- Mobile Card View -->
+                <div class="d-md-none">
+                    @forelse($pendings as $pending)
+                        @php
+                            $statusValue = (int) $pending->status;
+                            
+                            if ($statusValue === 1) {
+                                $statusClass = 'bg-success';
+                                $statusIcon = 'fas fa-check me-1';
+                                $statusText = 'Approved';
+                            } elseif ($statusValue === 2) {
+                                $statusClass = 'bg-danger';
+                                $statusIcon = 'fas fa-times me-1';
+                                $statusText = 'Disapproved';
+                            } else {
+                                $statusClass = 'bg-warning text-dark';
+                                $statusIcon = 'fas fa-clock me-1';
+                                $statusText = 'Pending';
+                            }
+                        @endphp
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title mb-0 fw-bold">{{ $pending->transaction }}</h6>
+                                    <span class="badge {{ $statusClass }}">
+                                        <i class="{{ $statusIcon }}"></i>{{ $statusText }}
+                                    </span>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-barcode me-1"></i> Control No: 
+                                        <strong>{{ $pending->kwhMeterRequest->control_no ?? 'N/A' }}</strong>
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-user me-1"></i> Requested By: 
+                                        <strong>{{ $pending->related_record->user->name ?? 'N/A' }}</strong>
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-calendar me-1"></i> 
+                                        {{ $pending->created_at->format('M d, Y H:i') }}
+                                    </small>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-info btn-sm" 
+                                            onclick="openDetailsModal('{{ route('pending.details', $pending->id) }}', '{{ $pending->transaction }}')">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </button>
+                                    @if($pending->status == 0 || $pending->status === null)
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-success btn-sm" 
+                                                    onclick="confirmApproval({{ $pending->id }})">
+                                                <i class="fas fa-check"></i> Approve
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm" 
+                                                    onclick="confirmDisapproval({{ $pending->id }})">
+                                                <i class="fas fa-times"></i> Disapprove
+                                            </button>
+                                        </div>
+                                    @else
+                                        <div class="text-center">
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-check-circle"></i> Processed
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                            <p class="text-muted">No pending transactions found.</p>
+                            @if(request('search') || request('status'))
+                                <a href="{{ route('pending.index') }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-times"></i> Clear Filters
+                                </a>
+                            @endif
+                        </div>
+                    @endforelse
+                </div>
+
                 <!-- Pagination -->
                 @if($pendings->hasPages())
-                    <div class="d-flex justify-content-between align-items-center mt-3">
-                        <div>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3 gap-2">
+                        <div class="order-2 order-md-1">
                             <small class="text-muted">
                                 Showing {{ $pendings->firstItem() ?? 0 }} to {{ $pendings->lastItem() ?? 0 }} 
                                 of {{ $pendings->total() }} {{ Str::plural('result', $pendings->total()) }}
                             </small>
                         </div>
-                        <div>
+                        <div class="order-1 order-md-2">
                             {{ $pendings->links() }}
                         </div>
                     </div>
@@ -247,15 +330,15 @@
 
   <!-- Details Modal -->
   <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header bg-info text-white">
-          <h5 class="modal-title" id="detailsModalLabel">
+          <h5 class="modal-title fs-6 fs-md-5" id="detailsModalLabel">
             <i class="fas fa-eye me-2"></i>Transaction Details
           </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" id="detailsModalBody" style="min-height: 400px;">
+        <div class="modal-body" id="detailsModalBody" style="min-height: 300px;">
           <div class="text-center py-5">
             <div class="spinner-border text-info" role="status">
               <span class="visually-hidden">Loading...</span>
@@ -263,11 +346,11 @@
             <p class="mt-3 text-muted">Loading transaction details...</p>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <div class="modal-footer flex-column flex-sm-row gap-2">
+          <button type="button" class="btn btn-secondary w-100 w-sm-auto order-2 order-sm-1" data-bs-dismiss="modal">
             <i class="fas fa-times"></i> Close
           </button>
-          <button type="button" class="btn btn-info" id="openInNewTabBtn">
+          <button type="button" class="btn btn-info w-100 w-sm-auto order-1 order-sm-2" id="openInNewTabBtn">
             <i class="fas fa-external-link-alt"></i> Open in New Tab
           </button>
         </div>
@@ -290,6 +373,11 @@ window.confirmApproval = function(pendingId) {
         cancelButtonColor: '#6c757d',
         confirmButtonText: '<i class="fas fa-check"></i> Yes, Approve',
         cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+        buttonsStyling: true,
+        customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'btn btn-secondary'
+        },
         reverseButtons: true,
         showLoaderOnConfirm: true,
         preConfirm: () => {
@@ -307,9 +395,9 @@ window.confirmDisapproval = function(pendingId) {
     Swal.fire({
         title: 'Disapprove Transaction?',
         html: `
-            <p>Are you sure you want to disapprove this pending transaction?</p>
-            <div class="mt-3">
-                <label for="disapproval_remarks" class="form-label text-start d-block">
+            <p class="mb-3">Are you sure you want to disapprove this pending transaction?</p>
+            <div class="mt-3 text-start">
+                <label for="disapproval_remarks" class="form-label">
                     <strong>Reason for Disapproval: <span class="text-danger">*</span></strong>
                 </label>
                 <textarea 
@@ -320,7 +408,7 @@ window.confirmDisapproval = function(pendingId) {
                     maxlength="500"
                     required
                 ></textarea>
-                <small class="text-muted d-block mt-1">Maximum 500 characters</small>
+                <small class="text-muted d-block mt-1">Maximum 500 characters (minimum 10)</small>
             </div>
         `,
         icon: 'warning',
@@ -329,6 +417,12 @@ window.confirmDisapproval = function(pendingId) {
         cancelButtonColor: '#6c757d',
         confirmButtonText: '<i class="fas fa-times"></i> Yes, Disapprove',
         cancelButtonText: '<i class="fas fa-arrow-left"></i> Cancel',
+        buttonsStyling: true,
+        customClass: {
+            popup: 'swal-wide',
+            confirmButton: 'btn btn-danger',
+            cancelButton: 'btn btn-secondary'
+        },
         reverseButtons: true,
         showLoaderOnConfirm: true,
         preConfirm: () => {
@@ -345,7 +439,6 @@ window.confirmDisapproval = function(pendingId) {
         },
         allowOutsideClick: () => !Swal.isLoading(),
         didOpen: () => {
-            // Focus on textarea when modal opens
             document.getElementById('disapproval_remarks').focus();
         }
     }).then((result) => {
