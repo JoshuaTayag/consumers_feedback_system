@@ -6,7 +6,8 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        {!! Form::open(array('route' => 'cmDispatching','method'=>'POST', 'id' => 'myForm')) !!}
+        <form action="{{ route('cmDispatching') }}" method="POST">
+          @csrf
           <div class="row">
             <input type="hidden" value="" id="cm_id" name="cm_id" class="form-control border border-warning" readonly>
             <div class="col">
@@ -21,7 +22,7 @@
               <select id="crew_dispatched" class="form-control" name="crew_dispatched" required>
                 <option value=""></option>
                 @foreach ($ref_employees as $employee)          
-                  <option value="{{ $employee['id'] }}" id="">{{ $employee['full_name'] }}</option>
+                  <option value="{{ $employee->id }}" id="">{{ $employee->full_name }}</option>
                 @endforeach
               </select>
             </div>
@@ -35,7 +36,7 @@
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="submit" class="btn btn-primary" id="submit_meter_posting" >Save changes</button>
         </div>
-      {!! Form::close() !!}
+      </form>
     </div>
   </div>
 </div>

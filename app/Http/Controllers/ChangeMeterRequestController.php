@@ -66,8 +66,7 @@ class ChangeMeterRequestController extends Controller
         // ->orderBy('last_name', 'ASC')
         // ->get();
         //     dd($ref_employees);
-        $change_meter_status_count = $this->getChangeMeterRequestStatusCounts();
-        // dd($change_meter_status_count);
+        $change_meter_status_count = $this->getStatusCountsArray();
         return view('service_connect_order.change_meter.index',compact('cm_requests', 'ref_employees', 'change_meter_status_count'));
     }
 
@@ -847,7 +846,7 @@ class ChangeMeterRequestController extends Controller
                 if (!empty($change_meter_request->email)) {
                     try {
                         Notification::route('mail', $change_meter_request->email)
-                            ->notify(new ChangeMeterCompletedNotification($change_meter_request, $this->signatureService));
+                            ->notify(new ChangeMeterCompletedNotification($change_meter_request));
                     } catch (\Exception $e) {
                         // Log email error but don't fail the transaction
                         \Log::error('Failed to send change meter completion email: ' . $e->getMessage());
@@ -955,8 +954,10 @@ class ChangeMeterRequestController extends Controller
         ->orderBy('last_name', 'ASC')
         ->get();
 
+        $change_meter_status_count = $this->getStatusCountsArray();
+
         // return view('products.index', compact('products'));
-        return view('service_connect_order.change_meter.index',compact('cm_requests','ref_employees'));
+        return view('service_connect_order.change_meter.index',compact('cm_requests','ref_employees','change_meter_status_count'));
     }
 
     public function view(string $id)
@@ -1385,69 +1386,82 @@ class ChangeMeterRequestController extends Controller
         }
     }
 
+    /**
+     * Private helper method to get status counts as array (for internal use)
+     */
+    private function getStatusCountsArray()
+    {
+        $today_count = [
+            'unacted' => ChangeMeterRequest::whereNull('status')
+                ->whereDate('created_at', '=', Carbon::today()->toDateString())
+                ->count() ?? 0,
+            'acted_completed' => ChangeMeterRequest::where('status', 2)
+                ->whereDate('created_at', '=', Carbon::today()->toDateString())
+                ->count() ?? 0,
+            'acted_not_completed' => ChangeMeterRequest::where('status', 1)
+                ->whereDate('created_at', '=', Carbon::today()->toDateString())
+                ->count() ?? 0,
+            'dispatched' => ChangeMeterRequest::where('status', 3)
+                ->whereDate('created_at', '=', Carbon::today()->toDateString())
+                ->count() ?? 0,
+        ];
+
+        $yesterday_count = [
+            'unacted' => ChangeMeterRequest::whereNull('status')
+                ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
+                ->count() ?? 0,
+            'acted_completed' => ChangeMeterRequest::where('status', 2)
+                ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
+                ->count() ?? 0,
+            'acted_not_completed' => ChangeMeterRequest::where('status', 1)
+                ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
+                ->count() ?? 0,
+            'dispatched' => ChangeMeterRequest::where('status', 3)
+                ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
+                ->count() ?? 0,
+        ];
+
+        $old_transaction_count = [
+            'unacted' => ChangeMeterRequest::whereNull('status')
+                ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
+                ->count() ?? 0,
+            'acted_completed' => ChangeMeterRequest::where('status', 2)
+                ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
+                ->count() ?? 0,
+            'acted_not_completed' => ChangeMeterRequest::where('status', 1)
+                ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
+                ->count() ?? 0,
+            'dispatched' => ChangeMeterRequest::where('status', 3)
+                ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
+                ->count() ?? 0,
+        ];
+
+        $total_count = [
+            'unacted' => ChangeMeterRequest::whereNull('status')->count() ?? 0,
+            'acted_completed' => ChangeMeterRequest::where('status', 2)->count() ?? 0,
+            'acted_not_completed' => ChangeMeterRequest::where('status', 1)->count() ?? 0,
+            'dispatched' => ChangeMeterRequest::where('status', 3)->count() ?? 0,
+        ];
+
+        return [
+            'today' => $today_count,
+            'yesterday' => $yesterday_count,
+            'old_transactions' => $old_transaction_count,
+            'total' => $total_count
+        ];
+    }
+
+    /**
+     * API endpoint to get status counts (returns JSON response)
+     */
     public function getChangeMeterRequestStatusCounts()
     {
         try {
-            $today_count = [
-                'unacted' => ChangeMeterRequest::whereNull('status')
-                    ->whereDate('created_at', '=', Carbon::today()->toDateString())
-                    ->count(),
-                'acted_completed' => ChangeMeterRequest::where('status', 2)
-                    ->whereDate('created_at', '=', Carbon::today()->toDateString())
-                    ->count(),
-                'acted_not_completed' => ChangeMeterRequest::where('status', 1)
-                    ->whereDate('created_at', '=', Carbon::today()->toDateString())
-                    ->count(),
-                'dispatched' => ChangeMeterRequest::where('status', 3)
-                    ->whereDate('created_at', '=', Carbon::today()->toDateString())
-                    ->count(),
-            ];
-
-            $yesterday_count = [
-                'unacted' => ChangeMeterRequest::whereNull('status')
-                    ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
-                    ->count(),
-                'acted_completed' => ChangeMeterRequest::where('status', 2)
-                    ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
-                    ->count(),
-                'acted_not_completed' => ChangeMeterRequest::where('status', 1)
-                    ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
-                    ->count(),
-                'dispatched' => ChangeMeterRequest::where('status', 3)
-                    ->whereDate('created_at', '=', Carbon::yesterday()->toDateString())
-                    ->count(),
-            ];
-
-            $old_transaction_count = [
-                'unacted' => ChangeMeterRequest::whereNull('status')
-                    ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
-                    ->count(),
-                'acted_completed' => ChangeMeterRequest::where('status', 2)
-                    ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
-                    ->count(),
-                'acted_not_completed' => ChangeMeterRequest::where('status', 1)
-                    ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
-                    ->count(),
-                'dispatched' => ChangeMeterRequest::where('status', 3)
-                    ->whereDate('created_at', '<', Carbon::yesterday()->toDateString())
-                    ->count(),
-            ];
-
-            $total_count = [
-                'unacted' => ChangeMeterRequest::whereNull('status')->count(),
-                'acted_completed' => ChangeMeterRequest::where('status', 2)->count(),
-                'acted_not_completed' => ChangeMeterRequest::where('status', 1)->count(),
-                'dispatched' => ChangeMeterRequest::where('status', 3)->count(),
-            ];
+            $data = $this->getStatusCountsArray();
 
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'today' => $today_count,
-                    'yesterday' => $yesterday_count,
-                    'old_transactions' => $old_transaction_count,
-                    'total' => $total_count
-                ]
+                'data' => $data
             ]);
 
         } catch (\Exception $e) {

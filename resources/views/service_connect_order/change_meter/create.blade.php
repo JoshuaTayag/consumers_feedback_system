@@ -113,8 +113,8 @@
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                      <label for="sitio" class="form-label mb-1">Sitio *</label>
-                      <input type="text" id="sitio" name="sitio" class="form-control" required>
+                      <label for="sitio" class="form-label mb-1">Sitio </label>
+                      <input type="text" id="sitio" name="sitio" class="form-control">
                     </div>
                   </div>
                 </div>
