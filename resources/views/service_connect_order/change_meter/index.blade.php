@@ -120,7 +120,7 @@
                   <div class="d-flex justify-content-between align-items-center">
                       <div>
                           <h6 class="card-subtitle mb-2 text-success fw-semibold">
-                              <i class="fas fa-check-circle me-1"></i> Acted Requests - Completed
+                              <i class="fas fa-check-circle me-1"></i> Acted - Completed Requests
                           </h6>
                           <h2 class="text-success fw-bold mb-1">
                             {{ $change_meter_status_count['total']['acted_completed'] ?? 0 }}
@@ -172,16 +172,22 @@
                     <input type="text" placeholder="Search by Control No." id="search_sco_no" name="control_no" class="form-control" value="{{ request('control_no') }}">
                 </div>
                 <div class="col-lg-2">
-                    <input type="text" placeholder="Search by First Name" id="search_first_name" name="first_name" class="form-control" value="{{ request('first_name') }}">
-                </div>
-                <div class="col-lg-2">
-                    <input type="text" placeholder="Search by Last Name" id="search_last_name" name="last_name" class="form-control" value="{{ request('last_name') }}">
+                    <input type="text" placeholder="Search by Name" id="search_first_name" name="first_name" class="form-control" value="{{ request('first_name') }}">
                 </div>
                 <div class="col-lg-2">
                     <input type="text" placeholder="Search by Meter No" id="search_meter_no" name="meter_no" class="form-control" value="{{ request('meter_no') }}">
                 </div>
                 <div class="col-lg-2">
                   <input type="text" placeholder="Search by Old Meter No" id="search_meter_no" name="old_meter_no" class="form-control" value="{{ request('old_meter_no') }}">
+                </div>
+                <div class="col-lg-2">
+                  <select class="form-select" name="status" onchange="this.form.submit()">
+                      <option value="ALL" {{ request('status') == 'ALL' ? 'selected' : '' }}>All</option>
+                      <option value="unacted" {{ request('status') == 'unacted' ? 'selected' : '' }}>Unacted</option>
+                      <option value="dispatched" {{ request('status') == 'dispatched' ? 'selected' : '' }}>Dispatched</option>
+                      <option value="acted_not_completed" {{ request('status') == 'acted_not_completed' ? 'selected' : '' }}>Acted - Not Completed</option>
+                      <option value="acted_completed" {{ request('status') == 'acted_completed' ? 'selected' : '' }}>Acted - Completed</option>
+                    </select>
                 </div>
                 <div class="col-lg-2">
                   <button type="submit" class="btn btn-info"><i class="fa fa-search"></i></button>
