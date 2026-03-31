@@ -925,6 +925,7 @@ class ChangeMeterRequestController extends Controller
         $l_name = $request->input('last_name');
         $meter_no = $request->input('meter_no');
         $old_meter_no = $request->input('old_meter_no');
+        $status = $request->input('status');
         // $products = Product::where('name', 'like', "%$query%")->get();
         $cm_request = ChangeMeterRequest::query();
 
@@ -946,6 +947,25 @@ class ChangeMeterRequestController extends Controller
 
         if ($old_meter_no !== null && $old_meter_no !== '') {
             $cm_request->where('old_meter_no', 'like', "%$old_meter_no%");
+        }
+
+        if ($status !== null && $status !== '') {
+            if ($status == 'unacted') {
+                // dd($status);
+                $cm_request->whereNull('status');
+            }
+            if ($status == 'dispatched') {
+                // dd($status);
+                $cm_request->where('status', 3);
+            }
+            if ($status == 'acted_not_completed') {
+                // dd($status);
+                $cm_request->where('status', 1);
+            }
+            if ($status == 'acted_completed') {
+                // dd($status);
+                $cm_request->where('status', 2);
+            }
         }
         $cm_requests = $cm_request->orderBy('control_no','DESC')->paginate(9);
 

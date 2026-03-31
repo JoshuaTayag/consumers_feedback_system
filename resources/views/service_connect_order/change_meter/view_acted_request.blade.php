@@ -373,10 +373,10 @@
                     <table class="table table-striped table-hover mb-0">
                       <thead class="table-dark">
                         <tr>
-                          <th class="text-center" style="width: 15%">Date & Time</th>
-                          <th class="text-center" style="width: 12%">User</th>
+                          <th class="text-center" style="width: 10%">Date & Time</th>
+                          <th class="text-center" style="width: 10%">User</th>
                           <th class="text-center" style="width: 10%">Event</th>
-                          <th style="width: 63%">Changes Made</th>
+                          <th style="width: 70%">Changes Made</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -409,57 +409,67 @@
                           </td>
                           <td class="align-top">
                             @if($audit->event == 'created')
-                              <div class="mb-2">
-                                <small class="text-success fw-bold">
-                                  <i class="fas fa-plus-circle"></i> Record Created with Initial Data
-                                </small>
-                              </div>
-                              @if($audit->new_values && count($audit->new_values) > 0)
-                                <div class="ms-3">
-                                  @php
-                                    $importantFields = ['control_no', 'first_name', 'last_name', 'account_number', 'area', 'municipality_id', 'barangay_id', 'old_meter_no', 'type_of_meter', 'created_by'];
-                                    $displayFields = array_intersect_key($audit->new_values, array_flip($importantFields));
-                                    if (empty($displayFields)) {
-                                      $displayFields = array_slice($audit->new_values, 0, 8);
-                                    }
-                                  @endphp
-                                  @foreach($displayFields as $key => $value)
-                                    <div class="border-start border-primary border-3 ps-2 mb-2">
-                                      <strong class="text-dark">{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
-                                      <br>
-                                      <small class="ms-2">
-                                        <span class="text-muted">Initial Value:</span> 
-                                        <code class="text-primary bg-light px-1 rounded">{{ is_null($value) ? 'NULL' : (is_array($value) ? json_encode($value) : $value) }}</code>
-                                      </small>
-                                    </div>
-                                  @endforeach
-                                  @if(count($audit->new_values) > count($displayFields))
-                                    <div class="mt-2">
-                                      <small class="text-muted">
-                                        <i class="fas fa-info-circle"></i> 
-                                        {{ count($audit->new_values) - count($displayFields) }} more fields were set during creation
-                                      </small>
-                                    </div>
-                                  @endif
+                              
+                                <div class="mb-2">
+                                  <small class="text-success fw-bold">
+                                    <i class="fas fa-plus-circle"></i> Record Created with Initial Data
+                                  </small>
                                 </div>
+                                @if($audit->new_values && count($audit->new_values) > 0)
+                                  <div class="ms-3">
+                                    @php
+                                      $importantFields = ['control_no', 'first_name', 'last_name', 'account_number', 'area', 'municipality_id', 'barangay_id', 'old_meter_no', 'type_of_meter', 'created_by'];
+                                      $displayFields = array_intersect_key($audit->new_values, array_flip($importantFields));
+                                      if (empty($displayFields)) {
+                                        $displayFields = array_slice($audit->new_values, 0, 8);
+                                      }
+                                    @endphp
+                                    <div class="row">
+                                      @foreach($displayFields as $key => $value)
+                                        <div class="col-lg-3">
+                                          <div class="border-start border-primary border-3 ps-2 mb-2">
+                                            <strong class="text-dark">{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
+                                            <br>
+                                            <small class="ms-2">
+                                              <span class="text-muted">Initial Value:</span> 
+                                              <code class="text-primary bg-light px-1 rounded">{{ is_null($value) ? 'NULL' : (is_array($value) ? json_encode($value) : $value) }}</code>
+                                            </small>
+                                          </div>
+                                        </div>
+                                      @endforeach
+                                    </div>
+                                    @if(count($audit->new_values) > count($displayFields))
+                                      <div class="mt-2">
+                                        <small class="text-muted">
+                                          <i class="fas fa-info-circle"></i> 
+                                          {{ count($audit->new_values) - count($displayFields) }} more fields were set during creation
+                                        </small>
+                                      </div>
+                                    @endif
+                                  </div>
                               @endif
                             @elseif($audit->event == 'updated' && $audit->old_values && $audit->new_values)
                               <div class="ms-3">
-                                @foreach($audit->new_values as $key => $newValue)
-                                  @if(array_key_exists($key, $audit->old_values) && $audit->old_values[$key] != $newValue)
-                                    <div class="border-start border-primary border-3 ps-2 mb-2">
-                                      <strong class="text-dark">{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
-                                      <br>
-                                      <small>
-                                        <span class="text-muted">From:</span> 
-                                        <code class="text-danger bg-light px-1 rounded">{{ is_null($audit->old_values[$key]) ? 'NULL' : (is_array($audit->old_values[$key]) ? json_encode($audit->old_values[$key]) : $audit->old_values[$key]) }}</code>
-                                        <br>
-                                        <span class="text-muted">To:</span> 
-                                        <code class="text-success bg-light px-1 rounded">{{ is_null($newValue) ? 'NULL' : (is_array($newValue) ? json_encode($newValue) : $newValue) }}</code>
-                                      </small>
-                                    </div>
-                                  @endif
-                                @endforeach
+                                <div class="row">
+                                  @foreach($audit->new_values as $key => $newValue)
+                                    @if(array_key_exists($key, $audit->old_values) && $audit->old_values[$key] != $newValue)
+                                      <div class="col-lg-3">
+                                        <div class="border-start border-primary border-3 ps-2 mb-2">
+                                          <strong class="text-dark">{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
+                                          <br>
+                                          <small>
+                                            <span class="text-muted">From:</span> 
+                                            <code class="text-danger bg-light px-1 rounded">{{ is_null($audit->old_values[$key]) ? 'NULL' : (is_array($audit->old_values[$key]) ? json_encode($audit->old_values[$key]) : $audit->old_values[$key]) }}</code>
+                                            <i class="fas fa-arrow-right mx-1"></i>
+                                            <span class="text-muted">To:</span> 
+                                            <code class="text-success bg-light px-1 rounded">{{ is_null($newValue) ? 'NULL' : (is_array($newValue) ? json_encode($newValue) : $newValue) }}</code>
+                                          </small>
+                                        </div>
+                                      </div>
+                                    @endif
+                                  @endforeach
+                                </div>
+                                
                               </div>
                             @elseif($audit->event == 'deleted')
                               <div class="mb-2">
