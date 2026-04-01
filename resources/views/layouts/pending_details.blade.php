@@ -120,7 +120,7 @@
                                                 <td>{{ $assignment->changeMeterRequest->control_no ?? 'N/A' }}</td>
                                                 <td>{{ $assignment->changeMeterRequest->date_time_acted ? $assignment->changeMeterRequest->date_time_acted->format('M d, Y') : 'N/A' }}</td>
                                                 <td>
-                                                    <span class="badge {{ $assignment->status == 0 ? 'bg-warning' : 'bg-success' }}">{{ $assignment->status == 0 &&  !$assignment->change_meter_request_id ? 'Unassigned' : ($assignment->changeMeterRequest->status == 2 ? 'Installed' : 'Unacted') }}</span>
+                                                    <span class="badge {{ $assignment->status == 0 ? 'bg-warning' : ($assignment->changeMeterRequest->status == 2 ? 'bg-success' : ($assignment->changeMeterRequest->status == 1 ? 'bg-danger' : 'bg-warning')) }}">{{ $assignment->status == 0 &&  !$assignment->change_meter_request_id ? 'Unassigned' : ($assignment->changeMeterRequest->status == 2 ? 'Installed' : ($assignment->changeMeterRequest->status == 1 ? 'Acted-Not Completed' : 'Unacted')) }}</span>
                                                 </td>
                                             </tr>
                                             @endforeach

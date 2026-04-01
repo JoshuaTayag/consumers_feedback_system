@@ -194,7 +194,7 @@
                           <td>{{ $serialNumber->meter->leyeco_seal_number }}</td>
                           <td>{{ $serialNumber->meter->erc_seal_number }}</td>
                           <td>{{ $serialNumber->changeMeterRequest ? $serialNumber->changeMeterRequest->control_no : 'N/A' }}</td>
-                          <td><span class="badge {{ $serialNumber->status == 0 &&  !$serialNumber->change_meter_request_id ? 'bg-info' : ($serialNumber->changeMeterRequest->status == 2 ? 'bg-success' : 'bg-warning') }}">{{ $serialNumber->status == 0 &&  !$serialNumber->change_meter_request_id ? 'Unassigned' : ($serialNumber->changeMeterRequest->status == 2 ? 'Installed' : 'Unacted') }}</span></td>
+                          <td><span class="badge {{ $serialNumber->status == 0 &&  !$serialNumber->change_meter_request_id ? 'bg-info' : ($serialNumber->changeMeterRequest->status == 2 ? 'bg-success' : ($serialNumber->changeMeterRequest->status == 1 ? 'bg-danger' : 'bg-warning')) }}">{{ $serialNumber->status == 0 &&  !$serialNumber->change_meter_request_id ? 'Unassigned' : ($serialNumber->changeMeterRequest->status == 2 ? 'Installed' : ($serialNumber->changeMeterRequest->status == 1 ? 'Acted-Not Completed' : 'Unacted')) }}</span></td>
                         </tr>
                       @endforeach
                     </tbody>
