@@ -37,7 +37,10 @@ class KwhMeterRequestController extends Controller
     public function index()
     {
         $kwh_meter_requests = KwhMeterRequest::orderBy('id', 'DESC')->paginate(15);
-        $users = User::all(); // Fetch all users for liquidation modal
+        // $users = User::orderBy('name')->all();
+        $users = User::whereDoesntHave('roles', function($query) {
+            $query->where('name', 'CM Contractors');
+        })->orderBy('name')->pluck('name', 'id'); // Fetch all users for liquidation modal
         return view('power_house.warehousing.kwh_meter_request.index', compact('kwh_meter_requests', 'users'));
     }
 
@@ -46,7 +49,9 @@ class KwhMeterRequestController extends Controller
      */
     public function create()
     {
-        $users = User::orderBy('name')->pluck('name', 'id');
+        $users = User::whereDoesntHave('roles', function($query) {
+            $query->where('name', 'CM Contractors');
+        })->orderBy('name')->pluck('name', 'id'); // Fetch all users for liquidation modal
         // Get meter types with available meter counts using service
         $type_of_meters = $this->changeMeterService->getMeterTypesWithAvailability();
         return view('power_house.warehousing.kwh_meter_request.create', compact('users', 'type_of_meters'));
@@ -229,8 +234,10 @@ class KwhMeterRequestController extends Controller
     }
 
     public function generateKwhMeterReport(){
-        $requesitioners = User::role(['TSD', 'TSD Manager'])->get();
-        return view('power_house.warehousing.kwh_meter_request.report')->with(compact('requesitioners'));
+        $users = User::whereDoesntHave('roles', function($query) {
+            $query->where('name', 'CM Contractors');
+        })->orderBy('name')->pluck('name', 'id');
+        return view('power_house.warehousing.kwh_meter_request.report')->with(compact('users'));
     }
 
     public function KwhMeterPdfReport(Request $request)
