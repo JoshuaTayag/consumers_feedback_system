@@ -17,7 +17,7 @@ class ChangeMeterRequestContractorController extends Controller
 
     public function create()
     {
-        $users = User::pluck('email', 'id');
+        $users = User::orderBy('email')->pluck('email', 'id');
         $lead_contractors = ChangeMeterLeadContractor::orderBy('contractor_team_leader_full_name','asc')->get();
         return view('service_connect_order.change_meter.contractor.create', compact('users', 'lead_contractors'));
     }
@@ -43,7 +43,7 @@ class ChangeMeterRequestContractorController extends Controller
     public function edit($id)
     {
         $contractor = ChangeMeterRequestContractor::findOrFail($id);
-        $users = User::pluck('email', 'id');
+        $users = User::orderBy('email')->pluck('email', 'id');
         $lead_contractors = ChangeMeterLeadContractor::orderBy('contractor_team_leader_full_name','asc')->get();
         return view('service_connect_order.change_meter.contractor.edit', compact('contractor', 'users', 'lead_contractors'));
     }
