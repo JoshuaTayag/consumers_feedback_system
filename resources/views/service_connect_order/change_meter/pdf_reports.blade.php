@@ -270,6 +270,26 @@
     </table>
   </div>
 
+  @if (request('contractor_id') != null)
+    <div class="text-align" style="margin-top: 0px; padding-top: 50px;">
+      <table class="signature-table" style="font-size: 11px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
+        <tbody>
+          <tr>
+            <th class="signature-header">Prepared By:</th>
+            <th class="signature-header"></th>
+            <th class="signature-header"></th>
+          </tr>
+          <tr>
+            <th class="signature-name">&nbsp;&nbsp;{{ $contractorName }}&nbsp;&nbsp;</th>
+          </tr>
+          <tr>
+            <th class="signature-position">Contractor</th>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  @endif
+
   <div class="text-align" style="margin-top: 0px; padding-top: 50px;">
     <table class="signature-table" style="font-size: 11px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
       <tbody>
@@ -279,9 +299,9 @@
           <th class="signature-header">Approved By:</th>
         </tr>
         <tr>
-          <th class="signature-name">NIÑO REY C. PONIENTE / ELMA G. MAÑACAP</th>
-          <th class="signature-name">GHANDA R. BERNANDINO, DPA</th>
-          <th class="signature-name">ANA MARIA LOURDES M. PASTOR, MBM</th>
+          <th class="signature-name">&nbsp;&nbsp;NIÑO REY C. PONIENTE / ELMA G. MAÑACAP&nbsp;&nbsp;</th>
+          <th class="signature-name">&nbsp;&nbsp;GHANDA R. BERNANDINO, DPA&nbsp;&nbsp;</th>
+          <th class="signature-name">&nbsp;&nbsp;ANA MARIA LOURDES M. PASTOR, MBM&nbsp;&nbsp;</th>
         </tr>
         <tr>
           <th class="signature-position">CWD Analyst</th>

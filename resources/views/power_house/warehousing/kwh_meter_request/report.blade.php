@@ -26,9 +26,9 @@
                   <label for="requesitioner">Requesitioner:</label>
                   <select class="form-control" name="requesitioner" id="requesitioner" required>
                     <option value="" disabled selected>Select Requesitioner</option>
-                    @foreach($requesitioners as $user)
-                      <option value="{{ $user->id }}">{{ $user->name }}</option>
-                    @endforeach
+                      @foreach($users as $id => $user)
+                        <option value="{{ $id }}">{{ $user }}</option>
+                      @endforeach
                   </select>
                 </div>
                 <div class="col-lg-3 text-start gap-2">

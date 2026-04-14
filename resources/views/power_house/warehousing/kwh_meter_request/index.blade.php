@@ -106,8 +106,8 @@
                                 </label>
                                 <select class="form-select" id="checked_by" name="checked_by" required>
                                     <option value="">Select Warehouse Staff</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @foreach($users as $id => $user)
+                                        <option value="{{ $id }}">{{ $user }}</option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback">
@@ -123,8 +123,8 @@
                                 </label>
                                 <select class="form-select" id="audited_by" name="audited_by" required>
                                     <option value="">Select IAD Staff</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @foreach($users as $id => $user)
+                                        <option value="{{ $id }}">{{ $user }}</option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback">
@@ -140,8 +140,8 @@
                                 </label>
                                 <select class="form-select" id="approved_by_liquidation" name="approved_by_liquidation" required>
                                     <option value="">Select Manager</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @foreach($users as $id => $user)
+                                        <option value="{{ $id }}">{{ $user }}</option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback">

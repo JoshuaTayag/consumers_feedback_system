@@ -1031,7 +1031,7 @@ class ChangeMeterRequestController extends Controller
 
     public function generateReport(Request $request)
     {
-        
+        $contractorName = "";
         // Start building the query
         $query = ChangeMeterRequest::whereBetween('created_at', [$request->date_from, $request->date_to]);
 
@@ -1068,6 +1068,8 @@ class ChangeMeterRequestController extends Controller
             // get all crew of this contractor
             $crews = ChangeMeterRequestContractor::where('team_leader_id', $request->contractor_id)->pluck('id')->toArray();
             $query->whereIn('crew', $crews);
+            $contractorName = ChangeMeterLeadContractor::where('id', $request->contractor_id)->value('contractor_team_leader_full_name');
+             view()->share('contractorName', $contractorName);
         }
 
         // Execute the query and get the results
@@ -1090,6 +1092,7 @@ class ChangeMeterRequestController extends Controller
 
         view()->share('datas', $change_meter_requests);
         view()->share('signatures', $allSignatures);
+        view()->share('contractor_name', $contractorName);
         $pdf = PDF::loadView('service_connect_order.change_meter.pdf_reports')->setPaper('legal', 'landscape');
         return $pdf->stream();
     }
