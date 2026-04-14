@@ -1038,7 +1038,7 @@ class MeterController extends Controller
             });
 
         // Get users who have contractor records for withdrawn_by selection
-        $employees = User::pluck('name', 'id');
+        $employees = User::orderBy('name')->pluck('name', 'id');
         return view('power_house.warehousing.data_management.meters.mass_assignment.index', compact('kwhMeterRequests', 'employees'));
     }
 

@@ -46,7 +46,7 @@ class KwhMeterRequestController extends Controller
      */
     public function create()
     {
-        $users = User::pluck('name', 'id');
+        $users = User::orderBy('name')->pluck('name', 'id');
         // Get meter types with available meter counts using service
         $type_of_meters = $this->changeMeterService->getMeterTypesWithAvailability();
         return view('power_house.warehousing.kwh_meter_request.create', compact('users', 'type_of_meters'));
@@ -117,7 +117,7 @@ class KwhMeterRequestController extends Controller
     public function show(string $id)
     {
         $kwh_meter_request = KwhMeterRequest::with('kwhMeterRequestSerialNumbers')->findOrFail($id);
-        $users = User::pluck('name', 'id');
+        $users = User::orderBy('name')->pluck('name', 'id');
         $meters_types = MeterType::get();
         
         // Get audit trail from pending table
@@ -136,7 +136,7 @@ class KwhMeterRequestController extends Controller
     public function edit(string $id)
     {
         $kwh_meter_request = KwhMeterRequest::findOrFail($id);
-        $users = User::role(['TSD', 'TSD Manager'])->pluck('name', 'id');
+        $users = User::orderBy('name')->pluck('name', 'id');
         $type_of_meters = $this->changeMeterService->getMeterTypesWithAvailability(null, $id);
         return view('power_house.warehousing.kwh_meter_request.edit', compact('kwh_meter_request', 'users', 'type_of_meters'));
     }
