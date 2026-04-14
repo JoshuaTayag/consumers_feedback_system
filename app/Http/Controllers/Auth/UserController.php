@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
-use DB;
-use Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Arr;
 
 class UserController extends Controller
@@ -24,10 +24,39 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = User::withTrashed()->orderBy('id','DESC')->paginate(15);
-        return view('users.index',compact('data'));
+        $query = User::withTrashed()->with('roles')->orderBy('id', 'DESC');
+
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            $query->where(function ($q) use ($search) {
+                                $q->where('users.name', 'like', "%{$search}%")
+                                    ->orWhere('users.email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->whereNull('deleted_at');
+            } elseif ($request->status === 'inactive') {
+                $query->whereNotNull('deleted_at');
+            }
+        }
+
+        if ($request->filled('role')) {
+            $query->whereHas('roles', function ($q) use ($request) {
+                $q->where('roles.name', $request->role);
+            });
+        }
+
+        $data = $query->paginate(15)->appends($request->query());
+        $roles = Role::query()
+            ->select('roles.name')
+            ->orderBy('roles.name')
+            ->pluck('roles.name', 'roles.name');
+
+        return view('users.index', compact('data', 'roles'));
     }
 
     /**
@@ -203,7 +232,7 @@ class UserController extends Controller
             'password' => 'required|min:8|same:confirm-password',
         ]);
 
-        $user = auth()->user();
+        $user = User::find(auth()->id());
 
         if (!Hash::check($request->old_password, $user->password)) {
             return back()->withErrors(['old_password' => 'Old password does not match']);
