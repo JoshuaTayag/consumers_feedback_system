@@ -120,6 +120,42 @@
               </div>
             </div>
             <div class="card-body">
+              <form method="GET" action="{{ route('users.index') }}" class="mb-3">
+                <div class="row g-2 align-items-end">
+                  <div class="col-lg-5 col-md-12">
+                    <label for="search" class="form-label mb-1">Search Name/Email</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="search"
+                      name="search"
+                      placeholder="Enter name or email"
+                      value="{{ request('search') }}">
+                  </div>
+                  <div class="col-lg-3 col-md-6">
+                    <label for="status" class="form-label mb-1">Status</label>
+                    <select class="form-select" id="status" name="status">
+                      <option value="">All</option>
+                      <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                      <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                  </div>
+                  <div class="col-lg-2 col-md-6">
+                    <label for="role" class="form-label mb-1">Role</label>
+                    <select class="form-select" id="role" name="role">
+                      <option value="">All</option>
+                      @foreach($roles as $roleName)
+                        <option value="{{ $roleName }}" {{ request('role') === $roleName ? 'selected' : '' }}>{{ $roleName }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="col-lg-2 col-md-12">
+                    <button type="submit" class="btn btn-info">Filter</button>
+                    <a href="{{ route('users.index') }}" class="btn btn-outline-secondary">Clear</a>
+                  </div>
+                </div>
+              </form>
+
               <table class="table table-bordered">
                 <tr>
                   <th>No</th>
@@ -131,7 +167,7 @@
                 </tr>
                 @foreach ($data as $key => $user)
                  <tr class="{{ $user->trashed() ? 'user-row-inactive' : '' }}">
-                   <td>{{ $loop->iteration }}</td>
+                   <td>{{ $data->firstItem() + $loop->index }}</td>
                    <td>{{ $user->name }}</td>
                    <td>{{ $user->email }}</td>
                    <td>
