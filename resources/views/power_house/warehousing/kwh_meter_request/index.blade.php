@@ -139,7 +139,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <select class="form-select" id="approved_by_liquidation" name="approved_by_liquidation" required>
-                                    <option value="">Select TSD Manager</option>
+                                    <option value="">Select Manager</option>
                                     @foreach($users as $user)
                                         <option value="{{ $user->id }}">{{ $user->name }}</option>
                                     @endforeach
