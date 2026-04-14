@@ -16,7 +16,7 @@ use App\Models\ChangeMeterRequestPostingHistory;
 use App\Models\User;
 use App\Services\ChangeMeterService;
 use App\Services\SignatureService;
-use DB;
+use Illuminate\Support\Facades\DB;
 use App\Helpers\Helper;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -24,6 +24,7 @@ use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\ChangeMeterCompletedNotification;
 use PDO;
+use Illuminate\Support\Facades\Log;
 
 class ChangeMeterRequestController extends Controller
 {
@@ -849,7 +850,7 @@ class ChangeMeterRequestController extends Controller
                             ->notify(new ChangeMeterCompletedNotification($change_meter_request));
                     } catch (\Exception $e) {
                         // Log email error but don't fail the transaction
-                        \Log::error('Failed to send change meter completion email: ' . $e->getMessage());
+                        Log::error('Failed to send change meter completion email: ' . $e->getMessage());
                     }
                 }
 
@@ -920,34 +921,45 @@ class ChangeMeterRequestController extends Controller
 
     public function search(Request $request)
     {
-        $control_no = $request->input('control_no');
-        $f_name = $request->input('first_name');
-        $l_name = $request->input('last_name');
-        $meter_no = $request->input('meter_no');
-        $old_meter_no = $request->input('old_meter_no');
+        // $control_no = $request->input('control_no');
+        // $f_name = $request->input('first_name');
+        // $l_name = $request->input('last_name');
+        // $meter_no = $request->input('meter_no');
+        // $old_meter_no = $request->input('old_meter_no');
         $status = $request->input('status');
-        // $products = Product::where('name', 'like', "%$query%")->get();
         $cm_request = ChangeMeterRequest::query();
 
-        if ($control_no !== null && $control_no !== '') {
-            $cm_request->where('control_no', 'like', "%$control_no%");
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $cm_request->where(function ($q) use ($searchTerm) {
+                $q->where('control_no', 'LIKE', '%' . $searchTerm . '%')
+                  ->orWhere('new_meter_no', 'LIKE', '%' . $searchTerm . '%')
+                  ->orWhere('old_meter_no', 'LIKE', '%' . $searchTerm . '%')
+                  ->orWhere('first_name', 'LIKE', '%' . $searchTerm . '%')
+                  ->orWhere('last_name', 'LIKE', '%' . $searchTerm . '%')
+                  ->orWhere('account_number', 'LIKE', '%' . $searchTerm . '%');
+            });
         }
+        
+        // if ($control_no !== null && $control_no !== '') {
+        //     $cm_request->where('control_no', 'like', "%$control_no%");
+        // }
 
-        if ($f_name !== null && $f_name !== '') {
-            $cm_request->where('first_name', 'like', "%$f_name%");
-        }
+        // if ($f_name !== null && $f_name !== '') {
+        //     $cm_request->where('first_name', 'like', "%$f_name%");
+        // }
 
-        if ($l_name !== null && $l_name !== '') {
-            $cm_request->where('last_name', 'like', "%$l_name%");
-        }
+        // if ($l_name !== null && $l_name !== '') {
+        //     $cm_request->where('last_name', 'like', "%$l_name%");
+        // }
 
-        if ($meter_no !== null && $meter_no !== '') {
-            $cm_request->where('new_meter_no', 'like', "%$meter_no%");
-        }
+        // if ($meter_no !== null && $meter_no !== '') {
+        //     $cm_request->where('new_meter_no', 'like', "%$meter_no%");
+        // }
 
-        if ($old_meter_no !== null && $old_meter_no !== '') {
-            $cm_request->where('old_meter_no', 'like', "%$old_meter_no%");
-        }
+        // if ($old_meter_no !== null && $old_meter_no !== '') {
+        //     $cm_request->where('old_meter_no', 'like', "%$old_meter_no%");
+        // }
 
         if ($status !== null && $status !== '') {
             if ($status == 'unacted') {

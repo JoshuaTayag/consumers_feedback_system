@@ -100,27 +100,44 @@
                                         <thead class="table-dark">
                                             <tr>
                                                 <th>No.</th>
-                                                <th>Old Meter</th>
-                                                <th>Meter Serial No.</th>
-                                                <th>Leyeco Seal No.</th>
-                                                <th>ERC Seal No.</th>
                                                 <th>CM Control No.</th>
+                                                <th>Old Meter No.</th>
+                                                <th>New Meter No.</th>
+                                                {{-- <th>Leyeco Seal No.</th>
+                                                <th>ERC Seal No.</th> --}}
                                                 <th>Date Installed</th>
                                                 <th>Status</th>
+                                                <th>Acknowledged by</th>
+                                                <th>Signature</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach($data->kwhMeterRequestSerialNumbers as $assignment)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $assignment->changeMeterRequest->control_no ?? 'N/A' }}</td>
                                                 <td class="text-danger fw-bold">{{ $assignment->changeMeterRequest->old_meter_no ?? 'N/A' }}</td>
                                                 <td>{{ $assignment->meter->serial_number ?? 'N/A' }}</td>
-                                                <td>{{ $assignment->meter->leyeco_seal_number ?? 'N/A' }}</td>
-                                                <td>{{ $assignment->meter->erc_seal_number ?? 'N/A' }}</td>
-                                                <td>{{ $assignment->changeMeterRequest->control_no ?? 'N/A' }}</td>
+                                                {{-- <td>{{ $assignment->meter->leyeco_seal_number ?? 'N/A' }}</td>
+                                                <td>{{ $assignment->meter->erc_seal_number ?? 'N/A' }}</td> --}}
                                                 <td>{{ $assignment->changeMeterRequest->date_time_acted ? $assignment->changeMeterRequest->date_time_acted->format('M d, Y') : 'N/A' }}</td>
                                                 <td>
                                                     <span class="badge {{ $assignment->status == 0 ? 'bg-warning' : ($assignment->changeMeterRequest->status == 2 ? 'bg-success' : ($assignment->changeMeterRequest->status == 1 ? 'bg-danger' : 'bg-warning')) }}">{{ $assignment->status == 0 &&  !$assignment->change_meter_request_id ? 'Unassigned' : ($assignment->changeMeterRequest->status == 2 ? 'Installed' : ($assignment->changeMeterRequest->status == 1 ? 'Acted-Not Completed' : 'Unacted')) }}</span>
+                                                </td>
+                                                <td>{{ $assignment->changeMeterRequest->customerSignature->signatory_name ?? 'N/A' }}</td>
+                                                <td class="signature-cell">
+                                                    @php
+                                                        $customerSignature = $assignment->changeMeterRequest->customerSignature;
+                                                    @endphp
+
+                                                    @if($customerSignature?->signature_image_url)
+                                                        <img src="{{ $customerSignature->signature_image_url }}"
+                                                            alt="{{ $customerSignature->signatory_name ?? 'Signature' }}"
+                                                            class="signature-image"
+                                                            style="max-height: 40px; max-width: 50px; display: block; margin: 0 auto;">
+                                                    @else
+                                                        <small>No Signature</small>
+                                                    @endif
                                                 </td>
                                             </tr>
                                             @endforeach

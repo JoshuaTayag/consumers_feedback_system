@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Validation\Rule;
 
@@ -597,15 +597,11 @@ class MeterController extends Controller
             $controlType = $meter->control_type;
             $accountNumber = $meter->account_number;
             $kwhMeterRequestId = $meter->kwh_meter_request_id;
+
+            if ($kwhMeterRequestId !== null) {
+                $kwhMeterRequest = KwhMeterRequest::find($kwhMeterRequestId);
+            }
             
-            // Update meter to available status
-            $meter->update([
-                'control_type' => null,
-                'control_no' => null,
-                'account_number' => null,
-                'kwh_meter_request_id' => null,
-                'status' => 0, // Set status to available
-            ]);
 
             // Handle different control types when returning
             if ($controlType === 'Change Meter' && $controlNo && $kwhMeterRequestId === null) {
@@ -625,12 +621,29 @@ class MeterController extends Controller
                         ->where('kwh_meter_request_id', $kwhMeterRequestId)
                         ->delete();
                 }
+            } elseif ( $meter->changeMeterRequest?->status == 1 && $kwhMeterRequest->is_liquidated) {
+                // dd('success');
+                // if ($kwhMeterRequestId) {
+                //     // Remove the tracking record for kWh Meter Request assignments
+                //     KwhMeterRequestSerialNumber::where('meter_id', $meter->id)
+                //         ->where('kwh_meter_request_id', $kwhMeterRequestId)
+                //         ->delete();
+                // }
             } else {
                 return response()->json([
                     'success' => false,
                     'message' => 'Cannot return meter. The meter has a linked transaction in '.$controlType.' with control number '.$controlNo.'. Please check the transaction details before returning this meter.'
                 ], 422);
             }
+            
+            // Update meter to available status
+            $meter->update([
+                'control_type' => null,
+                'control_no' => null,
+                'account_number' => null,
+                'kwh_meter_request_id' => null,
+                'status' => 0, // Set status to available
+            ]);
 
             DB::commit();
 
