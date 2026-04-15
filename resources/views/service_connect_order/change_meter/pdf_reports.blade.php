@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <link href="https://fonts.cdnfonts.com/css/franklin-gothic" rel="stylesheet">
-  <title>TSD Form</title>
+  <title>CM Report</title>
   <style>
     header{
       font-family: 'Franklin Gothic', sans-serif;
@@ -138,6 +138,11 @@
     /* Add these CSS rules for the footer */
     @page {
       margin: 15px 20px 15px 20px; /* top, right, bottom, left */
+      padding: 0px 0px 0px 0px; /* top, right, bottom, left */
+    }
+
+    body {
+      margin-bottom: 30px;
     }
 
     .page-footer {
@@ -145,11 +150,10 @@
       bottom: 0;
       left: 0;
       right: 0;
-      /* height: 0px; */
+      /* height: 30px; */
       text-align: right;
       font-size: 10px;
       color: #666;
-      /* padding: 10px; */
       background-color: white;
       border-top: 1px solid #ddd;
     }
