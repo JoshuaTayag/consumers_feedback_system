@@ -85,38 +85,34 @@
             }
             #qrcode > img {
                 border: 2px solid black !important;
-                width: 150px !important;
-                height: 150px !important;
+                width: 180px !important;
+                height: 180px !important;
             }      
         }
     </style>
 </head>
 <body>
-<div class="container p-5" id="print-container">
+<div class="container" id="print-container">
     <div id="dataToDownload" >
         <div class="card col-lg-6 p-3 mx-auto" id="main-card">
             <div class="card-body">
                 <div class="d-flex justify-content-center">
-                    <img src="{{asset('images/logo.png')}}" style="width: 50px" alt="..." class="text-center">
+                    {{-- <img src="{{asset('images/logo.png')}}" style="width: 50px" alt="..." class="text-center"> --}}
                 </div>
-                <div class="h4 mb-1 text-center">LEYECO V 43rd AGMM</div>
+                <div class="h5 mb-1 text-center">LEYECO V 45th AGMA</div>
                 <div class="mb-3 text-center">(PRE-REGISTRATION SLIP)</div>
                 <div class="row my-2">
                     <div class="col justify-content-center align-items-center qr-container">
                         <div id="qrcode" class="img-auto"></div>
                     </div>
-                    <!-- <div class="col mt-2" id="details">
-                        <strong>Name: {{ $details->last_name.', '.$details->first_name.' '.$details->middle_name }}</strong><br>
-                        <strong>Account No. : {{ substr_replace(substr_replace($details->account_no, '-', 2, 0), '-', 7, 0) }}</strong><br>
-                        <strong>Contact No. : {{ $details->contact_no ? $details->contact_no : 'None' }}</strong><br>
-                        <strong>Membership OR: {{ $details->membership_or }}</strong><br>
-                        <strong>Date: {{ \Carbon\Carbon::parse($details->created_at)->format('m/d/Y h:i A') }}</strong>
-                    </div> -->
                 </div>
-                <div class="row justify-content-center" style="font-size:13px">
+                <div class="row justify-content-center" style="font-size:12px">
                     <div class="col-auto">
-                        <p class="mb-1">Registration Date: {{ \Carbon\Carbon::parse($details->created_at)->format('m/d/Y h:i A') }}</p>
-                        <p class="mb-1">Registered By: {{ strtoupper($verifier) }}</p>
+                        <p class="mb-1 fw-bold">Account: {{ substr_replace(substr_replace($details->account_no, '-', 2, 0), '-', 7, 0) }}</p>
+                        <p class="mb-1 fw-bold">Name: {{ $details->last_name.', '.$details->first_name.' '.$details->middle_name }}</p>
+                        <p class="mb-1 fw-bold">Address: {{ $details->Address }}</p>
+                        <p class="mb-1 fw-bold">Reg Date: {{ \Carbon\Carbon::parse($details->created_at)->format('m/d/Y h:i A') }}</p>
+                        <p class="mb-1 fw-bold">Registered By: {{ strtoupper($verifier) }}</p>
                     <div>
                 </div>
                 

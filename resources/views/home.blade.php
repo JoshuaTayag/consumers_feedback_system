@@ -91,6 +91,12 @@
                                     <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">CM PAYMENT</p>
                                 </a>
                             </div>
+                            <div class="col-lg-3 my-1">
+                                <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('agmmRegistration') }}">
+                                    <img src="{{asset('images/icons/website.png')}}" class="img-fluid pt-2" style="max-width:40%;" alt="...">
+                                    <p class="fs-5 bg-secondary pt-1 mt-2 fw-bold">AGMA PRE-REGISTRATION</p>
+                                </a>
+                            </div>
                             <!-- @if(Auth::user()->hasRole('Admin'))
                             <div class="col-lg-3 my-1">
                                 <a type="button" class="btn btn-outline-warning" style="border: 3px solid black;" href="{{ route('surveyReport') }}">
