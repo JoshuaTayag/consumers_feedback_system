@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Agmm;
 use DB;
@@ -13,6 +14,7 @@ class AgmmController extends Controller
 {
     public function agmmRegister(Request $request)
     {
+        // dd($request);
         $account = $this->validateAccount($request->account_no);
         
         // check if account_no exist in consumers table
@@ -25,6 +27,7 @@ class AgmmController extends Controller
                 'last_name' => 'required|string|max:255',
                 'contact_no' => 'nullable|string|max:20',
                 'membership_or' => 'nullable|string|max:20',
+                'consumer_type' => 'required|string|in:MCO,Guest',
             ]);
 
             try {
@@ -84,15 +87,19 @@ class AgmmController extends Controller
                             'contact_no' => $request->contact_no,
                             'membership_or' => $validatedData['membership_or'],
                             'registration_type' => $request->type,
+                            'consumer_type' => $request->consumer_type,
                             'qr_code_value' => $uuid,
                             'transpo_allowance' => $validatedData['transpo_allowance'],
                             'allowance_status' => false,
-                            'created_at' => now()
+                            'created_at' => now(),
+                            'created_by' => Auth::id(),
                         )
                     );
 
                     $insertedData = DB::table('agmms')
-                    ->where('qr_code_value', $uuid)
+                    ->leftJoin('Consumers Table', 'Consumers Table.Accnt No', '=', 'agmms.account_no')
+                    ->select('agmms.*', 'Consumers Table.Address')
+                    ->where('agmms.qr_code_value', $uuid)
                     ->first();
 
                     if ($insertedData) {
@@ -117,7 +124,7 @@ class AgmmController extends Controller
             } catch (\Exception $e) {
                 // Handle any unexpected exceptions
                 // dd($e);
-                return response()->json(['message' => 'Failed to process the request', 'status_message' => 'error'], 500);
+                return response()->json(['message' => 'Failed to process the request'. $e, 'status_message' => 'error'], 500);
             }
     
         } else {
@@ -456,10 +463,15 @@ class AgmmController extends Controller
     }
 
     public function printRegistrationQRGuest($id){
-        $details = DB::table('agmms')->select('*')->where('account_no', $id)->first();
+        $details = DB::table('agmms')
+            ->leftJoin('Consumers Table', 'Consumers Table.Accnt No', '=', 'agmms.account_no')
+            ->select('agmms.*', 'Consumers Table.Address')
+            ->where('agmms.account_no', $id)
+            ->first();
         
-        $verifier = "GUEST";
         
+        $verifier = User::where('id', $details->created_by)->value('name');
+        // dd($verifier);
         return view('agmm.agmm_onsite_qr_code_print')->with(compact('details','verifier'));
     }
 

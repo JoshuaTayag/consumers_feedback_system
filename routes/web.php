@@ -18,9 +18,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Auth::routes(['verify' => true]);
 
-Route::get('agmm/on-site/registration', [App\Http\Controllers\AgmmController::class, 'agmmRegistration'])->name('agmmRegistration');
-Route::post('agmm/register', [App\Http\Controllers\AgmmController::class, 'agmmRegisterPost'])->name('agmmRegisterPost');
-Route::get('agmm/qr-print/guest/{id}', [App\Http\Controllers\AgmmController::class, 'printRegistrationQRGuest'])->name('printRegistrationQRGuest');
+
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', function () {
@@ -32,6 +30,11 @@ Route::group(['middleware' => 'auth'], function () {
             return view('home');
         // }
     });
+
+    Route::get('agmm/on-site/registration', [App\Http\Controllers\AgmmController::class, 'agmmRegistration'])->name('agmmRegistration');
+    Route::post('agmm/register', [App\Http\Controllers\AgmmController::class, 'agmmRegisterPost'])->name('agmmRegisterPost');
+    Route::get('agmm/qr-print/guest/{id}', [App\Http\Controllers\AgmmController::class, 'printRegistrationQRGuest'])->name('printRegistrationQRGuest');
+
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
     Route::get('change-password', [App\Http\Controllers\Auth\UserController::class, 'showChangePasswordForm'])->name('changePasswordForm');

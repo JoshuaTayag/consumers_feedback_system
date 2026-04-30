@@ -38,7 +38,7 @@
             font-size: 20px;
         }
         .left-side {
-            background-image: url('https://leyeco-v.com.ph/images/43rd-AGMM-Updated.png');
+            background-image: url('https://leyeco-v.com.ph/images/45TH-AGMM-LOGO.png');
             background-size:  contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -96,11 +96,11 @@
             </div>
             <div class="col-md-6 p-5">
                 <div class="row pb-4">
-                    <div class="col-md-2 col-sm-6">
+                    {{-- <div class="col-md-2 col-sm-6">
                         <img src="https://leyeco-v.com.ph/images/logo.png" alt="" class="img-fluid" width="85px">
-                    </div>
-                    <div class="col-md-10 d-flex align-items-center">
-                        <h3 class="text-center">43rd AGMM ON-SITE Registration Form</h3>
+                    </div> --}}
+                    <div class="col-md-12 d-flex align-items-center">
+                        <h3 class="text-center">45th AGMA Walk in Pre-Registration Form</h3>
                     </div>
                 </div>
                 <form method="POST" action="{{ route('agmmRegisterPost') }}">
@@ -126,10 +126,24 @@
                         <input type="text" class="form-control @error('contact_no') is-invalid @enderror" value="{{ old('contact_no') }}" id="contact_no" pattern="^((09))[0-9]{9}" name="contact_no" maxlength="11" required>
                     </div>
                     <div class="mb-2">
+                        <label class="form-label">Consumer Type <span class="text-danger fw-bold">*</span></label>
+                        <div class="d-flex gap-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="consumer_type" id="consumer_type_mco" value="MCO" {{ old('consumer_type') === 'MCO' ? 'checked' : '' }} required>
+                                <label class="form-check-label" for="consumer_type_mco">MCO</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="consumer_type" id="consumer_type_guest" value="Guest" {{ old('consumer_type') === 'Guest' ? 'checked' : '' }} required>
+                                <label class="form-check-label" for="consumer_type_guest">Guest</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
                         <input type="hidden" class="form-control" id="registration_type" name="registration_type" value="ON-SITE-PRE-REGISTRATION">
                     </div>
                     <hr class="my-3">
-                    <div class="mb-2 text-center">
+                    <div class="mb-2 d-flex justify-content-end gap-4">
+                        <a href="{{ route('home') }}" class="btn custom-primary rounded px-4"><i class="fa fa-plus"></i> Home</a>
                         <button type="submit" class="btn custom-primary rounded px-4">REGISTER</button>
                     </div>
                 </form>
@@ -152,7 +166,7 @@
         Swal.fire({
             html: swalMessageWithQR,
             icon: 'success',
-            showCloseButton: true,
+            showCloseButton: false,
             allowOutsideClick: false,
             showConfirmButton: false,
             showCancelButton: true,
