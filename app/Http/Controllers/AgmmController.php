@@ -465,7 +465,7 @@ class AgmmController extends Controller
     public function printRegistrationQRGuest($id){
         $details = DB::table('agmms')
             ->leftJoin('Consumers Table', 'Consumers Table.Accnt No', '=', 'agmms.account_no')
-            ->select('agmms.*', 'Consumers Table.Address', 'Consumers Table.ConMunicipality')
+            ->select('agmms.*', 'Consumers Table.Address', DB::raw("LTRIM(RTRIM([Consumers Table].[ConMunicipality])) as ConMunicipality"))
             ->where('agmms.account_no', $id)
             ->first();
         
