@@ -72,8 +72,8 @@
                 padding-top: 0px;
             }
             #qrcode > img{
-                width: 150px;
-                height: 150px;
+                width: 100px;
+                height: 100px;
                 /* padding: 30px; */
             }
         }
@@ -113,6 +113,21 @@
                         <p class="mb-1 fw-bold">Address: {{ $details->Address }}</p>
                         <p class="mb-1 fw-bold">Reg Date: {{ \Carbon\Carbon::parse($details->created_at)->format('m/d/Y h:i A') }}</p>
                         <p class="mb-1 fw-bold">Registered By: {{ strtoupper($verifier) }}</p>
+                        <hr>
+                        <p class="mb-1 fw-bold">Date: July 11, 2026 </p>
+                        <p class="mb-1 fw-bold">Time: 08:00 AM - 4:00 PM </p>
+                        @if ($details->ConMunicipality == 'Albuera' || $details->ConMunicipality == 'Kananga' || 
+                            $details->ConMunicipality == 'Merida' || 
+                            $details->ConMunicipality == 'Palompon' ||
+                            $details->ConMunicipality == 'Isabel' || 
+                            $details->ConMunicipality == 'Matag-ob' || 
+                            $details->ConMunicipality == 'Ormoc City' || 
+                            $details->ConMunicipality == 'Ormoc North' || 
+                            $details->ConMunicipality == 'Ormoc South')
+                            <p class="mb-1 fw-bold">Venue1: ORMOC CITY SUPERDOME</p>
+                        @else
+                            <p class="mb-1 fw-bold">Venue2: ROMEO ARANTE YSIDORO GYM, LEYTE, LEYTE</p>
+                        @endif
                     <div>
                 </div>
                 
@@ -136,8 +151,8 @@
 <script>
     const qrcode = new QRCode(document.getElementById('qrcode'), {
         text: "{{ $details->qr_code_value }}",
-        width: 150,
-        height: 150,
+        width: 100,
+        height: 100,
         colorDark: '#000',
         colorLight: '#fff',
         // correctLevel: QRCode.CorrectLevel.M
