@@ -77,6 +77,12 @@ class LifelineController extends Controller
         if ($request->date_of_application < '2023-01-01' || $request->date_of_application == $request->date_of_birth) {
             return redirect()->back()->withError('Pls double Check the Date of Application!');
         }
+
+        // check if account number existing in the record
+        $lifeline = Lifeline::where('account_no', $request->electric_service_details)->first();
+        if($lifeline){
+            return redirect()->back()->withError('Account No. already existing in the record!');
+        }
         
         $year = date("Y");
         $control_id = Helper::IDGenerator(new Lifeline, 'control_no', 4, $year); /** Generate control no */
@@ -138,6 +144,16 @@ class LifelineController extends Controller
             'annual_income' => ['required'],
             'sdwo_certification' => ['required', 'string', 'max:255'],
         ]);
+
+        if ($request->date_of_application < '2023-01-01' || $request->date_of_application == $request->date_of_birth) {
+            return redirect()->back()->withError('Pls double Check the Date of Application!');
+        }
+
+        // check if account number existing in the record
+        $lifeline = Lifeline::where('account_no', $request->electric_service_details)->first();
+        if($lifeline){
+            return redirect()->back()->withError('Account No. already existing in the record!');
+        }
 
         $year = date("Y");
         $control_id = Helper::IDGenerator(new Lifeline, 'control_no', 4, $year); /** Generate control no */
