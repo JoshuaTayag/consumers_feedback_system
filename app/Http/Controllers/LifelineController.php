@@ -294,9 +294,35 @@ class LifelineController extends Controller
     public function destroy(string $id)
     {
         $application = Lifeline::find($id);
-        $application->delete();
+        
 
-        return redirect(route('lifeline.index'))->withSuccess('Record Successfully deleted!');
+        try {
+                $update_account = DB::connection('sqlSrvBilling')
+                    ->table('Consumers Table')
+                    ->where('Accnt No', $application->account_no)
+                    ->update([
+                        'LFflag' => "NO",
+                        'LFdate' => null,
+                        'LFTag' => null,
+                    ]);
+
+                if($update_account == 0){
+                    return redirect()->back()->withError("Invalid Account No.");
+                }
+                else{
+                    $application->delete();
+                    DB::commit();
+                    return redirect(route('lifeline.index'))->withSuccess('Record Successfully deleted!');
+                    // all good
+                }
+                
+            } catch (\Exception $e) {
+                DB::rollback();
+                // something went wrong
+                return redirect()->back()->withError($e->getMessage());
+            }
+
+        //return redirect(route('lifeline.index'))->withSuccess('Record Successfully deleted!');
     }
 
     public function approveLifelineIndex()
@@ -319,6 +345,7 @@ class LifelineController extends Controller
                     ->update([
                         'LFflag' => "NO",
                         'LFdate' => null,
+                        'LFTag' => null,
                     ]);
 
                 if($update_account == 0){
@@ -401,6 +428,7 @@ class LifelineController extends Controller
                     ->update([
                         'LFflag' => "Yes",
                         'LFdate' => $lifeline->date_of_application,
+                        'LFTag' => $lifelines->pppp_id ? "4Ps" : "Non-4Ps",
                     ]);
 
             }
