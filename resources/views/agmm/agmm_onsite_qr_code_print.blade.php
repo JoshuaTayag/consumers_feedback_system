@@ -124,7 +124,7 @@
                             $details->ConMunicipality == 'Ormoc City' || 
                             $details->ConMunicipality == 'Ormoc North' || 
                             $details->ConMunicipality == 'Ormoc South')
-                            <p class="mb-1 fw-bold">Venue1: ORMOC CITY SUPERDOME</p>
+                            <p class="mb-1 fw-bold">Venue1: (LEYECO V) BRGY. SAN PABLO, ORMOC CITY, LEYTE</p>
                         @else
                             <p class="mb-1 fw-bold">Venue2: ROMEO ARANTE YSIDORO GYM, LEYTE, LEYTE</p>
                         @endif
