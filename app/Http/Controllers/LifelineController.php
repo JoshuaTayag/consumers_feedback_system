@@ -444,7 +444,7 @@ class LifelineController extends Controller
                     ->update([
                         'LFflag' => "Yes",
                         'LFdate' => $lifeline->date_of_application,
-                        'LFTag' => $lifelines->pppp_id ? "4Ps" : "Non-4Ps",
+                        'LFTag' => $lifeline->pppp_id ? "4Ps" : "Non-4Ps",
                     ]);
 
             }
