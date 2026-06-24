@@ -35,6 +35,14 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('agmm/register', [App\Http\Controllers\AgmmController::class, 'agmmRegisterPost'])->name('agmmRegisterPost');
     Route::get('agmm/qr-print/guest/{id}', [App\Http\Controllers\AgmmController::class, 'printRegistrationQRGuest'])->name('printRegistrationQRGuest');
 
+    Route::get('/raffle',                [App\Http\Controllers\AgmaRaffleWinnerController::class, 'index']);
+    Route::get('/raffle/winners',        [App\Http\Controllers\AgmaRaffleWinnerController::class, 'winners']);
+    Route::post('/raffle/winners',       [App\Http\Controllers\AgmaRaffleWinnerController::class, 'store']);
+    Route::delete('/raffle/winners',     [App\Http\Controllers\AgmaRaffleWinnerController::class, 'destroyAll']);
+    Route::delete('/raffle/winner/{id}', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'destroy'])->name('raffle.winner.destroy');
+    Route::get('/raffle/winners/export', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'export'])->name('raffle.winners.export');
+    Route::get('/raffle/winners/display', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'display']);
+
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
     Route::get('change-password', [App\Http\Controllers\Auth\UserController::class, 'showChangePasswordForm'])->name('changePasswordForm');
