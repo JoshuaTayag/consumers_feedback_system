@@ -164,6 +164,116 @@
             color: #fff;
         }
 
+        /* ── Multi-select municipality dropdown ─────────────── */
+        .ms-dropdown {
+            position: relative;
+            width: 100%;
+            user-select: none;
+        }
+
+        .ms-toggle {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            border: 2px solid var(--primary);
+            background: rgba(79, 70, 229, 0.05);
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: 'Source Sans 3', sans-serif;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            text-align: left;
+        }
+        .ms-toggle:hover {
+            box-shadow: var(--glow-sm);
+            border-color: var(--secondary);
+        }
+        .ms-dropdown.open .ms-toggle {
+            border-color: var(--cta);
+            box-shadow: var(--glow-md);
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        .ms-toggle .ms-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ms-toggle .ms-caret {
+            flex: 0 0 auto;
+            transition: transform 0.25s ease;
+            color: var(--secondary);
+        }
+        .ms-dropdown.open .ms-toggle .ms-caret {
+            transform: rotate(180deg);
+        }
+
+        .ms-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            z-index: 40;
+            background: linear-gradient(135deg, #1e1b4b 0%, #241a4d 100%);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius);
+            box-shadow: var(--glow-md), 0 10px 30px rgba(0,0,0,0.4);
+            padding: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            display: none;
+        }
+        .ms-dropdown.open .ms-panel {
+            display: block;
+            animation: msFadeIn 0.15s ease-out;
+        }
+        @keyframes msFadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .ms-panel::-webkit-scrollbar { width: 6px; }
+        .ms-panel::-webkit-scrollbar-track { background: transparent; }
+        .ms-panel::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+        .ms-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            transition: background 0.15s ease;
+        }
+        .ms-option:hover {
+            background: rgba(79, 70, 229, 0.35);
+        }
+        .ms-option input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--cta);
+            flex: 0 0 auto;
+            cursor: pointer;
+        }
+        .ms-option.ms-all {
+            font-weight: 700;
+            color: var(--cta);
+        }
+        .ms-divider {
+            height: 1px;
+            background: rgba(79, 70, 229, 0.3);
+            margin: 6px 4px;
+        }
+
         /* Wheel */
         #wheel-container {
             /* flex: 1 1 600px; */
@@ -553,12 +663,28 @@
 
         <input type="text"   id="prize"      placeholder="Prize (e.g. Grocery Pack)" required>
         <input type="number" id="batchCount" min="1" value="1" placeholder="Batch Winners">
-        <select id="municipality" class="municipality-select">
-            <option value="">🌐 All Municipalities</option>
-            @foreach($municipalities as $m)
-                <option value="{{ $m }}">{{ $m }}</option>
-            @endforeach
-        </select>
+
+        {{-- Multi-select municipality dropdown --}}
+        <div class="ms-dropdown" id="municipalityDropdown">
+            <button type="button" class="ms-toggle" id="msToggle">
+                <span class="ms-label" id="msLabel">🌐 All Municipalities</span>
+                <span class="ms-caret">▾</span>
+            </button>
+            <div class="ms-panel" id="msPanel">
+                <label class="ms-option ms-all">
+                    <input type="checkbox" id="msAll" checked>
+                    🌐 All Municipalities
+                </label>
+                <div class="ms-divider"></div>
+                @foreach($municipalities as $m)
+                    <label class="ms-option">
+                        <input type="checkbox" class="ms-item" value="{{ $m }}">
+                        {{ $m }}
+                    </label>
+                @endforeach
+            </div>
+        </div>
+
         <button class="btn btn-spin"   onclick="spin()">🎡 Spin</button>
         {{-- <button class="btn btn-export" onclick="exportCSV()">⬇ Export History (CSV)</button> --}}
         <button class="btn btn-clear"  onclick="clearHistory()">🗑 Clear History</button>
@@ -591,11 +717,76 @@
     // Working copy so we can remove winners mid-session without mutating PARTICIPANTS
     let pool = [...PARTICIPANTS];
 
-    // Filter pool by selected municipality
+    // ── Multi-select municipality dropdown ──────────────────
+    const msDropdown   = document.getElementById("municipalityDropdown");
+    const msToggle     = document.getElementById("msToggle");
+    const msPanel      = document.getElementById("msPanel");
+    const msLabel      = document.getElementById("msLabel");
+    const msAllBox     = document.getElementById("msAll");
+    const msItemBoxes  = Array.from(document.querySelectorAll(".ms-item"));
+
+    // Empty array = no filter = all municipalities
+    let selectedMunicipalities = [];
+
+    function openMsPanel(open) {
+        msDropdown.classList.toggle("open", open);
+    }
+
+    msToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openMsPanel(!msDropdown.classList.contains("open"));
+    });
+
+    // Close the panel when clicking anywhere outside of it
+    document.addEventListener("click", (e) => {
+        if (!msDropdown.contains(e.target)) openMsPanel(false);
+    });
+
+    function updateMsLabel() {
+        if (!selectedMunicipalities.length) {
+            msLabel.textContent = "🌐 All Municipalities";
+        } else if (selectedMunicipalities.length === 1) {
+            msLabel.textContent = selectedMunicipalities[0];
+        } else {
+            msLabel.textContent = `${selectedMunicipalities.length} municipalities selected`;
+        }
+    }
+
+    function onMunicipalitySelectionChanged() {
+        updateMsLabel();
+        drawWheel(getWheelNames());
+        updateCount();
+    }
+
+    msAllBox.addEventListener("change", () => {
+        if (msAllBox.checked) {
+            // "All" wins: clear individual selections
+            msItemBoxes.forEach(cb => cb.checked = false);
+            selectedMunicipalities = [];
+        } else {
+            // Prevent unchecking "All" with nothing else selected — just keep it checked
+            msAllBox.checked = true;
+        }
+        onMunicipalitySelectionChanged();
+    });
+
+    msItemBoxes.forEach(cb => {
+        cb.addEventListener("change", () => {
+            selectedMunicipalities = msItemBoxes
+                .filter(box => box.checked)
+                .map(box => box.value);
+
+            // Toggle "All" automatically based on individual selections
+            msAllBox.checked = selectedMunicipalities.length === 0;
+
+            onMunicipalitySelectionChanged();
+        });
+    });
+
+    // Filter pool by selected municipalities (empty selection = no filter = all)
     function getFilteredPool() {
-        const selected = document.getElementById("municipality").value;
-        if (!selected) return pool; // no filter = all
-        return pool.filter(p => p.municipality === selected);
+        if (!selectedMunicipalities.length) return pool;
+        return pool.filter(p => selectedMunicipalities.includes(p.municipality));
     }
 
     // Wheel only shows filtered pool (max 100)
@@ -698,11 +889,11 @@
             return;
         }
         if (!filtered.length) {
-            Swal.fire({ icon: 'error', title: 'No Participants', text: 'No participants for the selected municipality.' });
+            Swal.fire({ icon: 'error', title: 'No Participants', text: 'No participants for the selected municipality selection.' });
             return;
         }
         if (batch > filtered.length) {
-            Swal.fire({ icon: 'error', title: 'Invalid Batch Count', text: 'Batch count exceeds participants in this municipality.' });
+            Swal.fire({ icon: 'error', title: 'Invalid Batch Count', text: 'Batch count exceeds participants in this selection.' });
             return;
         }
 
@@ -882,11 +1073,6 @@
             cleanupSwalDOM();
         });
     }
-
-    document.getElementById("municipality").addEventListener("change", () => {
-        drawWheel(getWheelNames());
-        updateCount();
-    });
 
     // Update updateCount() to reflect filtered count
     function updateCount() {

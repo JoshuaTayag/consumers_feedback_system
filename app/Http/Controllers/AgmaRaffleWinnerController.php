@@ -11,55 +11,6 @@ class AgmaRaffleWinnerController extends Controller
      // GET /raffle — load the view with participants from agmms
     public function index()
     {
-    //     // Use chunk() to avoid loading all winners into memory
-    // $wonAccountNos = collect();
-    // DB::connection('sqlsrv')
-    //     ->table('agma_raffle_winners')
-    //     ->orderBy('id')
-    //     ->select('account_no')
-    //     ->chunk(1000, function($winners) use (&$wonAccountNos) {
-    //         $wonAccountNos = $wonAccountNos->merge($winners->pluck('account_no'));
-    //     });
-
-    // // Get eligible consumer IDs from MySQL
-    // $consumerIds = DB::connection('agmm_db')
-    //     ->table('verifications')
-    //     ->where('is_removed', false)
-    //     ->where('consumer_type', 'mco')
-    //     ->where('is_attended', true)
-    //     ->whereNotIn('consumer_id', $wonAccountNos->toArray())
-    //     ->pluck('consumer_id')
-    //     ->toArray();
-
-    // // Fetch consumer details in larger chunks (200 instead of 100)
-    // $participants = [];
-    // foreach (array_chunk($consumerIds, 200) as $chunk) {
-    //     $chunkData = DB::connection('sqlsrv')
-    //         ->table('Consumers Table')
-    //         ->whereIn('Accnt No', $chunk)
-    //         ->select(
-    //             'Accnt No as account_no',
-    //             'TRIM(name) as name',  // ← Trim in database
-    //             'TRIM(ConMunicipality) as municipality'
-    //         )
-    //         ->get();
-        
-    //     foreach ($chunkData as $p) {
-    //         $participants[] = [
-    //             'account_no' => $p->account_no,
-    //             'name' => $p->name,  // ← Already trimmed
-    //             'municipality' => $p->municipality,
-    //         ];
-    //     }
-    // }
-
-    // $municipalities = collect($participants)->pluck('municipality')->unique()->sort()->values();
-    // return view('agmm.agmm_raffle', compact('participants', 'municipalities'));
-
-
-
-
-    
         // Get already-won account numbers from SQL Server
         $wonAccountNos = DB::connection('sqlsrv')
             ->table('agma_raffle_winners')
@@ -76,15 +27,26 @@ class AgmaRaffleWinnerController extends Controller
             ->pluck('consumer_id')
             ->toArray();
 
+
+            // dd(DB::connection('sqlSrvBilling')->table('Ledger Table')->take(10)->get());
+
         // Fetch consumer details in chunks from SQL Server
         $participants = [];
         foreach (array_chunk($consumerIds, 200) as $chunk) {
-            $chunkData = DB::connection('sqlsrv')
-                ->table('Consumers Table')
-                ->whereIn('Accnt No', $chunk)
-                ->select('Accnt No as account_no', 'Name as name', 'ConMunicipality as municipality')
-                ->get();
-            
+            $accountList = implode(',', array_map(fn ($id) => "'" . str_replace("'", "''", $id) . "'", $chunk));
+
+            $query = sprintf(
+                "SELECT ct.[Accnt No] as account_no, ct.[Name] as name, ct.[ConMunicipality] as municipality
+                 FROM [Consumers Table] as ct
+                 LEFT JOIN [Ledger Table] as lt ON lt.[Account No] = ct.[Accnt No]
+                 WHERE ct.[Accnt No] IN (%s)
+                 GROUP BY ct.[Accnt No], ct.[Name], ct.[ConMunicipality]
+                 HAVING COUNT(CASE WHEN COALESCE(lt.[BillAmt], 0) > 0 THEN 1 END) <= 1",
+                $accountList
+            );
+
+            $chunkData = DB::connection('sqlSrvBilling')->select($query);
+
             foreach ($chunkData as $p) {
                 $participants[] = [
                     'account_no' => $p->account_no,
@@ -93,20 +55,6 @@ class AgmaRaffleWinnerController extends Controller
                 ];
             }
         }
-        // $participants = Agmm::select('agmms.account_no', 'al.Name as name', 'al.ConMunicipality as municipality')
-        //     ->join('Consumers Table as al', 'al.Accnt No', '=', 'agmms.account_no')
-        //     ->whereNotIn('agmms.account_no', function ($query) {
-        //         $query->select('account_no')->from('agma_raffle_winners');
-        //     })
-        //     ->get()
-        //     ->map(fn($p) => [
-        //         'account_no' => $p->account_no,
-        //         'name'       => trim($p->name),
-        //         'municipality' => trim($p->municipality),
-        //     ]);
-        // dd($participants);
-        // $municipalities = $participants->pluck('municipality')->unique()->sort()->values();
-
         $municipalities = collect($participants)->pluck('municipality')->unique()->sort()->values();
 
         return view('agmm.agmm_raffle', compact('participants', 'municipalities'));
