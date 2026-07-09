@@ -17,16 +17,16 @@ class AgmaRaffleWinnerController extends Controller
             ->pluck('account_no')
             ->toArray();
 
-        // Get consumer IDs from MySQL (agmm_db) that haven't won yet
+        // Get consumer IDs from MySQL (agmm_db) that haven't won yet and were verified on July 11 at or before 12:01 PM
         $consumerIds = DB::connection('agmm_db')
             ->table('verifications')
             ->where('is_removed', false)
             ->where('consumer_type', 'mco')
             ->where('is_attended', true)
+            ->whereBetween('verified_at', ['2026-07-11 00:00:00', '2026-07-11 12:00:00'])
             ->whereNotIn('consumer_id', $wonAccountNos)
             ->pluck('consumer_id')
             ->toArray();
-
 
             // dd(DB::connection('sqlSrvBilling')->table('Ledger Table')->take(10)->get());
 
