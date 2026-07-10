@@ -156,4 +156,68 @@ class AgmaRaffleWinnerController extends Controller
         $winner->delete();
         return redirect()->back()->with('success', 'Winner removed successfully.');
     }
+
+    public function exportConsumersCsv(){
+         // Get already-won account numbers from SQL Server
+        $wonAccountNos = DB::connection('sqlsrv')
+            ->table('agma_raffle_winners')
+            ->pluck('account_no')
+            ->toArray();
+
+        // Get consumer IDs from MySQL (agmm_db) that haven't won yet and were verified on July 11 at or before 12:01 PM
+        $consumerIds = DB::connection('agmm_db')
+            ->table('verifications')
+            ->where('is_removed', false)
+            ->where('consumer_type', 'mco')
+            ->where('is_attended', true)
+            ->whereBetween('verified_at', ['2026-07-11 00:00:00', '2026-07-11 12:00:00'])
+            ->whereNotIn('consumer_id', $wonAccountNos)
+            ->pluck('consumer_id')
+            ->toArray();
+
+            // dd(DB::connection('sqlSrvBilling')->table('Ledger Table')->take(10)->get());
+
+        // Fetch consumer details in chunks from SQL Server
+        $participants = [];
+        foreach (array_chunk($consumerIds, 200) as $chunk) {
+            $accountList = implode(',', array_map(fn ($id) => "'" . str_replace("'", "''", $id) . "'", $chunk));
+
+            $query = sprintf(
+                "SELECT ct.[Accnt No] as account_no, ct.[Name] as name, ct.[ConMunicipality] as municipality
+                 FROM [Consumers Table] as ct
+                 LEFT JOIN [Ledger Table] as lt ON lt.[Account No] = ct.[Accnt No]
+                 WHERE ct.[Accnt No] IN (%s)
+                 GROUP BY ct.[Accnt No], ct.[Name], ct.[ConMunicipality]
+                 HAVING COUNT(CASE WHEN COALESCE(lt.[BillAmt], 0) > 0 THEN 1 END) <= 1",
+                $accountList
+            );
+
+            $chunkData = DB::connection('sqlSrvBilling')->select($query);
+
+            foreach ($chunkData as $p) {
+                $participants[] = [
+                    'account_no' => $p->account_no,
+                    'name'       => trim($p->name),
+                    'municipality' => trim($p->municipality),
+                ];
+            }
+        }
+
+        // Create a CSV file and download it
+        $csv = fopen('php://temp', 'w');
+        fputcsv($csv, ['Account No', 'Name', 'Municipality']);
+
+        foreach ($participants as $participant) {
+            fputcsv($csv, $participant);
+        }
+
+        rewind($csv);
+        $content = stream_get_contents($csv);
+        fclose($csv);
+
+        return response($content, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="consumers.csv"'
+        ]);
+    }
 }

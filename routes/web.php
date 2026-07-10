@@ -42,6 +42,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::delete('/raffle/winner/{id}', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'destroy'])->name('raffle.winner.destroy');
     Route::get('/raffle/winners/export', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'export'])->name('raffle.winners.export');
     Route::get('/raffle/winners/display', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'display']);
+    Route::get('/raffle/consumers/export', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'exportConsumersCsv'])->name('raffle.consumers.export');
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
