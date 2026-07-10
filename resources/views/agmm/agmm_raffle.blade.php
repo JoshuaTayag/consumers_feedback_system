@@ -688,11 +688,7 @@
         <button class="btn btn-spin"   onclick="spin()">🎡 Spin</button>
         {{-- <button class="btn btn-export" onclick="exportCSV()">⬇ Export History (CSV)</button> --}}
         <button class="btn btn-clear"  onclick="clearHistory()">🗑 Clear History</button>
-
-        {{-- <div class="history-container">
-            <button class="btn btn-history" onclick="toggleHistory()">📜 Show / Hide Winner History</button>
-            <ul id="historyList" class="history-list"></ul>
-        </div> --}}
+        <button class="btn btn-history" onclick="window.open('{{ route('raffle.consumers.export') }}', '_blank')">EXPORT CONSUMERS</button>
     </div>
 </div>
 
