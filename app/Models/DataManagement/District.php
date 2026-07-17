@@ -1,32 +1,27 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\DataManagement;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Municipality extends Model
+class District extends Model
 {
     use HasFactory;
 
     protected $connection = 'sqlSrvMembership';
-    protected $table = 'municipalities';
+    protected $table = 'districts';
 
-    public function barangay()
+    public function municipality()
     {
-        return $this->hasMany('App\Models\Barangay');
-    }
-
-    public function district()
-    {
-        return $this->belongsTo('App\Models\District');
+        return $this->hasMany('App\Models\DataManagement\Municipality');
     }
 
     public function preMembership()
     {
         return $this->hasMany('App\Models\Premembership');
     }
-
+    
     public function lifeline()
     {
         return $this->hasMany('App\Models\Lifeline');
@@ -36,7 +31,7 @@ class Municipality extends Model
     {
         return $this->hasMany('App\Models\MaterialRequisitionForm');
     }
-
+    
     public function electrician_address()
     {
         return $this->hasMany('App\Models\BarangayElectrician\ElectricianAddress');

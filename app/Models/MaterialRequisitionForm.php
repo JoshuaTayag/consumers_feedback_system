@@ -79,17 +79,17 @@ class MaterialRequisitionForm extends Model
 
     public function district()
     {
-        return $this->belongsTo('App\Models\District', 'district_id', 'id');
+        return $this->belongsTo('App\Models\DataManagement\District', 'district_id', 'id');
     }
 
     public function municipality()
     {
-        return $this->belongsTo('App\Models\Municipality', 'municipality_id', 'id');
+        return $this->belongsTo('App\Models\DataManagement\Municipality', 'municipality_id', 'id');
     }
 
     public function barangay()
     {
-        return $this->belongsTo('App\Models\Barangay', 'barangay_id', 'id');
+        return $this->belongsTo('App\Models\DataManagement\Barangay', 'barangay_id', 'id');
     }
 
     public function user_requested()

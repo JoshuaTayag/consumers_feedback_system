@@ -1,27 +1,34 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\DataManagement;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class District extends Model
+class Barangay extends Model implements Auditable
 {
-    use HasFactory;
-
+    use HasFactory, SoftDeletes;
+    use \OwenIt\Auditing\Auditable;
+    
     protected $connection = 'sqlSrvMembership';
-    protected $table = 'districts';
+    protected $table = 'barangays';
+    protected $fillable = [
+        'barangay_name',
+        'municipality_id',
+    ];
 
     public function municipality()
     {
-        return $this->hasMany('App\Models\Municipality');
+        return $this->belongsTo('App\Models\Datamanagement\Municipality');
     }
 
     public function preMembership()
     {
         return $this->hasMany('App\Models\Premembership');
     }
-    
+
     public function lifeline()
     {
         return $this->hasMany('App\Models\Lifeline');
@@ -31,7 +38,7 @@ class District extends Model
     {
         return $this->hasMany('App\Models\MaterialRequisitionForm');
     }
-    
+
     public function electrician_address()
     {
         return $this->hasMany('App\Models\BarangayElectrician\ElectricianAddress');

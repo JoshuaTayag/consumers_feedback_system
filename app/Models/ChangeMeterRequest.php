@@ -49,12 +49,12 @@ class ChangeMeterRequest extends Model implements Auditable
 
     public function municipality()
     {
-        return $this->belongsTo('App\Models\Municipality', 'municipality_id', 'id');
+        return $this->belongsTo('App\Models\DataManagement\Municipality', 'municipality_id', 'id');
     }
 
     public function barangay()
     {
-        return $this->belongsTo('App\Models\Barangay', 'barangay_id', 'id');
+        return $this->belongsTo('App\Models\DataManagement\Barangay', 'barangay_id', 'id');
     }
 
     public function cmr_fees()

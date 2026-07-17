@@ -261,6 +261,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('kwh-meter-request-report', [App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class, 'generateKwhMeterReport'])->name('generateKwhMeterReport');
     Route::get('kwh-meter-request-report-pdf', [App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class, 'KwhMeterPdfReport'])->name('KwhMeterPdfReport');
     // Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
+
+    Route::resource('barangays', App\Http\Controllers\BarangayController::class);
+    Route::get('export_barangays', [App\Http\Controllers\BarangayController::class, 'exportCsv'])->name('barangays.exportCsv');
+    Route::resource('municipalities', App\Http\Controllers\MunicipalityController::class);
 });
 
 Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])->name('online.pms')->middleware(['auth', 'verified']);
