@@ -89,6 +89,7 @@ $(document).ready(function () {
         var getFirstName = $('#first_name').val();
         var getLastName = $('#last_name').val();
         var getControlNo = $(this).val();
+        var getAccountNo = $('#account_number').val();
         clearTimeout(timeout);
         timeout = setTimeout(() => {
             $.ajax({
@@ -97,7 +98,8 @@ $(document).ready(function () {
             data: {
                 fname:getFirstName,
                 lname:getLastName,
-                control_number:getControlNo
+                control_number:getControlNo,
+                account_number:getAccountNo
             },
             success:function(response){
                 $("#show_data").html(response);
@@ -111,6 +113,7 @@ $(document).ready(function () {
         var getFirstName = $(this).val();
         var getLastName = $('#last_name').val();
         var getControlNo = $('#control_number').val();
+        var getAccountNo = $('#account_number').val();
         clearTimeout(timeout);
         timeout = setTimeout(() => {
             $.ajax({
@@ -119,7 +122,8 @@ $(document).ready(function () {
             data: {
                 fname:getFirstName,
                 lname:getLastName,
-                control_number:getControlNo
+                control_number:getControlNo,
+                account_number:getAccountNo
             },
             success:function(response){
                 console.log(response)
@@ -134,6 +138,7 @@ $(document).ready(function () {
         var getFirstName = $('#first_name').val();
         var getLastName = $(this).val();
         var getControlNo = $('#control_number').val();
+        var getAccountNo = $('#account_number').val();
         clearTimeout(timeout);
         timeout = setTimeout(() => {
             $.ajax({
@@ -142,7 +147,32 @@ $(document).ready(function () {
             data: {
                 fname:getFirstName,
                 lname:getLastName,
-                control_number:getControlNo
+                control_number:getControlNo,
+                account_number:getAccountNo
+            },
+            success:function(response){
+                $("#show_data").html(response);
+                $('#pagination').delay(500).fadeOut('fast');
+            }
+            });
+        }, 500);
+    });
+
+    $('#account_number').keyup(function() {
+        var getFirstName = $('#first_name').val();
+        var getLastName = $('#last_name').val();
+        var getControlNo = $('#control_number').val();
+        var getAccountNo = $(this).val();
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            $.ajax({
+            method: 'GET',
+            url: "{{route('fetchLifelineApplication')}}",
+            data: {
+                fname:getFirstName,
+                lname:getLastName,
+                control_number:getControlNo,
+                account_number:getAccountNo
             },
             success:function(response){
                 $("#show_data").html(response);

@@ -642,6 +642,7 @@ class LifelineController extends Controller
             $lifeline_datas = Lifeline::where('control_no', 'LIKE', '%'.$request->control_number.'%')
             ->where('first_name', 'LIKE', '%'.$request->fname.'%')
             ->where('last_name', 'LIKE', '%'.$request->lname.'%')
+            ->where('account_no', 'LIKE', '%'.$request->account_number.'%')
             ->paginate(10);
             
             return view('lifeline.search')->with(compact('lifeline_datas'))->render();
