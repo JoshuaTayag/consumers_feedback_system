@@ -23,14 +23,17 @@
             </div>
             <div class="card-body">
               <div class="row pb-2">
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <input type="text" placeholder="Search by Control No" id="control_number" name="control_number" class="form-control">
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <input type="text" placeholder="Search by First Name" id="first_name" name="first_name" class="form-control">
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <input type="text" placeholder="Search by Last Name" id="last_name" name="last_name" class="form-control">
+                </div>
+                <div class="col-lg-3">
+                    <input type="text" placeholder="Search by Account No" id="account_number" name="account_number" class="form-control">
                 </div>
               </div>
               <table class="table table-striped table-bordered border-primary">
