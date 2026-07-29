@@ -131,8 +131,15 @@ class KwhMeterRequestController extends Controller
             ->with(['senderUser', 'recipientUser'])
             ->orderBy('created_at', 'asc')
             ->get();
-            
-        return view('power_house.warehousing.kwh_meter_request.show', compact('kwh_meter_request', 'users', 'meters_types', 'audit_trail'));
+
+        $serivs = DB::connection('pgsql')
+            ->table('seriv')
+            ->select('seriv_number')
+            ->orderBy('created_at', 'desc')
+            ->where('approval_status', 2)
+            ->limit(100)->get();
+            // dd($serivs);
+        return view('power_house.warehousing.kwh_meter_request.show', compact('kwh_meter_request', 'users', 'meters_types', 'audit_trail','serivs'));
     }
 
     /**
@@ -151,6 +158,18 @@ class KwhMeterRequestController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // assigning of seriv_number
+        if ($request->has('is_assigning_of_seriv') && $request->is_assigning_of_seriv === 'yes') {
+          $validatedData = $request->validate([
+              'seriv_number' => 'required|unique:kwh_meter_requests,seriv_number',
+          ]);
+          // find and update the kwh_meter_request with the new seriv_number
+          $kwhMeterRequest = KwhMeterRequest::findOrFail($id);
+          $kwhMeterRequest->seriv_number = $request->input('seriv_number');
+          $kwhMeterRequest->save();
+          return redirect()->route('kwh-meter-request.show', $id)->with('success', 'Seriv Number assigned successfully.');
+        }
+        
         // count unliquidated requests before submitting new one
         $unliquidatedCount = KwhMeterRequest::where('user_id', $request->user_id)
             ->where('is_liquidated', false)

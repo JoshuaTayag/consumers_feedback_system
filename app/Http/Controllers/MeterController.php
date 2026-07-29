@@ -621,14 +621,14 @@ class MeterController extends Controller
                         ->where('kwh_meter_request_id', $kwhMeterRequestId)
                         ->delete();
                 }
-            } elseif ( $meter->changeMeterRequest?->status == 1 && $kwhMeterRequest->is_liquidated) {
-                // dd('success');
-                // if ($kwhMeterRequestId) {
-                //     // Remove the tracking record for kWh Meter Request assignments
-                //     KwhMeterRequestSerialNumber::where('meter_id', $meter->id)
-                //         ->where('kwh_meter_request_id', $kwhMeterRequestId)
-                //         ->delete();
-                // }
+            } elseif ( $meter->changeMeterRequest?->status == 1 && $kwhMeterRequest->is_liquidated == false) {
+                if ($kwhMeterRequestId) {
+                    // Remove the tracking record for kWh Meter Request assignments
+                    KwhMeterRequestSerialNumber::where('meter_id', $meter->id)
+                        ->where('kwh_meter_request_id', $kwhMeterRequestId)
+                        ->where('action_status', false) // Only delete if action_status is false (not acted upon)
+                        ->delete();
+                }
             } else {
                 return response()->json([
                     'success' => false,

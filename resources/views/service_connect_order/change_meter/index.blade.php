@@ -234,7 +234,7 @@
 
                                 @can('change-meter-request-delete')
                                   @if($cm_request->status == null)
-                                    <li><a class="dropdown-item" href="{{route('deleteCM',$cm_request->id)}}"><i class="fa fa-trash"></i> Delete</a></li>
+                                    <li><a class="dropdown-item delete-cm" href="{{route('deleteCM',$cm_request->id)}}"><i class="fa fa-trash"></i> Delete</a></li>
                                   @endif
                                 @endcan 
                               </ul>
@@ -330,6 +330,28 @@
 @endsection
 @section('script')
 <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.delete-cm').forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        const href = this.getAttribute('href');
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "This action cannot be undone.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = href;
+          }
+        });
+      });
+    });
+  });
+  
   var meterPostingModal = document.getElementById('meterPostingModal');
   var dispatchingModal = document.getElementById('dispatchingModal');
   var transferRequestModal = document.getElementById('transferRequestModal');

@@ -24,7 +24,7 @@
 Brgy. San Pablo, Ormoc City, Leyte<br>
 Tel: (053) 839-3920 to 3921 | Globe: (053) 561-4466<br>
 Email: info@leyeco-v.com.ph | Website: www.leyeco-v.com.ph<br><br>
-© {{ date('Y') }} LEYTE V ELECTRIC COOPERATIVE, INC. All rights reserved.
+© 2026 LEYTE V ELECTRIC COOPERATIVE, INC. All rights reserved.
 </x-mail::footer>
 </x-slot:footer>
 </x-mail::layout>

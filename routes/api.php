@@ -59,3 +59,4 @@ Route::middleware('auth:sanctum')->group(function () {
 // Public validation endpoints (no auth required for AJAX validation)
 Route::post('meters/validate-serial', [App\Http\Controllers\MeterController::class, 'validateSerialNumber']);
 Route::post('meters/validate-erc-seal', [App\Http\Controllers\MeterController::class, 'validateErcSeal']);
+Route::post('/sms', [SmsController::class, 'store']);
