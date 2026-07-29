@@ -25,6 +25,9 @@ use Illuminate\Support\Facades\Notification;
 use App\Notifications\ChangeMeterCompletedNotification;
 use PDO;
 use Illuminate\Support\Facades\Log;
+use App\Enums\SmsTemplate;
+use App\Services\M360SmsService;
+use App\Services\SmsTemplateRenderer;
 
 class ChangeMeterRequestController extends Controller
 {
@@ -103,8 +106,17 @@ class ChangeMeterRequestController extends Controller
         ->orderBy('id', 'DESC')
         ->where('approved_at', '!=', null)
         ->with(['kwhMeterRequestSerialNumbers' => function($query) {
-            $query->where('status', 0)
-                ->whereNull('change_meter_request_id')
+            $query->where(function ($query) {
+                $query->where(function ($query) {
+                    $query->whereNotNull('change_meter_request_id')
+                        ->where('status', 1)
+                        ->where('action_status', false);
+                })->orWhere(function ($query) {
+                    $query->whereNull('change_meter_request_id')
+                        ->where('status', 0)
+                        ->whereNull('action_status');
+                });
+            })
                 ->whereNull('deleted_at');
         }])
         ->get()
@@ -122,7 +134,6 @@ class ChangeMeterRequestController extends Controller
             return [$request->id => $displayText];
         });
         
-        // dd($kwh_meter_requests);
         return view('service_connect_order.change_meter.create')->with(compact( 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters', 'kwh_meter_requests'));
     }
     
@@ -178,7 +189,7 @@ class ChangeMeterRequestController extends Controller
 
             // check for unacted change meter requests using the same meter type
             $unactedRequestsCount = ChangeMeterRequest::where('type_of_meter', $request->meter_code_no)
-                ->where('status', '!=', 2) // unacted requests
+                ->whereNull('status') // unacted requests
                 ->count();
 
             // Calculate truly available meters (total available - reserved by unacted requests)
@@ -255,12 +266,14 @@ class ChangeMeterRequestController extends Controller
                     // Update the tracking record to link with this change meter request
                     $tracking = KwhMeterRequestSerialNumber::where('kwh_meter_request_id', $kwhMeterRequest->id)
                         ->where('meter_id', $meter->id)
-                        ->whereNull('change_meter_request_id')
+                        // ->whereNull('change_meter_request_id')
                         ->first();
                         
                     if ($tracking) {
                         $tracking->update([
-                            'change_meter_request_id' => $change_meter_request->id
+                            'change_meter_request_id' => $change_meter_request->id,
+                            'action_status' => null, 
+                            'status' => 0, // set status to unacted
                         ]);
                     }
 
@@ -282,7 +295,7 @@ class ChangeMeterRequestController extends Controller
                         "Kwhm Deposit" => $request->meter_accessories,
                         "Calibration" => $request->calibration_fee,
                         "VATPercentage" => 0.12,
-                        "WireUnitCost" => 29.00,
+                        "WireUnitCost" => 35.00,
                         "MeterSeal" => 0.00,
                 ]);
             }
@@ -305,6 +318,22 @@ class ChangeMeterRequestController extends Controller
                         'amount' => $request->$feeField
                     ]);
                 }
+            }
+            
+            // send sms notification to the consumer if contact number is provided
+            if($change_meter_request->contact_no) {
+              app(M360SmsService::class)->sendTemplate(
+                  to: [$change_meter_request->contact_no],
+                  template: SmsTemplate::RequestReceived,
+                  data: [
+                      'CONTROL_NO'   => $change_meter_request->control_no,
+                      'ACCOUNT_NO'   => $change_meter_request->account_number,
+                      'ACCOUNT_NAME' => $change_meter_request->full_name,
+                      'ADDRESS'      => $change_meter_request->address,
+                      'REQUEST_DATE' => $change_meter_request->created_at->format('F j, Y'),
+                  ],
+                  renderer: app(SmsTemplateRenderer::class),
+              );
             }
 
             DB::commit();
@@ -794,23 +823,6 @@ class ChangeMeterRequestController extends Controller
             // Update the existing record with new data
             $change_meter_request->update($dataToUpdate);
 
-            ChangeMeterRequestPostingHistory::create([
-                "sco_no" => $change_meter_request->control_no,
-                "old_meter_no" => $change_meter_request->old_meter_no,
-                "new_meter_no" => $change_meter_request->new_meter_no,
-                "process_date" => date('Y-m-d', strtotime($change_meter_request->created_at)),
-                "date_installed" => $request->date_acted ? date('Y-m-d H:i:s', strtotime($request->date_acted)) : null,
-                "action_status" => $change_meter_request->status,
-                "area" => $change_meter_request->area,
-                "feeder" => $change_meter_request->feeder,
-                "leyeco_seal_no" => $request->seal_no,
-                "serial_no" => null,
-                "erc_seal_no" => $request->erc_seal,
-                "posted_by" => Auth::id(),
-                "created_at" => Carbon::now(),
-                "account_no" => $change_meter_request->account_number,
-            ]);
-
             // check if posting is installed
             if($change_meter_request->status == 2){
 
@@ -843,6 +855,24 @@ class ChangeMeterRequestController extends Controller
                     ]);
                 }
 
+                // add history to posted meters history if the status is acted completed
+                ChangeMeterRequestPostingHistory::create([
+                  "sco_no" => $change_meter_request->control_no,
+                  "old_meter_no" => $change_meter_request->old_meter_no,
+                  "new_meter_no" => $change_meter_request->new_meter_no,
+                  "process_date" => date('Y-m-d', strtotime($change_meter_request->created_at)),
+                  "date_installed" => $request->date_acted ? date('Y-m-d H:i:s', strtotime($request->date_acted)) : null,
+                  "action_status" => $change_meter_request->status,
+                  "area" => $change_meter_request->area,
+                  "feeder" => $change_meter_request->feeder,
+                  "leyeco_seal_no" => $request->seal_no,
+                  "serial_no" => null,
+                  "erc_seal_no" => $request->erc_seal,
+                  "posted_by" => Auth::id(),
+                  "created_at" => Carbon::now(),
+                  "account_no" => $change_meter_request->account_number,
+                ]);
+
                 // Send email notification if email exists
                 if (!empty($change_meter_request->email)) {
                     try {
@@ -852,6 +882,38 @@ class ChangeMeterRequestController extends Controller
                         // Log email error but don't fail the transaction
                         Log::error('Failed to send change meter completion email: ' . $e->getMessage());
                     }
+                }
+
+                if($change_meter_request->contact_no && $change_meter_request->status == 2) {
+                  app(M360SmsService::class)->sendTemplate(
+                      to: [$change_meter_request->contact_no],
+                      template: SmsTemplate::RequestCompleted,
+                      data: [
+                          'CONTROL_NO'   => $change_meter_request->control_no,
+                          'ACCOUNT_NO'   => $change_meter_request->account_number,
+                          'ACCOUNT_NAME' => $change_meter_request->full_name,
+                          'ADDRESS'      => $change_meter_request->address,
+                          'ACKNOWLEDGE_BY'      => $change_meter_request->customerSignature->signatory_name ?? 'NONE',
+                          'COMPLETION_DATE' => $change_meter_request->date_time_acted->format('F j, Y h:i A'),
+                      ],
+                      renderer: app(SmsTemplateRenderer::class),
+                  );
+                }
+
+                if($change_meter_request->contact_no && $change_meter_request->status == 1) {
+                  app(M360SmsService::class)->sendTemplate(
+                      to: [$change_meter_request->contact_no],
+                      template: SmsTemplate::RequestNotCompleted,
+                      data: [
+                          'CONTROL_NO'   => $change_meter_request->control_no,
+                          'ACCOUNT_NO'   => $change_meter_request->account_number,
+                          'ACCOUNT_NAME' => $change_meter_request->full_name,
+                          'ADDRESS'      => $change_meter_request->address,
+                          'DATE_ACTED' => $change_meter_request->date_time_acted->format('F j, Y h:i A'),
+                          'REASON' => $change_meter_request->crew_remarks ?? 'No reason provided',
+                      ],
+                      renderer: app(SmsTemplateRenderer::class),
+                  );
                 }
 
             }
@@ -898,6 +960,24 @@ class ChangeMeterRequestController extends Controller
                 'dispatched_date' => Carbon::now(),
             ]);
             DB::commit();
+
+            if($change_meter_request->contact_no) {
+              app(M360SmsService::class)->sendTemplate(
+                  to: [$change_meter_request->contact_no],
+                  template: SmsTemplate::FieldPersonnelDispatched,
+                  data: [
+                      'CONTROL_NO'   => $change_meter_request->control_no,
+                      'ACCOUNT_NO'   => $change_meter_request->account_number,
+                      'ACCOUNT_NAME' => $change_meter_request->full_name,
+                      'ADDRESS'      => $change_meter_request->address,
+                      'DISPATCH_DATE' => $change_meter_request->dispatched_date->format('F j, Y'),
+                      'CM_CREW'      => $change_meter_request->crew_full_name,
+                      'REQUEST_DATE' => $change_meter_request->created_at->format('F j, Y'),
+                  ],
+                  renderer: app(SmsTemplateRenderer::class),
+              );
+            }
+
             return redirect(route('indexCM'))->withSuccess('Successfully Dispatched!');
         } catch (\Exception $e) {
             //throw $th;
@@ -1370,20 +1450,25 @@ class ChangeMeterRequestController extends Controller
                 ]);
             }
             
-            // Get meters assigned to this KWH meter request
+            // Get meters assigned to this KWH meter request (only those that are not linked to a change meter request or are linked but not yet acted upon or acted but not completed)
             $assignedMeters = Meter::join('kwh_meter_request_serial_numbers', 'meters.id', '=', 'kwh_meter_request_serial_numbers.meter_id')
+            ->leftjoin('change_meter_requests', 'kwh_meter_request_serial_numbers.change_meter_request_id', '=', 'change_meter_requests.id')
                 ->where('kwh_meter_request_serial_numbers.kwh_meter_request_id', $kwhMeterRequest->id)
-                ->where('kwh_meter_request_serial_numbers.status', 0) // Unliquidated
-                ->whereNull('kwh_meter_request_serial_numbers.deleted_at')
-                ->where(function($query) use ($changeMeterRequestId) {
-                    $query->whereNull('kwh_meter_request_serial_numbers.change_meter_request_id');
-                    if ($changeMeterRequestId) {
-                        $query->orWhere('kwh_meter_request_serial_numbers.change_meter_request_id', $changeMeterRequestId);
-                    }
+                ->where(function ($query) {
+                    $query->where(function ($query) {
+                        $query->whereNotNull('kwh_meter_request_serial_numbers.change_meter_request_id')
+                            ->where('kwh_meter_request_serial_numbers.status', 1)
+                            ->where('kwh_meter_request_serial_numbers.action_status', false);
+                    })->orWhere(function ($query) {
+                        $query->whereNull('kwh_meter_request_serial_numbers.change_meter_request_id')
+                            ->where('kwh_meter_request_serial_numbers.status', 0)
+                            ->whereNull('kwh_meter_request_serial_numbers.action_status');
+                    });
                 })
+                ->whereNull('kwh_meter_request_serial_numbers.deleted_at')
                 ->select('meters.id', 'meters.serial_number', 'meters.erc_seal_number', 'meters.leyeco_seal_number')
                 ->get();
-            
+            // dd($assignedMeters);
             return response()->json([
                 'success' => true,
                 'data' => $assignedMeters

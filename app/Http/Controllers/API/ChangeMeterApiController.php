@@ -11,6 +11,9 @@ use App\Services\ChangeMeterService;
 use App\Services\SignatureService;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\ChangeMeterCompletedNotification;
+use App\Enums\SmsTemplate;
+use App\Services\M360SmsService;
+use App\Services\SmsTemplateRenderer;
 
 class ChangeMeterApiController extends Controller
 {
@@ -175,6 +178,7 @@ class ChangeMeterApiController extends Controller
                 $existingMeter = \DB::table('change_meter_requests')
                     ->where('new_meter_no', $request->meter_no)
                     ->where('id', '!=', $request->cm_id) // Exclude current record
+                    ->where('status', '!=', 1) // exclude records that acted-notcompleted
                     ->first();
 
                 $existingPostedMeter = \DB::table('posted_meters_history')
@@ -264,14 +268,14 @@ class ChangeMeterApiController extends Controller
             $change_meter_request = ChangeMeterRequest::findOrFail($request->cm_id);
 
             // Debug logging for audit tracking
-            \Log::info('API Audit Debug - Before Update', [
-                'bearer_token' => $request->bearerToken() ? 'present' : 'missing',
-                'sanctum_user_id' => auth('sanctum')->id(),
-                'web_user_id' => auth('web')->id(),
-                'auth_user_id' => auth()->id(),
-                'request_user' => $request->user() ? $request->user()->id : null,
-                'cm_request_id' => $request->cm_id
-            ]);
+            // \Log::info('API Audit Debug - Before Update', [
+            //     'bearer_token' => $request->bearerToken() ? 'present' : 'missing',
+            //     'sanctum_user_id' => auth('sanctum')->id(),
+            //     'web_user_id' => auth('web')->id(),
+            //     'auth_user_id' => auth()->id(),
+            //     'request_user' => $request->user() ? $request->user()->id : null,
+            //     'cm_request_id' => $request->cm_id
+            // ]);
 
             // Get the crew id
             $crew_id = auth()->user()->change_meter_contractor->id;
@@ -308,14 +312,18 @@ class ChangeMeterApiController extends Controller
             if($change_meter_request->kwh_meter_request_id) {
                 $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
                     ->where('change_meter_request_id', $change_meter_request->id)
-                    ->update(['status' => 1]); // Assuming '1' indicates 'posted'
+                    ->update([
+                      'status' => 1,
+                      'action_status' => $request->status == 1 ? false : ($request->status == 2 ? true : null), // if status is acted-notcompleted, set action_status to false, if acted-completed, set action to true, else set to null
+                      ]);
+                     // Assuming '1' indicates 'posted'
             }
             // Debug logging after update
-            \Log::info('API Audit Debug - After Update', [
-                'updated_fields' => $dataToUpdate,
-                'current_user' => auth()->id(),
-                'sanctum_user' => auth('sanctum')->id()
-            ]);
+            // \Log::info('API Audit Debug - After Update', [
+            //     'updated_fields' => $dataToUpdate,
+            //     'current_user' => auth()->id(),
+            //     'sanctum_user' => auth('sanctum')->id()
+            // ]);
 
             // Check if posting is installed (status = 2)
             if($change_meter_request->status == 2) {
@@ -380,6 +388,38 @@ class ChangeMeterApiController extends Controller
                     // Log email error but don't fail the transaction
                     \Log::error('Failed to send change meter completion email: ' . $e->getMessage());
                 }
+            }
+
+            if($change_meter_request->contact_no && $change_meter_request->status == 2) {
+              app(M360SmsService::class)->sendTemplate(
+                  to: [$change_meter_request->contact_no],
+                  template: SmsTemplate::RequestCompleted,
+                  data: [
+                      'CONTROL_NO'   => $change_meter_request->control_no,
+                      'ACCOUNT_NO'   => $change_meter_request->account_number,
+                      'ACCOUNT_NAME' => $change_meter_request->full_name,
+                      'ADDRESS'      => $change_meter_request->address,
+                      'ACKNOWLEDGE_BY'      => $change_meter_request->customerSignature->signatory_name ?? 'NONE',
+                      'COMPLETION_DATE' => $change_meter_request->date_time_acted->format('F j, Y h:i A'),
+                  ],
+                  renderer: app(SmsTemplateRenderer::class),
+              );
+            }
+
+            if($change_meter_request->contact_no && $change_meter_request->status == 1) {
+              app(M360SmsService::class)->sendTemplate(
+                  to: [$change_meter_request->contact_no],
+                  template: SmsTemplate::RequestNotCompleted,
+                  data: [
+                      'CONTROL_NO'   => $change_meter_request->control_no,
+                      'ACCOUNT_NO'   => $change_meter_request->account_number,
+                      'ACCOUNT_NAME' => $change_meter_request->full_name,
+                      'ADDRESS'      => $change_meter_request->address,
+                      'DATE_ACTED' => $change_meter_request->date_time_acted->format('F j, Y h:i A'),
+                      'REASON' => $change_meter_request->crew_remarks ?? 'No reason provided',
+                  ],
+                  renderer: app(SmsTemplateRenderer::class),
+              );
             }
 
             \DB::commit();

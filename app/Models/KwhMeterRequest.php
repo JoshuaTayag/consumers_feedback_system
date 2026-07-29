@@ -70,7 +70,23 @@ class KwhMeterRequest extends Model implements Auditable
     // Helper method to check remaining meters that can be assigned
     public function getRemainingQuantityAttribute()
     {
-        return $this->quantity - $this->kwhMeterRequestSerialNumbers()->count();
+        $assignedCount = $this->kwhMeterRequestSerialNumbers()
+            ->whereNull('deleted_at')
+            ->where(function ($query) {
+                $query->whereNotNull('change_meter_request_id')
+                    ->where(function ($query) {
+                        $query->where(function ($query) {
+                            $query->where('status', 1)
+                                ->where('action_status', true);
+                        })->orWhere(function ($query) {
+                            $query->where('status', 0)
+                                ->whereNull('action_status');
+                        });
+                    });
+            })
+            ->count();
+
+        return $this->quantity - $assignedCount;
     }
 
     /**
@@ -156,6 +172,7 @@ class KwhMeterRequest extends Model implements Auditable
         'updated_by',
         'audited_by',
         'audited_at',
+        'seriv_number',
     ];
 
     protected $casts = [

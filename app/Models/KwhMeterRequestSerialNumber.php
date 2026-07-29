@@ -32,6 +32,7 @@ class KwhMeterRequestSerialNumber extends Model implements Auditable
         'kwh_meter_request_id',
         'change_meter_request_id',
         'status',
+        'action_status',
         'created_at',
         'updated_at'
     ];

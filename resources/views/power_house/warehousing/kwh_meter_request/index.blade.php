@@ -39,7 +39,7 @@
                    <td>{{ $kwh_meter_request->quantity }}</td>
                    <td>{{ $kwh_meter_request->kwhMeterRequestSerialNumbers->count() }}</td>
                    <td>{{ $kwh_meter_request->created_at->format('m/d/Y') }}</td>
-                   <td><span class="badge p-2 {{ $kwh_meter_request->is_liquidated ? 'bg-success' : ($kwh_meter_request->approved_at ? 'bg-info' : ($kwh_meter_request->disapproved_at ? 'bg-danger' : 'bg-warning text-dark')) }}">{{ $kwh_meter_request->is_liquidated ? 'Liquidated' : ($kwh_meter_request->approved_at ? 'Approved' : ($kwh_meter_request->disapproved_at ? 'Disapproved' : 'Pending')) }}</span></td>
+                   <td><span class="badge p-2 {{ $kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number <> null ? 'bg-success' : ($kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number == null ? 'bg-warning' : ($kwh_meter_request->approved_at ? 'bg-info' : ($kwh_meter_request->disapproved_at ? 'bg-danger' : 'bg-secondary'))) }}">{{ $kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number <> null ? 'Liquidated' : ($kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number == null ? 'Partially Liquidated' : ($kwh_meter_request->approved_at ? 'Approved' : ($kwh_meter_request->disapproved_at ? 'Disapproved' : 'Pending'))) }}</span></td>
                    <td class="text-center">
                     <div class="btn-group btn-group-sm" role="group">
                         @if (!$kwh_meter_request->is_liquidated && $kwh_meter_request->approved_at == null && $kwh_meter_request->disapproved_at == null)
