@@ -468,9 +468,11 @@ class ChangeMeterRequestController extends Controller
 
                 // check for unacted change meter requests using the same meter type
                 $unactedRequestsCount = ChangeMeterRequest::where('type_of_meter', $request->meter_code_no)
-                    ->where('status', '!=', 2) // unacted requests
+                    ->where('status', 3)
+                    ->orWhere('status', null)
+                    ->whereNull('deleted_at')
                     ->count();
-
+                    
                 // Calculate truly available meters (total available - reserved by unacted requests)
                 $trulyAvailableCount = $availableMeterCount - $unactedRequestsCount;
 
