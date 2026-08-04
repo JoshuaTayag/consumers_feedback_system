@@ -7,6 +7,11 @@
   <link href="https://fonts.cdnfonts.com/css/franklin-gothic" rel="stylesheet">
   <title>TSD Form</title>
   <style>
+
+    @page {
+      margin: 12mm 10mm 10mm 10mm;
+    }
+
     header{
       font-family: 'Franklin Gothic', sans-serif;
       position: relative;
@@ -127,6 +132,19 @@
         thead {
             background-color: #f0f0f0; /* Optional: Light background color for the header */
         }
+
+        #pdf-footer {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          padding: 6px 15px;
+          text-align: right;
+          font-size: 12px;
+          border-top: 1px solid #000;
+          background: #fff;
+        }
+
   </style>
 </head>
 <body>
@@ -261,6 +279,8 @@
       </tbody>
     </table>
   </div>
-  <p style="text-align:right; margin-top: 40px">Date and Time Generated: {{ date('m/d/Y h:i:a') }}</p>
+  <div id="pdf-footer">
+    Date and Time Generated: {{ date('m/d/Y h:i a') }}
+  </div>
 </body>
 </html>
