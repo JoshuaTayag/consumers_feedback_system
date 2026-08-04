@@ -172,16 +172,15 @@
           <td colspan="3" style="text-align: center !important; border:none; padding-top:0px;">
             <span style="font-size: 13px">
               Brgy. San Pablo, Ormoc City, Leyte<br>
-              Telephone Nos.: PLDT: (053) 839-3920 to 3921 / Globe: (053) 561-4466<br>
-              Cellular Phone Nos. Calls Only: Smart: 0998-964-3804; Globe: 0917-836-3895<br>
+              Cellular Phone Nos. Calls Only: Globe: 0917-683-7230<br>
               Website: www.leyeco-v.com.ph    eMail Address: info@leyeco-v.com.ph
             </span>
           </td>
         </tr>
         <tr>
-            <td><span style="font-size: 13px">Document No.: FM-MSD-012</span></td>
-            <td><span style="font-size: 13px">Revision No.: 001</span></td>
-            <td><span style="font-size: 13px">Effectivity Date: </span</td>
+            <td><span style="font-size: 13px">Document No.: ISD-FM-0014</span></td>
+            <td><span style="font-size: 13px">Revision No.: </span></td>
+            <td><span style="font-size: 13px">Effectivity Date: 10/24/2025</span></td>
         </tr>
         <tr>
           <td colspan="3"><h3>REQUEST FOR CHANGE METER</h3></td>
