@@ -11,7 +11,9 @@ return [
             . "Account Name: {ACCOUNT_NAME}\n"
             . "Service Address: {ADDRESS}\n"
             . "Date Filed: {REQUEST_DATE}\n\n"
-            . "Your request is currently under review. You will receive another SMS once it has been scheduled for implementation.",
+            . "Your request is currently under review. You will receive another SMS once it has been scheduled for implementation.\n\n"
+            . "Please be informed that this meter replacement service is completely FREE OF CHARGE.\n\n"
+            . "LEYECO V: Pag-alagad na madasigon",
     ],
 
     'field_personnel_dispatched' => [
@@ -23,7 +25,9 @@ return [
             . "Service Address: {ADDRESS}\n"
             . "Date Dispatched: {DISPATCH_DATE}\n"
             . "Crew: {CM_CREW}\n\n"
-            . "Our authorized field personnel will visit the service location. Please ensure safe and convenient access to your electric meter.",
+            . "Our authorized field personnel will visit the service location. Please ensure safe and convenient access to your electric meter."
+            . "Please be informed that this meter replacement service is completely FREE OF CHARGE.\n\n"
+            . "LEYECO V: Pag-alagad na madasigon",
     ],
 
     'request_completed' => [
@@ -35,7 +39,8 @@ return [
             . "Service Address: {ADDRESS}\n"
             . "Acknowledged By: {ACKNOWLEDGE_BY}\n"
             . "Completion Date: {COMPLETION_DATE}\n\n"
-            . "Thank you for choosing LEYECO V. We appreciate the opportunity to serve you.",
+            . "For other queries, please contact our 24/7 Consumer Welfare Desk hotline at 0917-683-7230 or message our FB page: Leyte V Electric Cooperative, Inc.\n\n"
+            . "LEYECO V: Pag-alagad na madasigon",
     ],
 
     'request_not_completed' => [
@@ -47,6 +52,6 @@ return [
             . "Service Address: {ADDRESS}\n"
             . "Date: {DATE_ACTED}\n\n"
             . "Reason: {REASON}\n\n"
-            . "Thank you for choosing LEYECO V. If you wish to proceed with your Change Meter Request, please contact your nearest LEYECO V office to arrange a new schedule.",
+            . "Thank you for choosing LEYECO V. If you wish to proceed with your Change Meter Request, please contact LEYECO V office, our 24/7 Consumer Welfare Desk Hotline at **0917-683-7230**, or our Facebook page, **Leyte V Electric Cooperative, Inc.**, to arrange a new schedule.",
     ],
 ];
