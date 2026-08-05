@@ -33,7 +33,7 @@
             <a class="dropdown-item" href="#">SERVICE CONNECT ORDER &raquo; </a>
             <ul class="dropdown-menu dropdown-submenu">
               <li>
-                <a class="dropdown-item" href="{{ route('service-connect-order.index') }}">REGULAR</a>
+                <a class="dropdown-item" href="{{ route('service-connect-order.index') }}">REGULAR CONNECTION</a>
               </li>
               <li>
                 <a class="dropdown-item" href="{{ route('indexCM') }}">CHANGE METER</a>
