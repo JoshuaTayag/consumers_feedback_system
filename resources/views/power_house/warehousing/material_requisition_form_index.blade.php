@@ -4,13 +4,14 @@
 @section('content')
     <div class="container">
         <div class="row justify-content-center">
-            @if ($daysPassed >= 30)
+            @if ($requestBlocked)
                 <div class="col-lg-12">
                     <div class="alert alert-danger" role="alert">
-                        Note: Requests older than 30 days must be liquidated before submitting a new request.<br>
-                        @foreach ($old_unliquidated_mrf as $index => $old_mrf)
+                        Note: Requests older than 35 days must be liquidated before submitting a new request.<br>
+                        @foreach ($oldUnliquidatedMrf as $old_mrf)
                             <strong>*
-                                <span>{{ date('y', strtotime($old_mrf->approved_by)) . '-' . str_pad($old_mrf->id, 5, '0', STR_PAD_LEFT) }}</span></strong><br>
+                                <span>{{ date('y', strtotime($old_mrf->created_at)) . '-' . str_pad($old_mrf->id, 5, '0', STR_PAD_LEFT) }}</span>
+                            </strong><br>
                         @endforeach
                     </div>
                 </div>
@@ -25,10 +26,11 @@
                             <div class="col-lg-6 text-end">
                                 <a class="btn btn-success" href="{{ route('mrfLiquidationReport') }}" target="_blank"> <i
                                         class="fa fa-eye"></i> Liquidation Report </a>
-                                @if ($unliquidated_mrf_count < 10 && $daysPassed <= 30)
+                                @unless ($requestBlocked)
                                     <a class="btn btn-success" href="{{ route('material-requisition-form.create') }}">
-                                        Create New Request </a>
-                                @endif
+                                        Create New Request
+                                    </a>
+                                @endunless
                             </div>
                         </div>
                     </div>
