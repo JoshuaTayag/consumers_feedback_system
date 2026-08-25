@@ -67,24 +67,24 @@ class MaterialRequisitionFormController extends Controller
         $unliquidated_mrf_count = $unliquidated_mrf->count();
 
         $oldest = $unliquidated_mrf->with('mrf_liquidations')->get()->map(function($mrf) {
-            $oldestLiquidation = $mrf->mrf_liquidations->sortBy('created_at')->first();
+            $oldestLiquidation = $mrf->mrf_liquidations->sortBy('approved_by')->first();
             return $oldestLiquidation ? [
             'id' => $mrf->id,
-            'created_at' => $oldestLiquidation->created_at->addDays(5)
+            'approved_by' => $oldestLiquidation->approved_by->addDays(5)
             ] : null;
-        })->filter()->sortBy('created_at')->first();
+        })->filter()->sortBy('approved_by')->first();
     
         if ($unliquidated_mrf_count) {
             // $liquidation_created_at = optional($oldest_unliquidated_mrf->mrf_liquidations->first())->created_at;
             $liquidations = DB::table('material_requisition_form_liquidations')->get();
             // dd($oldest);
-            $createdAt = $oldest ? $oldest['created_at'] : null;
+            $createdAt = $oldest ? $oldest['approved_by'] : null;
             $daysPassed = $createdAt ? $createdAt->diffInDays(Carbon::now()) : null;
             $thirtyFiveDaysAgo = Carbon::now()->subDays(35);
             // dd($createdAt, Carbon::now());
 
             $old_unliquidated_mrf = $unliquidated_mrf->whereHas('mrf_liquidations', function ($query) use ($thirtyFiveDaysAgo) {
-                $query->where('created_at', '<', $thirtyFiveDaysAgo);
+                $query->where('approved_by', '<', $thirtyFiveDaysAgo);
             })->get();
         } else {
             $createdAt = null;
@@ -127,17 +127,17 @@ class MaterialRequisitionFormController extends Controller
 
         $oldest_unliquidated_mrf = MaterialRequisitionForm::where('requested_id', Auth::id())
         ->whereIn('status', [1,2])
-        ->select('created_at')
-        ->orderBy('created_at', 'asc')
+        ->select('approved_by')
+        ->orderBy('approved_by', 'asc')
         ->first();
 
         $liquidations = DB::table('material_requisition_form_liquidations')->get();
 
         if ($oldest_unliquidated_mrf) {
-            $createdAt = Carbon::parse($oldest_unliquidated_mrf->created_at);
-            $daysPassed = $createdAt->diffInDays(Carbon::now());
+            $approvedBy = Carbon::parse($oldest_unliquidated_mrf->approved_by);
+            $daysPassed = $approvedBy->diffInDays(Carbon::now());
         } else {
-            $createdAt = null;
+            $approvedBy = null;
             $daysPassed = null;
         }
 
