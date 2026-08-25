@@ -1,5 +1,4 @@
 @foreach ($mrfs as $index => $mrf)
-    @php $liquidation = $liquidations ? $liquidations->where('material_requisition_form_id', $mrf->id)->count() : 0; @endphp
     <tr class="text-center">
         <th style="white-space: nowrap;">
             {{ date('y', strtotime($mrf->created_at)) . '-' . str_pad($mrf->id, 5, '0', STR_PAD_LEFT) }}

@@ -29,73 +29,29 @@ class MaterialRequisitionFormController extends Controller
          $this->middleware('permission:material-requisition-form-delete', ['only' => ['destroy']]);
     }
 
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
-        // if(Auth::user()->hasRole('CETD SPRC')){
-        //     $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->where('status', 1)->where('req_type')->orderBy('id','DESC')->paginate(10);
-        // }
-        // else if(Auth::user()->hasRole('CETD (Dexter)')){
-        //     $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->where('status', 1)->where('req_type', '!=', null)->orderBy('id','DESC')->paginate(10);
-        // }
-        // else if(Auth::user()->hasRole('Admin') || Auth::user()->hasRole('TSD (Richard)') || Auth::user()->hasRole('CETD (Dexter)')){
-        //     $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->orderBy('id','DESC')->paginate(10);
-        // }
-        // else{
-        //     $mrfs = MaterialRequisitionForm::with('items','district', 'municipality', 'barangay')->where('requested_id', Auth::id())->orderBy('id','DESC')->paginate(10);
-        // }
+        $user = Auth::user();
 
-        $mrfsQuery = MaterialRequisitionForm::with('items', 'district', 'municipality', 'barangay')->orderBy('id', 'DESC');
+        $mrfsQuery = MaterialRequisitionForm::with(['items', 'district', 'municipality', 'barangay'])
+            ->orderBy('id', 'DESC');
 
-        if (Auth::user()->hasRole('CETD SPRC')) {
-            $mrfsQuery->where('status', 1)->where('req_type');
-        } elseif (Auth::user()->hasRole('CETD (Dexter)')) {
-            // $mrfsQuery->where('status', 1)->where('req_type', '!=', null);
-        } elseif (!(Auth::user()->hasRole('Admin') || Auth::user()->hasRole('TSD (Richard)')) || Auth::user()->hasRole('CETD (Dexter)') || Auth::user()->hasRole('TSD Manager')) {
-            $mrfsQuery->where('requested_id', Auth::id());
+        if ($user->hasRole('CETD SPRC')) {
+            $mrfsQuery->where('status', 1)->whereNotNull('req_type');
+        } elseif ($user->hasRole('CETD (Dexter)')) {
+            // no extra filter for this role
+        } elseif (! $user->hasRole('Admin') && ! $user->hasRole('TSD (Richard)') && ! $user->hasRole('TSD Manager')) {
+            $mrfsQuery->where('requested_id', $user->id);
         }
-
 
         $mrfs = $mrfsQuery->paginate(10);
-        
-        $unliquidated_mrf = MaterialRequisitionForm::where('requested_id', operator: Auth::id())
-            ->where('status', '<', 11)
-            ->whereNotIn('status', [4]);
 
-        $unliquidated_mrf_count = $unliquidated_mrf->count();
+        extract($this->getUnliquidatedRequestStatus());
 
-        $oldest = $unliquidated_mrf->with('mrf_liquidations')->get()->map(function($mrf) {
-            $oldestLiquidation = $mrf->mrf_liquidations->sortBy('approved_by')->first();
-            return $oldestLiquidation ? [
-            'id' => $mrf->id,
-            'approved_by' => $oldestLiquidation->approved_by->addDays(5)
-            ] : null;
-        })->filter()->sortBy('approved_by')->first();
-    
-        if ($unliquidated_mrf_count) {
-            // $liquidation_created_at = optional($oldest_unliquidated_mrf->mrf_liquidations->first())->created_at;
-            $liquidations = DB::table('material_requisition_form_liquidations')->get();
-            // dd($oldest);
-            $createdAt = $oldest ? $oldest['approved_by'] : null;
-            $daysPassed = $createdAt ? $createdAt->diffInDays(Carbon::now()) : null;
-            $thirtyFiveDaysAgo = Carbon::now()->subDays(35);
-            // dd($createdAt, Carbon::now());
-
-            $old_unliquidated_mrf = $unliquidated_mrf->whereHas('mrf_liquidations', function ($query) use ($thirtyFiveDaysAgo) {
-                $query->where('approved_by', '<', $thirtyFiveDaysAgo);
-            })->get();
-        } else {
-            $createdAt = null;
-            $daysPassed = null;
-            $liquidations = null;
-            $old_unliquidated_mrf = null;
-        }
-
-        $thirtyDaysAgo = Carbon::now()->subDays(35);
-
-        return view('power_house.warehousing.material_requisition_form_index', compact('mrfs','unliquidated_mrf_count','liquidations', 'daysPassed','old_unliquidated_mrf'));
+        return view('power_house.warehousing.material_requisition_form_index', compact(
+            'mrfs', 'unliquidatedMrfCount', 'daysPassed', 'oldUnliquidatedMrf', 'requestBlocked'
+        ));
     }
 
     public function mrfApprovalIndex()
@@ -114,41 +70,20 @@ class MaterialRequisitionFormController extends Controller
      */
     public function create()
     {
-        $unliquidated_mrf = MaterialRequisitionForm::where([['requested_id', Auth::id()], ['status', '<=', 2]])->count();
-        $structures = Structure::orderBy('id','DESC')->get();
-        $temp_items = TempMaterialRequisitionFormItem::with('item')->where('user_id', Auth::id())->orderBy('id','DESC')->get();
-        $users = User::orderBy('name','asc')->get();
-        $districts = DB::connection('sqlSrvMembership')
-        ->table('districts')
-        ->select('*')
-        ->get();
+        ['requestBlocked' => $requestBlocked] = $this->getUnliquidatedRequestStatus();
 
-        // dd($temp_items);
-
-        $oldest_unliquidated_mrf = MaterialRequisitionForm::where('requested_id', Auth::id())
-        ->whereIn('status', [1,2])
-        ->select('approved_by')
-        ->orderBy('approved_by', 'asc')
-        ->first();
-
-        $liquidations = DB::table('material_requisition_form_liquidations')->get();
-
-        if ($oldest_unliquidated_mrf) {
-            $approvedBy = Carbon::parse($oldest_unliquidated_mrf->approved_by);
-            $daysPassed = $approvedBy->diffInDays(Carbon::now());
-        } else {
-            $approvedBy = null;
-            $daysPassed = null;
+        if ($requestBlocked) {
+            return redirect()
+                ->route('material-requisition-form.index')
+                ->withWarning('Please liquidate at least one MRF to proceed!');
         }
 
-        if($unliquidated_mrf >= 10 || $daysPassed >= 30){
-            // dd($unliquidated_mrf);
-            return redirect(route('material-requisition-form.index'))->withWarning('Please Liquidate atleast one MRF to proceed!');
-            return view('power_house.warehousing.material_requisition_form_create', compact('structures','temp_items','users','districts'))->withWarning('Please Liquidate atleast one MRF to proceed!');
-        }
-        else{
-            return view('power_house.warehousing.material_requisition_form_create', compact('structures','temp_items','users','districts'));
-        }
+        $structures = Structure::orderBy('id', 'DESC')->get();
+        $temp_items = TempMaterialRequisitionFormItem::with('item')->where('user_id', Auth::id())->orderBy('id', 'DESC')->get();
+        $users = User::orderBy('name', 'asc')->get();
+        $districts = DB::connection('sqlSrvMembership')->table('districts')->select('*')->get();
+
+        return view('power_house.warehousing.material_requisition_form_create', compact('structures', 'temp_items', 'users', 'districts'));
     }
 
     /**
@@ -161,94 +96,71 @@ class MaterialRequisitionFormController extends Controller
             'project_name' => ['required', 'string', 'max:255'],
             'approved_by' => ['required'],
             'area_id' => ['required'],
-            'image_path.*' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048', // Validate each file in the array
+            'image_path.*' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
-        
-        // dd($oldest_unliquidated_mrf);
-        $oldest_unliquidated_mrf = MaterialRequisitionForm::where('requested_id', Auth::id())
-        ->whereIn('status', [1,2])
-        ->select('created_at')
-        ->orderBy('created_at', 'asc')
-        ->first();
-        if ($oldest_unliquidated_mrf) {
-            $createdAt = Carbon::parse($oldest_unliquidated_mrf->created_at);
-            $daysPassed = $createdAt->diffInDays(Carbon::now());
-        } else {
-            $createdAt = null;
-            $daysPassed = null;
-        }
-        
 
-        $unliquidated_mrf = MaterialRequisitionForm::where([['requested_id', Auth::id()], ['status', '<=', 2]])->count();
-        // check if this user has unliquidated MRF's
-        if($unliquidated_mrf >= 10 && $daysPassed >= 7){
-            return redirect(route('material-requisition-form.index'))->withWarning('Please Liquidate atleast one MRF to proceed!');
+        ['requestBlocked' => $requestBlocked] = $this->getUnliquidatedRequestStatus();
+
+        if ($requestBlocked) {
+            return redirect()
+                ->route('material-requisition-form.index')
+                ->withWarning('Please liquidate at least one MRF to proceed!');
         }
-        // dd($request);
-        $temp_items = TempMaterialRequisitionFormItem::with('item')->where('user_id', Auth::id())->orderBy('id','DESC')->get();
+
+        $temp_items = TempMaterialRequisitionFormItem::with('item')->where('user_id', Auth::id())->orderBy('id', 'DESC')->get();
+
         $material_requisition_form = MaterialRequisitionForm::create([
-            "project_name" => $request->project_name,
-            "district_id" => $request->district,
+            "project_name"    => $request->project_name,
+            "district_id"     => $request->district,
             "municipality_id" => $request->municipality,
-            "barangay_id" => $request->barangay,
-            "sitio" => $request->sitio,
-            "remarks" => $request->remarks,
-            "status" => 0,
-            "requested_id" => Auth::id(),
-            "requested_by" => now(),
-            "approved_id" => $request->approved_by,
-            "area_id" => $request->area_id,
-            "substation_id" => $request->substation,
-            "feeder_id" => $request->feeder,
-            // "approved_by" => now(),
+            "barangay_id"     => $request->barangay,
+            "sitio"           => $request->sitio,
+            "remarks"         => $request->remarks,
+            "status"          => 0,
+            "requested_id"    => Auth::id(),
+            "requested_by"    => now(),
+            "approved_id"     => $request->approved_by,
+            "area_id"         => $request->area_id,
+            "substation_id"   => $request->substation,
+            "feeder_id"       => $request->feeder,
         ]);
-        foreach($temp_items as $item){ 
-            // Insert Record structure
+
+        foreach ($temp_items as $item) {
             DB::table('material_requisition_form_items')->insert([
-                "nea_code" => $item->nea_code ? $item->nea_code : $item->item->ItemCode,
+                "nea_code"                     => $item->nea_code ?: $item->item->ItemCode,
                 "material_requisition_form_id" => $material_requisition_form->id,
-                "item_id" => $item->item_id,
-                "quantity" => $item->quantity,
-                "unit_cost" => $item->unit_cost,
+                "item_id"                      => $item->item_id,
+                "quantity"                     => $item->quantity,
+                "unit_cost"                    => $item->unit_cost,
             ]);
         }
 
-        $ref_no = 'MER No. '.date('y', strtotime($material_requisition_form->created_at)). "-". str_pad($material_requisition_form->id,5,'0',STR_PAD_LEFT);
+        $ref_no = 'MER No. ' . date('y', strtotime($material_requisition_form->created_at)) . '-' . str_pad($material_requisition_form->id, 5, '0', STR_PAD_LEFT);
 
-        // dd($ref_no);
-        // Insert Record structure
         TempMaterialRequisitionFormItem::with('item')->where('user_id', Auth::id())->delete();
 
         $images_path = $request->file('image_path');
 
-        if($images_path){
-            // Handle each uploaded file
+        if ($images_path) {
             foreach ($images_path as $image_path) {
                 $resize = Image::make($image_path)
-                ->resize(600, null, function ($constraint) { $constraint->aspectRatio(); } )
-                ->encode('jpg',80);
+                    ->resize(600, null, function ($constraint) { $constraint->aspectRatio(); })
+                    ->encode('jpg', 80);
 
-                // calculate md5 hash of encoded image
                 $hash = md5($resize->__toString());
-
-                // use hash as a name
                 $path = "images/mrf_images/{$material_requisition_form->id}_{$hash}.jpg";
-
-                // save it locally to ~/public/images/{$hash}.jpg
                 $resize->save(public_path($path));
 
-                DB::table('material_requisition_form_liquidation_images')->insert(
-                    array("user_id" => Auth::id(),
-                            "material_requisition_form_id" => $material_requisition_form->id,
-                            "image_path" => $path,
-                            "type" => 'BEFORE',
-                            )
-                );
-
+                DB::table('material_requisition_form_liquidation_images')->insert([
+                    "user_id"                      => Auth::id(),
+                    "material_requisition_form_id" => $material_requisition_form->id,
+                    "image_path"                   => $path,
+                    "type"                         => 'BEFORE',
+                ]);
             }
         }
-        
-        return redirect(route('material-requisition-form.index'))->withSuccess('Record Successfully Created!<br>'. $ref_no);
+
+        return redirect(route('material-requisition-form.index'))->withSuccess('Record Successfully Created!<br>' . $ref_no);
     }
 
     /**
@@ -1376,5 +1288,39 @@ class MaterialRequisitionFormController extends Controller
         ->get();
 
         return view('power_house.warehousing.material_requisition_form_search', compact('mrfs','unliquidated_mrf','liquidations', 'daysPassed','old_unliquidated_mrf'))->render();
+    }
+
+    /**
+     * Determine whether the user is blocked from creating a new MRF
+     * because they have unliquidated requests past the threshold.
+     */
+    private function getUnliquidatedRequestStatus(): array
+    {
+        $user = Auth::user();
+        $thresholdDays = 30;
+
+        $unliquidatedMrfQuery = MaterialRequisitionForm::where('requested_id', $user->id)
+            ->where('status', '<', 11)
+            ->whereNotIn('status', [4]);
+
+        $unliquidatedMrfCount = $unliquidatedMrfQuery->count();
+
+        $oldestLiquidationDate = $unliquidatedMrfQuery->with('mrf_liquidations')
+            ->get()
+            ->flatMap->mrf_liquidations
+            ->sortBy('approved_by')
+            ->first()?->approved_by;
+
+        $daysPassed = $oldestLiquidationDate
+            ? $oldestLiquidationDate->diffInDays(Carbon::now())
+            : 0;
+
+        $oldUnliquidatedMrf = $unliquidatedMrfQuery->whereHas('mrf_liquidations', function ($query) use ($thresholdDays) {
+            $query->where('approved_by', '<', Carbon::now()->subDays($thresholdDays));
+        })->get();
+
+        $requestBlocked = $daysPassed >= $thresholdDays || $unliquidatedMrfCount >= 10;
+
+        return compact('unliquidatedMrfCount', 'daysPassed', 'oldUnliquidatedMrf', 'requestBlocked');
     }
 }
