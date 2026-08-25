@@ -10,7 +10,7 @@
                         Note: Requests older than 30 days must be liquidated before submitting a new request.<br>
                         @foreach ($old_unliquidated_mrf as $index => $old_mrf)
                             <strong>*
-                                <span>{{ date('y', strtotime($old_mrf->created_at)) . '-' . str_pad($old_mrf->id, 5, '0', STR_PAD_LEFT) }}</span></strong><br>
+                                <span>{{ date('y', strtotime($old_mrf->approved_by)) . '-' . str_pad($old_mrf->id, 5, '0', STR_PAD_LEFT) }}</span></strong><br>
                         @endforeach
                     </div>
                 </div>
