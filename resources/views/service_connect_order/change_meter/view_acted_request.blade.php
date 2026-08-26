@@ -127,7 +127,7 @@
                       <span class="fs-5 fw-bold">Damage Cause:</span>
                     </div>
                     <div class="col-6">
-                      <span class="fs-5">{{$cm_request->damage_cause}}</span>
+                      <span class="fs-5">{{$cm_request->damageCause->name ?? 'N/A' }}</span>
                     </div>
                   </div>
 

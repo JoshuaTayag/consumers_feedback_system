@@ -77,15 +77,21 @@
               <label for="date_acted">Date Acted:</label>
               <input type="date" value="" id="date_acted" name="date_acted" class="form-control" required>
             </div>
-            <div class="col-lg-3">
+            <div class="col-lg-2">
               <label for="time">Time:</label>
               <input type="time" value="" id="time" name="time" class="form-control" required>
             </div>
-            <div class="col-lg-6">
+            <div class="col-lg-4">
               <label for="damage_cause">Damage Cause *:</label>
-              <textarea name="damage_cause" id="damage_cause" class="form-control" required></textarea>
+              {{-- <textarea name="damage_cause" id="damage_cause" class="form-control" required></textarea> --}}
+              <select id="damage_cause" class="form-control" name="damage_cause" required>
+                <option value=""></option>
+                @foreach ($meter_damage_causes as $id => $name)          
+                  <option value="{{ $id }}" id="">{{ $name }}</option>
+                @endforeach 
+              </select>
             </div>
-            <div class="col-lg-6">
+            <div class="col-lg-12">
               <label for="crew_remarks">Crew Remarks:</label>
               <textarea name="crew_remarks" id="crew_remarks" class="form-control"></textarea>
             </div>

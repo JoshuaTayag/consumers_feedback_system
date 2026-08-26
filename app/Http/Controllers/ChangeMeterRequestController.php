@@ -28,6 +28,8 @@ use Illuminate\Support\Facades\Log;
 use App\Enums\SmsTemplate;
 use App\Services\M360SmsService;
 use App\Services\SmsTemplateRenderer;
+use App\Models\DataManagement\KwhMeterDamageCauseType;
+use App\Models\Employee;
 
 class ChangeMeterRequestController extends Controller
 {
@@ -71,7 +73,9 @@ class ChangeMeterRequestController extends Controller
         // ->get();
         //     dd($ref_employees);
         $change_meter_status_count = $this->getStatusCountsArray();
-        return view('service_connect_order.change_meter.index',compact('cm_requests', 'ref_employees', 'change_meter_status_count'));
+        $meter_damage_causes = KwhMeterDamageCauseType::pluck('name', 'id');
+        // dd($meter_damage_causes);
+        return view('service_connect_order.change_meter.index',compact('cm_requests', 'ref_employees', 'change_meter_status_count', 'meter_damage_causes', 'meter_damage_causes'));
     }
 
     /**
@@ -935,12 +939,11 @@ class ChangeMeterRequestController extends Controller
             // dd($billing);      
             DB::commit();
 
-            return redirect(route('indexCM'))->withSuccess('Successfully Posted!');
+            return back()->withSuccess('Successfully Posted!');
 
         } catch (\Exception $e) {
             // If an exception occurs during the transaction, rollback all changes
             DB::rollback();
-            dd($e);
             // Optionally, handle the exception (log it, display an error message, etc.)
             // For example:
             // Log::error($e->getMessage());
@@ -979,8 +982,7 @@ class ChangeMeterRequestController extends Controller
                   renderer: app(SmsTemplateRenderer::class),
               );
             }
-
-            return redirect(route('indexCM'))->withSuccess('Successfully Dispatched!');
+            return back()->withSuccess('Successfully Dispatched!');
         } catch (\Exception $e) {
             //throw $th;
             dd($e);
@@ -995,9 +997,9 @@ class ChangeMeterRequestController extends Controller
         );
 
         if ($result['success']) {
-            return redirect(route('indexCM'))->withSuccess($result['message']);
+            return back()->withSuccess($result['message']);
         } else {
-            return redirect(route('indexCM'))->withError($result['message']);
+            return back()->withError($result['message']);
         }
     }
 
@@ -1107,8 +1109,10 @@ class ChangeMeterRequestController extends Controller
         ->get();
 
         $contractors = ChangeMeterLeadContractor::pluck('contractor_team_leader_full_name', 'id');
-        // dd($contractors);
-        return view('service_connect_order.change_meter.report', compact('municipalities', 'contractors'));
+
+        $damage_meter_causes = KwhMeterDamageCauseType::pluck('name', 'id');
+
+        return view('service_connect_order.change_meter.report', compact('municipalities', 'contractors', 'damage_meter_causes'));
     }
 
     public function generateReport(Request $request)
@@ -1146,12 +1150,18 @@ class ChangeMeterRequestController extends Controller
             $query->where('barangay_id', $request->barangay);
         }
 
+        if ($request->damage_cause) {
+            $query->where('damage_cause', $request->damage_cause);
+        }
+
         if ($request->contractor_id) {
             // get all crew of this contractor
             $crews = ChangeMeterRequestContractor::where('team_leader_id', $request->contractor_id)->pluck('id')->toArray();
             $query->whereIn('crew', $crews);
-            $contractorName = ChangeMeterLeadContractor::where('id', $request->contractor_id)->value('contractor_team_leader_full_name');
-             view()->share('contractorName', $contractorName);
+            $contractor = ChangeMeterLeadContractor::where('id', $request->contractor_id)
+                        ->select('contractor_team_leader_full_name', 'signature_path')
+                        ->first();
+            view()->share('contractor', $contractor);
         }
 
         // Execute the query and get the results
@@ -1172,9 +1182,18 @@ class ChangeMeterRequestController extends Controller
             }
         }
 
+        $checkedBy = Employee::where('first_name', 'Elma')->first();
+        $notedBy = Employee::where('first_name', 'Ghanda')->first();
+        $approvedBy = Employee::where('first_name', 'Ana Maria Lourdes')->first();
+        // dd($approvedBy);
+
+        // $employee_signatures = Employee::select('first_name')->whereIn('first_name', ['Ghanda','Analou','Elma'])->get();
+
         view()->share('datas', $change_meter_requests);
         view()->share('signatures', $allSignatures);
-        view()->share('contractor_name', $contractorName);
+        view()->share('checkedBy', $checkedBy);
+        view()->share('notedBy', $notedBy);
+        view()->share('approvedBy', $approvedBy);
         $pdf = PDF::loadView('service_connect_order.change_meter.pdf_reports')->setPaper('legal', 'landscape');
         return $pdf->stream();
     }

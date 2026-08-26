@@ -95,10 +95,15 @@ class EmployeeController extends Controller
         ]);
     
         $input = $request->all();
+
+        $employee = Employee::findOrFail($id);
         
         $signature = $request->file('signature_path');
         if($signature){
-            // dd('test');
+            // delete old file
+            if($employee->signature_path && file_exists(public_path($employee->signature_path))){
+                unlink(public_path($employee->signature_path));
+            }
             $resize = Image::make($signature)
             ->resize(600, null, function ($constraint) { $constraint->aspectRatio(); } )
             ->encode('jpg',80);
@@ -115,7 +120,7 @@ class EmployeeController extends Controller
         }
         
 
-        $employee = Employee::find($id);
+        
         $employee->update($input);
     
         return redirect()->route('employee.index')

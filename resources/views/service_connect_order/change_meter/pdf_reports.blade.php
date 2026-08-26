@@ -45,13 +45,6 @@
       height: 80px;
       width: 100px;
     }
-    .img-signature{
-      position: absolute;
-      top: 20px;
-      right: 20%;
-      height: 80px;
-      width: 120px;
-    }
     .text-center{
       text-align: center;
     }
@@ -106,33 +99,57 @@
     }
 
     .signature-table {
-      border-collapse: collapse;
-      border: none !important;
+        border-collapse: collapse;
+        border: none !important;
+        width: 100%;
     }
-    
+
     .signature-table th,
     .signature-table td {
-      border: none !important;
+        border: none !important;
+        padding: 0;
+        text-align: center;
     }
-    
+
     .signature-header {
-      width: 33.33%; 
-      padding-bottom: 70px; 
-      border: none !important;
-      text-align: center;
+        width: 33.33%;
+        padding-bottom: 5px !important;
+        text-align: center;
+        font-weight: bold;
+        font-size: 12px;
     }
-    
+
+    .signature-image {
+        width: 33.33%;
+        height: 60px;
+        text-align: center;
+        vertical-align: bottom;
+    }
+
+    .img-signature {
+        width: 150px;
+        height: 60px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
     .signature-name {
-      text-decoration: underline; 
-      width: 33.33%; 
-      border: none !important;
-      text-align: center;
+        width: 33.33%;
+        text-align: center;
+        text-decoration: underline;
+        font-weight: bold;
+        padding-top: 0 !important;
+        text-transform: uppercase;
+        font-size: 12px;
     }
-    
+
     .signature-position {
-      width: 33.33%; 
-      border: none !important;
-      text-align: center;
+        width: 33.33%;
+        text-align: center;
+        padding-top: 2px !important;
+        text-transform: uppercase;
+        font-size: 12px;
     }
 
     /* Add these CSS rules for the footer */
@@ -166,7 +183,7 @@
 <body>
   <header>
     <img src="{{ public_path('images/logo.png') }}" alt="" class="img-logo">
-    <img src="{{ public_path('images/iso.png') }}" alt="" class="img-iso">
+    <img src="{{ public_path('images/iso_2025.jpg') }}" alt="" class="img-iso">
     <h2 class="heading">LEYTE V ELECTRIC COOPERATIVE, INC.</h2>
     <p class="sub-heading">
       Brgy. San Pablo, Ormoc City, Leyte<br>
@@ -284,7 +301,14 @@
             <th class="signature-header"></th>
           </tr>
           <tr>
-            <th class="signature-name">&nbsp;&nbsp;{{ $contractorName }}&nbsp;&nbsp;</th>
+                <td class="signature-image">
+                    <img src="{{ public_path($contractor->signature_path) }}"
+                        alt="Signature"
+                        class="img-signature">
+                </td>
+            </tr>
+          <tr>
+            <th class="signature-name">&nbsp;&nbsp;{{ $contractor->contractor_team_leader_full_name }}&nbsp;&nbsp;</th>
           </tr>
           <tr>
             <th class="signature-position">Contractor</th>
@@ -295,24 +319,68 @@
   @endif
 
   <div class="text-align" style="margin-top: 0px; padding-top: 50px;">
-    <table class="signature-table" style="font-size: 11px; width: 100%; padding-top: 0px; padding-bottom: 0px;">
-      <tbody>
-        <tr>
-          <th class="signature-header">Checked By:</th>
-          <th class="signature-header">Noted By:</th>
-          <th class="signature-header">Approved By:</th>
-        </tr>
-        <tr>
-          <th class="signature-name">&nbsp;&nbsp;NIÑO REY C. PONIENTE / ELMA G. MAÑACAP&nbsp;&nbsp;</th>
-          <th class="signature-name">&nbsp;&nbsp;GHANDA R. BERNANDINO, DPA&nbsp;&nbsp;</th>
-          <th class="signature-name">&nbsp;&nbsp;ANA MARIA LOURDES M. PASTOR, MBM&nbsp;&nbsp;</th>
-        </tr>
-        <tr>
-          <th class="signature-position">CWD Analyst</th>
-          <th class="signature-position">MSD Chief</th>
-          <th class="signature-position">ISD Manager</th>
-        </tr>
-      </tbody>
+      <table class="signature-table" style="font-size: 11px; width: 100%;">
+        <tbody>
+
+            <!-- Header -->
+            <tr>
+                <th class="signature-header">Checked By:</th>
+                <th class="signature-header">Noted By:</th>
+                <th class="signature-header">Approved By:</th>
+            </tr>
+
+            <!-- Signatures -->
+            <tr>
+                <td class="signature-image">
+                    <img src="{{ public_path($checkedBy->signature_path) }}"
+                        alt="Signature"
+                        class="img-signature">
+                </td>
+
+                <td class="signature-image">
+                    <img src="{{ public_path($notedBy->signature_path) }}"
+                        alt="Signature"
+                        class="img-signature">
+                </td>
+
+                <td class="signature-image">
+                    <img src="{{ public_path($approvedBy->signature_path) }}"
+                        alt="Signature"
+                        class="img-signature">
+                </td>
+            </tr>
+
+            <!-- Names -->
+            <tr>
+                <td class="signature-name">
+                    {{ $checkedBy->full_name }}
+                </td>
+
+                <td class="signature-name">
+                    {{ $notedBy->full_name }}
+                </td>
+
+                <td class="signature-name">
+                    {{ $approvedBy->full_name }}
+                </td>
+            </tr>
+
+            <!-- Position -->
+            <tr>
+                <td class="signature-position">
+                    {{ $checkedBy->position }}
+                </td>
+
+                <td class="signature-position">
+                    {{ $notedBy->position }}
+                </td>
+
+                <td class="signature-position">
+                    {{ $approvedBy->position }}
+                </td>
+            </tr>
+
+        </tbody>
     </table>
   </div>
 

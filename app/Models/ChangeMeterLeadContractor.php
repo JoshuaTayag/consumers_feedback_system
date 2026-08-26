@@ -18,5 +18,6 @@ class ChangeMeterLeadContractor extends Model implements Auditable
         'contractor_team_leader_full_name',
         'area',
         'municipality',
+        'signature_path',
     ];
 }

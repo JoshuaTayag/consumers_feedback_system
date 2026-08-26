@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ChangeMeterLeadContractor;
+use Image;
 
 class ChangeMeterLeadContractorController extends Controller
 {
@@ -33,9 +34,27 @@ class ChangeMeterLeadContractorController extends Controller
             'contractor_team_leader_full_name' => 'required|string|max:255|unique:change_meter_lead_contractors,contractor_team_leader_full_name',
             'area' => 'required|string|max:255',
             'municipality' => 'required|string|max:255',
+            'signature' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        ChangeMeterLeadContractor::create($request->all());
+        $signature = $request->file('signature');
+        if($signature){
+            // dd('test');
+            $resize = Image::make($signature)
+            ->resize(600, null, function ($constraint) { $constraint->aspectRatio(); } )
+            ->encode('jpg',80);
+
+            // calculate md5 hash of encoded image
+            $hash = md5($resize->__toString());
+
+            // use hash as a name
+            $path = "images/signatures/{$hash}.jpg";
+
+            // save it locally to ~/public/images/{$hash}.jpg
+            $resize->save(public_path($path));
+            $input['signature_path'] = $path;
+        }
+        ChangeMeterLeadContractor::create(array_merge($request->all(), ['signature_path' => $input['signature_path'] ?? null]));
 
         return redirect()->route('change-meter-lead-contractor.index')
                          ->with('success','Lead Contractor created successfully.');
@@ -67,13 +86,35 @@ class ChangeMeterLeadContractorController extends Controller
             'contractor_team_leader_full_name' => 'required|string|max:255',
             'area' => 'required|string|max:255',
             'municipality' => 'required|string|max:255',
+            'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $lead_contractor = ChangeMeterLeadContractor::findOrFail($id);
-        $lead_contractor->update($request->all());
+        $signature = $request->file('signature');
+        if($signature){
+            // delete old file if exists
+            if ($lead_contractor->signature_path && file_exists(public_path($lead_contractor->signature_path))) {
+                unlink(public_path($lead_contractor->signature_path));
+            }
+            
+            $resize = Image::make($signature)
+            ->resize(600, null, function ($constraint) { $constraint->aspectRatio(); } )
+            ->encode('jpg',80);
+
+            // calculate md5 hash of encoded image
+            $hash = md5($resize->__toString());
+
+            // use hash as a name
+            $path = "images/signatures/{$hash}.jpg";
+
+            // save it locally to ~/public/images/{$hash}.jpg
+            $resize->save(public_path($path));
+            $input['signature_path'] = $path;
+        }
+        $lead_contractor->update(array_merge($request->all(), ['signature_path' => $input['signature_path'] ?? $lead_contractor->signature_path]));
 
         return redirect()->route('change-meter-lead-contractor.index')
-                         ->with('success','Lead Contractor updated successfully.'); 
+                         ->with('success','Lead Contractor updated successfully.');
     }
 
     /**
