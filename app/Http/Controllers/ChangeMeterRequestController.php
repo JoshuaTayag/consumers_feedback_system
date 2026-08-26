@@ -1012,6 +1012,7 @@ class ChangeMeterRequestController extends Controller
         // $old_meter_no = $request->input('old_meter_no');
         $status = $request->input('status');
         $cm_request = ChangeMeterRequest::query();
+        $meter_damage_causes = KwhMeterDamageCauseType::pluck('name', 'id');
 
         if ($request->filled('search')) {
             $searchTerm = $request->search;
@@ -1024,26 +1025,6 @@ class ChangeMeterRequestController extends Controller
                   ->orWhere('account_number', 'LIKE', '%' . $searchTerm . '%');
             });
         }
-        
-        // if ($control_no !== null && $control_no !== '') {
-        //     $cm_request->where('control_no', 'like', "%$control_no%");
-        // }
-
-        // if ($f_name !== null && $f_name !== '') {
-        //     $cm_request->where('first_name', 'like', "%$f_name%");
-        // }
-
-        // if ($l_name !== null && $l_name !== '') {
-        //     $cm_request->where('last_name', 'like', "%$l_name%");
-        // }
-
-        // if ($meter_no !== null && $meter_no !== '') {
-        //     $cm_request->where('new_meter_no', 'like', "%$meter_no%");
-        // }
-
-        // if ($old_meter_no !== null && $old_meter_no !== '') {
-        //     $cm_request->where('old_meter_no', 'like', "%$old_meter_no%");
-        // }
 
         if ($status !== null && $status !== '') {
             if ($status == 'unacted') {
@@ -1083,7 +1064,7 @@ class ChangeMeterRequestController extends Controller
         $change_meter_status_count = $this->getStatusCountsArray();
 
         // return view('products.index', compact('products'));
-        return view('service_connect_order.change_meter.index',compact('cm_requests','ref_employees','change_meter_status_count'));
+        return view('service_connect_order.change_meter.index',compact('cm_requests','ref_employees','change_meter_status_count', 'meter_damage_causes'));
     }
 
     public function view(string $id)
