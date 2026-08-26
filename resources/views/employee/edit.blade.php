@@ -65,7 +65,7 @@
               <div class="col-xs-12 col-sm-12 col-md-4 mb-2">
                 <div class="form-group">
                     <strong>Signature</strong>
-                    {!! Form::file('signature_path', null, array( 'class' => 'form-control', 'required')) !!}
+                    {!! Form::file('signature_path', ['class' => 'form-control', 'required' => 'required']) !!}
                 </div>
               </div>
               <div class="col-xs-12 col-sm-12 col-md-12 text-end">

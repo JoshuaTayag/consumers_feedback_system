@@ -60,3 +60,5 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('meters/validate-serial', [App\Http\Controllers\MeterController::class, 'validateSerialNumber']);
 Route::post('meters/validate-erc-seal', [App\Http\Controllers\MeterController::class, 'validateErcSeal']);
 Route::post('/sms', [SmsController::class, 'store']);
+
+Route::get('fetch-kwh-meter-damage-cause-types', [App\Http\Controllers\API\ChangeMeterApiController::class, 'fetchKwhMeterDamageCauses'])->middleware('auth:sanctum');

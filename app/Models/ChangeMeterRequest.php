@@ -122,6 +122,11 @@ class ChangeMeterRequest extends Model implements Auditable
         return $this->hasMany(KwhMeterRequestSerialNumber::class, 'change_meter_request_id', 'id');
     }
 
+    public function damageCause()
+    {
+        return $this->belongsTo('App\Models\DataManagement\KwhMeterDamageCauseType', 'damage_cause', 'id');
+    }
+
     protected $fillable = [
         'control_no', 'first_name', 'middle_name', 'last_name', 'contact_no',
         'area', 'municipality_id', 'barangay_id', 'sitio', 'account_number',

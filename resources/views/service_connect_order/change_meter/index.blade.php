@@ -429,6 +429,8 @@
   transferRequestModal.addEventListener('show.bs.modal', function (event) {
     var button = event.relatedTarget;
 
+    console.log('Button that triggered the modal:');
+
     var sco = button.getAttribute('data-sco');
     var cm_id = button.getAttribute('data-id');
     var crew_id = button.getAttribute('data-crew-id');
@@ -442,7 +444,6 @@
     // Format the time as HH:mm
     const formattedTime = today.toTimeString().slice(0, 5);
 
-    console.log(formattedDate)
     var modal_sco = transferRequestModal.querySelector('#sco_dispatched');
     var modal_cm_id = transferRequestModal.querySelector('#cm_id');
     var modal_dispatched_date = transferRequestModal.querySelector('#date_dispatched');
@@ -468,7 +469,6 @@
     // Format the time as HH:mm
     const formattedTime = today.toTimeString().slice(0, 5);
 
-    console.log(formattedDate)
     var modal_sco = dispatchingModal.querySelector('#sco_dispatched');
     var modal_cm_id = dispatchingModal.querySelector('#cm_id');
     var modal_dispatched_date = dispatchingModal.querySelector('#date_dispatched');

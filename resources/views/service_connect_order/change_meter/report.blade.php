@@ -19,15 +19,15 @@
             </div>
             <form action="{{ route('generateReport') }}" method="GET">
               <div class="row p-3">
-                <div class="col-lg-1">
+                <div class="col-lg-3">
                   {{ Form::label('date_from', 'Date From;') }}
                   {{ Form::date('date_from', null, array('class' => 'form-control', 'required')) }}
                 </div>
-                <div class="col-lg-1">
+                <div class="col-lg-3">
                   {{ Form::label('date_to', 'Date To;') }}
                   {{ Form::date('date_to', null, array('class' => 'form-control', 'required')) }}
                 </div>
-                <div class="col-lg-2">
+                <div class="col-lg-3">
                   <label for="app_status" class="form-label mb-1">Application Status</label>
                   <select id="app_status" class="form-control" name="app_status">
                     <option value="0" id="">All</option>
@@ -38,7 +38,7 @@
                   </select>
                 </div>
 
-                <div class="col-lg-2">
+                <div class="col-lg-3">
                   <div class="mb-2">
                       <label for="contractor_id" class="form-label mb-1">Contractor</label>
                       <select id="contractor_id" class="form-control" name="contractor_id" value="{{ old('contractor_id')}}">
@@ -50,7 +50,20 @@
                   </div>
                 </div>
 
-                <div class="col-lg-1">
+                <div class="col-lg-3">
+                  <div class="mb-2">
+                      <label for="damage_cause" class="form-label mb-1">Damage Cause</label>
+                      <select id="damage_cause" class="form-control" name="damage_cause" value="{{ old('damage_cause')}}">
+                        <option value="">ALL</option>
+                        @foreach ($damage_meter_causes as $id => $damage_cause)          
+                          <option value="{{ $id }}" id="">{{ $damage_cause }}</option>
+                        @endforeach
+                      </select>
+                  </div>
+                </div>
+              
+
+                <div class="col-lg-3">
                   <div class="mb-2">
                       <label for="area" class="form-label mb-1">Area</label>
                       <select id="area" class="form-control" name="area" value="{{ old('area')}}">
@@ -61,7 +74,7 @@
                       </select>
                   </div>
                 </div>
-                <div class="col-lg-2">
+                <div class="col-lg-3">
                   <div class="mb-2">
                     <label for="municipality" class="form-label mb-1">Municipality</label>
                     <select id="municipality" class="form-control" name="municipality" >
@@ -72,7 +85,7 @@
                     </select>
                   </div>
                 </div>
-                <div class="col-lg-2">
+                <div class="col-lg-3">
                   <div class="mb-2">
                     <label for="barangay" class="form-label mb-1">Barangay</label>
                     <select id="barangay" class="form-control" name="barangay">

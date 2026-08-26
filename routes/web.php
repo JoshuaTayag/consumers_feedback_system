@@ -265,6 +265,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('barangays', App\Http\Controllers\BarangayController::class);
     Route::get('export_barangays', [App\Http\Controllers\BarangayController::class, 'exportCsv'])->name('barangays.exportCsv');
     Route::resource('municipalities', App\Http\Controllers\MunicipalityController::class);
+    Route::resource('kwh-meter-damage-cause-types', App\Http\Controllers\KwhMeterDamageCauseTypeController::class);
 });
 
 Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])->name('online.pms')->middleware(['auth', 'verified']);

@@ -72,13 +72,16 @@
             </ul>
           </li>
           <li>
-            <a class="dropdown-item" href="#">ADDRESS MANAGEMENT &raquo; </a>
+            <a class="dropdown-item" href="#">DATA MANAGEMENT &raquo; </a>
             <ul class="dropdown-menu dropdown-submenu">
               <li>
                 <a class="dropdown-item" href="{{ route('municipalities.index') }}">MUNICIPALITIES</a>
               </li>
               <li>
                 <a class="dropdown-item" href="{{ route('barangays.index') }}">BARANGAYS</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('kwh-meter-damage-cause-types.index') }}">KWH METER DAMAGE CAUSE</a>
               </li>
             </ul>
           </li>

@@ -14,6 +14,7 @@ use App\Notifications\ChangeMeterCompletedNotification;
 use App\Enums\SmsTemplate;
 use App\Services\M360SmsService;
 use App\Services\SmsTemplateRenderer;
+use App\Models\Datamanagement\KwhMeterDamageCauseType;
 
 class ChangeMeterApiController extends Controller
 {
@@ -34,6 +35,7 @@ class ChangeMeterApiController extends Controller
             ->with('municipality', 'barangay', 'assignedMeter.meterType')
             ->where('crew', $contractorId)
             ->where('status', '3') // Fetch only dispatched requests
+            ->orderBy('barangay_id')
             ->orderBy('municipality_id')
             ->orderBy('dispatched_date')
             ->get()
@@ -51,6 +53,8 @@ class ChangeMeterApiController extends Controller
                     'land_mark' => $request->location,
                     'old_meter_no' => $request->old_meter_no,
                     'care_of' => $request->care_of,
+                    'barangay_id' => $request->barangay_id,
+                    'municipality_id' => $request->municipality_id,
                     'assigned_meter' => $request->assignedMeter ? [
                         'serial_number' => $request->assignedMeter->serial_number,
                         'leyeco_seal_number' => $request->assignedMeter->leyeco_seal_number,
@@ -60,10 +64,20 @@ class ChangeMeterApiController extends Controller
                     ] : null,
                 ];
             });
+        
+        $summaryPerBarangay = $changeMeterRequests->groupBy('barangay_id')->map(function ($group) {
+            return [
+                'municipality_name' => $group->first()['address'] ? explode(', ', $group->first()['address'])[2] : null,
+                'barangay_name' => $group->first()['address'] ? explode(', ', $group->first()['address'])[1] : null,
+                'serial_numbers' => $group->pluck('assigned_meter.serial_number')->filter()->values(),
+                'total_requests' => $group->count(),
+            ];
+        })->values();
 
         return response()->json([
             'success' => true,
             'data' => $changeMeterRequests,
+            'summary_per_barangay' => $summaryPerBarangay
         ]);
     }
 
@@ -585,6 +599,25 @@ class ChangeMeterApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching change meter request history: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function fetchKwhMeterDamageCauses(Request $request)
+    {
+        try {
+            $damageCauses = KwhMeterDamageCauseType::select('id', 'name')
+                ->orderBy('name', 'asc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $damageCauses,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching KWH meter damage causes: ' . $e->getMessage()
             ], 500);
         }
     }

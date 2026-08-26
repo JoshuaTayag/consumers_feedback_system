@@ -6,7 +6,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action="{{ route('cmTransferOfDispatching') }}" method="POST"></form>
+        <form action="{{ route('cmTransferOfDispatching') }}" method="POST">
           @csrf
           <div class="row">
             <input type="hidden" value="" id="cm_id" name="cm_id" class="form-control border border-warning" readonly>
