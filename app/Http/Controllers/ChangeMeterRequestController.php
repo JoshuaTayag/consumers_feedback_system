@@ -51,7 +51,7 @@ class ChangeMeterRequestController extends Controller
      */
     public function index()
     {
-        $cm_requests = ChangeMeterRequest::with('municipality', 'barangay', 'assignedMeter')->orderBy('id','desc')->paginate(9);
+        $cm_requests = ChangeMeterRequest::with('municipality', 'barangay', 'assignedMeter')->orderBy('id','desc')->paginate(9)->withQueryString();
         $ref_employees = ChangeMeterRequestContractor::with('teamLeadContractor')
             ->where('status', 1)
             ->orderBy('last_name', 'ASC')
@@ -1044,7 +1044,7 @@ class ChangeMeterRequestController extends Controller
                 $cm_request->where('status', 2);
             }
         }
-        $cm_requests = $cm_request->orderBy('control_no','DESC')->paginate(9);
+        $cm_requests = $cm_request->orderBy('control_no','DESC')->paginate(9)->withQueryString();
 
         $ref_employees = ChangeMeterRequestContractor::with('teamLeadContractor')
             ->where('status', 1)
