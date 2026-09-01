@@ -135,7 +135,6 @@ class ChangeMeterApiController extends Controller
             'care_of' => 'nullable|string',
             'last_reading' => 'nullable|numeric',
             'reading_initial' => 'nullable|numeric',
-            'damage_cause' => 'nullable|string',
             'require_consumer_signature' => 'boolean',
         ]);
 
@@ -148,7 +147,7 @@ class ChangeMeterApiController extends Controller
                 'erc_seal' => 'required|string',
                 'crew_remarks' => 'nullable|string',
                 'email' => 'nullable|email',
-
+                'damage_cause' => 'required|integer|exists:kwh_meter_damage_cause_types,id',
                 'consumer_signature_data' => 'nullable|string', // Base64 encoded image
                 'consumer_name' => 'required_with:consumer_signature_data|string|max:255',
                 'consumer_position' => 'nullable|string|max:255',
@@ -163,6 +162,7 @@ class ChangeMeterApiController extends Controller
                 'seal_no' => 'nullable|string',
                 'erc_seal' => 'nullable|string',
                 'crew_remarks' => 'required|string',
+                'damage_cause' => 'nullable',
             ]);
         }
 
