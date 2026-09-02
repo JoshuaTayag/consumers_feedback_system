@@ -586,8 +586,8 @@ class ChangeMeterRequestController extends Controller
                 "status" => null,
                 "damage_cause" => null,
                 "crew_remarks" => null,
-                "created_by" => Auth::id(),
-                "created_at" => Carbon::today(),
+                // "created_by" => Auth::id(),
+                // "created_at" => Carbon::today(),
                 "kwh_meter_request_id" => $request->kwh_meter_request_control_no,
                 "email" => $request->email,
             ]);
