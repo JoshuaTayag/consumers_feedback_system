@@ -452,24 +452,33 @@ class ChangeMeterRequestController extends Controller
                 // Restore the meter's link back to its original kWh meter request
                 $meter = Meter::where('serial_number', $change_meter_request->new_meter_no)->first();
 
-                if ($meter) {
-                    $meter->update([
-                        'control_type' => 'kWh Meter Request',
-                        'account_number' => null,
-                        'control_no' => $meter->currentKwhMeterRequest->control_no ?? null,
-                    ]);
+                if (!$meter) {
+                    throw new \Exception("Meter with serial number {$change_meter_request->new_meter_no} not found.");
                 }
-                // update new meter's link to the current kWh meter request
-                if ($newMeter) {
-                    $newMeter->kwhMeterRequestSerialNumbers()->where('kwh_meter_request_id', $request->kwh_meter_request_control_no)
-                        ->update(['change_meter_request_id' => $change_meter_request->id]);
 
-                    $newMeter->update([
-                      'control_type' => 'Change Meter',
-                      'control_no' => $change_meter_request->control_no,
-                      'account_number' => $request->liquidation_meter_serial_number,
-                  ]);
+                $meter->update([
+                    'control_type' => 'kWh Meter Request',
+                    'account_number' => null,
+                    'control_no' => $meter->currentKwhMeterRequest->control_no ?? null,
+                ]);
+
+                // update new meter's link to the current kWh meter request
+                if (!$newMeter) {
+                    throw new \Exception("New meter record is missing.");
                 }
+
+                $newMeter->kwhMeterRequestSerialNumbers()->where('kwh_meter_request_id', $request->kwh_meter_request_control_no)
+                    ->update(['change_meter_request_id' => $change_meter_request->id]);
+
+                $newMeter->update([
+                    'control_type' => 'Change Meter',
+                    'control_no' => $change_meter_request->control_no,
+                    'account_number' => $request->liquidation_meter_serial_number,
+                ]);
+            }
+
+            if (!$newMeter) {
+                throw new \Exception("New meter record is missing, cannot determine type_of_meter.");
             }
 
             // Update the existing record with new data
@@ -541,7 +550,7 @@ class ChangeMeterRequestController extends Controller
 
             return redirect(route('indexCM'))->withSuccess('Record Successfully Updated! </br> SCO No:' . $change_meter_request->control_no);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollback();
 
             return redirect()->back()->withInput()->withErrors([
@@ -560,22 +569,25 @@ class ChangeMeterRequestController extends Controller
         try {
             $change_meter_request = ChangeMeterRequest::findOrFail($id);
 
-            if ($change_meter_request) {
-                // Liquidation-type request: unlink tracking record
-                $change_meter_request->kwhMeterRequestSerialNumbers()
-                    ->where('change_meter_request_id', $change_meter_request->id)
-                    ->update(['change_meter_request_id' => null]);
+            // Liquidation-type request: unlink tracking record
+            $change_meter_request->kwhMeterRequestSerialNumbers()
+                ->where('change_meter_request_id', $change_meter_request->id)
+                ->update(['change_meter_request_id' => null]);
 
-                // Restore the meter's link back to its original kWh meter request
-                $meter = Meter::where('serial_number', $change_meter_request->new_meter_no)->first();
+            // Restore the meter's link back to its original kWh meter request
+            $meter = Meter::where('serial_number', $change_meter_request->new_meter_no)->first();
 
-                if ($meter) {
-                    $meter->update([
-                        'control_type' => 'kWh Meter Request',
-                        'account_number' => null,
-                        'control_no'     => $meter->currentKwhMeterRequest?->control_no, 
-                    ]);
-                }
+            if ($meter) {
+                $meter->update([
+                    'control_type' => 'kWh Meter Request',
+                    'account_number' => null,
+                    'control_no'     => $meter->currentKwhMeterRequest?->control_no,
+                ]);
+            } else {
+                Log::warning('Meter not found while archiving change meter request', [
+                    'change_meter_request_id' => $change_meter_request->id,
+                    'new_meter_no' => $change_meter_request->new_meter_no,
+                ]);
             }
 
             // Delete change meter request fees
