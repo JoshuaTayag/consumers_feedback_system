@@ -79,17 +79,17 @@
                     <select id="feeder" class="form-control" name="feeder" required>
                       <option value=""></option>
                       @foreach (Config::get('constants.feeders') as $feeder)          
-                        <option value="{{ $feeder['name'] }}" id="">{{ $feeder['name'] }}</option>
+                        <option value="{{ $feeder['name'] }}" {{ old('feeder') == $feeder['name'] ? 'selected' : '' }}>{{ $feeder['name'] }}</option>
                       @endforeach 
                     </select>
                   </div>
                   <div class="col-lg-1">
                     <div class="mb-2">
                       <label for="area" class="form-label mb-1">Area *</label>
-                      <select id="area" class="form-control" name="area" value="{{ old('area')}}" required>
+                      <select id="area" class="form-control" name="area" required>
                         <option value=""></option>
                         @foreach (Config::get('constants.coverage_areas') as $area)          
-                          <option value="{{ $area['id'] }}" id="">{{ $area['name'] }}</option>
+                          <option value="{{ $area['id'] }}" {{ old('area') == $area['id'] ? 'selected' : '' }}>{{ $area['name'] }}</option>
                         @endforeach
                       </select>
                     </div>
@@ -98,7 +98,7 @@
                     <div class="mb-2">
                       <label for="municipality" class="form-label mb-1">Municipality *</label>
                       <select id="municipality" class="form-control" name="municipality" required>
-                        <option value="" id=""></option>
+                        <option value=""></option>
                         @foreach ($municipalities as $municipality)                        
                             <option value="{{ $municipality->id }}" id="{{ $municipality->id }}">{{$municipality->municipality_name}}</option>
                         @endforeach 
@@ -151,24 +151,6 @@
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-lg-8">
-                    <div class="mb-2">
-                      <label for="meter_code_no" class="form-label mb-1">Type Of Meter*</label>
-                        <select id="meter_code_no" class="form-control" name="meter_code_no" required>
-                          <option value=""></option>
-                          @foreach ($type_of_meters as $type_of_meter)          
-                            <option value="{{ $type_of_meter->id }}" 
-                                    id="" 
-                                    {{ old('meter_code_no') == $type_of_meter->meter_code ? 'selected' : ''}}
-                                    {{ $type_of_meter->available_count <= 0 ? 'disabled' : '' }}
-                                    data-available-count="{{ $type_of_meter->available_count }}">
-                              {{ $type_of_meter->meter_code }} - {{ $type_of_meter->meter_description }} 
-                              (Available: {{ $type_of_meter->available_count }})
-                            </option>
-                          @endforeach 
-                        </select>
-                    </div>
-                  </div>
                   <div class="col-lg-2">
                     <div class="mb-2">
                       <label for="last_reading" class="form-label mb-1">Last Reading</label>
@@ -210,7 +192,7 @@
                     <div class="col-lg-5">
                       <div class="mb-2">
                         <label for="kwh_meter_request_control_no" class="form-label mb-1">kWh Meter Request</label>
-                          <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no">
+                          <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no" required>
                             <option value="">Select kWh Meter Request</option>
                             @foreach ($kwh_meter_requests as $key => $control_no)          
                               <option value="{{ $key }}" {{ old('kwh_meter_request_control_no') == $control_no ? 'selected' : ''}}>
@@ -238,7 +220,7 @@
                     <div class="col-lg-4">
                       <div class="mb-2">
                         <label for="meter_serial_number" class="form-label mb-1">Serial Number</label>
-                          <select id="meter_serial_number" class="form-control" name="meter_serial_number">
+                          <select id="meter_serial_number" class="form-control" name="meter_id" required>
                             <option value="">Select Serial Number</option>
                           </select>
                       </div>
@@ -246,16 +228,15 @@
                     <div class="col-lg-4">
                       <div class="mb-2">
                         <label for="liquidation_erc_seal" class="form-label mb-1">ERC Seal</label>
-                        <input type="text" id="liquidation_erc_seal" name="liquidation_erc_seal" class="form-control" readonly>
+                        <input type="text" id="liquidation_erc_seal" name="liquidation_erc_seal" required class="form-control" readonly>
                       </div>
                     </div>
                     <div class="col-lg-4">
                       <div class="mb-2">
                         <label for="liquidation_leyeco_seal" class="form-label mb-1">Leyeco 5 Seal</label>
-                        <input type="text" id="liquidation_leyeco_seal" name="liquidation_leyeco_seal" class="form-control" readonly>
+                        <input type="text" id="liquidation_leyeco_seal" name="liquidation_leyeco_seal" required class="form-control" readonly>
                       </div>
                     </div>
-                    <input type="hidden" id="liquidation_meter_serial_number" name="liquidation_meter_serial_number" class="form-control" readonly>
                 </div>
               </div>
 
@@ -279,7 +260,6 @@
       url: "{{route('cmFetchAccounts')}}",
       type: "get",
       dataType: 'json',
-      // delay: 100,
       data: function (params) {
         return {
             // _token: '{{csrf_token()}}',
@@ -299,7 +279,6 @@
       },
       cache: true
     },
-    // placeholder:'Search Account Number',
     templateResult: templateResult,
     templateSelection: templateSelection,
   });
@@ -353,7 +332,6 @@
   $('#municipality').on('change', function () {
       var id = $(this).children(":selected").attr("id");
       $("#barangay").html('');
-      console.log(id);
       $.ajax({
           url: "{{url('api/fetch-barangays')}}",
           type: "POST",
@@ -386,33 +364,6 @@
       display: flex;
      
   }
-  
-  .scrollbar {
-    max-height: 450px; overflow-y: auto;
-  }
-  /*       ScrollBar 1        */
-  
-  #scrollbar1::-webkit-scrollbar {
-      width: 10px;
-  }
-  
-  #scrollbar1::-webkit-scrollbar-track {
-      border-radius: 8px;
-      background-color: #e7e7e7;
-      border: 1px solid #cacaca;
-  }
-  
-  #scrollbar1::-webkit-scrollbar-thumb {
-      border-radius: 8px;
-      background-color: #e19a00;
-  }
-
-  /* Style for disabled meter options */
-  #meter_code_no option:disabled {
-      color: #999;
-      background-color: #f5f5f5;
-      font-style: italic;
-  }
 
   /* Style for available meter count display */
   .meter-availability-info {
@@ -431,29 +382,6 @@
 
 <script>
 $(document).ready(function() {
-    // Add event handler for meter type selection
-    $('#meter_code_no').on('change', function() {
-        var selectedOption = $(this).find('option:selected');
-        var availableCount = selectedOption.data('available-count');
-        
-        // Check if the selected meter type has available meters
-        if (availableCount <= 0 && selectedOption.val() !== '') {
-            alert('Warning: No meters available for the selected meter type. Please choose a different meter type.');
-            $(this).val(''); // Clear the selection
-            return false;
-        }
-    });
-    
-    // Style options based on availability when page loads
-    $('#meter_code_no option').each(function() {
-        var availableCount = $(this).data('available-count');
-        if (availableCount <= 0 && $(this).val() !== '') {
-            $(this).addClass('meter-unavailable');
-            $(this).append(' - OUT OF STOCK');
-        } else if ($(this).val() !== '') {
-            $(this).addClass('meter-available');
-        }
-    });
 
     // Handle kWh meter request selection change
     $('#kwh_meter_request_control_no').on('change', function() {
@@ -465,7 +393,6 @@ $(document).ready(function() {
         $('#meter_serial_number').html('<option value="">Select Serial Number</option>');
         $('#liquidation_erc_seal').val('');
         $('#liquidation_leyeco_seal').val('');
-        $('#liquidation_meter_serial_number').val('');
         
         if (controlNo) {
             // Fetch kWh meter request details
@@ -490,13 +417,6 @@ $(document).ready(function() {
                 }
             });
         }
-
-        // remove type of meter required validation
-        if (controlNo) {
-            $('#meter_code_no').prop('required', false);
-        } else {
-            $('#meter_code_no').prop('required', true);
-        }
     });
     
     // Handle serial number selection change
@@ -506,7 +426,6 @@ $(document).ready(function() {
         // Clear seal fields
         $('#liquidation_erc_seal').val('');
         $('#liquidation_leyeco_seal').val('');
-        $('#liquidation_meter_serial_number').val('');
         
         if (meterId) {
             // Fetch meter seal details
@@ -518,7 +437,6 @@ $(document).ready(function() {
                     if (response.success) {
                         $('#liquidation_erc_seal').val(response.data.erc_seal || '');
                         $('#liquidation_leyeco_seal').val(response.data.leyeco_seal || '');
-                        $('#liquidation_meter_serial_number').val(response.data.serial_number || '');
                     } else {
                         alert('Error: ' + response.message);
                     }

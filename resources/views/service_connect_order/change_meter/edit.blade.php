@@ -112,11 +112,7 @@
                     <div class="mb-2">
                         <label for="barangay" class="form-label mb-1">Barangays *</label>
                         <select id="barangay" class="form-control" name="barangay" required>
-                          <!-- <option value=""></option> -->
                           <option value="{{ $change_meter_request->barangay_id }}" id="{{ $change_meter_request->barangay_id }}">{{$change_meter_request->barangay_id ? $change_meter_request->barangay->barangay_name : null }}</option>
-                          <!-- @foreach ($barangays as $barangay)        
-                            <option value="{{ $barangay->Brgy }}" {{ $change_meter_request->Brgy == rtrim($barangay->Brgy) ? 'selected' : ''}}>{{ $barangay->Brgy }}</option>
-                          @endforeach  -->
                         </select>
                     </div>
                   </div>
@@ -132,13 +128,6 @@
                     <div class="mb-2">
                         <label for="membership_or" class="form-label mb-1">Membership OR *</label>
                         <input type="text" id="membership_or" name="membership_or" class="form-control" value="{{ $change_meter_request->membership_or }}" readonly>
-                    </div>
-                  </div>
-                  <div class="col-lg-3">
-                    <div class="mb-2">
-                      {{ $change_meter_request->{'Membership Date'} }}
-                        <label for="membership_date" class="form-label mb-1">Membership Date *</label>
-                        <input type="date" id="membership_date" name="membership_date" class="form-control" value="{{ date('Y-m-d', strtotime($change_meter_request->{'Membership Date'})) }}" readonly>
                     </div>
                   </div>
                   <div class="col-lg-1">
@@ -163,52 +152,24 @@
                 
                 <div class="row">
                   <hr>
-                  {{-- if this meter number came to warehouse --}}
-                  @if ($change_meter_request->new_meter_no != null && $change_meter_request->kwh_meter_request_id == null)
-                    <div class="col-lg-2" id="meter_type_section" style="display: {{ $change_meter_request->kwh_meter_request_id ? 'none' : 'block' }};">
-                      <div class="mb-2">
-                        <label for="meter_code_no" class="form-label mb-1">Meter Type</label>
-                        <input type="text" id="meter_code_no" name="meter_code_no" class="form-control" value="{{ $change_meter_request->assignedMeter->meterType->meter_code }}">
-                      </div>
-                    </div>
-                    <div class="col-lg-2" id="meter_type_section" style="display: {{ $change_meter_request->kwh_meter_request_id ? 'none' : 'block' }};">
+                    <div class="col-lg-2">
                       <div class="mb-2">
                         <label for="meter_code_no" class="form-label mb-1">Meter No</label>
                         <input type="text" id="meter_code_no" name="meter_code_no" class="form-control" value="{{ $change_meter_request->new_meter_no }}">
                       </div>
                     </div>
-                    <div class="col-lg-2" id="meter_type_section" style="display: {{ $change_meter_request->kwh_meter_request_id ? 'none' : 'block' }};">
+                    <div class="col-lg-2">
                       <div class="mb-2">
                         <label for="erc_seal" class="form-label mb-1">ERC Seal</label>
-                        <input type="text" id="erc_seal" name="erc_seal" class="form-control" value="{{ $change_meter_request->assignedMeter->erc_seal_number }}">
+                        <input type="text" id="erc_seal" name="erc_seal" class="form-control" value="{{ $change_meter_request->assignedMeter?->erc_seal_number }}">
                       </div>
                     </div>
-                    <div class="col-lg-2" id="meter_type_section" style="display: {{ $change_meter_request->kwh_meter_request_id ? 'none' : 'block' }};">
+                    <div class="col-lg-2">
                       <div class="mb-2">
                         <label for="leyeco_v_seal" class="form-label mb-1">Leyeco V Seal</label>
-                        <input type="text" id="leyeco_v_seal" name="leyeco_v_seal" class="form-control" value="{{ $change_meter_request->assignedMeter->leyeco_seal_number }}">
+                        <input type="text" id="leyeco_v_seal" name="leyeco_v_seal" class="form-control" value="{{ $change_meter_request->assignedMeter?->leyeco_seal_number }}">
                       </div>
                     </div>
-                  @else
-                    <div class="col-lg-8" id="meter_type_section" style="display: {{ $change_meter_request->kwh_meter_request_id ? 'none' : 'block' }};">
-                      <div class="mb-2">
-                        <label for="meter_code_no" class="form-label mb-1">Type Of Meter*</label>
-                        <select id="meter_code_no" class="form-control" name="meter_code_no" {{ $change_meter_request->kwh_meter_request_id ? '' : 'required' }}>
-                          <option value=""></option>
-                          @foreach ($type_of_meters as $type_of_meter)          
-                            <option value="{{ $type_of_meter->id }}" 
-                                    id="" 
-                                    {{ $change_meter_request->type_of_meter == $type_of_meter->id ? 'selected' : ''}}
-                                    {{ $type_of_meter->available_count <= 0 ? 'disabled' : '' }}
-                                    data-available-count="{{ $type_of_meter->available_count }}">
-                              {{ $type_of_meter->meter_code }} - {{ $type_of_meter->meter_description }} 
-                              (Available: {{ $type_of_meter->available_count }})
-                            </option>
-                          @endforeach 
-                        </select>
-                      </div>
-                    </div>
-                  @endif
                   <div class="col-lg-2">
                     <div class="mb-2">
                         <label for="last_reading" class="form-label mb-1">Last Reading</label>
@@ -273,7 +234,7 @@
                       <div class="col-lg-4">
                         <div class="mb-2">
                           <label for="kwh_meter_request_control_no" class="form-label mb-1">kWh Meter Request</label>
-                            <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no">
+                            <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no" required>
                               <option value="">-- Select kWh Meter Request --</option>
                               @foreach ($kwh_meter_requests as $key => $control_no)          
                                 <option value="{{ $key }}" {{ ($change_meter_request->kwh_meter_request_id == $key || old('kwh_meter_request_control_no') == $key) ? 'selected' : ''}}>
@@ -302,7 +263,7 @@
                       <div class="col-lg-4">
                         <div class="mb-2">
                           <label for="meter_serial_number" class="form-label mb-1">Serial Number</label>
-                            <select id="meter_serial_number" class="form-control" name="meter_serial_number">
+                            <select id="meter_serial_number" class="form-control" name="meter_id" required>
                                 @forelse($change_meter_request->kwhMeterRequestSerialNumbers as $serialNumber)
                                     <option value="{{ $serialNumber->id }}" selected>
                                         {{ $serialNumber->meter->serial_number ?? 'No Serial Number' }}
@@ -346,35 +307,6 @@
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-  $( "#electric_service_detail" ).select2({
-    ajax: { 
-      url: "{{route('fetchAccounts')}}",
-      type: "get",
-      dataType: 'json',
-      delay: 250,
-      data: function (params) {
-        return {
-            // _token: '{{csrf_token()}}',
-            search: params.term, // search term
-            page: params.page
-        };
-      },
-      processResults:function (results, params){
-        params.page = params.page||1;
-
-        return{
-          results:results.data,
-          pagination:{
-            more:results.last_page!=params.page
-          },
-        }
-      },
-      cache: true
-    },
-    // placeholder:'Search Account Number',
-    templateResult: templateResult,
-    templateSelection: templateSelection,
-  });
 
   function templateResult(data){
   if (data.loading){
@@ -419,7 +351,6 @@
   $('#municipality').on('change', function () {
       var id = $(this).children(":selected").attr("id");
       $("#barangay").html('');
-      console.log(id);
       $.ajax({
           url: "{{url('api/fetch-barangays')}}",
           type: "POST",
@@ -443,17 +374,6 @@
       // Handle kWh meter request selection change
       $('#kwh_meter_request_control_no').on('change', function() {
           const controlNo = $(this).val();
-          
-          // Show/hide meter type section based on kWh meter request selection
-          if (controlNo) {
-              // Hide meter type section when kWh meter request is selected
-              $('#meter_type_section').hide();
-              $('#meter_code_no').removeAttr('required');
-          } else {
-              // Show meter type section when no kWh meter request is selected
-              $('#meter_type_section').show();
-              $('#meter_code_no').attr('required', 'required');
-          }
           
           // Clear dependent fields
           $('#liquidation_requested_by').val('');
@@ -550,30 +470,6 @@
                   alert('Error loading serial numbers. Please try again.');
               }
           });
-      }
-  });
-
-  // Add event handler for meter type selection
-  $('#meter_code_no').on('change', function() {
-      var selectedOption = $(this).find('option:selected');
-      var availableCount = selectedOption.data('available-count');
-      
-      // Check if the selected meter type has available meters
-      if (availableCount <= 0 && selectedOption.val() !== '') {
-          alert('Warning: No meters available for the selected meter type. Please choose a different meter type.');
-          $(this).val(''); // Clear the selection
-          return false;
-      }
-  });
-  
-  // Style options based on availability when page loads
-  $('#meter_code_no option').each(function() {
-      var availableCount = $(this).data('available-count');
-      if (availableCount <= 0 && $(this).val() !== '') {
-          $(this).addClass('meter-unavailable');
-          $(this).append(' - OUT OF STOCK');
-      } else if ($(this).val() !== '') {
-          $(this).addClass('meter-available');
       }
   });
 </script>
