@@ -215,6 +215,7 @@
                                 Action
                               </button>
                               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                <li><a class="dropdown-item" href="{{ route('viewCM', $cm_request->id) }}"><i class="fa fa-eye"></i> View</a></li>
                                 @can('change-meter-request-edit')
                                   @if($cm_request->status == null)
                                     <li><a class="dropdown-item" href="{{ route('editCM',$cm_request->id) }}"><i class="fa fa-pencil"></i> Update</a></li>
