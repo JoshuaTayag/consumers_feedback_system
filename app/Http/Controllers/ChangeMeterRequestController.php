@@ -424,13 +424,6 @@ class ChangeMeterRequestController extends Controller
             return redirect()->back()->withInput()->withErrors(['Invalid change meter request']);
         }
 
-        $kwhMeterRequest = $change_meter_request->kwhMeterRequest()->first();
-        if (!$kwhMeterRequest) {
-            return redirect()->back()->withInput()->withErrors([
-                'kwh_meter_request_control_no' => 'The selected kWh meter request does not exist.'
-            ]);
-        }
-
         $newMeter = Meter::find($request->meter_id);
         if (!$newMeter) {
             return redirect()->back()->withInput()
@@ -497,7 +490,7 @@ class ChangeMeterRequestController extends Controller
                 "meter_or_number" => $request->meter_or_no,
                 "meter_or_date" => null,
                 "new_meter_no" => $request->liquidation_meter_serial_number,
-                "type_of_meter" => $request->meter_code_no,
+                "type_of_meter" => $newMeter->meter_type_id,
                 "last_reading" => $request->last_reading,
                 "initial_reading" => $request->reading_initial,
                 "remarks" => $request->remarks,
@@ -567,7 +560,7 @@ class ChangeMeterRequestController extends Controller
         try {
             $change_meter_request = ChangeMeterRequest::findOrFail($id);
 
-            if ($change_meter_request->kwh_meter_request_id) {
+            if ($change_meter_request) {
                 // Liquidation-type request: unlink tracking record
                 $change_meter_request->kwhMeterRequestSerialNumbers()
                     ->where('change_meter_request_id', $change_meter_request->id)
@@ -580,19 +573,7 @@ class ChangeMeterRequestController extends Controller
                     $meter->update([
                         'control_type' => 'kWh Meter Request',
                         'account_number' => null,
-                        'control_no' => $meter->currentKwhMeterRequest->control_no ?? null,
-                    ]);
-                }
-            } else {
-                // Direct meter-assignment request: free the meter back to available stock
-                $meter = Meter::where('serial_number', $change_meter_request->new_meter_no)->first();
-
-                if ($meter) {
-                    $meter->update([
-                        'control_type' => null,
-                        'control_no' => null,
-                        'account_number' => null,
-                        'status' => 0, // available
+                        'control_no'     => $meter->currentKwhMeterRequest?->control_no, 
                     ]);
                 }
             }
