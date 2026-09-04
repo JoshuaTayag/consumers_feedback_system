@@ -125,7 +125,6 @@ class KwhMeterRequest extends Model implements Auditable
             
             $result['status_updated'] = true;
             
-            \Log::info("KWH Meter Request {$this->id} automatically liquidated", $result);
         } else {
             $result['status_updated'] = false;
         }
