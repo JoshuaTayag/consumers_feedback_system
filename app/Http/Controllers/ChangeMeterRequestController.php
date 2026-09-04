@@ -569,22 +569,25 @@ class ChangeMeterRequestController extends Controller
         try {
             $change_meter_request = ChangeMeterRequest::findOrFail($id);
 
-            if ($change_meter_request) {
-                // Liquidation-type request: unlink tracking record
-                $change_meter_request->kwhMeterRequestSerialNumbers()
-                    ->where('change_meter_request_id', $change_meter_request->id)
-                    ->update(['change_meter_request_id' => null]);
+            // Liquidation-type request: unlink tracking record
+            $change_meter_request->kwhMeterRequestSerialNumbers()
+                ->where('change_meter_request_id', $change_meter_request->id)
+                ->update(['change_meter_request_id' => null]);
 
-                // Restore the meter's link back to its original kWh meter request
-                $meter = Meter::where('serial_number', $change_meter_request->new_meter_no)->first();
+            // Restore the meter's link back to its original kWh meter request
+            $meter = Meter::where('serial_number', $change_meter_request->new_meter_no)->first();
 
-                if ($meter) {
-                    $meter->update([
-                        'control_type' => 'kWh Meter Request',
-                        'account_number' => null,
-                        'control_no'     => $meter->currentKwhMeterRequest?->control_no, 
-                    ]);
-                }
+            if ($meter) {
+                $meter->update([
+                    'control_type' => 'kWh Meter Request',
+                    'account_number' => null,
+                    'control_no'     => $meter->currentKwhMeterRequest?->control_no,
+                ]);
+            } else {
+                Log::warning('Meter not found while archiving change meter request', [
+                    'change_meter_request_id' => $change_meter_request->id,
+                    'new_meter_no' => $change_meter_request->new_meter_no,
+                ]);
             }
 
             // Delete change meter request fees
