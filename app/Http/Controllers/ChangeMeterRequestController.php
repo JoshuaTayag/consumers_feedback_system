@@ -449,18 +449,20 @@ class ChangeMeterRequestController extends Controller
                     ->where('change_meter_request_id', $change_meter_request->id)
                     ->update(['change_meter_request_id' => null]);
 
-                // Restore the meter's link back to its original kWh meter request
-                $meter = Meter::where('serial_number', $change_meter_request->new_meter_no)->first();
+                if($change_meter_request->new_meter_no){
+                  // Restore the meter's link back to its original kWh meter request
+                  $meter = Meter::where('serial_number', $change_meter_request->new_meter_no)->first();
 
-                if (!$meter) {
-                    throw new \Exception("Meter with serial number {$change_meter_request->new_meter_no} not found.");
+                  if (!$meter) {
+                      throw new \Exception("Meter with serial number {$change_meter_request->new_meter_no} not found.");
+                  }
+
+                  $meter->update([
+                      'control_type' => 'kWh Meter Request',
+                      'account_number' => null,
+                      'control_no' => $meter->currentKwhMeterRequest->control_no ?? null,
+                  ]);
                 }
-
-                $meter->update([
-                    'control_type' => 'kWh Meter Request',
-                    'account_number' => null,
-                    'control_no' => $meter->currentKwhMeterRequest->control_no ?? null,
-                ]);
 
                 // update new meter's link to the current kWh meter request
                 if (!$newMeter) {
