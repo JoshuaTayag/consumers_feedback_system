@@ -419,7 +419,7 @@ class ChangeMeterRequestController extends Controller
             'meter_id' => ['required_with:kwh_meter_request_control_no'],
         ]);
 
-        $change_meter_request = ChangeMeterRequest::findOrFail($id);      
+        $change_meter_request = ChangeMeterRequest::findOrFail($id);     
         if(!$change_meter_request){
             return redirect()->back()->withInput()->withErrors(['Invalid change meter request']);
         }
@@ -469,18 +469,23 @@ class ChangeMeterRequestController extends Controller
                     throw new \Exception("New meter record is missing.");
                 }
 
-                $newMeter->kwhMeterRequestSerialNumbers()->where('kwh_meter_request_id', $request->kwh_meter_request_control_no)
+                $updatedKwhMeterRequestSerialRows = $newMeter->kwhMeterRequestSerialNumbers()
+                    ->where('kwh_meter_request_id', $request->kwh_meter_request_control_no)
                     ->update(['change_meter_request_id' => $change_meter_request->id]);
+                
+                if ($updatedKwhMeterRequestSerialRows === 0) {
+                    throw new \Exception("No kwhMeterRequestSerialNumbers row found for meter {$newMeter->serial_number} and kwh_meter_request_id {$request->kwh_meter_request_control_no}.");
+                }
 
-                $newMeter->update([
+                $updatedMeterRows = $newMeter->update([
                     'control_type' => 'Change Meter',
                     'control_no' => $change_meter_request->control_no,
-                    'account_number' => $request->liquidation_meter_serial_number,
+                    'account_number' => $request->electric_service_details,
                 ]);
-            }
 
-            if (!$newMeter) {
-                throw new \Exception("New meter record is missing, cannot determine type_of_meter.");
+                if ($updatedMeterRows === 0) {
+                    throw new \Exception("Failed to update meter {$newMeter->serial_number}.");
+                }
             }
 
             // Update the existing record with new data

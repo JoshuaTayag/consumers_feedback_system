@@ -110,12 +110,6 @@
                                         <li>
                                             <a class="dropdown-item" href="{{ route('roles.index') }}">ROLES</a>
                                         </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('change-meter-lead-contractor.index') }}">CHANGE METER CONTRACTORS</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('change-meter-contractor.index') }}">CHANGE METER CONTRACTOR CREW</a>
-                                        </li>
                                     </ul>
                                 </li>
                             @endif
