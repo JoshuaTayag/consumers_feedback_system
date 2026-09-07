@@ -419,7 +419,7 @@ class ChangeMeterRequestController extends Controller
             'meter_id' => ['required_with:kwh_meter_request_control_no'],
         ]);
 
-        $change_meter_request = ChangeMeterRequest::findOrFail($id);      
+        $change_meter_request = ChangeMeterRequest::findOrFail($id);     
         if(!$change_meter_request){
             return redirect()->back()->withInput()->withErrors(['Invalid change meter request']);
         }
@@ -482,6 +482,10 @@ class ChangeMeterRequestController extends Controller
                     'control_no' => $change_meter_request->control_no,
                     'account_number' => $request->electric_service_details,
                 ]);
+
+                if ($updatedMeterRows === 0) {
+                    throw new \Exception("Failed to update meter {$newMeter->serial_number}.");
+                }
             }
 
             // Update the existing record with new data
