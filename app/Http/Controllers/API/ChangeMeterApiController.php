@@ -15,6 +15,8 @@ use App\Enums\SmsTemplate;
 use App\Services\M360SmsService;
 use App\Services\SmsTemplateRenderer;
 use App\Models\Datamanagement\KwhMeterDamageCauseType;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ChangeMeterApiController extends Controller
 {
@@ -189,13 +191,13 @@ class ChangeMeterApiController extends Controller
             
             // Validate meter number uniqueness
             if ($request->meter_no) {
-                $existingMeter = \DB::table('change_meter_requests')
+                $existingMeter = DB::table('change_meter_requests')
                     ->where('new_meter_no', $request->meter_no)
                     ->where('id', '!=', $request->cm_id) // Exclude current record
                     ->where('status', '!=', 1) // exclude records that acted-notcompleted
                     ->first();
 
-                $existingPostedMeter = \DB::table('posted_meters_history')
+                $existingPostedMeter = DB::table('posted_meters_history')
                     ->where('new_meter_no', $request->meter_no)
                     ->first();
 
@@ -213,7 +215,7 @@ class ChangeMeterApiController extends Controller
 
             // Validate seal number uniqueness
             if ($request->seal_no) {
-                $existingSeal = \DB::table('posted_meters_history')
+                $existingSeal = DB::table('posted_meters_history')
                     ->where('leyeco_seal_no', $request->seal_no)
                     ->first();
 
@@ -230,7 +232,7 @@ class ChangeMeterApiController extends Controller
 
             // Validate ERC seal uniqueness
             if ($request->erc_seal) {
-                $existingErcSeal = \DB::table('posted_meters_history')
+                $existingErcSeal = DB::table('posted_meters_history')
                     ->where('erc_seal_no', $request->erc_seal)
                     ->first();
 
@@ -246,7 +248,7 @@ class ChangeMeterApiController extends Controller
             }
 
 
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             // Handle signature collection if provided
             $signatureCollected = false;
@@ -268,7 +270,7 @@ class ChangeMeterApiController extends Controller
                 );
 
                 if (!$signatureResult['success']) {
-                    \DB::rollback();
+                    DB::rollback();
                     return response()->json([
                         'success' => false,
                         'message' => 'Failed to save consumer signature: ' . $signatureResult['message']
@@ -282,7 +284,7 @@ class ChangeMeterApiController extends Controller
             $change_meter_request = ChangeMeterRequest::findOrFail($request->cm_id);
 
             // Debug logging for audit tracking
-            // \Log::info('API Audit Debug - Before Update', [
+            // Log::info('API Audit Debug - Before Update', [
             //     'bearer_token' => $request->bearerToken() ? 'present' : 'missing',
             //     'sanctum_user_id' => auth('sanctum')->id(),
             //     'web_user_id' => auth('web')->id(),
@@ -324,16 +326,44 @@ class ChangeMeterApiController extends Controller
 
             // if the changemeter is for liquidation update the status of kwh meter serial number to 1 (active) in the kwh meter inventory
             if($change_meter_request->kwh_meter_request_id) {
+                // // update kwh meter request
+                // $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
+                //     ->where('change_meter_request_id', $change_meter_request->id)
+                //     ->update([
+                //       'status' => 1,
+                //       'action_status' => $request->status == 1 ? false : ($request->status == 2 ? true : null), // if status is acted-notcompleted, set action_status to false, if acted-completed, set action to true, else set to null
+                //       ]);
+
+                // // update meter assignment back to kwh meter request
+                // $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
+                //     ->where('change_meter_request_id', $change_meter_request->id)->meter()->update([
+                //       'control_type' => 'kWh Meter Request',
+                //       'control_no' => $change_meter_request->kwhMeterRequest->control_no,
+                //       'account_number' => null
+                //     ]);
+
                 $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
                     ->where('change_meter_request_id', $change_meter_request->id)
                     ->update([
                       'status' => 1,
                       'action_status' => $request->status == 1 ? false : ($request->status == 2 ? true : null), // if status is acted-notcompleted, set action_status to false, if acted-completed, set action to true, else set to null
                       ]);
-                     // Assuming '1' indicates 'posted'
+
+                $serialRows = $change_meter_request->kwhMeterRequest
+                    ->kwhMeterRequestSerialNumbers()
+                    ->where('change_meter_request_id', $change_meter_request->id)
+                    ->get();
+
+                $serialRows->each(function ($serial) use ($change_meter_request) {
+                    $serial->meter()->update([
+                        'control_type' => 'kWh Meter Request',
+                        'control_no' => $change_meter_request->kwhMeterRequest->control_no,
+                        'account_number' => null,
+                    ]);
+                });
             }
             // Debug logging after update
-            // \Log::info('API Audit Debug - After Update', [
+            // Log::info('API Audit Debug - After Update', [
             //     'updated_fields' => $dataToUpdate,
             //     'current_user' => auth()->id(),
             //     'sanctum_user' => auth('sanctum')->id()
@@ -360,13 +390,13 @@ class ChangeMeterApiController extends Controller
                     "account_no" => $change_meter_request->account_number,
                 ]);
 
-                $existingRemarks = \DB::connection('sqlSrvBilling')
+                $existingRemarks = DB::connection('sqlSrvBilling')
                     ->table('Consumers Table')
                     ->where('Accnt No', $change_meter_request->account_number)
                     ->value('Remarks') ?? '';
 
                 // check if the account has email address
-                $existingEmail = \DB::connection('sqlSrvBilling')
+                $existingEmail = DB::connection('sqlSrvBilling')
                 ->table('Consumers Table')
                 ->where('Accnt No', $change_meter_request->account_number)
                 ->value('emailadd') ?? '';
@@ -381,7 +411,7 @@ class ChangeMeterApiController extends Controller
 
                 $newRemarks = substr($existingRemarks . $completeRemarks, 0);
 
-                \DB::connection('sqlSrvBilling')
+                DB::connection('sqlSrvBilling')
                     ->table('Consumers Table')
                     ->where('Accnt No', $change_meter_request->account_number)
                     ->update([
@@ -400,7 +430,7 @@ class ChangeMeterApiController extends Controller
                         ->notify(new ChangeMeterCompletedNotification($change_meter_request));
                 } catch (\Exception $e) {
                     // Log email error but don't fail the transaction
-                    \Log::error('Failed to send change meter completion email: ' . $e->getMessage());
+                    Log::error('Failed to send change meter completion email: ' . $e->getMessage());
                 }
             }
 
@@ -436,7 +466,7 @@ class ChangeMeterApiController extends Controller
               );
             }
 
-            \DB::commit();
+            DB::commit();
 
             return response()->json([
                 'success' => true,
@@ -453,7 +483,7 @@ class ChangeMeterApiController extends Controller
 
         } catch (\Exception $e) {
             // If an exception occurs during the transaction, rollback all changes
-            \DB::rollback();
+            DB::rollback();
 
             return response()->json([
                 'success' => false,
