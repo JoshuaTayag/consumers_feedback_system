@@ -364,15 +364,21 @@ class ChangeMeterRequestController extends Controller
             ->get();
 
             // fetch all meter requests with approved_at and have available serials
-            $kwh_meter_requests = KwhMeterRequest::select('id', 'control_no', 'quantity')
+            $kwh_meter_requests = KwhMeterRequest::select('id', 'control_no', 'quantity', 'user_id')
             ->orderBy('id', 'DESC')
             ->where('approved_at', '!=', null)
-            ->with(['kwhMeterRequestSerialNumbers' => function($query) use ($id) {
-                $query->where('status', 0)
-                    ->where(function($subQuery) use ($id) {
-                        $subQuery->whereNull('change_meter_request_id')
-                                ->orWhere('change_meter_request_id', $id);
-                    })
+            ->with(['kwhMeterRequestSerialNumbers' => function($query) {
+                $query->where(function ($query) {
+                    $query->where(function ($query) {
+                        $query->whereNotNull('change_meter_request_id')
+                            ->where('status', 1)
+                            ->where('action_status', false);
+                    })->orWhere(function ($query) {
+                        $query->whereNull('change_meter_request_id')
+                            ->where('status', 0)
+                            ->whereNull('action_status');
+                    });
+                })
                     ->whereNull('deleted_at');
             }])
             ->get()
@@ -385,7 +391,7 @@ class ChangeMeterRequestController extends Controller
                 $totalQuantity = $request->quantity;
                 
                 // Format: "Control No - (Available: X/Total: Y)"
-                $displayText = $request->control_no . ' - (Available: ' . $availableCount . '/' . $totalQuantity . ')';
+                $displayText = $request->control_no .' (' . $request->user->name . ') - (Available: ' . $availableCount . '/' . $totalQuantity . ')';
                 
                 return [$request->id => $displayText];
             });
