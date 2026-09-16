@@ -20,12 +20,9 @@
             @csrf
             @method('PUT')
             <div class="row">
-              <div class="col-lg-9">
+              <div class="col-lg-12">
                 <div class="row">
-                  <div class="col-lg-12 mb-3">
-                    <span class="fs-4 fw-bold">Control #: <span class="text-danger">{{$change_meter_request->control_no}}</span></span>
-                  </div>
-                  <div class="col-lg-6">
+                  <div class="col-lg-8">
                     <div class="mb-2">
                         <label for="electric_service_details" class="form-label mb-1">Account Number</label>
                         <input type="text" id="electric_service_details" name="electric_service_details" class="form-control" value="{{ $change_meter_request->account_number }}" disabled>
@@ -39,6 +36,7 @@
                   </div>
                 </div>
 
+                <code class="fs-4">Consumer Details</code>
                 <hr>
 
                 <div class="row">
@@ -48,7 +46,7 @@
                         <input type="text" id="last_name" name="last_name" class="form-control" value="{{ $change_meter_request->last_name }}">
                     </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <div class="mb-2">
                         <label for="first_name" class="form-label mb-1">First Name</label>
                         <input type="text" id="first_name" name="first_name" class="form-control" value="{{ $change_meter_request->first_name }}">
@@ -66,7 +64,7 @@
                         <input type="email" id="email" name="email" class="form-control" value="{{ $change_meter_request->email }}">
                     </div>
                   </div>
-                  <div class="col-lg-3">
+                  <div class="col-lg-2">
                     <div class="mb-2">
                         <label for="care_of" class="form-label mb-1">Care of</label>
                         <input type="text" id="care_of" name="care_of" class="form-control" value="{{ $change_meter_request->care_of }}">
@@ -75,8 +73,7 @@
                 </div>
                 <div class="row">
                   <div class="col-lg-2">
-                    <label for="feeder">Feeder *</label>
-                    <!-- <input type="text" value="" id="care_of" name="care_of" class="form-control" readonly> -->
+                    <label for="feeder" class="form-label mb-1">Feeder *</label>
                     <select id="feeder" class="form-control" name="feeder" required>
                       <option value=""></option>
                       @foreach (Config::get('constants.feeders') as $feeder)          
@@ -110,7 +107,7 @@
                   </div>
                   <div class="col-lg-3">
                     <div class="mb-2">
-                        <label for="barangay" class="form-label mb-1">Barangays *</label>
+                        <label for="barangay" class="form-label mb-1">Barangay *</label>
                         <select id="barangay" class="form-control" name="barangay" required>
                           <option value="{{ $change_meter_request->barangay_id }}" id="{{ $change_meter_request->barangay_id }}">{{$change_meter_request->barangay_id ? $change_meter_request->barangay->barangay_name : null }}</option>
                         </select>
@@ -149,37 +146,67 @@
                     </div>
                   </div>
                 </div>
-                
                 <div class="row">
-                  <hr>
-                    <div class="col-lg-2">
-                      <div class="mb-2">
-                        <label for="meter_code_no" class="form-label mb-1">Meter No</label>
-                        <input type="text" id="meter_code_no" name="meter_code_no" class="form-control" value="{{ $change_meter_request->new_meter_no }}">
-                      </div>
-                    </div>
-                    <div class="col-lg-2">
-                      <div class="mb-2">
-                        <label for="erc_seal" class="form-label mb-1">ERC Seal</label>
-                        <input type="text" id="erc_seal" name="erc_seal" class="form-control" value="{{ $change_meter_request->assignedMeter?->erc_seal_number }}">
-                      </div>
-                    </div>
-                    <div class="col-lg-2">
-                      <div class="mb-2">
-                        <label for="leyeco_v_seal" class="form-label mb-1">Leyeco V Seal</label>
-                        <input type="text" id="leyeco_v_seal" name="leyeco_v_seal" class="form-control" value="{{ $change_meter_request->assignedMeter?->leyeco_seal_number }}">
-                      </div>
-                    </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-1">
                     <div class="mb-2">
-                        <label for="last_reading" class="form-label mb-1">Last Reading</label>
-                        <input type="number" id="last_reading" name="last_reading" class="form-control" value="{{ $change_meter_request->last_reading }}" readonly>
+                      <label for="last_reading" class="form-label mb-1">Last Reading</label>
+                      <input type="number" id="last_reading" name="last_reading" class="form-control" readonly value="{{ $change_meter_request->last_reading }}">
                     </div>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-1">
                     <div class="mb-2">
-                        <label for="reading_initial" class="form-label mb-1">Initial Reading</label>
-                        <input type="number" id="reading_initial" name="reading_initial" class="form-control" value="{{ $change_meter_request->initial_reading }}">
+                      <label for="reading_initial" class="form-label mb-1">Ini Reading</label>
+                      <input type="number" id="reading_initial" name="reading_initial" class="form-control" value="{{ $change_meter_request->initial_reading }}">
+                    </div>
+                  </div>
+                  {{-- <div class="col-lg-4">
+                    <div class="mb-2">
+                      <label for="kwh_meter_request_control_no" class="form-label mb-1">kWh Meter Request *</label>
+                        <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no" required>
+                          <option value="">Select kWh Meter Request</option>
+                          @foreach ($kwh_meter_requests as $key => $control_no)          
+                            <option value="{{ $key }}" {{ old('kwh_meter_request_control_no') == $control_no ? 'selected' : ''}}>
+                            {{ $control_no }}
+                            </option>
+                          @endforeach 
+                        </select>
+                    </div>
+                  </div> --}}
+                  <div class="col-lg-4">
+                    <div class="mb-2">
+                      <label for="kwh_meter_request_control_no" class="form-label mb-1">kWh Meter Request</label>
+                        <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no" required>
+                          <option value="">-- Select kWh Meter Request --</option>
+                          @foreach ($kwh_meter_requests as $key => $control_no)          
+                            <option value="{{ $key }}" {{ ($change_meter_request->kwh_meter_request_id == $key || old('kwh_meter_request_control_no') == $key) ? 'selected' : ''}}>
+                            {{ $control_no }}
+                            </option>
+                          @endforeach 
+                        </select>
+                    </div>
+                  </div>
+                  {{-- <div class="col-lg-3">
+                    <div class="mb-2">
+                      <label for="liquidation_requested_by" class="form-label mb-1">Requested By</label>
+                      <input type="text" id="liquidation_requested_by" name="liquidation_requested_by" class="form-control" readonly>
+                    </div>
+                  </div>
+                  <div class="col-lg-3">
+                    <div class="mb-2">
+                      <label for="liquidation_meter_type" class="form-label mb-1">Meter Type</label>
+                      <input type="text" id="liquidation_meter_type" name="liquidation_meter_type" class="form-control" readonly>
+                    </div>
+                  </div> --}}
+                  <div class="col-lg-3">
+                    <div class="mb-2">
+                      <label for="liquidation_requested_by" class="form-label mb-1">Requested By</label>
+                      <input type="text" id="liquidation_requested_by" value="{{ $change_meter_request->kwhMeterRequest->user->name ?? '' }}" name="liquidation_requested_by" class="form-control" readonly>
+                    </div>
+                  </div>
+                  <div class="col-lg-3">
+                    <div class="mb-2">
+                      <label for="liquidation_meter_type" class="form-label mb-1">Meter Type</label>
+                      <input type="text" id="liquidation_meter_type" value="{{ $change_meter_request->kwhMeterRequest->meterType->meter_description ?? '' }}" name="liquidation_meter_type" class="form-control" readonly>
                     </div>
                   </div>
                 </div>
@@ -187,111 +214,24 @@
                   <div class="col-lg-6">
                     <div class="mb-2">
                       <label class="form-label mb-1">Remarks </label>
-                      <textarea class="form-control" name="remarks" id="remarks">{{ $change_meter_request->remarks }}</textarea>
+                      <textarea class="form-control" name="remarks" id="remarks">{{ $change_meter_request->remarks ?? '' }}</textarea>
                     </div>
                   </div>
                   <div class="col-lg-6">
                     <div class="mb-2">
-                      <label class="form-label mb-1">Landmark </label>
-                      <textarea class="form-control" name="location" id="location">{{ $change_meter_request->location }}</textarea>
+                      <label class="form-label mb-1">Landmark *</label>
+                      <textarea class="form-control" name="location" id="location" required>{{ $change_meter_request->location ?? '' }}</textarea>
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div class="col-lg-3 mb-3" id="schedule_of_fees" >
-                <div class="col text-center"><h2>Schedule of Fees</h2></div>
-                @if($change_meter_request->changeMeterRequestTransaction)
-                  <span class="text-center fw-bold text-warning fs-3">OR: {{ $change_meter_request->changeMeterRequestTransaction->or_no }}</span>
-                  
-                  <ol class="list-group list-group-numbered">
-                    @if(isset($change_meter_request->cmr_fees) && $change_meter_request->cmr_fees->isNotEmpty())
-                        @foreach($change_meter_request->cmr_fees as $cm_fees)
-                            <li class="list-group-item bg-secondary text-white text-capitalize fw-bold">
-                                {{ str_replace('_', ' ', $cm_fees->fees) }} - ₱{{ number_format($cm_fees->amount, 2, '.', '') }}
-                            </li>
-                        @endforeach
-                    @else
-                        <!-- <li class="list-group-item bg-secondary text-white text-capitalize fw-bold">No fees available</li> -->
-                    @endif
-                  </ol>
-
-                @else
-                  @include('service_connect_order.schedule_of_fees')
-                @endif
-              </div>
-
-              {{-- @if ($change_meter_request->new_meter_no == null && $change_meter_request->kwh_meter_request_id == null) --}}
-                <div class="col-lg-8">
-                  <code class="fs-4">Liquidation Details</code>
-                  <hr>
-                  @if ($change_meter_request->new_meter_no != null && $change_meter_request->kwh_meter_request_id == null)
-                    <div class="alert alert-info">
-                      This change meter request is already assigned with a meter number. 
-                    </div>
-                  @else
-                    <div class="row">
-                      <div class="col-lg-4">
-                        <div class="mb-2">
-                          <label for="kwh_meter_request_control_no" class="form-label mb-1">kWh Meter Request</label>
-                            <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no" required>
-                              <option value="">-- Select kWh Meter Request --</option>
-                              @foreach ($kwh_meter_requests as $key => $control_no)          
-                                <option value="{{ $key }}" {{ ($change_meter_request->kwh_meter_request_id == $key || old('kwh_meter_request_control_no') == $key) ? 'selected' : ''}}>
-                                {{ $control_no }}
-                                </option>
-                              @endforeach 
-                            </select>
-                        </div>
-                      </div>
-                      <div class="col-lg-3">
-                        <div class="mb-2">
-                          <label for="liquidation_requested_by" class="form-label mb-1">Requested By</label>
-                          {{-- <input type="text" id="liquidation_requested_by" name="liquidation_requested_by" class="form-control" readonly> --}}
-                          <input type="text" id="liquidation_requested_by" value="{{ $change_meter_request->kwhMeterRequest->user->name ?? '' }}" name="liquidation_requested_by" class="form-control" readonly>
-                        </div>
-                      </div>
-                      <div class="col-lg-5">
-                        <div class="mb-2">
-                          <label for="liquidation_meter_type" class="form-label mb-1">Meter Type</label>
-                          {{-- <input type="text" id="liquidation_meter_type" name="liquidation_meter_type" class="form-control" readonly> --}}
-                          <input type="text" id="liquidation_meter_type" value="{{ $change_meter_request->kwhMeterRequestSerialNumbers->first()?->meter?->meterType?->meter_description ?? '' }}" name="liquidation_meter_type" class="form-control" readonly>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-lg-4">
-                        <div class="mb-2">
-                          <label for="meter_serial_number" class="form-label mb-1">Serial Number</label>
-                            <select id="meter_serial_number" class="form-control" name="meter_id" required>
-                                @forelse($change_meter_request->kwhMeterRequestSerialNumbers as $serialNumber)
-                                    <option value="{{ $serialNumber->id }}" selected>
-                                        {{ $serialNumber->meter->serial_number ?? 'No Serial Number' }}
-                                    </option>
-                                @empty
-                                    <option value="">No serial numbers assigned</option>
-                                @endforelse
-                            </select>
-                        </div>
-                      </div>
-                      <div class="col-lg-4">
-                        <div class="mb-2">
-                          <label for="liquidation_erc_seal" class="form-label mb-1">ERC Seal</label>
-                          <input type="text" id="liquidation_erc_seal" value="@if($change_meter_request->kwhMeterRequestSerialNumbers->count() > 0 && $change_meter_request->kwhMeterRequestSerialNumbers->first()->meter){{ $change_meter_request->kwhMeterRequestSerialNumbers->first()->meter->erc_seal_number }}@endif" name="liquidation_erc_seal" class="form-control" readonly>
-                        </div>
-                      </div>
-                      <div class="col-lg-4">
-                        <div class="mb-2">
-                          <label for="liquidation_leyeco_seal" class="form-label mb-1">Leyeco 5 Seal</label>
-                          <input type="text" id="liquidation_leyeco_seal" value="@if($change_meter_request->kwhMeterRequestSerialNumbers->count() > 0 && $change_meter_request->kwhMeterRequestSerialNumbers->first()->meter){{ $change_meter_request->kwhMeterRequestSerialNumbers->first()->meter->leyeco_seal_number }}@endif" name="liquidation_leyeco_seal" class="form-control" readonly>
-                        </div>
-                      </div>
-                      <input type="hidden" id="liquidation_meter_serial_number" value="@if($change_meter_request->kwhMeterRequestSerialNumbers->count() > 0 && $change_meter_request->kwhMeterRequestSerialNumbers->first()->meter){{ $change_meter_request->kwhMeterRequestSerialNumbers->first()->meter->serial_number }}@endif" name="liquidation_meter_serial_number" class="form-control" readonly>
-                    </div>
-                  @endif   
+                <code class="fs-4">Schedule of Fees</code>
+                <hr>
+                <div class="row">
+                  <div class="col-lg-4">
+                    @include('service_connect_order.schedule_of_fees')
+                  </div>
                 </div>
-              {{-- @endif --}}
-
+              </div>
               <div class="col-xs-12 col-sm-12 col-md-12 text-end">
                   <a class="btn btn-sm btn-primary" href="{{ route('indexCM') }}"><i class="fa fa-arrow-left me-2"></i>Back </a>
                   <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-check me-2"></i>Submit</button>
@@ -379,9 +319,6 @@
           $('#liquidation_requested_by').val('');
           $('#liquidation_meter_type').val('');
           $('#meter_serial_number').html('<option value="">Select Serial Number</option>');
-          $('#liquidation_erc_seal').val('');
-          $('#liquidation_leyeco_seal').val('');
-          $('#liquidation_meter_serial_number').val('');
           
           if (controlNo) {
               // Fetch kWh meter request details
@@ -407,70 +344,6 @@
               });
           }
       });
-      
-      // Handle serial number selection change
-      $('#meter_serial_number').on('change', function() {
-          const meterId = $(this).val();
-          
-          // Clear seal fields
-          $('#liquidation_erc_seal').val('');
-          $('#liquidation_leyeco_seal').val('');
-          $('#liquidation_meter_serial_number').val('');
-          
-          if (meterId) {
-              // Fetch meter seal details
-              $.ajax({
-                  url: '{{ route("meterSealDetails") }}',
-                  type: 'GET',
-                  data: { meter_id: meterId },
-                  success: function(response) {
-                      if (response.success) {
-                          $('#liquidation_erc_seal').val(response.data.erc_seal || '');
-                          $('#liquidation_leyeco_seal').val(response.data.leyeco_seal || '');
-                          $('#liquidation_meter_serial_number').val(response.data.serial_number || '');
-                      } else {
-                          alert('Error: ' + response.message);
-                      }
-                  },
-                  error: function(xhr, status, error) {
-                      console.error('Error fetching meter seal details:', error);
-                      alert('Error loading meter seal details. Please try again.');
-                  }
-              });
-          }
-      });
-      
-      // Function to load serial numbers for selected kWh meter request
-      function loadSerialNumbers(controlNo) {
-          $('#meter_serial_number').html('<option value="">Loading serial numbers...</option>');
-          
-          $.ajax({
-              url: '{{ route("kwhMeterSerialNumbers") }}',
-              type: 'GET',
-              data: { 
-                  control_no: controlNo, 
-                  change_meter_request_id: '{{ $change_meter_request->id }}'
-              },
-              success: function(response) {
-                  let options = '<option value="">Select Serial Number</option>';
-                  
-                  if (response.success && response.data.length > 0) {
-                      response.data.forEach(function(meter) {
-                          options += `<option value="${meter.id}">${meter.serial_number}</option>`;
-                      });
-                  } else {
-                      options = '<option value="">No available serial numbers</option>';
-                  }
-                  
-                  $('#meter_serial_number').html(options);
-              },
-              error: function(xhr, status, error) {
-                  console.error('Error fetching serial numbers:', error);
-                  $('#meter_serial_number').html('<option value="">Error loading serial numbers</option>');
-                  alert('Error loading serial numbers. Please try again.');
-              }
-          });
-      }
   });
 </script>
 @endsection
@@ -483,10 +356,10 @@
     backdrop-filter: blur(8px);
   }
 
-  .container {
+  /* .container {
       display: flex;
      
-  }
+  } */
   
   .scrollbar {
     max-height: 450px; overflow-y: auto;

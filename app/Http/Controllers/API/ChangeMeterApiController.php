@@ -127,344 +127,55 @@ class ChangeMeterApiController extends Controller
     
     public function meterPosting(Request $request)
     {
-        // Basic validation first
-        $request->validate([
-            'cm_id' => 'required|exists:change_meter_requests,id',
-            'date_acted' => 'required|date',
-            'time' => 'required|date_format:H:i',
-            'crew' => 'required|integer',
-            'status' => 'required|integer|in:1,2', // Only allow status 1 or 2
-            'care_of' => 'nullable|string',
-            'last_reading' => 'nullable|numeric',
-            'reading_initial' => 'nullable|numeric',
-            'require_consumer_signature' => 'boolean',
-        ]);
-
-        // Conditional validation based on status
-        if ($request->status == 2) {
-            // Status 2 (acted-completed) - require meter_no, seal_no, erc_seal
-            $request->validate([
-                'meter_no' => 'required|string',
-                'seal_no' => 'required|string',
-                'erc_seal' => 'required|string',
-                'crew_remarks' => 'nullable|string',
-                'email' => 'nullable|email',
-                'damage_cause' => 'required|integer|exists:kwh_meter_damage_cause_types,id',
-                'consumer_signature_data' => 'nullable|string', // Base64 encoded image
-                'consumer_name' => 'required_with:consumer_signature_data|string|max:255',
-                'consumer_position' => 'nullable|string|max:255',
-                'latitude' => 'required_with:consumer_signature_data|numeric|between:-90,90',
-                'longitude' => 'required_with:consumer_signature_data|numeric|between:-180,180',
-                'gps_accuracy' => 'nullable|numeric',   
-            ]);
-        } else if ($request->status == 3) {
-            // Status 3 (acted-not-completed) - these fields are optional
-            $request->validate([
-                'meter_no' => 'nullable|string',
-                'seal_no' => 'nullable|string',
-                'erc_seal' => 'nullable|string',
-                'crew_remarks' => 'required|string',
-                'damage_cause' => 'nullable',
-            ]);
-        }
-
+        $this->validateMeterPostingRequest($request);
 
         try {
-
-            // Check if the status is already acted
             $existingRequest = ChangeMeterRequest::findOrFail($request->cm_id);
-            if ($existingRequest->status == 2) { 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'This meter request has already been acted upon and cannot be posted again.'
-                ], 400);
+
+            if ($response = $this->checkAlreadyActed($existingRequest)) {
+                return $response;
             }
 
-            // Check if the crew assigned is the same as the logged-in user
-            $loggedInCrewId = auth()->user()->change_meter_contractor->id;
-            if ($existingRequest->crew != $loggedInCrewId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You are not authorized to post this meter request.'
-                ], 403);
-            }
-            
-            // Validate meter number uniqueness
-            if ($request->meter_no) {
-                $existingMeter = DB::table('change_meter_requests')
-                    ->where('new_meter_no', $request->meter_no)
-                    ->where('id', '!=', $request->cm_id) // Exclude current record
-                    ->where('status', '!=', 1) // exclude records that acted-notcompleted
-                    ->first();
-
-                $existingPostedMeter = DB::table('posted_meters_history')
-                    ->where('new_meter_no', $request->meter_no)
-                    ->first();
-
-                if ($existingMeter || $existingPostedMeter) {
-                    $control_no = $existingMeter ? $existingMeter->control_no : $existingPostedMeter->sco_no;
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Meter number already exists',
-                        'error_type' => 'meter_validation',
-                        'existing_control_no' => $control_no,
-                        'field' => 'meter_no'
-                    ], 422);
-                }
+            if ($response = $this->checkCrewAuthorization($existingRequest)) {
+                return $response;
             }
 
-            // Validate seal number uniqueness
-            if ($request->seal_no) {
-                $existingSeal = DB::table('posted_meters_history')
-                    ->where('leyeco_seal_no', $request->seal_no)
-                    ->first();
-
-                if ($existingSeal) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Seal number already exists',
-                        'error_type' => 'seal_validation',
-                        'existing_control_no' => $existingSeal->sco_no,
-                        'field' => 'seal_no'
-                    ], 422);
-                }
+            if ($response = $this->checkMeterNumberUniqueness($request)) {
+                return $response;
             }
 
-            // Validate ERC seal uniqueness
-            if ($request->erc_seal) {
-                $existingErcSeal = DB::table('posted_meters_history')
-                    ->where('erc_seal_no', $request->erc_seal)
-                    ->first();
-
-                if ($existingErcSeal) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'ERC seal number already exists',
-                        'error_type' => 'erc_seal_validation',
-                        'existing_control_no' => $existingErcSeal->sco_no,
-                        'field' => 'erc_seal'
-                    ], 422);
-                }
+            if ($response = $this->checkSealNumberUniqueness($request)) {
+                return $response;
             }
 
+            if ($response = $this->checkErcSealUniqueness($request)) {
+                return $response;
+            }
 
             DB::beginTransaction();
 
-            // Handle signature collection if provided
-            $signatureCollected = false;
             if ($request->consumer_signature_data && $request->consumer_name) {
-                $metadata = [
-                    'position' => $request->consumer_position ?? 'Consumer',
-                    'device_info' => $request->header('User-Agent'),
-                    'collected_at' => now()->toISOString(),
-                    'accuracy' => $request->gps_accuracy,
-                ];
-
-                $signatureResult = $this->signatureService->storeConsumerSignature(
-                    $request->cm_id,
-                    $request->consumer_signature_data,
-                    $request->consumer_name,
-                    $request->latitude,
-                    $request->longitude,
-                    $metadata
-                );
-
-                if (!$signatureResult['success']) {
-                    DB::rollback();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Failed to save consumer signature: ' . $signatureResult['message']
-                    ], 400);
+                $signatureResponse = $this->storeConsumerSignature($request);
+                if ($signatureResponse) {
+                    return $signatureResponse;
                 }
-
-                $signatureCollected = true;
             }
 
-            // Find the existing record
             $change_meter_request = ChangeMeterRequest::findOrFail($request->cm_id);
 
-            // Debug logging for audit tracking
-            // Log::info('API Audit Debug - Before Update', [
-            //     'bearer_token' => $request->bearerToken() ? 'present' : 'missing',
-            //     'sanctum_user_id' => auth('sanctum')->id(),
-            //     'web_user_id' => auth('web')->id(),
-            //     'auth_user_id' => auth()->id(),
-            //     'request_user' => $request->user() ? $request->user()->id : null,
-            //     'cm_request_id' => $request->cm_id
-            // ]);
+            $dateTimeActed = $this->buildDateTimeActed($request);
 
-            // Get the crew id
-            $crew_id = auth()->user()->change_meter_contractor->id;
-            
-            // Combine date and time
-            $dateTimeActed = null;
-            if ($request->date_acted && $request->time) {
-                $dateTimeActed = \Carbon\Carbon::createFromFormat('Y-m-d H:i', $request->date_acted . ' ' . $request->time)->format('Y-m-d H:i:s');
+            $this->updateChangeMeterRequest($change_meter_request, $request, $dateTimeActed);
+
+            $this->syncKwhMeterInventory($change_meter_request, $request);
+
+            if ($change_meter_request->status == 2) {
+                $this->createPostingHistory($change_meter_request, $request, $dateTimeActed);
+                $this->updateBillingSystem($change_meter_request, $request);
             }
 
-            // Prepare the data for updating
-            $dataToUpdate = [
-                "new_meter_no" => $request->meter_no,
-                "date_time_acted" => $dateTimeActed,
-                "care_of" => $request->care_of,
-                "last_reading" => $request->last_reading,
-                "initial_reading" => $request->reading_initial,
-                "crew" => $crew_id,
-                "status" => $request->status,
-                "damage_cause" => $request->damage_cause,
-                "crew_remarks" => $request->crew_remarks,
-                "email" => $request->email,
-            ];
-
-            // Remove any null values from the update array
-            $dataToUpdate = array_filter($dataToUpdate, function ($value) {
-                return !is_null($value);
-            });
-
-            // Update the existing record with new data
-            $change_meter_request->update($dataToUpdate);
-
-            // if the changemeter is for liquidation update the status of kwh meter serial number to 1 (active) in the kwh meter inventory
-            if($change_meter_request->kwh_meter_request_id) {
-                // // update kwh meter request
-                // $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
-                //     ->where('change_meter_request_id', $change_meter_request->id)
-                //     ->update([
-                //       'status' => 1,
-                //       'action_status' => $request->status == 1 ? false : ($request->status == 2 ? true : null), // if status is acted-notcompleted, set action_status to false, if acted-completed, set action to true, else set to null
-                //       ]);
-
-                // // update meter assignment back to kwh meter request
-                // $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
-                //     ->where('change_meter_request_id', $change_meter_request->id)->meter()->update([
-                //       'control_type' => 'kWh Meter Request',
-                //       'control_no' => $change_meter_request->kwhMeterRequest->control_no,
-                //       'account_number' => null
-                //     ]);
-
-                $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
-                    ->where('change_meter_request_id', $change_meter_request->id)
-                    ->update([
-                      'status' => 1,
-                      'action_status' => $request->status == 1 ? false : ($request->status == 2 ? true : null), // if status is acted-notcompleted, set action_status to false, if acted-completed, set action to true, else set to null
-                      ]);
-
-                $serialRows = $change_meter_request->kwhMeterRequest
-                    ->kwhMeterRequestSerialNumbers()
-                    ->where('change_meter_request_id', $change_meter_request->id)
-                    ->get();
-
-                $serialRows->each(function ($serial) use ($change_meter_request) {
-                    $serial->meter()->update([
-                        'control_type' => 'kWh Meter Request',
-                        'control_no' => $change_meter_request->kwhMeterRequest->control_no,
-                        'account_number' => null,
-                    ]);
-                });
-            }
-            // Debug logging after update
-            // Log::info('API Audit Debug - After Update', [
-            //     'updated_fields' => $dataToUpdate,
-            //     'current_user' => auth()->id(),
-            //     'sanctum_user' => auth('sanctum')->id()
-            // ]);
-
-            // Check if posting is installed (status = 2)
-            if($change_meter_request->status == 2) {
-
-                // Create posting history record if the status is acted-completed (2)
-                ChangeMeterRequestPostingHistory::create([
-                    "sco_no" => $change_meter_request->control_no,
-                    "old_meter_no" => $change_meter_request->old_meter_no,
-                    "new_meter_no" => $change_meter_request->new_meter_no,
-                    "process_date" => date('Y-m-d', strtotime($change_meter_request->created_at)),
-                    "date_installed" => $request->date_acted ? date('Y-m-d H:i:s', strtotime($request->date_acted)) : null,
-                    "action_status" => $change_meter_request->status,
-                    "leyeco_seal_no" => $request->seal_no,
-                    "serial_no" => null,
-                    "area" => $change_meter_request->area,
-                    "feeder" => $change_meter_request->feeder,
-                    "erc_seal_no" => $request->erc_seal,
-                    "posted_by" => auth()->id(),
-                    "created_at" => \Carbon\Carbon::now(),
-                    "account_no" => $change_meter_request->account_number,
-                ]);
-
-                $existingRemarks = DB::connection('sqlSrvBilling')
-                    ->table('Consumers Table')
-                    ->where('Accnt No', $change_meter_request->account_number)
-                    ->value('Remarks') ?? '';
-
-                // check if the account has email address
-                $existingEmail = DB::connection('sqlSrvBilling')
-                ->table('Consumers Table')
-                ->where('Accnt No', $change_meter_request->account_number)
-                ->value('emailadd') ?? '';
-
-                // if the consumers does not have email address in the billing system and the consumer position is owner, use the email address from the request to update the billing system and use it for sending email notification
-                $emailAddress = $existingEmail == null && $request->consumer_position == 'Owner' ? $request->email : $existingEmail;
-                
-                // Remove leading and trailing spaces
-                $existingRemarks = trim($existingRemarks);
-
-                $completeRemarks = ' OM: '.$change_meter_request->old_meter_no.' DI: '.date('m/d/y', strtotime($request->date_acted));
-
-                $newRemarks = substr($existingRemarks . $completeRemarks, 0);
-
-                DB::connection('sqlSrvBilling')
-                    ->table('Consumers Table')
-                    ->where('Accnt No', $change_meter_request->account_number)
-                    ->update([
-                        'Serial No' => $change_meter_request->new_meter_no,
-                        'Brand' => $change_meter_request->assignedMeter && $change_meter_request->assignedMeter->meterType ? $change_meter_request->assignedMeter->meterType->meter_brand : null,
-                        'TypeMtr' => $change_meter_request->assignedMeter && $change_meter_request->assignedMeter->meterType ? $change_meter_request->assignedMeter->meterType->meter_code : null,
-                        'Remarks' => $newRemarks,
-                        'emailadd' => $emailAddress,
-                    ]);
-            }
-
-            // Send email notification if email exists
-            if (!empty($change_meter_request->email)) {
-                try {
-                    Notification::route('mail', $change_meter_request->email)
-                        ->notify(new ChangeMeterCompletedNotification($change_meter_request));
-                } catch (\Exception $e) {
-                    // Log email error but don't fail the transaction
-                    Log::error('Failed to send change meter completion email: ' . $e->getMessage());
-                }
-            }
-
-            if($change_meter_request->contact_no && $change_meter_request->status == 2) {
-              app(M360SmsService::class)->sendTemplate(
-                  to: [$change_meter_request->contact_no],
-                  template: SmsTemplate::RequestCompleted,
-                  data: [
-                      'CONTROL_NO'   => $change_meter_request->control_no,
-                      'ACCOUNT_NO'   => $change_meter_request->account_number,
-                      'ACCOUNT_NAME' => $change_meter_request->full_name,
-                      'ADDRESS'      => $change_meter_request->address,
-                      'ACKNOWLEDGE_BY'      => $change_meter_request->customerSignature->signatory_name ?? 'NONE',
-                      'COMPLETION_DATE' => $change_meter_request->date_time_acted->format('F j, Y h:i A'),
-                  ],
-                  renderer: app(SmsTemplateRenderer::class),
-              );
-            }
-
-            if($change_meter_request->contact_no && $change_meter_request->status == 1) {
-              app(M360SmsService::class)->sendTemplate(
-                  to: [$change_meter_request->contact_no],
-                  template: SmsTemplate::RequestNotCompleted,
-                  data: [
-                      'CONTROL_NO'   => $change_meter_request->control_no,
-                      'ACCOUNT_NO'   => $change_meter_request->account_number,
-                      'ACCOUNT_NAME' => $change_meter_request->full_name,
-                      'ADDRESS'      => $change_meter_request->address,
-                      'DATE_ACTED' => $change_meter_request->date_time_acted->format('F j, Y h:i A'),
-                      'REASON' => $change_meter_request->crew_remarks ?? 'No reason provided',
-                  ],
-                  renderer: app(SmsTemplateRenderer::class),
-              );
-            }
+            $this->sendEmailNotification($change_meter_request);
+            $this->sendSmsNotifications($change_meter_request);
 
             DB::commit();
 
@@ -482,12 +193,11 @@ class ChangeMeterApiController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            // If an exception occurs during the transaction, rollback all changes
             DB::rollback();
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error posting meter: ' . $e->getMessage()
+                'message' => 'Error posting meter: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -649,6 +359,360 @@ class ChangeMeterApiController extends Controller
                 'success' => false,
                 'message' => 'Error fetching KWH meter damage causes: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    private function validateMeterPostingRequest(Request $request): void
+    {
+        // Basic validation first
+        $request->validate([
+            'cm_id' => 'required|exists:change_meter_requests,id',
+            'date_acted' => 'required|date',
+            'time' => 'required|date_format:H:i',
+            'crew' => 'required|integer',
+            'status' => 'required|integer|in:1,2', // Only allow status 1 or 2
+            'care_of' => 'nullable|string',
+            'last_reading' => 'nullable|numeric',
+            'reading_initial' => 'nullable|numeric',
+            'require_consumer_signature' => 'boolean',
+        ]);
+
+        // Conditional validation based on status
+        if ($request->status == 2) {
+            // Status 2 (acted-completed) - require meter_no, seal_no, erc_seal
+            $request->validate([
+                'meter_no' => 'required|string',
+                'seal_no' => 'required|string',
+                'erc_seal' => 'required|string',
+                'crew_remarks' => 'nullable|string',
+                'email' => 'nullable|email',
+                'damage_cause' => 'required|integer|exists:kwh_meter_damage_cause_types,id',
+                'consumer_signature_data' => 'nullable|string', // Base64 encoded image
+                'consumer_name' => 'required_with:consumer_signature_data|string|max:255',
+                'consumer_position' => 'nullable|string|max:255',
+                'latitude' => 'required_with:consumer_signature_data|numeric|between:-90,90',
+                'longitude' => 'required_with:consumer_signature_data|numeric|between:-180,180',
+                'gps_accuracy' => 'nullable|numeric',
+            ]);
+        } else if ($request->status == 3) {
+            // Status 3 (acted-not-completed) - these fields are optional
+            $request->validate([
+                'meter_no' => 'nullable|string',
+                'seal_no' => 'nullable|string',
+                'erc_seal' => 'nullable|string',
+                'crew_remarks' => 'required|string',
+                'damage_cause' => 'nullable',
+            ]);
+        }
+    }
+
+    private function checkAlreadyActed(ChangeMeterRequest $existingRequest)
+    {
+        if ($existingRequest->status == 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This meter request has already been acted upon and cannot be posted again.'
+            ], 400);
+        }
+
+        return null;
+    }
+
+    private function checkCrewAuthorization(ChangeMeterRequest $existingRequest)
+    {
+        $loggedInCrewId = auth()->user()->change_meter_contractor->id;
+
+        if ($existingRequest->crew != $loggedInCrewId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to post this meter request.'
+            ], 403);
+        }
+
+        return null;
+    }
+
+    private function checkMeterNumberUniqueness(Request $request)
+    {
+        if (!$request->meter_no) {
+            return null;
+        }
+
+        $existingMeter = DB::table('change_meter_requests')
+            ->where('new_meter_no', $request->meter_no)
+            ->where('id', '!=', $request->cm_id) // Exclude current record
+            ->where('status', '!=', 1) // exclude records that acted-notcompleted
+            ->first();
+
+        $existingPostedMeter = DB::table('posted_meters_history')
+            ->where('new_meter_no', $request->meter_no)
+            ->first();
+
+        if ($existingMeter || $existingPostedMeter) {
+            $control_no = $existingMeter ? $existingMeter->control_no : $existingPostedMeter->sco_no;
+            return response()->json([
+                'success' => false,
+                'message' => 'Meter number already exists',
+                'error_type' => 'meter_validation',
+                'existing_control_no' => $control_no,
+                'field' => 'meter_no'
+            ], 422);
+        }
+
+        return null;
+    }
+
+    private function checkSealNumberUniqueness(Request $request)
+    {
+        if (!$request->seal_no) {
+            return null;
+        }
+
+        $existingSeal = DB::table('posted_meters_history')
+            ->where('leyeco_seal_no', $request->seal_no)
+            ->first();
+
+        if ($existingSeal) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Seal number already exists',
+                'error_type' => 'seal_validation',
+                'existing_control_no' => $existingSeal->sco_no,
+                'field' => 'seal_no'
+            ], 422);
+        }
+
+        return null;
+    }
+
+    private function checkErcSealUniqueness(Request $request)
+    {
+        if (!$request->erc_seal) {
+            return null;
+        }
+
+        $existingErcSeal = DB::table('posted_meters_history')
+            ->where('erc_seal_no', $request->erc_seal)
+            ->first();
+
+        if ($existingErcSeal) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ERC seal number already exists',
+                'error_type' => 'erc_seal_validation',
+                'existing_control_no' => $existingErcSeal->sco_no,
+                'field' => 'erc_seal'
+            ], 422);
+        }
+
+        return null;
+    }
+
+    private function storeConsumerSignature(Request $request)
+    {
+        $metadata = [
+            'position' => $request->consumer_position ?? 'Consumer',
+            'device_info' => $request->header('User-Agent'),
+            'collected_at' => now()->toISOString(),
+            'accuracy' => $request->gps_accuracy,
+        ];
+
+        $signatureResult = $this->signatureService->storeConsumerSignature(
+            $request->cm_id,
+            $request->consumer_signature_data,
+            $request->consumer_name,
+            $request->latitude,
+            $request->longitude,
+            $metadata
+        );
+
+        if (!$signatureResult['success']) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save consumer signature: ' . $signatureResult['message']
+            ], 400);
+        }
+
+        return null;
+    }
+
+    private function buildDateTimeActed(Request $request): ?string
+    {
+        if ($request->date_acted && $request->time) {
+            return \Carbon\Carbon::createFromFormat('Y-m-d H:i', $request->date_acted . ' ' . $request->time)->format('Y-m-d H:i:s');
+        }
+
+        return null;
+    }
+
+    private function updateChangeMeterRequest(ChangeMeterRequest $change_meter_request, Request $request, ?string $dateTimeActed): void
+    {
+        $crew_id = auth()->user()->change_meter_contractor->id;
+
+        $dataToUpdate = [
+            "new_meter_no" => $request->meter_no,
+            "date_time_acted" => $dateTimeActed,
+            "care_of" => $request->care_of,
+            "last_reading" => $request->last_reading,
+            "initial_reading" => $request->reading_initial,
+            "crew" => $crew_id,
+            "status" => $request->status,
+            "damage_cause" => $request->damage_cause,
+            "crew_remarks" => $request->crew_remarks,
+            "email" => $request->email,
+        ];
+
+        // Remove any null values from the update array
+        $dataToUpdate = array_filter($dataToUpdate, function ($value) {
+            return !is_null($value);
+        });
+
+        $change_meter_request->update($dataToUpdate);
+    }
+
+    private function syncKwhMeterInventory(ChangeMeterRequest $change_meter_request, Request $request): void
+    {
+        // if the changemeter is for liquidation update the status of kwh meter serial number to 1 (active) in the kwh meter inventory
+        if (!$change_meter_request->kwh_meter_request_id) {
+            return;
+        }
+
+        $change_meter_request->kwhMeterRequest->kwhMeterRequestSerialNumbers()
+            ->where('change_meter_request_id', $change_meter_request->id)
+            ->update([
+                'status' => 1,
+                'action_status' => $request->status == 1 ? false : ($request->status == 2 ? true : null), // if status is acted-notcompleted, set action_status to false, if acted-completed, set action to true, else set to null
+            ]);
+
+        $serialRows = $change_meter_request->kwhMeterRequest
+            ->kwhMeterRequestSerialNumbers()
+            ->where('change_meter_request_id', $change_meter_request->id)
+            ->get();
+
+        if ($change_meter_request->status == 1) {
+            $serialRows->each(function ($serial) use ($change_meter_request) {
+                $serial->meter()->update([
+                    'control_type' => 'kWh Meter Request',
+                    'control_no' => $change_meter_request->kwhMeterRequest->control_no,
+                    'account_number' => null,
+                ]);
+            });
+        }
+
+        if ($change_meter_request->status == 2) {
+            $serialRows->each(function ($serial) use ($change_meter_request) {
+                $serial->meter()->update([
+                    'control_type' => 'Change Meter',
+                    'control_no' => $change_meter_request->control_no,
+                    'account_number' => $change_meter_request->account_number,
+                ]);
+            });
+        }
+    }
+
+    private function createPostingHistory(ChangeMeterRequest $change_meter_request, Request $request, ?string $dateTimeActed): void
+    {
+        // Create posting history record if the status is acted-completed (2)
+        ChangeMeterRequestPostingHistory::create([
+            "sco_no" => $change_meter_request->control_no,
+            "old_meter_no" => $change_meter_request->old_meter_no,
+            "new_meter_no" => $change_meter_request->new_meter_no,
+            "process_date" => date('Y-m-d', strtotime($change_meter_request->created_at)),
+            "date_installed" => $request->date_acted ? date('Y-m-d H:i:s', strtotime($request->date_acted)) : null,
+            "action_status" => $change_meter_request->status,
+            "leyeco_seal_no" => $request->seal_no,
+            "serial_no" => null,
+            "area" => $change_meter_request->area,
+            "feeder" => $change_meter_request->feeder,
+            "erc_seal_no" => $request->erc_seal,
+            "posted_by" => auth()->id(),
+            "created_at" => \Carbon\Carbon::now(),
+            "account_no" => $change_meter_request->account_number,
+        ]);
+    }
+
+    private function updateBillingSystem(ChangeMeterRequest $change_meter_request, Request $request): void
+    {
+        $existingRemarks = DB::connection('sqlSrvBilling')
+            ->table('Consumers Table')
+            ->where('Accnt No', $change_meter_request->account_number)
+            ->value('Remarks') ?? '';
+
+        // check if the account has email address
+        $existingEmail = DB::connection('sqlSrvBilling')
+            ->table('Consumers Table')
+            ->where('Accnt No', $change_meter_request->account_number)
+            ->value('emailadd') ?? '';
+
+        // if the consumers does not have email address in the billing system and the consumer position is owner, use the email address from the request to update the billing system and use it for sending email notification
+        $emailAddress = $existingEmail == null && $request->consumer_position == 'Owner' ? $request->email : $existingEmail;
+
+        // Remove leading and trailing spaces
+        $existingRemarks = trim($existingRemarks);
+
+        $completeRemarks = ' OM: ' . $change_meter_request->old_meter_no . ' DI: ' . date('m/d/y', strtotime($request->date_acted));
+
+        $newRemarks = substr($existingRemarks . $completeRemarks, 0);
+
+        DB::connection('sqlSrvBilling')
+            ->table('Consumers Table')
+            ->where('Accnt No', $change_meter_request->account_number)
+            ->update([
+                'Serial No' => $change_meter_request->new_meter_no,
+                'Brand' => $change_meter_request->assignedMeter && $change_meter_request->assignedMeter->meterType ? $change_meter_request->assignedMeter->meterType->meter_brand : null,
+                'TypeMtr' => $change_meter_request->assignedMeter && $change_meter_request->assignedMeter->meterType ? $change_meter_request->assignedMeter->meterType->meter_code : null,
+                'Remarks' => $newRemarks,
+                'emailadd' => $emailAddress,
+            ]);
+    }
+
+    private function sendEmailNotification(ChangeMeterRequest $change_meter_request): void
+    {
+        // Send email notification if email exists
+        if (!empty($change_meter_request->email)) {
+            try {
+                Notification::route('mail', $change_meter_request->email)
+                    ->notify(new ChangeMeterCompletedNotification($change_meter_request));
+            } catch (\Exception $e) {
+                // Log email error but don't fail the transaction
+                Log::error('Failed to send change meter completion email: ' . $e->getMessage());
+            }
+        }
+    }
+
+    private function sendSmsNotifications(ChangeMeterRequest $change_meter_request): void
+    {
+        if ($change_meter_request->contact_no && $change_meter_request->status == 2) {
+            app(M360SmsService::class)->sendTemplate(
+                to: [$change_meter_request->contact_no],
+                template: SmsTemplate::RequestCompleted,
+                data: [
+                    'CONTROL_NO'   => $change_meter_request->control_no,
+                    'ACCOUNT_NO'   => $change_meter_request->account_number,
+                    'ACCOUNT_NAME' => $change_meter_request->full_name,
+                    'ADDRESS'      => $change_meter_request->address,
+                    'ACKNOWLEDGE_BY'      => $change_meter_request->customerSignature->signatory_name ?? 'NONE',
+                    'COMPLETION_DATE' => $change_meter_request->date_time_acted->format('F j, Y h:i A'),
+                ],
+                renderer: app(SmsTemplateRenderer::class),
+            );
+        }
+
+        if ($change_meter_request->contact_no && $change_meter_request->status == 1) {
+            app(M360SmsService::class)->sendTemplate(
+                to: [$change_meter_request->contact_no],
+                template: SmsTemplate::RequestNotCompleted,
+                data: [
+                    'CONTROL_NO'   => $change_meter_request->control_no,
+                    'ACCOUNT_NO'   => $change_meter_request->account_number,
+                    'ACCOUNT_NAME' => $change_meter_request->full_name,
+                    'ADDRESS'      => $change_meter_request->address,
+                    'DATE_ACTED' => $change_meter_request->date_time_acted->format('F j, Y h:i A'),
+                    'REASON' => $change_meter_request->crew_remarks ?? 'No reason provided',
+                ],
+                renderer: app(SmsTemplateRenderer::class),
+            );
         }
     }
 

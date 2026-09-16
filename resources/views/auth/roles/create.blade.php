@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+  $permissionGroups = $permission
+    ->groupBy(fn ($value) => Str::beforeLast($value->name, '-'))
+    ->sortKeys();
+@endphp
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-lg-12">
@@ -36,18 +41,25 @@
                           <hr>
                         </div>
                       </div>
-                      <div class="row">
-                        @foreach($permission as $value)
-                          <div class="col-lg-3">
-                            <label>{{ Form::checkbox('permission[]', $value->id, false, array('class' => 'name')) }}
-                              {{ $value->name }}</label>
-                          </div>   
-                          <br/>
-                          @if ($loop->iteration % 4 == 0) 
-                            <div class="col-lg-12 py-0 my-0">
-                              <hr>
+                      <div class="row g-3">
+                        @foreach($permissionGroups as $groupName => $groupPermissions)
+                          <div class="col-lg-12">
+                            <div class="border rounded p-3">
+                              <h6 class="fw-bold text-capitalize mb-3">
+                                <i class="fas fa-folder-open me-2"></i>{{ str_replace('-', ' ', $groupName) }}
+                              </h6>
+                              <div class="row">
+                                @foreach($groupPermissions->sortBy('name') as $value)
+                                  <div class="col-lg-3 mb-2">
+                                    <label class="d-flex align-items-center gap-2">
+                                      {{ Form::checkbox('permission[]', $value->id, false, array('class' => 'name')) }}
+                                      <span>{{ $value->name }}</span>
+                                    </label>
+                                  </div>
+                                @endforeach
+                              </div>
                             </div>
-                          @endif
+                          </div>
                         @endforeach
                       </div>
                   </div>

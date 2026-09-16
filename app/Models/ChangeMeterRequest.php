@@ -34,8 +34,15 @@ class ChangeMeterRequest extends Model implements Auditable
     public function getAddressAttribute()
     {
         if ($this->municipality_id && $this->barangay_id) {
-            return $this->sitio . ", BRGY. " . $this->barangay->barangay_name . ', ' . $this->municipality->municipality_name;
+            $parts = array_filter([
+                $this->sitio ? strtoupper($this->sitio) : null,
+                'BRGY. ' . $this->barangay->barangay_name,
+                $this->municipality->municipality_name,
+            ]);
+
+            return implode(', ', $parts);
         }
+
         return 'No Address Available';
     }
 

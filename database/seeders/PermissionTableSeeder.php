@@ -78,6 +78,9 @@ class PermissionTableSeeder extends Seeder
             // 'kwh-meter-request-create',
             // 'kwh-meter-request-edit',
             // 'kwh-meter-request-delete',
+
+            'change-meter-request-dispatch',
+            'change-meter-request-assign',
          ];
       
          foreach ($permissions as $permission) {
