@@ -229,7 +229,7 @@
                                     <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#meterPostingModal" data-assign-meter="{{ $cm_request->assignedMeter }}" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
                                   @endif
 
-                                  @can('change-meter-request-delete')
+                                  @can('change-meter-request-dispatch')
                                     @if($cm_request->status == null && $cm_request->kwh_meter_request_id != null && $cm_request->new_meter_no != null)
                                       <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dispatchingModal" 
                                         data-dispatch-sco="{{$cm_request->control_no}}" 
@@ -240,7 +240,8 @@
                                         data-dispatch-kwhMeterType="{{$cm_request->kwhMeterRequest->meterType->meter_code ?? ''}}"
                                         data-dispatch-serial="{{$cm_request->new_meter_no}}"><i class="fa fa-truck"></i>&nbsp; Dispatch</a></li>
                                     @endif
-
+                                  @endcan 
+                                  @can('change-meter-request-assign')
                                     @if($cm_request->status == null && $cm_request->kwh_meter_request_id != null && $cm_request->new_meter_no == null)
                                       <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#assigningModal" 
                                         data-sco="{{$cm_request->control_no}}" 
