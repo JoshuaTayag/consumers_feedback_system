@@ -4,32 +4,62 @@
   @php
     $consumerTypes = collect(Config::get('constants.consumer_types'));
     $consumerType = $consumerTypes->firstWhere('id', $cm_request->consumer_type);
+
+    // Determine the current lifecycle stage for the breadcrumb stepper
+    if ($cm_request->status == 2) {
+        $cmStageIndex = 4; // Completed
+    } elseif ($cm_request->status == 1) {
+        $cmStageIndex = 3; // Post
+    } elseif ($cm_request->status == 3) {
+        $cmStageIndex = 2; // Dispatch
+    } elseif ($cm_request->new_meter_no) {
+        $cmStageIndex = 1; // Assign Meter
+    } else {
+        $cmStageIndex = 0; // Create
+    }
+    $cmStages = [
+        ['label' => 'Create', 'icon' => 'fa-file-signature'],
+        ['label' => 'Assign Meter', 'icon' => 'fa-gauge-high'],
+        ['label' => 'Dispatch', 'icon' => 'fa-truck'],
+        ['label' => 'Post', 'icon' => 'fa-paper-plane'],
+        ['label' => 'Completed', 'icon' => 'fa-circle-check'],
+    ];
   @endphp
-<div class="container">
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="card shadow-sm">
-        <div class="card-header bg-white border-bottom">
-          <div class="row align-items-center">
-              <div class="col-lg-6">
-                  <h3 class="mb-0">View Change Meter Order</h3>
-              </div>
-              <div class="col-lg-6 text-end">
-                <a class="btn btn-sm btn-primary" href="{{ route('indexCM') }}">
-                  <i class="fas fa-arrow-left"></i> Back
-                </a>
-              </div>
-          </div>
+<div class="container ui-form-page">
+  <!-- Page Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="ui-form-title mb-0"><i class="fas fa-eye me-2"></i>View Change Meter Order</h4>
+      <small class="text-muted">Control No. {{ $cm_request->control_no }}</small>
+    </div>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ route('indexCM') }}">
+      <i class="fas fa-arrow-left me-1"></i> Back to List
+    </a>
+  </div>
+
+  <!-- Stage Breadcrumb / Stepper -->
+  <div class="ui-stepper-wrap mb-4">
+    <ol class="ui-stepper">
+      @foreach ($cmStages as $index => $stage)
+        <li class="ui-step {{ $index == $cmStageIndex ? 'is-active' : '' }}">
+          <span class="ui-step-icon"><i class="fas {{ $stage['icon'] }}"></i></span>
+          <span class="ui-step-label">{{ $stage['label'] }}</span>
+        </li>
+        @if (!$loop->last)
+          <li class="ui-step-connector"></li>
+        @endif
+      @endforeach
+    </ol>
+  </div>
+
+  <div class="row g-3">
+    <!-- Transaction Details Card -->
+    <div class="col-lg-6">
+      <div class="card ui-card h-100">
+        <div class="card-header ui-card-header">
+          <i class="fas fa-file-invoice me-2"></i>Transaction Details
         </div>
         <div class="card-body">
-          <div class="row g-3">
-            <!-- Transaction Details Card -->
-            <div class="col-lg-6">
-              <div class="card h-100 border shadow-sm">
-                <div class="card-header bg-warning text-center py-3">
-                    <h4 class="fw-bold mb-0">Transaction Details</h4>
-                </div>
-                <div class="card-body">
                   <div class="row mb-2">
                     <div class="col-6">
                       <span class="fs-5 fw-bold">Control #:</span>
@@ -152,12 +182,12 @@
               </div>
             </div>
 
-            <!-- Meter Posting Details Card -->
-            <div class="col-lg-6">
-              <div class="card h-100 border shadow-sm">
-                <div class="card-header bg-warning text-center py-3">
-                    <h4 class="fw-bold mb-0">Meter Posting Details</h4>
-                </div>
+    <!-- Meter Posting Details Card -->
+    <div class="col-lg-6">
+      <div class="card ui-card h-100">
+        <div class="card-header ui-card-header">
+          <i class="fas fa-bolt me-2"></i>Meter Posting Details
+        </div>
                 <div class="card-body">
                   <div class="row mb-2">
                     <div class="col-6">
@@ -253,14 +283,14 @@
             </div>
           </div>
 
-          <!-- Consumer Acknowledgment Section -->
-          @if($signatures && $signatures->isNotEmpty())
-          <div class="row mt-4">
-            <div class="col-lg-12">
-              <div class="card border shadow-sm">
-                <div class="card-header bg-info text-white text-center py-3">
-                  <h4 class="mb-0 fw-bold">Consumer Acknowledgment</h4>
-                </div>
+  <!-- Consumer Acknowledgment Section -->
+  @if($signatures && $signatures->isNotEmpty())
+  <div class="row mt-4">
+    <div class="col-lg-12">
+      <div class="card ui-card">
+        <div class="card-header ui-card-header">
+          <i class="fas fa-signature me-2"></i>Consumer Acknowledgment
+        </div>
                 <div class="card-body">
                   @foreach($signatures as $signature)
                   <div class="row mb-4 pb-3 border-bottom">
@@ -334,9 +364,9 @@
           @else
           <div class="row mt-4">
             <div class="col-lg-12">
-              <div class="card border-warning shadow-sm">
-                <div class="card-header bg-warning text-dark text-center py-3">
-                  <h5 class="mb-0 fw-bold">No Consumer Acknowledgment Found</h5>
+              <div class="card ui-card">
+                <div class="card-header ui-card-header">
+                  <i class="fas fa-circle-info me-2"></i>No Consumer Acknowledgment Found
                 </div>
                 <div class="card-body text-center">
                   <p class="mb-0">This change meter request has not been acknowledged by the consumer yet.</p>
@@ -350,20 +380,18 @@
           @if($audits && $audits->isNotEmpty())
           <div class="row mt-4">
             <div class="col-lg-12">
-              <div class="card border shadow-sm">
-                <div class="card-header bg-secondary text-white py-3">
+              <div class="card ui-card">
+                <div class="card-header ui-card-header">
                   <div class="row align-items-center">
                     <div class="col-lg-8">
-                      <h4 class="mb-0">
-                        <i class="fas fa-history"></i> Change History (Audit Logs)
-                      </h4>
+                      <i class="fas fa-clock-rotate-left me-2"></i>Change History (Audit Logs)
                     </div>
                     <div class="col-lg-4 text-end">
-                      <a href="{{ route('cmExportAuditLogs', $cm_request->id) }}" class="btn btn-outline-light btn-sm me-2">
+                      <a href="{{ route('cmExportAuditLogs', $cm_request->id) }}" class="btn btn-outline-secondary btn-sm me-2">
                         <i class="fas fa-download"></i> Export CSV
                       </a>
-                      <button class="btn btn-outline-light btn-sm" onclick="refreshAuditLogs({{ $cm_request->id }})">
-                        <i class="fas fa-sync-alt"></i> Refresh
+                      <button class="btn btn-outline-secondary btn-sm" onclick="refreshAuditLogs({{ $cm_request->id }})">
+                        <i class="fas fa-arrows-rotate"></i> Refresh
                       </button>
                     </div>
                   </div>
@@ -518,11 +546,9 @@
           @else
           <div class="row mt-4">
             <div class="col-lg-12">
-              <div class="card border shadow-sm">
-                <div class="card-header bg-light text-dark text-center py-3">
-                  <h5 class="mb-0">
-                    <i class="fas fa-info-circle"></i> No Audit Logs Found
-                  </h5>
+              <div class="card ui-card">
+                <div class="card-header ui-card-header">
+                  <i class="fas fa-circle-info me-2"></i>No Audit Logs Found
                 </div>
                 <div class="card-body text-center">
                   <p class="mb-0 text-muted">No change history is available for this request.</p>
@@ -532,10 +558,6 @@
           </div>
           @endif
 
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- Toast Container -->
@@ -552,7 +574,11 @@
 </div>
 @endsection
 
-@section('scripts')
+@section('style')
+<link rel="stylesheet" href="{{ asset('css/ui-form-design.css') }}">
+@endsection
+
+@section('script')
 <script>
 function refreshAuditLogs(cmRequestId) {
     const refreshBtn = document.querySelector('[onclick="refreshAuditLogs(' + cmRequestId + ')"]');

@@ -217,7 +217,7 @@
                               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                 <li><a class="dropdown-item" href="{{ route('viewCM', $cm_request->id) }}"><i class="fa fa-eye"></i> View</a></li>
                                 @can('change-meter-request-edit')
-                                  @if($cm_request->status == null)
+                                  @if($cm_request->status == null && $cm_request->new_meter_no == null)
                                     <li><a class="dropdown-item" href="{{ route('editCM',$cm_request->id) }}"><i class="fa fa-pencil"></i> Update</a></li>
                                   @endif
                                 @endcan
@@ -229,9 +229,29 @@
                                     <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#meterPostingModal" data-assign-meter="{{ $cm_request->assignedMeter }}" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
                                   @endif
 
-                                  @if($cm_request->status == null && $cm_request->new_meter_no != null)
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dispatchingModal" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}"><i class="fa fa-truck"></i>&nbsp; Dispatch</a></li>
-                                  @endif
+                                  @can('change-meter-request-delete')
+                                    @if($cm_request->status == null && $cm_request->kwh_meter_request_id != null && $cm_request->new_meter_no != null)
+                                      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dispatchingModal" 
+                                        data-dispatch-sco="{{$cm_request->control_no}}" 
+                                        data-dispatch-id="{{$cm_request->id}}" 
+                                        data-dispatch-name="{{$cm_request->last_name.', '.$cm_request->first_name}}"
+                                        data-dispatch-address="{{$cm_request->address}}"
+                                        data-dispatch-kwhMeterControlNo="{{$cm_request->kwhMeterRequest->control_no}}"
+                                        data-dispatch-kwhMeterType="{{$cm_request->kwhMeterRequest->meterType->meter_code ?? ''}}"
+                                        data-dispatch-serial="{{$cm_request->new_meter_no}}"><i class="fa fa-truck"></i>&nbsp; Dispatch</a></li>
+                                    @endif
+
+                                    @if($cm_request->status == null && $cm_request->kwh_meter_request_id != null && $cm_request->new_meter_no == null)
+                                      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#assigningModal" 
+                                        data-sco="{{$cm_request->control_no}}" 
+                                        data-id="{{$cm_request->id}}" 
+                                        data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}"
+                                        data-address="{{$cm_request->address}}"
+                                        data-kwhMeterControlNo="{{$cm_request->kwhMeterRequest->control_no}}"
+                                        data-kwhMeterType="{{$cm_request->kwhMeterRequest->meterType->meter_code ?? ''}}"
+                                        data-kwhMeterId="{{$cm_request->kwh_meter_request_id}}" ><i class="fa fa-tasks"></i>&nbsp; Assign Meter</a></li>
+                                    @endif
+                                  @endcan 
 
                                 @can('change-meter-request-delete')
                                   @if($cm_request->status == null)
@@ -272,7 +292,7 @@
                       </div>
                       <div class="row border-bottom">
                         <div class="col-lg-5 border-end">Address:</div>
-                        <div class="col-lg-7 ">{{$cm_request->sitio.', '.$cm_request->barangay->barangay_name.', '. $cm_request->municipality->municipality_name}}</div>
+                        <div class="col-lg-7 ">{{$cm_request->address}}</div>
                       </div>
                       <div class="row border-bottom">
                         <div class="col-lg-5 border-end">Consumer Type:</div>
@@ -322,7 +342,8 @@
               <div id="pagination">{{ $cm_requests->links() }}</div>
             </div>
               @include('service_connect_order.change_meter.meter_posting')
-              @include('service_connect_order.change_meter.dispatching')
+              @include('service_connect_order.change_meter.dispatch')
+              @include('service_connect_order.change_meter.meter_assign')
               @include('service_connect_order.change_meter.transfer_request')
           </div>
       </div>
@@ -458,8 +479,13 @@
   dispatchingModal.addEventListener('show.bs.modal', function (event) {
     var button = event.relatedTarget;
 
-    var sco = button.getAttribute('data-sco');
-    var cm_id = button.getAttribute('data-id');
+    var sco = button.getAttribute('data-dispatch-sco');
+    var cm_id = button.getAttribute('data-dispatch-id');
+    var name = button.getAttribute('data-dispatch-name');
+    var address = button.getAttribute('data-dispatch-address');
+    var kwhMeterControlNo = button.getAttribute('data-dispatch-kwhMeterControlNo');
+    var kwhMeterType = button.getAttribute('data-dispatch-kwhMeterType');
+    var kwhMeterSerial = button.getAttribute('data-dispatch-serial');
 
     // Get today's date
     const today = new Date();
@@ -467,19 +493,91 @@
     // Format it as YYYY-MM-DD
     const formattedDate = today.toISOString().split('T')[0];
 
-    // Format the time as HH:mm
-    const formattedTime = today.toTimeString().slice(0, 5);
 
-    var modal_sco = dispatchingModal.querySelector('#sco_dispatched');
+    var modal_sco = dispatchingModal.querySelector('#dispatching_sco');
+    var modal_name = dispatchingModal.querySelector('#dispatching_name');
+    var modal_address = dispatchingModal.querySelector('#dispatching_address');
     var modal_cm_id = dispatchingModal.querySelector('#cm_id');
-    var modal_dispatched_date = dispatchingModal.querySelector('#date_dispatched');
-    var modal_dispatched_time = dispatchingModal.querySelector('#time_dispatched');
+    var modal_kwh_meter_request_id = dispatchingModal.querySelector('#dispatching_kwh_meter_request');
+    var modal_kwhMeterType = dispatchingModal.querySelector('#dispatching_type_of_meter');
+    var modal_kwhMeterSerial = dispatchingModal.querySelector('#dispatching_serial_number');
+    var modal_dispatched_date = dispatchingModal.querySelector('#dispatching_date');
 
     modal_sco.value = sco;
     modal_cm_id.value = cm_id;
+    modal_name.value = name;
+    modal_address.value = address;
+    modal_kwh_meter_request_id.value = kwhMeterControlNo;
+    modal_kwhMeterType.value = kwhMeterType;
+    modal_kwhMeterSerial.value = kwhMeterSerial;
     modal_dispatched_date.value = formattedDate;
-    modal_dispatched_time.value = formattedTime;
   });
+
+  assigningModal.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+
+    var sco = button.getAttribute('data-sco');
+    var cm_id = button.getAttribute('data-id');
+    var name = button.getAttribute('data-name');
+    var address = button.getAttribute('data-address');
+    var kwhMeterControlNo = button.getAttribute('data-kwhMeterControlNo');
+    var kwhMeterType = button.getAttribute('data-kwhMeterType');
+    var kwh_meter_request_id = button.getAttribute('data-kwhMeterId');
+
+    // Get today's date
+    const today = new Date();
+    
+    // Format it as YYYY-MM-DD
+    const formattedDate = today.toISOString().split('T')[0];
+
+    var modal_sco = assigningModal.querySelector('#assigning_sco');
+    var modal_name = assigningModal.querySelector('#assigning_name');
+    var modal_address = assigningModal.querySelector('#assigning_address');
+    var modal_cm_id = assigningModal.querySelector('#cm_id');
+    var modal_kwhMeterControlNo = assigningModal.querySelector('#assigning_kwh_meter_request');
+    var modal_kwhMeterType = assigningModal.querySelector('#assigning_type_of_meter');
+    var modal_kwh_meter_request_id = assigningModal.querySelector('#kwh_meter_request_id');
+
+    modal_sco.value = sco;
+    modal_cm_id.value = cm_id;
+    modal_name.value = name;
+    modal_address.value = address;
+    modal_kwhMeterControlNo.value = kwhMeterControlNo;
+    modal_kwhMeterType.value = kwhMeterType;
+    loadSerialNumbers(kwh_meter_request_id);
+  });
+
+  // Function to load serial numbers for selected kWh meter request
+  function loadSerialNumbers(controlNo) {
+      $('#meter_serial_number').html('<option value="">Loading serial numbers...</option>');
+      
+      $.ajax({
+          url: '{{ route("kwhMeterSerialNumbers") }}',
+          type: 'GET',
+          data: { 
+              // change_meter_request_id: controlNo
+              control_no: controlNo
+          },
+          success: function(response) {
+              let options = '<option value="">Select Serial Number</option>';
+              // console.log('Response from server:', response);
+              if (response.success && response.data.length > 0) {
+                  response.data.forEach(function(meter) {
+                      options += `<option value="${meter.id}">${meter.serial_number}</option>`;
+                  });
+              } else {
+                  options = '<option value="">No available serial numbers</option>';
+              }
+              
+              $('#assigning_serial_number').html(options);
+          },
+          error: function(xhr, status, error) {
+              console.error('Error fetching serial numbers:', error);
+              $('#assigning_serial_number').html('<option value="">Error loading serial numbers</option>');
+              alert('Error loading serial numbers. Please try again.');
+          }
+      });
+  }
 
   const application_status = document.getElementById('status');
   const time = document.getElementById('time');
@@ -700,4 +798,7 @@
       }
   });
 </script>
+@endsection
+@section('style')
+<link rel="stylesheet" href="{{ asset('css/ui-form-design.css') }}">
 @endsection

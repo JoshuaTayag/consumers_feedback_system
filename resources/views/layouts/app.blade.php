@@ -31,6 +31,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.5.1/sweetalert2.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.5.1/sweetalert2.all.min.js"></script>
     
+    <link href="{{ asset('css/dark-mode.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/dark-mode.js') }}"></script>
     
     <style>
       .dropdown-menu li {
@@ -94,6 +96,12 @@
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
+                      <li class="nav-item me-2">
+                          <div class="form-check form-switch mt-2">
+                              <input class="form-check-input" type="checkbox" id="darkModeToggle" style="cursor:pointer;">
+                              <label class="form-check-label" for="darkModeToggle">🌙</label>
+                          </div>
+                      </li>
                         @auth
                             @if(Auth::user()->hasRole('Admin'))
                                 <li class="nav-item dropdown">

@@ -1,0 +1,255 @@
+/* ==========================================================================
+   DARK MODE STYLES
+   Applies whenever <html data-theme="dark"> is set by dark-mode.js
+   ========================================================================== */
+
+/* ---- Base ---- */
+[data-theme="dark"] body {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+/* ---- Navbar ---- */
+[data-theme="dark"] nav.navbar {
+    background-color: #1e1e1e !important;
+}
+[data-theme="dark"] nav.navbar .nav-link,
+[data-theme="dark"] nav.navbar .navbar-brand {
+    color: #e0e0e0 !important;
+}
+
+/* ---- Main content area ---- */
+[data-theme="dark"] main {
+    background-color: #1a1a1a !important;
+}
+
+/* ---- Cards ---- */
+[data-theme="dark"] .card {
+    background-color: #1e1e1e;
+    border-color: #333 !important;
+    color: #e0e0e0;
+}
+[data-theme="dark"] .card-body {
+    background-color: #1e1e1e !important;
+}
+[data-theme="dark"] .card-header {
+    background-color: #1a1a1a !important;
+    border-color: #333 !important;
+}
+
+/* ---- Labels / headings ---- */
+[data-theme="dark"] label,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] code {
+    color: #e0e0e0 !important;
+}
+
+/* ---- Form controls: inputs, selects, textareas ---- */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] input {
+    background-color: #2a2a2a !important;
+    color: #f1f1f1 !important;
+    border-color: #444 !important;
+}
+
+/* Placeholder text */
+[data-theme="dark"] .form-control::placeholder {
+    color: #9a9a9a !important;
+    opacity: 1;
+}
+
+/* Disabled / readonly fields */
+[data-theme="dark"] .form-control:disabled,
+[data-theme="dark"] .form-control[readonly] {
+    background-color: #232323 !important;
+    color: #b0b0b0 !important;
+}
+
+/* Native date/time picker icon - invert so it's visible on dark bg */
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+/* ---- Dropdown menus (Bootstrap) ---- */
+[data-theme="dark"] .dropdown-menu {
+    background-color: #2a2a2a;
+    border-color: #444;
+}
+[data-theme="dark"] .dropdown-item {
+    color: #e0e0e0;
+}
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus {
+    background-color: #3a3a3a;
+    color: #fff;
+}
+
+/* ---- Tables ---- */
+[data-theme="dark"] thead tr th {
+    background-color: #004a8f !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .table {
+    color: #e0e0e0;
+    background-color: #1e1e1e;
+}
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th {
+    border-color: #333;
+}
+
+/* ---- Alerts ---- */
+[data-theme="dark"] .alert-danger {
+    background-color: #4a1c1c;
+    color: #f8d7da;
+    border-color: #6b2a2a;
+}
+[data-theme="dark"] .alert-warning {
+    background-color: #4a3c1c;
+    color: #ffe69c;
+    border-color: #6b5a2a;
+}
+[data-theme="dark"] .alert-success {
+    background-color: #1c4a2a;
+    color: #c3e6cb;
+    border-color: #2a6b3f;
+}
+[data-theme="dark"] .alert-info {
+    background-color: #1c3a4a;
+    color: #bee5eb;
+    border-color: #2a5a6b;
+}
+
+/* ---- Select2 (used for Account Number search, etc.) ---- */
+[data-theme="dark"] .select2-container--default .select2-selection--single {
+    background-color: #2a2a2a !important;
+    border-color: #444 !important;
+}
+[data-theme="dark"] .select2-selection__rendered {
+    color: #f1f1f1 !important;
+}
+[data-theme="dark"] .select2-selection__arrow b {
+    border-color: #999 transparent transparent transparent !important;
+}
+[data-theme="dark"] .select2-dropdown {
+    background-color: #2a2a2a;
+    border-color: #444;
+}
+[data-theme="dark"] .select2-search__field {
+    background-color: #2a2a2a !important;
+    color: #f1f1f1 !important;
+}
+[data-theme="dark"] .select2-results__option {
+    color: #e0e0e0;
+}
+[data-theme="dark"] .select2-results__option--highlighted {
+    background-color: #3a3a3a !important;
+    color: #fff !important;
+}
+
+/* ---- SweetAlert2 popups ---- */
+[data-theme="dark"] .swal2-popup {
+    background-color: #1e1e1e !important;
+    color: #e0e0e0 !important;
+}
+[data-theme="dark"] .swal2-title {
+    color: #f1f1f1 !important;
+}
+[data-theme="dark"] .swal2-html-container {
+    color: #cfcfcf !important;
+}
+[data-theme="dark"] .swal2-input,
+[data-theme="dark"] .swal2-textarea,
+[data-theme="dark"] .swal2-select {
+    background-color: #2a2a2a !important;
+    color: #f1f1f1 !important;
+    border-color: #444 !important;
+}
+[data-theme="dark"] .swal2-icon.swal2-question {
+    border-color: #8ab4f8;
+    color: #8ab4f8;
+}
+[data-theme="dark"] .swal2-close {
+    color: #cfcfcf !important;
+}
+/* Backdrop stays as SweetAlert's default dim overlay - no override needed */
+
+/* ---- Daterangepicker widget ---- */
+[data-theme="dark"] .daterangepicker {
+    background-color: #1e1e1e !important;
+    border-color: #444 !important;
+    color: #e0e0e0 !important;
+}
+[data-theme="dark"] .daterangepicker .calendar-table {
+    background-color: #1e1e1e !important;
+    border-color: #444 !important;
+}
+[data-theme="dark"] .daterangepicker td.available {
+    background-color: #2a2a2a !important;
+    color: #e0e0e0 !important;
+}
+[data-theme="dark"] .daterangepicker td.off,
+[data-theme="dark"] .daterangepicker td.off.in-range,
+[data-theme="dark"] .daterangepicker td.off.start-date,
+[data-theme="dark"] .daterangepicker td.off.end-date {
+    background-color: #1a1a1a !important;
+    color: #555 !important;
+}
+[data-theme="dark"] .daterangepicker td.in-range {
+    background-color: #3a3a3a !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .daterangepicker td.active,
+[data-theme="dark"] .daterangepicker td.active:hover {
+    background-color: #0d6efd !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .daterangepicker th.month {
+    color: #e0e0e0 !important;
+}
+[data-theme="dark"] .daterangepicker th.available:hover,
+[data-theme="dark"] .daterangepicker td.available:hover {
+    background-color: #3a3a3a !important;
+}
+[data-theme="dark"] .daterangepicker .drp-buttons {
+    background-color: #1e1e1e !important;
+    border-color: #444 !important;
+}
+[data-theme="dark"] .daterangepicker .drp-selected {
+    color: #cfcfcf !important;
+}
+[data-theme="dark"] .daterangepicker select.monthselect,
+[data-theme="dark"] .daterangepicker select.yearselect,
+[data-theme="dark"] .daterangepicker select.hourselect,
+[data-theme="dark"] .daterangepicker select.minuteselect,
+[data-theme="dark"] .daterangepicker select.ampmselect {
+    background-color: #2a2a2a !important;
+    color: #e0e0e0 !important;
+    border-color: #444 !important;
+}
+[data-theme="dark"] .daterangepicker:after {
+    border-bottom-color: #1e1e1e !important;
+}
+[data-theme="dark"] .daterangepicker:before {
+    border-bottom-color: #444 !important;
+}
+[data-theme="dark"] .daterangepicker .ranges li {
+    color: #e0e0e0 !important;
+}
+[data-theme="dark"] .daterangepicker .ranges li:hover {
+    background-color: #3a3a3a !important;
+}
+[data-theme="dark"] .daterangepicker .ranges li.active {
+    background-color: #0d6efd !important;
+    color: #fff !important;
+}
