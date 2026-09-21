@@ -38,7 +38,7 @@ class MaterialRequisitionFormController extends Controller
             ->orderBy('id', 'DESC');
 
         if ($user->hasRole('CETD SPRC')) {
-            $mrfsQuery->where('status', 1)->whereNotNull('req_type');
+            $mrfsQuery->where('status', 1)->where('req_type');
         } elseif ($user->hasRole('CETD (Dexter)')) {
             // no extra filter for this role
         } elseif (! $user->hasRole('Admin') && ! $user->hasRole('TSD (Richard)') && ! $user->hasRole('TSD Manager')) {

@@ -119,6 +119,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('change-meter-request-posting', [App\Http\Controllers\ChangeMeterRequestController::class, 'meterPosting'])->name('meterPostingCM');
     Route::post('change-meter-request-dispatching', [App\Http\Controllers\ChangeMeterRequestController::class, 'cmDispatched'])->name('cmDispatching');
     Route::post('change-meter-request-assign-meter', [App\Http\Controllers\ChangeMeterRequestController::class, 'cmAssignMeter'])->name('cmAssignMeter');
+    Route::put('change-meter-request-reset-status/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'resetStatus'])->name('service_connect_order.change_meter.reset_status');
     Route::post('change-meter-request-transfer-dispatching', [App\Http\Controllers\ChangeMeterRequestController::class, 'cmTransferOfDispatching'])->name('cmTransferOfDispatching');
     Route::post('validate-meter-no', [App\Http\Controllers\ChangeMeterRequestController::class, 'validateMeterPosting'])->name('validateMeterPosting');
     Route::get('pdf-sco-cm/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'printChangeMeterRequest'])->name('printChangeMeterRequest');

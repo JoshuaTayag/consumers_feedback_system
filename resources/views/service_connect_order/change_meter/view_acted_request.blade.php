@@ -140,6 +140,11 @@
                       <span class="badge rounded-pill bg-{{$cm_request->status == 1 ? 'danger' : ($cm_request->status == 2 ? 'success' : 'warning text-dark') }} p-2 fs-6">
                         {{$cm_request->status == 1 ? 'ACTED - NOT COMPLETED' : ($cm_request->status == 2 ? 'ACTED - COMPLETED' : ($cm_request->status == 3 ? 'DISPATCHED' : 'UNACTED')) }}
                       </span>
+                      @if($cm_request->status == 2)
+                        <button type="button" class="btn btn-sm btn-link p-0 ms-2" data-bs-toggle="modal" data-bs-target="#resetStatusModal" title="Reset Status">
+                          <i class="fa fas fa-arrow-rotate-left"></i>
+                        </button>
+                      @endif
                     </div>
                   </div>
 
@@ -557,7 +562,47 @@
             </div>
           </div>
           @endif
+</div>
 
+<!-- Reset Status Modal -->
+<div class="modal fade" id="resetStatusModal" tabindex="-1" aria-labelledby="resetStatusModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ui-form-title" id="resetStatusModalLabel"><i class="fas fa-arrow-rotate-left me-2"></i>Reset Status</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ route('service_connect_order.change_meter.reset_status', $cm_request->id) }}" method="POST" id="resetStatusForm">
+        @csrf
+        @method('PUT')
+        <div class="modal-body">
+          <div class="alert ui-alert-soft d-flex align-items-start mb-3">
+            <i class="fas fa-circle-info me-2 mt-1"></i>
+            <div>This will change the application status to ACTED - NOT COMPLETED. Please explain why (minimum 10 words).</div>
+          </div>
+          <label for="reset_status_reason" class="form-label ui-label">Status <span class="text-danger">*</span></label>
+          <select name="status" class="form-control" rows="4" required>
+            <option value="1" id="">ACTED - NOT COMPLETED</option>
+          </select>
+
+          <label for="reset_status_reason" class="form-label ui-label">Reason <span class="text-danger">*</span></label>
+          <textarea name="reason" id="reset_status_reason" class="form-control" rows="4" required></textarea>
+          <div class="form-text">
+            <span id="reset_status_word_count">0</span> / 10 words minimum
+          </div>
+          <div class="invalid-feedback" id="reset_status_error">Please enter at least 10 words explaining the reason.</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-xmark me-1"></i>Cancel
+          </button>
+          <button type="submit" class="btn ui-btn-cta" id="resetStatusSubmitBtn">
+            <i class="fas fa-check me-1"></i>Confirm Reset
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <!-- Toast Container -->
@@ -712,5 +757,33 @@ function showToast(message, type) {
     const toast = new bootstrap.Toast(toastElement);
     toast.show();
 }
+
+// Require a minimum of 10 words before the reset-status reason can be submitted
+(function () {
+    const reasonInput = document.getElementById('reset_status_reason');
+    const wordCountEl = document.getElementById('reset_status_word_count');
+    const resetForm = document.getElementById('resetStatusForm');
+    const MIN_WORDS = 10;
+
+    function countWords(text) {
+        const words = text.trim().split(/\s+/).filter(Boolean);
+        return words.length;
+    }
+
+    reasonInput.addEventListener('input', function () {
+        const count = countWords(reasonInput.value);
+        wordCountEl.textContent = count;
+        reasonInput.classList.remove('is-invalid');
+    });
+
+    resetForm.addEventListener('submit', function (event) {
+        const count = countWords(reasonInput.value);
+        if (count < MIN_WORDS) {
+            event.preventDefault();
+            reasonInput.classList.add('is-invalid');
+            reasonInput.focus();
+        }
+    });
+})();
 </script>
 @endsection
