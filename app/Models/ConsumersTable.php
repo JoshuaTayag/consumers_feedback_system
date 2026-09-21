@@ -19,4 +19,12 @@ class ConsumersTable extends Model
     {
         return $this->setConnection('sqlsrv')->hasOne('App\Models\Lifeline', 'account_no', 'Accnt No');
     }
+
+    protected $fillable = [
+        'Accnt No',
+        'Serial No',
+        'Remarks',
+    ];
+    
+    public $timestamps = false;
 }

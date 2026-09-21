@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChangeMeterLeadContractor;
-use App\Models\ConsumersTable;
-use App\Models\DataManagement\MeterType;
 use App\Models\KwhMeterRequest;
 use App\Models\KwhMeterRequestSerialNumber;
 use App\Models\Meter;
@@ -13,7 +11,6 @@ use App\Models\ChangeMeterRequest;
 use App\Models\ChangeMeterRequestContractor;
 use App\Models\ChangeMeterRequestFees;
 use App\Models\ChangeMeterRequestPostingHistory;
-use App\Models\User;
 use App\Services\ChangeMeterService;
 use App\Services\SignatureService;
 use Illuminate\Support\Facades\DB;
@@ -23,9 +20,9 @@ use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\ChangeMeterCompletedNotification;
-use PDO;
 use Illuminate\Support\Facades\Log;
 use App\Enums\SmsTemplate;
+use App\Models\ConsumersTable;
 use App\Services\M360SmsService;
 use App\Services\SmsTemplateRenderer;
 use App\Models\DataManagement\KwhMeterDamageCauseType;
@@ -587,7 +584,7 @@ class ChangeMeterRequestController extends Controller
                 // Remove leading and trailing spaces
                 $existingRemarks = trim($existingRemarks);
 
-                $completeRemarks = ' OM: '.$change_meter_request->old_meter_no.' DI: '.date('m/d/y', strtotime($request->date_acted));
+                $completeRemarks = '| OM: '.$change_meter_request->old_meter_no.' DI: '.date('m/d/y', strtotime($request->date_acted));
 
                 $newRemarks = substr($existingRemarks . $completeRemarks, 0);
 
@@ -597,7 +594,7 @@ class ChangeMeterRequestController extends Controller
                 ->where('Accnt No', $change_meter_request->account_number)
                 ->update([
                     'Serial No' => $change_meter_request->new_meter_no,
-                    // 'Remarks' => $newRemarks,
+                    'Remarks' => $newRemarks,
                 ]);
 
                 // update meter status to unavailable if the old meter is posted and existing
@@ -1245,23 +1242,24 @@ class ChangeMeterRequestController extends Controller
             
             // Get meters assigned to this KWH meter request (only those that are not linked to a change meter request or are linked but not yet acted upon or acted but not completed)
             $assignedMeters = Meter::join('kwh_meter_request_serial_numbers', 'meters.id', '=', 'kwh_meter_request_serial_numbers.meter_id')
-            ->leftjoin('change_meter_requests', 'kwh_meter_request_serial_numbers.change_meter_request_id', '=', 'change_meter_requests.id')
+                ->leftjoin('change_meter_requests', 'kwh_meter_request_serial_numbers.change_meter_request_id', '=', 'change_meter_requests.id')
                 ->where('kwh_meter_request_serial_numbers.kwh_meter_request_id', $kwhMeterRequest->id)
+                ->whereNull('kwh_meter_request_serial_numbers.deleted_at')
                 ->where(function ($query) {
                     $query->where(function ($query) {
                         $query->whereNotNull('kwh_meter_request_serial_numbers.change_meter_request_id')
-                            ->where('kwh_meter_request_serial_numbers.status', 1)
-                            ->where('kwh_meter_request_serial_numbers.action_status', false);
+                            ->where(function ($q) {
+                                $q->where('change_meter_requests.status', 1)
+                                  ->orWhereNull('change_meter_requests.status'); // qualified
+                            })
+                            ->where('kwh_meter_request_serial_numbers.action_status', true);
                     })->orWhere(function ($query) {
                         $query->whereNull('kwh_meter_request_serial_numbers.change_meter_request_id')
-                            ->where('kwh_meter_request_serial_numbers.status', 0)
-                            ->whereNull('kwh_meter_request_serial_numbers.action_status');
+                            ->where('kwh_meter_request_serial_numbers.status', 0);
                     });
                 })
-                ->whereNull('kwh_meter_request_serial_numbers.deleted_at')
                 ->select('meters.id', 'meters.serial_number', 'meters.erc_seal_number', 'meters.leyeco_seal_number')
                 ->get();
-            // dd($assignedMeters);
             return response()->json([
                 'success' => true,
                 'data' => $assignedMeters
@@ -1409,6 +1407,10 @@ class ChangeMeterRequestController extends Controller
         ->with('user')
         ->withCount(['changeMeterRequests as used_quantity' => function($query) use ($excludeChangeMeterRequestId) {
             $query->whereNull('deleted_at');
+            $query->where(function ($q) {
+                $q->where('status', '<>', 1)
+                  ->orWhereNull('status');
+            }); // exclude acted not completed requests
 
             if ($excludeChangeMeterRequestId) {
                 $query->where('id', '!=', $excludeChangeMeterRequestId);
@@ -1429,5 +1431,87 @@ class ChangeMeterRequestController extends Controller
 
             return [$request->id => $displayText];
         });
+    }
+
+    public function resetStatus(Request $request)
+    {
+        $this->validate($request, [
+            'reason' => ['required', 'string', function ($attribute, $value, $fail) {
+                if (str_word_count($value) < 10) {
+                    $fail('The reason must contain at least 10 words.');
+                }
+            }],
+        ]);
+
+        $changeMeterRequest = ChangeMeterRequest::findOrFail($request->id);
+        $meter = Meter::where('serial_number', $changeMeterRequest->new_meter_no)->first();
+        $kwhMeterRequestSerial = KwhMeterRequestSerialNumber::where('kwh_meter_request_id', $changeMeterRequest->kwh_meter_request_id)->where('meter_id', $meter->id)->where('change_meter_request_id', $changeMeterRequest->id)->first();
+        $consumersData = ConsumersTable::where('Accnt No', $changeMeterRequest->account_number)->first();
+        $postedMeterHistory = DB::table('posted_meters_history')->where('new_meter_no', $changeMeterRequest->new_meter_no)->where('account_no', $changeMeterRequest->account_number);
+
+        // dd($consumersData->Remarks);
+        $existingRemarks = $consumersData->Remarks ?? '';
+                
+        // Remove leading and trailing spaces
+        $existingRemarks = trim($existingRemarks);
+
+        $completeRemarks = '| OM: '.$consumersData->{"Serial No"}.' DI: '.date('m/d/y', strtotime($request->date_acted));
+
+        $newRemarks = substr($existingRemarks . $completeRemarks, 0);
+
+        DB::beginTransaction();
+        try {
+            // change the change meter request status and add a reason
+            $changeMeterRequest->update([
+                'status' => 1, // Reset status to 'ACTED - NOT COMPLETED'
+                'reset_status_reason' => $request->reason,
+            ]);
+
+            if (!$changeMeterRequest) {
+                throw new \Exception('Failed to update change meter request.');
+            }
+
+            // update the kwh meter request serial acted not completed to assign the meter to new change meter request
+            $kwhMeterRequestSerial->update([
+                'status' => 0, // Reset status to 'ACTED - NOT COMPLETED'
+            ]);
+
+            if (!$kwhMeterRequestSerial) {
+                throw new \Exception('Failed to update kwh meter request serial.');
+            }
+
+            // update meter to back to kwh meter request
+            $meter->update([
+                'control_type' => 'kWh Meter Request',
+                'account_number' => null,
+                'control_no'     => $meter->currentKwhMeterRequest?->control_no,
+            ]);
+
+            if (!$meter) {
+                throw new \Exception('Failed to update meter.');
+            }
+
+            // update Consumers Table serial back to the old meter number
+            $consumersData->update([
+                'Serial No' => $changeMeterRequest->old_meter_no,
+                'Remarks' => $newRemarks,
+            ]);
+
+            if (!$consumersData) {
+                throw new \Exception('Failed to update consumers data.');
+            }
+            
+            $postedMeterHistory->delete();
+
+            if (!$postedMeterHistory) {
+                throw new \Exception('Failed to delete posted meter history.');
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Change meter request status has been reset.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to reset status: ' . $e->getMessage());
+        }
     }
 }

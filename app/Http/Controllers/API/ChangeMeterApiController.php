@@ -438,7 +438,7 @@ class ChangeMeterApiController extends Controller
             return null;
         }
 
-        $existingMeter = DB::table('change_meter_requests')
+        $existingChangeMeterRequest = DB::table('change_meter_requests')
             ->where('new_meter_no', $request->meter_no)
             ->where('id', '!=', $request->cm_id) // Exclude current record
             ->where('status', '!=', 1) // exclude records that acted-notcompleted
@@ -448,8 +448,8 @@ class ChangeMeterApiController extends Controller
             ->where('new_meter_no', $request->meter_no)
             ->first();
 
-        if ($existingMeter || $existingPostedMeter) {
-            $control_no = $existingMeter ? $existingMeter->control_no : $existingPostedMeter->sco_no;
+        if ($existingChangeMeterRequest || $existingPostedMeter) {
+            $control_no = $existingChangeMeterRequest ? $existingChangeMeterRequest->control_no : $existingPostedMeter->sco_no;
             return response()->json([
                 'success' => false,
                 'message' => 'Meter number already exists',
