@@ -1474,6 +1474,7 @@ class ChangeMeterRequestController extends Controller
             // update the kwh meter request serial acted not completed to assign the meter to new change meter request
             $kwhMeterRequestSerial->update([
                 'status' => 0, // Reset status to 'ACTED - NOT COMPLETED'
+                'action_status' => false, // Reset action status to 'not acted'
             ]);
 
             if (!$kwhMeterRequestSerial) {
