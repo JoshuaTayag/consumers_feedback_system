@@ -1241,7 +1241,7 @@ class ChangeMeterRequestController extends Controller
             }
             
             // Get meters assigned to this KWH meter request (only those that are not linked to a change meter request or are linked but not yet acted upon or acted but not completed)
-            $assignedMeters = Meter::join('kwh_meter_request_serial_numbers', 'meters.id', '=', 'kwh_meter_request_serial_numbers.meter_id')
+            $vailableMeters = Meter::join('kwh_meter_request_serial_numbers', 'meters.id', '=', 'kwh_meter_request_serial_numbers.meter_id')
                 ->leftjoin('change_meter_requests', 'kwh_meter_request_serial_numbers.change_meter_request_id', '=', 'change_meter_requests.id')
                 ->where('kwh_meter_request_serial_numbers.kwh_meter_request_id', $kwhMeterRequest->id)
                 ->whereNull('kwh_meter_request_serial_numbers.deleted_at')
@@ -1252,7 +1252,7 @@ class ChangeMeterRequestController extends Controller
                                 $q->where('change_meter_requests.status', 1)
                                   ->orWhereNull('change_meter_requests.status'); // qualified
                             })
-                            ->where('kwh_meter_request_serial_numbers.action_status', true);
+                            ->where('kwh_meter_request_serial_numbers.action_status', false);
                     })->orWhere(function ($query) {
                         $query->whereNull('kwh_meter_request_serial_numbers.change_meter_request_id')
                             ->where('kwh_meter_request_serial_numbers.status', 0);
@@ -1262,7 +1262,7 @@ class ChangeMeterRequestController extends Controller
                 ->get();
             return response()->json([
                 'success' => true,
-                'data' => $assignedMeters
+                'data' => $vailableMeters
             ]);
             
         } catch (\Exception $e) {
