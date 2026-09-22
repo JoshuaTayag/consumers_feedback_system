@@ -886,25 +886,28 @@ class ChangeMeterRequestController extends Controller
 
     public function generateReport(Request $request)
     {
-        $contractorName = "";
         // Start building the query
-        $query = ChangeMeterRequest::whereBetween('created_at', [$request->date_from, $request->date_to]);
+        $query = ChangeMeterRequest::query();
 
         // Add the app_status condition if it is set to 1
         if ($request->app_status == 1) {
             $query->whereNull('status'); // unacted
+            $query->whereBetween('created_at', [$request->date_from, $request->date_to]);
         }
 
         if ($request->app_status == 2) {
+            $query->whereBetween('date_time_acted', [$request->date_from, $request->date_to]);
             $query->where('status', 2); // acted - completed
         }
 
         if ($request->app_status == 3) {
             $query->where('status', 1); // acted - not completed
+            $query->whereBetween('date_time_acted', [$request->date_from, $request->date_to]);
         }
 
         if ($request->app_status == 4) {
             $query->where('status', 3); // DISPATCHED
+            $query->whereBetween('dispatched_date', [$request->date_from, $request->date_to]);
         }
 
         if ($request->area) {
