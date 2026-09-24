@@ -3,79 +3,96 @@
 
 @section('content')
 <div class="container">
-  <div class="row justify-content-center">
-      <div class="col-lg-12">
-          <div class="card">
-            <div class="card-header">
-              <div class="row align-items-center">
-                  <div class="col-lg-6">
-                      <span class="mb-0 align-middle fs-3">kWh Meter Request</span>
-                  </div>
-                  <div class="col-lg-6 text-end">
-                    <a class="btn btn-success btn-sm" href="{{ route('generateKwhMeterReport') }}" target="_blank"> <i class="fa fa-print"></i> Generate Liquidation Report</a>
-                    <a class="btn btn-success btn-sm" href="{{ route('kwh-meter-request.create') }}"> <i class="fa fa-plus"></i> Create New Request</a>
-                  </div>
-              </div>
+  <!-- Toolbar -->
+  <div class="cmd-toolbar">
+    <div class="cmd-toolbar-top">
+        <h1 class="cmd-toolbar-title">kWh Meter Request</h1>
+        <div class="cmd-toolbar-actions">
+          <a class="btn btn-sm btn-success" href="{{ route('generateKwhMeterReport') }}" target="_blank"><i class="fa fa-print"></i> Generate Liquidation Report</a>
+          <a class="btn btn-sm ui-btn-cta" href="{{ route('kwh-meter-request.create') }}"><i class="fa fa-plus"></i> Create New Request</a>
+        </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="cmd-table-card">
+    <div class="table-responsive">
+      <table class="table cmd-table mb-0">
+        <thead>
+          <tr>
+            <th>Control No.</th>
+            <th>Requested By</th>
+            <th>Purpose</th>
+            <th>Meter Type</th>
+            <th>Qty Req</th>
+            <th>Qty Assigned</th>
+            <th>Date Requested</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        @foreach ($kwh_meter_requests as $key => $kwh_meter_request)
+          @php
+            $kwhBadgeClass = $kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number <> null
+                ? 'success'
+                : ($kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number == null
+                    ? 'warning'
+                    : ($kwh_meter_request->approved_at
+                        ? 'info'
+                        : ($kwh_meter_request->disapproved_at ? 'danger' : 'neutral')));
+            $kwhBadgeLabel = $kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number <> null
+                ? 'Liquidated'
+                : ($kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number == null
+                    ? 'Partially Liquidated'
+                    : ($kwh_meter_request->approved_at
+                        ? 'Approved'
+                        : ($kwh_meter_request->disapproved_at ? 'Disapproved' : 'Pending')));
+          @endphp
+         <tr>
+           <td class="fw-bold">{{ $kwh_meter_request->control_no }}</td>
+           <td>{{ $kwh_meter_request->user->name }}</td>
+           <td>{{ $kwh_meter_request->purpose }}</td>
+           <td>{{ $kwh_meter_request->meterType->meter_code }}</td>
+           <td>{{ $kwh_meter_request->quantity }}</td>
+           <td>{{ $kwh_meter_request->kwhMeterRequestSerialNumbers->count() }}</td>
+           <td>{{ $kwh_meter_request->created_at->format('m/d/Y') }}</td>
+           <td><span class="badge cmd-badge cmd-badge--{{ $kwhBadgeClass }} p-2">{{ $kwhBadgeLabel }}</span></td>
+           <td class="text-center">
+            <div class="btn-group btn-group-sm" role="group">
+                @if (!$kwh_meter_request->is_liquidated && $kwh_meter_request->approved_at == null && $kwh_meter_request->disapproved_at == null)
+                    <a type="button" class="btn btn-outline-warning" 
+                            href="{{ route('kwh-meter-request.edit',$kwh_meter_request->id) }}" title="Edit Meter Type">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                @endif
+                <a type="button" class="btn btn-outline-info" 
+                        href="{{ route('kwh-meter-request.show',$kwh_meter_request->id) }}" title="View Meter Request">
+                    <i class="fas fa-eye"></i>
+                </a>
+                @if ($kwh_meter_request->getLiquidationProgress()['progress_percentage'] == 100 && !$kwh_meter_request->is_liquidated && $kwh_meter_request->approved_at)
+                    <button type="button" class="btn btn-outline-success" 
+                        onclick="openLiquidationModal({{ $kwh_meter_request->id }}, '{{ $kwh_meter_request->control_no }}')" 
+                        title="Liquidate">
+                        <i class="fas fa-check"></i>
+                    </button>
+                @endif
+                <button type="button" class="btn btn-outline-danger" 
+                        onclick="confirmDelete({{ $kwh_meter_request->id }}, '{{ $kwh_meter_request->meterType->meter_brand }}')" title="Delete Details">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
-            <div class="card-body">
-              <table class="table table-bordered">
-                <tr>
-                  <th>Control No.</th>
-                  <th>Requested By</th>
-                  <th>Purpose</th>
-                  <th>Meter Type</th>
-                  <th>Qty Req</th>
-                  <th>Qty Assigned</th>
-                  <th>Date Requested</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-                @foreach ($kwh_meter_requests as $key => $kwh_meter_request)
-                 <tr>
-                   <td>{{ $kwh_meter_request->control_no }}</td>
-                   <td>{{ $kwh_meter_request->user->name }}</td>
-                   <td>{{ $kwh_meter_request->purpose }}</td>
-                   <td>{{ $kwh_meter_request->meterType->meter_code }}</td>
-                   <td>{{ $kwh_meter_request->quantity }}</td>
-                   <td>{{ $kwh_meter_request->kwhMeterRequestSerialNumbers->count() }}</td>
-                   <td>{{ $kwh_meter_request->created_at->format('m/d/Y') }}</td>
-                   <td><span class="badge p-2 {{ $kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number <> null ? 'bg-success' : ($kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number == null ? 'bg-warning' : ($kwh_meter_request->approved_at ? 'bg-info' : ($kwh_meter_request->disapproved_at ? 'bg-danger' : 'bg-secondary'))) }}">{{ $kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number <> null ? 'Liquidated' : ($kwh_meter_request->is_liquidated && $kwh_meter_request->seriv_number == null ? 'Partially Liquidated' : ($kwh_meter_request->approved_at ? 'Approved' : ($kwh_meter_request->disapproved_at ? 'Disapproved' : 'Pending'))) }}</span></td>
-                   <td class="text-center">
-                    <div class="btn-group btn-group-sm" role="group">
-                        @if (!$kwh_meter_request->is_liquidated && $kwh_meter_request->approved_at == null && $kwh_meter_request->disapproved_at == null)
-                            <a type="button" class="btn btn-outline-warning" 
-                                    href="{{ route('kwh-meter-request.edit',$kwh_meter_request->id) }}" title="Edit Meter Type">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                        @endif
-                        <a type="button" class="btn btn-outline-info" 
-                                href="{{ route('kwh-meter-request.show',$kwh_meter_request->id) }}" title="View Meter Request">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        @if ($kwh_meter_request->getLiquidationProgress()['progress_percentage'] == 100 && !$kwh_meter_request->is_liquidated && $kwh_meter_request->approved_at)
-                            <button type="button" class="btn btn-outline-success" 
-                                onclick="openLiquidationModal({{ $kwh_meter_request->id }}, '{{ $kwh_meter_request->control_no }}')" 
-                                title="Liquidate">
-                                <i class="fas fa-check"></i>
-                            </button>
-                        @endif
-                        <button type="button" class="btn btn-outline-danger" 
-                                onclick="confirmDelete({{ $kwh_meter_request->id }}, '{{ $kwh_meter_request->meterType->meter_brand }}')" title="Delete Details">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                    <form id="delete-form-{{ $kwh_meter_request->id }}" method="POST" action="{{ route('kwh-meter-request.destroy', $kwh_meter_request->id) }}" style="display: none;">
-                        @csrf
-                        @method('DELETE')
-                    </form>
-                  </td>
-                 </tr>
-                @endforeach
-               </table>
-               <div id="pagination">{{ $kwh_meter_requests->links() }}</div>
-            </div>
-          </div>
-      </div>
+            <form id="delete-form-{{ $kwh_meter_request->id }}" method="POST" action="{{ route('kwh-meter-request.destroy', $kwh_meter_request->id) }}" style="display: none;">
+                @csrf
+                @method('DELETE')
+            </form>
+          </td>
+         </tr>
+        @endforeach
+        </tbody>
+       </table>
+    </div>
+    <div class="cmd-table-footer" id="pagination">{{ $kwh_meter_requests->links() }}</div>
   </div>
 </div>
 
@@ -297,4 +314,8 @@ document.getElementById('liquidationForm').addEventListener('submit', function(e
     });
 @endif
 </script>
+@endsection
+@section('style')
+<link rel="stylesheet" href="{{ asset('css/ui-form-design.css') }}">
+<link rel="stylesheet" href="{{ asset('css/change-meter-dashboard.css') }}">
 @endsection

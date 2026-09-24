@@ -3,352 +3,214 @@
 @section('content')
 <div class="container">
   <!-- Dashboard for available and reserved meters -->
-  <div class="row">
+  <div class="row cmd-stats">
       <!-- Unacted Requests Card -->
-      <div class="col-lg-3 mb-3">
-          <div class="card border-danger shadow-sm h-100">
-              <div class="card-body bg-danger bg-opacity-10">
-                  <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                          <h6 class="card-subtitle mb-2 text-danger fw-semibold">
-                              <i class="fas fa-unlock me-1"></i> Unacted Requests
-                          </h6>
-                          <h2 class="text-danger fw-bold mb-1">
-                          {{ $change_meter_status_count['total']['unacted'] ?? 0 }}
-                          </h2>
-                          {{-- <small class="text-muted">asd</small> --}}
-                      </div>
-                      <div class="text-danger opacity-25">
-                          <i class="fas fa-clipboard-list" style="font-size: 3rem;"></i>
-                      </div>
-                  </div>
-                  <hr class="my-3">
-                  <div class="row text-center">
-                      <div class="col-4">
-                          <small class="text-muted d-block">Today</small>
-                          <strong class="text-danger">{{ $change_meter_status_count['today']['unacted'] ?? 0 }}</strong>
-                      </div>
-                      <div class="col-4">
-                          <small class="text-muted d-block">Yesterday</small>
-                          <strong class="text-danger">{{ $change_meter_status_count['yesterday']['unacted'] ?? 0 }}</strong>
-                      </div>
-                      <div class="col-4">
-                          <small class="text-muted d-block">Old</small>
-                          <strong class="text-danger">{{ $change_meter_status_count['old_transactions']['unacted'] ?? 0 }}</strong>
-                      </div>
+      <div class="col-xl-3 col-md-6 mb-3">
+          <div class="cmd-stat-card cmd-stat-card--unacted">
+              <div class="cmd-stat-icon"><i class="fas fa-clipboard-list"></i></div>
+              <div class="flex-grow-1">
+                  <div class="cmd-stat-label">Unacted Requests</div>
+                  <div class="cmd-stat-value">{{ $change_meter_status_count['total']['unacted'] ?? 0 }}</div>
+                  <div class="cmd-stat-breakdown">
+                      <span>Today<strong>{{ $change_meter_status_count['today']['unacted'] ?? 0 }}</strong></span>
+                      <span>Yesterday<strong>{{ $change_meter_status_count['yesterday']['unacted'] ?? 0 }}</strong></span>
+                      <span>Older<strong>{{ $change_meter_status_count['old_transactions']['unacted'] ?? 0 }}</strong></span>
                   </div>
               </div>
           </div>
       </div>
 
       <!-- Dispatched Requests Card -->
-      <div class="col-lg-3 mb-3">
-          <div class="card border-warning shadow-sm h-100">
-              <div class="card-body bg-warning bg-opacity-10">
-                  <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                          <h6 class="card-subtitle mb-2 text-warning fw-semibold">
-                              <i class="fas fa-lock me-1"></i> Dispatched Requests
-                          </h6>
-                          <h2 class="text-warning fw-bold mb-1">
-                            {{ $change_meter_status_count['total']['dispatched'] ?? 0 }}
-                          </h2>
-                      </div>
-                      <div class="text-warning opacity-25">
-                          <i class="fas fa-truck" style="font-size: 3rem;"></i>
-                      </div>
-                  </div>
-                  <hr class="my-3">
-                  <div class="row text-center">
-                      <div class="col-4">
-                          <small class="text-muted d-block">Today</small>
-                          <strong class="text-warning">{{ $change_meter_status_count['today']['dispatched'] ?? 0 }}</strong>
-                      </div>
-                      <div class="col-4">
-                          <small class="text-muted d-block">Yesterday</small>
-                          <strong class="text-warning">{{ $change_meter_status_count['yesterday']['dispatched'] ?? 0 }}</strong>
-                      </div>
-                      <div class="col-4">
-                          <small class="text-muted d-block">Old</small>
-                          <strong class="text-warning">{{ $change_meter_status_count['old_transactions']['dispatched'] ?? 0 }}</strong>
-                      </div>
+      <div class="col-xl-3 col-md-6 mb-3">
+          <div class="cmd-stat-card cmd-stat-card--dispatched">
+              <div class="cmd-stat-icon"><i class="fas fa-truck"></i></div>
+              <div class="flex-grow-1">
+                  <div class="cmd-stat-label">Dispatched Requests</div>
+                  <div class="cmd-stat-value">{{ $change_meter_status_count['total']['dispatched'] ?? 0 }}</div>
+                  <div class="cmd-stat-breakdown">
+                      <span>Today<strong>{{ $change_meter_status_count['today']['dispatched'] ?? 0 }}</strong></span>
+                      <span>Yesterday<strong>{{ $change_meter_status_count['yesterday']['dispatched'] ?? 0 }}</strong></span>
+                      <span>Older<strong>{{ $change_meter_status_count['old_transactions']['dispatched'] ?? 0 }}</strong></span>
                   </div>
               </div>
           </div>
       </div>
 
       <!-- Acted - Not Completed Requests Card -->
-      <div class="col-lg-3 mb-3">
-          <div class="card border-primary shadow-sm h-100">
-              <div class="card-body bg-primary bg-opacity-10">
-                  <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                          <h6 class="card-subtitle mb-2 text-primary fw-semibold">
-                              <i class="fas fa-exclamation-circle me-1"></i> Acted - Not Completed Requests
-                          </h6>
-                          <h2 class="text-primary fw-bold mb-1">
-                            {{ $change_meter_status_count['total']['acted_not_completed'] ?? 0 }}
-                          </h2>
-                      </div>
-                      <div class="text-primary opacity-25">
-                          <i class="fas fa-exclamation-circle" style="font-size: 3rem;"></i>
-                      </div>
-                  </div>
-                  <hr class="my-3">
-                  <div class="row text-center">
-                      <div class="col-4">
-                          <small class="text-muted d-block">Today</small>
-                          <strong class="text-primary">{{ $change_meter_status_count['today']['acted_not_completed'] ?? 0 }}</strong>
-                      </div>
-                      <div class="col-4">
-                          <small class="text-muted d-block">Yesterday</small>
-                          <strong class="text-primary">{{ $change_meter_status_count['yesterday']['acted_not_completed'] ?? 0 }}</strong>
-                      </div>
-                      <div class="col-4">
-                          <small class="text-muted d-block">Old</small>
-                          <strong class="text-primary">{{ $change_meter_status_count['old_transactions']['acted_not_completed'] ?? 0 }}</strong>
-                      </div>
+      <div class="col-xl-3 col-md-6 mb-3">
+          <div class="cmd-stat-card cmd-stat-card--progress">
+              <div class="cmd-stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+              <div class="flex-grow-1">
+                  <div class="cmd-stat-label">Acted &ndash; Not Completed</div>
+                  <div class="cmd-stat-value">{{ $change_meter_status_count['total']['acted_not_completed'] ?? 0 }}</div>
+                  <div class="cmd-stat-breakdown">
+                      <span>Today<strong>{{ $change_meter_status_count['today']['acted_not_completed'] ?? 0 }}</strong></span>
+                      <span>Yesterday<strong>{{ $change_meter_status_count['yesterday']['acted_not_completed'] ?? 0 }}</strong></span>
+                      <span>Older<strong>{{ $change_meter_status_count['old_transactions']['acted_not_completed'] ?? 0 }}</strong></span>
                   </div>
               </div>
           </div>
       </div>
 
-      <!-- Total Overview Card -->
-      <div class="col-lg-3 mb-3">
-          <div class="card border-success shadow-sm h-100">
-              <div class="card-body bg-success bg-opacity-10">
-                  <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                          <h6 class="card-subtitle mb-2 text-success fw-semibold">
-                              <i class="fas fa-check-circle me-1"></i> Acted - Completed Requests
-                          </h6>
-                          <h2 class="text-success fw-bold mb-1">
-                            {{ $change_meter_status_count['total']['acted_completed'] ?? 0 }}
-                          </h2>
-                      </div>
-                      <div class="text-success opacity-25">
-                          <i class="fas fa-check-circle" style="font-size: 3rem;"></i>
-                      </div>
-                  </div>
-                  <hr class="my-3">
-                  <div class="row text-center">
-                      <div class="col-4">
-                          <small class="text-muted d-block">Today</small>
-                          <strong class="text-success">{{ $change_meter_status_count['today']['acted_completed'] ?? 0 }}</strong>
-                      </div>
-                      <div class="col-4">
-                          <small class="text-muted d-block">Yesterday</small>
-                          <strong class="text-success">{{ $change_meter_status_count['yesterday']['acted_completed'] ?? 0 }}</strong>
-                      </div>
-                      <div class="col-4">
-                          <small class="text-muted d-block">Old</small>
-                          <strong class="text-success">{{ $change_meter_status_count['old_transactions']['acted_completed'] ?? 0 }}</strong>
-                      </div>
+      <!-- Acted - Completed Requests Card -->
+      <div class="col-xl-3 col-md-6 mb-3">
+          <div class="cmd-stat-card cmd-stat-card--completed">
+              <div class="cmd-stat-icon"><i class="fas fa-check-circle"></i></div>
+              <div class="flex-grow-1">
+                  <div class="cmd-stat-label">Acted &ndash; Completed</div>
+                  <div class="cmd-stat-value">{{ $change_meter_status_count['total']['acted_completed'] ?? 0 }}</div>
+                  <div class="cmd-stat-breakdown">
+                      <span>Today<strong>{{ $change_meter_status_count['today']['acted_completed'] ?? 0 }}</strong></span>
+                      <span>Yesterday<strong>{{ $change_meter_status_count['yesterday']['acted_completed'] ?? 0 }}</strong></span>
+                      <span>Older<strong>{{ $change_meter_status_count['old_transactions']['acted_completed'] ?? 0 }}</strong></span>
                   </div>
               </div>
           </div>
       </div>
   </div>
 
-  <div class="row justify-content-center">
-      <div class="col-lg-12">
-          <div class="card">
-            <div class="card-header">
-              <div class="row align-items-center">
-                  <div class="col-lg-6">
-                      <span class="mb-0 align-middle fs-3">Change Meter Request</span>
-                  </div>
-                  <div class="col-lg-6 text-end">
-                    <a class="btn btn-sm btn-success" href="{{ route('viewReport') }}" target="_blank"><i class="fa fa-download"></i> Generate Report</a>
-                    @can('change-meter-request-create')
-                      <a class="btn btn-sm btn-success" href="{{ route('createCM') }}"> Create New Request </a>
+  <!-- Toolbar: title, actions, search + filter -->
+  <div class="cmd-toolbar">
+    <div class="cmd-toolbar-top">
+        <h1 class="cmd-toolbar-title">Change Meter Request</h1>
+        <div class="cmd-toolbar-actions">
+          <a class="btn btn-sm btn-success" href="{{ route('viewReport') }}" target="_blank"><i class="fa fa-download"></i> Generate Report</a>
+          @can('change-meter-request-create')
+            <a class="btn btn-sm ui-btn-cta" href="{{ route('createCM') }}"> Create New Request </a>
+          @endcan
+        </div>
+    </div>
+    <form action="{{ route('cm.search') }}" method="GET">
+      <div class="cmd-toolbar-filters">
+        <div class="cmd-search">
+            <input type="text" placeholder="Search by Control No. / Account No. / Name / New or Old Meter No" id="search" name="search" class="form-control" value="{{ request('search') }}">
+        </div>
+        <div class="cmd-status-select">
+          <select class="form-select" name="status" onchange="this.form.submit()">
+              <option value="ALL" {{ request('status') == 'ALL' ? 'selected' : '' }}>All</option>
+              <option value="unacted" {{ request('status') == 'unacted' ? 'selected' : '' }}>Unacted</option>
+              <option value="dispatched" {{ request('status') == 'dispatched' ? 'selected' : '' }}>Dispatched</option>
+              <option value="acted_not_completed" {{ request('status') == 'acted_not_completed' ? 'selected' : '' }}>Acted - Not Completed</option>
+              <option value="acted_completed" {{ request('status') == 'acted_completed' ? 'selected' : '' }}>Acted - Completed</option>
+            </select>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-info"><i class="fa fa-search"></i></button>
+          @if(request('search') || request('status'))
+            <a href="{{ route('indexCM') }}" class="btn btn-outline-secondary" title="Clear All Filters">
+                <i class="fas fa-times"></i> Clear All
+            </a>
+          @endif
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Results -->
+  <div class="row" id="show_data">
+  @foreach ($cm_requests as $key => $cm_request)
+    @php
+      // Same mapping as the original top-strip color: 3 = dispatched (warning),
+      // 1 or 2 = acted (success), otherwise unacted (danger).
+      $cmAccentClass = $cm_request->status == 3 ? 'warning' : (($cm_request->status == 2) ? 'success' : ($cm_request->status == 1 ? 'danger' : 'primary'));
+    @endphp
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="cmd-request-card cmd-request-card--{{ $cmAccentClass }}">
+        <div class="cmd-request-head">
+          <div>
+            @if($cm_request->status == null || $cm_request->status == 3)
+              <div class="dropdown">
+                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  Action
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="{{ route('viewCM', $cm_request->id) }}"><i class="fa fa-eye"></i> View</a></li>
+                  @can('change-meter-request-edit')
+                    @if($cm_request->status == null && $cm_request->new_meter_no == null)
+                      <li><a class="dropdown-item" href="{{ route('editCM',$cm_request->id) }}"><i class="fa fa-pencil"></i> Update</a></li>
+                    @endif
+                  @endcan
+
+                  <li><a class="dropdown-item" href="{{route('printChangeMeterRequest',$cm_request->id)}}" target="_blank"><i class="fa fa-print"></i> Print</a></li>
+
+                    @if($cm_request->status == 3)
+                      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#transferRequestModal" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-crew-id="{{$cm_request->crew}}"><i class="fa fa-shuffle"></i>&nbsp; Transfer Request</a></li>
+                      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#meterPostingModal" data-assign-meter="{{ $cm_request->assignedMeter }}" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
+                    @endif
+
+                    @can('change-meter-request-dispatch')
+                      @if($cm_request->status == null && $cm_request->kwh_meter_request_id != null && $cm_request->new_meter_no != null)
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dispatchingModal"
+                          data-dispatch-sco="{{$cm_request->control_no}}"
+                          data-dispatch-id="{{$cm_request->id}}"
+                          data-dispatch-name="{{$cm_request->last_name.', '.$cm_request->first_name}}"
+                          data-dispatch-address="{{$cm_request->address}}"
+                          data-dispatch-kwhMeterControlNo="{{$cm_request->kwhMeterRequest->control_no}}"
+                          data-dispatch-kwhMeterType="{{$cm_request->kwhMeterRequest->meterType->meter_code ?? ''}}"
+                          data-dispatch-serial="{{$cm_request->new_meter_no}}"><i class="fa fa-truck"></i>&nbsp; Dispatch</a></li>
+                      @endif
                     @endcan
-                  </div>
+                    @can('change-meter-request-assign')
+                      @if($cm_request->status == null && $cm_request->kwh_meter_request_id != null && $cm_request->new_meter_no == null)
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#assigningModal"
+                          data-sco="{{$cm_request->control_no}}"
+                          data-id="{{$cm_request->id}}"
+                          data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}"
+                          data-address="{{$cm_request->address}}"
+                          data-kwhMeterControlNo="{{$cm_request->kwhMeterRequest->control_no}}"
+                          data-kwhMeterType="{{$cm_request->kwhMeterRequest->meterType->meter_code ?? ''}}"
+                          data-kwhMeterId="{{$cm_request->kwh_meter_request_id}}" ><i class="fa fa-tasks"></i>&nbsp; Assign Meter</a></li>
+                      @endif
+                    @endcan
+
+                  @can('change-meter-request-delete')
+                    @if($cm_request->status == null)
+                      <li><a class="dropdown-item delete-cm" href="{{route('deleteCM',$cm_request->id)}}"><i class="fa fa-trash"></i> Delete</a></li>
+                    @endif
+                  @endcan
+                </ul>
               </div>
-            </div>
-            <form action="{{ route('cm.search') }}" method="GET">
-              <div class="row p-3">
-                <div class="col-lg-6">
-                    <input type="text" placeholder="Search by Control No. / Account No. / Name / New or Old Meter No" id="search" name="search" class="form-control" value="{{ request('search') }}">
-                </div>
-                {{-- <div class="col-lg-2">
-                    <input type="text" placeholder="Search by Name" id="search_first_name" name="first_name" class="form-control" value="{{ request('first_name') }}">
-                </div>
-                <div class="col-lg-2">
-                    <input type="text" placeholder="Search by Meter No" id="search_meter_no" name="meter_no" class="form-control" value="{{ request('meter_no') }}">
-                </div>
-                <div class="col-lg-2">
-                  <input type="text" placeholder="Search by Old Meter No" id="search_meter_no" name="old_meter_no" class="form-control" value="{{ request('old_meter_no') }}">
-                </div> --}}
-                <div class="col-lg-2">
-                  <select class="form-select" name="status" onchange="this.form.submit()">
-                      <option value="ALL" {{ request('status') == 'ALL' ? 'selected' : '' }}>All</option>
-                      <option value="unacted" {{ request('status') == 'unacted' ? 'selected' : '' }}>Unacted</option>
-                      <option value="dispatched" {{ request('status') == 'dispatched' ? 'selected' : '' }}>Dispatched</option>
-                      <option value="acted_not_completed" {{ request('status') == 'acted_not_completed' ? 'selected' : '' }}>Acted - Not Completed</option>
-                      <option value="acted_completed" {{ request('status') == 'acted_completed' ? 'selected' : '' }}>Acted - Completed</option>
-                    </select>
-                </div>
-                <div class="col-lg-2">
-                  <button type="submit" class="btn btn-info"><i class="fa fa-search"></i></button>
-                  {{-- <button type="button" class="btn btn-info" onclick="clearSearch()">Clear</button> --}}
-                  @if(request('search') || request('status'))
-                    <a href="{{ route('indexCM') }}" class="btn btn-outline-secondary me-2" title="Clear All Filters">
-                        <i class="fas fa-times"></i> Clear All
-                    </a>
-                  @endif
-                </div>
-              </div>
-            </form>
-            <div class="card-body">
-              <div class="row" id="show_data">
-              @foreach ($cm_requests as $key => $cm_request)
-                <div class="col-lg-4 mb-4">
-                  <div class="card h-100">
-                    <div class="card-header p-1 bg-{{ $cm_request->status == 3 ? 'warning' : ($cm_request->status == 1 || $cm_request->status == 2 ? 'success' : 'danger')}}"></div>
-                    <div class="card-body">
-                      <div class="row mb-3">
-                        <div class="col d-flex align-items-center">
-                          @if($cm_request->status == null || $cm_request->status == 3)
-                            <div class="dropdown">
-                              <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                Action
-                              </button>
-                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                <li><a class="dropdown-item" href="{{ route('viewCM', $cm_request->id) }}"><i class="fa fa-eye"></i> View</a></li>
-                                @can('change-meter-request-edit')
-                                  @if($cm_request->status == null && $cm_request->new_meter_no == null)
-                                    <li><a class="dropdown-item" href="{{ route('editCM',$cm_request->id) }}"><i class="fa fa-pencil"></i> Update</a></li>
-                                  @endif
-                                @endcan
-
-                                <li><a class="dropdown-item" href="{{route('printChangeMeterRequest',$cm_request->id)}}" target="_blank"><i class="fa fa-print"></i> Print</a></li>
-
-                                  @if($cm_request->status == 3)
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#transferRequestModal" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-crew-id="{{$cm_request->crew}}"><i class="fa fa-shuffle"></i>&nbsp; Transfer Request</a></li>
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#meterPostingModal" data-assign-meter="{{ $cm_request->assignedMeter }}" data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}" data-sco="{{$cm_request->control_no}}" data-id="{{$cm_request->id}}" data-process-date="{{ date('F d, Y', strtotime($cm_request->created_at)) }}"><i class="fa fa-clipboard-check"></i>&nbsp; Meter Posting</a></li>
-                                  @endif
-
-                                  @can('change-meter-request-dispatch')
-                                    @if($cm_request->status == null && $cm_request->kwh_meter_request_id != null && $cm_request->new_meter_no != null)
-                                      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dispatchingModal" 
-                                        data-dispatch-sco="{{$cm_request->control_no}}" 
-                                        data-dispatch-id="{{$cm_request->id}}" 
-                                        data-dispatch-name="{{$cm_request->last_name.', '.$cm_request->first_name}}"
-                                        data-dispatch-address="{{$cm_request->address}}"
-                                        data-dispatch-kwhMeterControlNo="{{$cm_request->kwhMeterRequest->control_no}}"
-                                        data-dispatch-kwhMeterType="{{$cm_request->kwhMeterRequest->meterType->meter_code ?? ''}}"
-                                        data-dispatch-serial="{{$cm_request->new_meter_no}}"><i class="fa fa-truck"></i>&nbsp; Dispatch</a></li>
-                                    @endif
-                                  @endcan 
-                                  @can('change-meter-request-assign')
-                                    @if($cm_request->status == null && $cm_request->kwh_meter_request_id != null && $cm_request->new_meter_no == null)
-                                      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#assigningModal" 
-                                        data-sco="{{$cm_request->control_no}}" 
-                                        data-id="{{$cm_request->id}}" 
-                                        data-name="{{$cm_request->last_name.', '.$cm_request->first_name}}"
-                                        data-address="{{$cm_request->address}}"
-                                        data-kwhMeterControlNo="{{$cm_request->kwhMeterRequest->control_no}}"
-                                        data-kwhMeterType="{{$cm_request->kwhMeterRequest->meterType->meter_code ?? ''}}"
-                                        data-kwhMeterId="{{$cm_request->kwh_meter_request_id}}" ><i class="fa fa-tasks"></i>&nbsp; Assign Meter</a></li>
-                                    @endif
-                                  @endcan 
-
-                                @can('change-meter-request-delete')
-                                  @if($cm_request->status == null)
-                                    <li><a class="dropdown-item delete-cm" href="{{route('deleteCM',$cm_request->id)}}"><i class="fa fa-trash"></i> Delete</a></li>
-                                  @endif
-                                @endcan 
-                              </ul>
-                            </div>
-                          @else
-                            <a href="{{ route('viewCM', $cm_request->id) }}" type="submit" target="_blank" class="btn btn-info btn-sm"><i class="fa fa-eye"></i></a>
-                          @endif
-                        </div>
-                        <div class="col-lg-3 d-flex align-items-center">
-                            <div class="mx-end ms-auto"> <!-- Add mx-auto to horizontally center the content -->
-                                <p class="badge rounded-pill bg-{{ $cm_request->status == 1 || $cm_request->status == 2 ? 'success' : ($cm_request->status == 3 ? 'warning text-dark' : 'danger')}} p-2 mb-0">{{ $cm_request->status == 1 || $cm_request->status == 2 ? 'Acted' : ($cm_request->status == 3 ? 'Dispatched' : 'Unacted')}}</p>
-                            </div>
-                        </div>
-                      </div>
-                      <div class="row border-bottom ">
-                        <div class="col-lg-5 border-end">Control No. :</div>
-                        <div class="col-lg-7 fw-bold">{{$cm_request->control_no}}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Name:</div>
-                        <div class="col-lg-7 ">{{$cm_request->last_name.', '.$cm_request->first_name}}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Account:</div>
-                        <div class="col-lg-7 "><a style="text-decoration: none;" target="_blank" href="{{ route('ledger.search', ['account_no' => $cm_request->account_number]) }}">{{ substr($cm_request->account_number, 0, 2) }}-{{ substr($cm_request->account_number, 2, 4) }}-{{ substr($cm_request->account_number, 6, 4) }}</a></div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Process Date:</div>
-                        <div class="col-lg-7 ">{{ date('F d, Y', strtotime($cm_request->created_at)) }}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Area:</div>
-                        <div class="col-lg-7 ">A{{$cm_request->area}}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Address:</div>
-                        <div class="col-lg-7 ">{{$cm_request->address}}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Consumer Type:</div>
-                        <div class="col-lg-7 ">{{ $cm_request->consumer_type ?? 'Unknown Type'}}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Application Status:</div>
-                        <!-- 1 = installed, 2 = rejected -->
-                        <div class="col-lg-7 {{ $cm_request->status == null ? 'd-none' : 'd-block'}}"><span class="badge my-1 rounded-pill bg-{{$cm_request->status == 1 ? 'danger' : ($cm_request->status == 2 ? 'success' : 'warning text-dark') }} p-2 fs-6" >{{$cm_request->status == 1 ? 'ACTED - NOT COMPLETED' : ($cm_request->status == 2 ? 'ACTED - COMPLETED' : ($cm_request->status == 3 ? 'DISPATCHED' : 'UNACTED')) }}</span></div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Crew:</div>
-                        <div class="col-lg-7 ">{{$cm_request->crew_full_name}}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Old Meter No.:</div>
-                        <div class="col-lg-7 ">{{$cm_request->old_meter_no}}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">New Meter No.:</div>
-                        <div class="col-lg-7 text-{{$cm_request->new_meter_no ? '' : 'danger'}} ">{{$cm_request->new_meter_no ? $cm_request->new_meter_no : "N/A"}}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">{{ $cm_request->status == 1 ? 'Date Acted' : 'Date Installed'}}</div>
-                        <div class="col-lg-7 text-{{$cm_request->date_time_acted ? '' : 'danger'}}">{{ $cm_request->date_time_acted ? date('F d, Y h:i A', strtotime($cm_request->date_time_acted)) : 'N/A' }}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Landmark:</div>
-                        <div class="col-lg-7">{{$cm_request->location}}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">Remarks:</div>
-                        <div class="col-lg-7">{{$cm_request->remarks}}</div>
-                      </div>
-                      <div class="row border-bottom">
-                        <div class="col-lg-5 border-end">OR No.:</div>
-                        <div class="col-lg-7 {{$cm_request->changeMeterRequestTransaction ? 'fw-bold text-success' : ''}} ">{{$cm_request->changeMeterRequestTransaction ? $cm_request->changeMeterRequestTransaction->or_no : "None"}}</div>
-                      </div>
-                      <div class="row pt-3 text-muted">
-                        <div class="col text-end">created by: {{$cm_request->created_name}}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              @endforeach
-              </div>
-              <div id="pagination">{{ $cm_requests->links() }}</div>
-            </div>
-              @include('service_connect_order.change_meter.meter_posting')
-              @include('service_connect_order.change_meter.dispatch')
-              @include('service_connect_order.change_meter.meter_assign')
-              @include('service_connect_order.change_meter.transfer_request')
+            @else
+              <a href="{{ route('viewCM', $cm_request->id) }}" type="submit" target="_blank" class="btn btn-info btn-sm"><i class="fa fa-eye"></i></a>
+            @endif
           </div>
+          <span class="badge cmd-badge rounded-pill cmd-badge--{{$cm_request->status == null ? 'primary' : ($cm_request->status == 2 ? 'success' : ($cm_request->status == 1 ? 'danger' : 'warning')) }} p-2">{{$cm_request->status == 1 ? 'ACTED - NOT COMPLETED' : ($cm_request->status == 2 ? 'ACTED - COMPLETED' : ($cm_request->status == 3 ? 'DISPATCHED' : 'UNACTED')) }}</span>
+          {{-- <p class="badge rounded-pill bg-{{ $cmAccentClass }}{{ $cmAccentClass === 'warning' ? ' text-dark' : '' }} p-2 mb-0">{{ $cm_request->status == 1 || $cm_request->status == 2 ? 'Acted' : ($cm_request->status == 3 ? 'Dispatched' : 'Unacted')}}</p> --}}
+        </div>
+        <div class="cmd-request-body">
+          <div class="cmd-request-grid">
+            <div class="cmd-request-row"><span class="cmd-label">Control No.</span><span class="cmd-value fw-bold">{{$cm_request->control_no}}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">Name</span><span class="cmd-value">{{$cm_request->last_name.', '.$cm_request->first_name}}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">Account</span><span class="cmd-value"><a style="text-decoration: none;" target="_blank" href="{{ route('ledger.search', ['account_no' => $cm_request->account_number]) }}">{{ substr($cm_request->account_number, 0, 2) }}-{{ substr($cm_request->account_number, 2, 4) }}-{{ substr($cm_request->account_number, 6, 4) }}</a></span></div>
+            <div class="cmd-request-row"><span class="cmd-label">Process Date</span><span class="cmd-value">{{ date('F d, Y', strtotime($cm_request->created_at)) }}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">Area</span><span class="cmd-value">A{{$cm_request->area}}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">Address</span><span class="cmd-value">{{$cm_request->address}}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">Consumer Type</span><span class="cmd-value">{{ $cm_request->consumer_type ?? 'Unknown Type'}}</span></div>
+            <div class="cmd-request-row {{ $cm_request->status == null ? 'd-none' : '' }}">
+              <span class="cmd-label">Application Status</span>
+              <!-- 1 = installed, 2 = rejected -->
+              <span class="cmd-value"></span>
+            </div>
+            <div class="cmd-request-row"><span class="cmd-label">Crew</span><span class="cmd-value">{{$cm_request->crew_full_name}}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">Old Meter No.</span><span class="cmd-value">{{$cm_request->old_meter_no}}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">New Meter No.</span><span class="cmd-value text-{{$cm_request->new_meter_no ? '' : 'danger'}}">{{$cm_request->new_meter_no ? $cm_request->new_meter_no : "N/A"}}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">{{ $cm_request->status == 1 ? 'Date Acted' : 'Date Installed'}}</span><span class="cmd-value text-{{$cm_request->date_time_acted ? '' : 'danger'}}">{{ $cm_request->date_time_acted ? date('F d, Y h:i A', strtotime($cm_request->date_time_acted)) : 'N/A' }}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">Landmark</span><span class="cmd-value">{{$cm_request->location}}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">Remarks</span><span class="cmd-value">{{$cm_request->remarks}}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">OR No.</span><span class="cmd-value {{$cm_request->changeMeterRequestTransaction ? 'fw-bold text-success' : ''}}">{{$cm_request->changeMeterRequestTransaction ? $cm_request->changeMeterRequestTransaction->or_no : "None"}}</span></div>
+          </div>
+        </div>
+        <div class="cmd-request-footer">created by: {{$cm_request->created_name}}</div>
       </div>
+    </div>
+  @endforeach
   </div>
+  <div id="pagination">{{ $cm_requests->links() }}</div>
+
+  @include('service_connect_order.change_meter.meter_posting')
+  @include('service_connect_order.change_meter.dispatch')
+  @include('service_connect_order.change_meter.meter_assign')
+  @include('service_connect_order.change_meter.transfer_request')
 </div>
 @endsection
 @section('script')
@@ -802,4 +664,5 @@
 @endsection
 @section('style')
 <link rel="stylesheet" href="{{ asset('css/ui-form-design.css') }}">
+<link rel="stylesheet" href="{{ asset('css/change-meter-dashboard.css') }}">
 @endsection

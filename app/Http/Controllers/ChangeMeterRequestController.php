@@ -40,7 +40,8 @@ class ChangeMeterRequestController extends Controller
          $this->middleware('permission:change-meter-request-list|change-meter-request-create|change-meter-request-edit|change-meter-request-delete', ['only' => ['index']]);
          $this->middleware('permission:change-meter-request-create', ['only' => ['create','store']]);
          $this->middleware('permission:change-meter-request-edit', ['only' => ['edit','update']]);
-         $this->middleware('permission:change-meter-request-delete', ['only' => ['destroy']]);
+         $this->middleware('permission:change-meter-request-dispatch', ['only' => ['cmDispatched']]);
+         $this->middleware('permission:change-meter-request-assign', ['only' => ['cmAssignMeter']]);
     }
 
     /**

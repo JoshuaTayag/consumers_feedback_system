@@ -134,6 +134,11 @@
         margin-right: auto;
     }
 
+    .signature-image-cm {
+        width: 100%;
+        height: 60px;
+    }
+
     .signature-name {
         width: 33.33%;
         text-align: center;
@@ -276,7 +281,7 @@
                   
                   <img src="data:image/png;base64,{{ $signatureData }}" 
                       alt="Signature" 
-                      class="signature-image"
+                      class="signature-image-cm"
                       style="max-height: 40px; max-width: 50px; display: block; margin: 0 auto;">
                 @else
                   <small>No Signature</small>

@@ -1,0 +1,245 @@
+/* ==========================================================================
+   CHANGE METER DASHBOARD
+   Scoped styles for the Change Meter Request index page. Reuses the
+   --ui-* tokens from ui-form-design.css (load that file first). Follows
+   the same [data-theme="dark"] convention as dark-mode.css / ui-form-design.css.
+   ========================================================================== */
+
+/* ---- Stat cards ---- */
+.cmd-stats { margin-bottom: 1.5rem; }
+
+.cmd-stat-card {
+  display: flex;
+  align-items: flex-start;
+  gap: .875rem;
+  height: 100%;
+  background: #fff;
+  border: 1px solid var(--ui-border, #E2E8F0);
+  border-left: 4px solid var(--cmd-accent, #94A3B8);
+  border-radius: .75rem;
+  padding: 1.15rem 1.25rem;
+}
+
+.cmd-stat-card--unacted    { --cmd-accent: var(--ui-primary, #0891B2); --cmd-accent-bg: #CFFAFE;}
+.cmd-stat-card--dispatched { --cmd-accent: #D97706; --cmd-accent-bg: #FEF3C7; }
+.cmd-stat-card--progress   { --cmd-accent: #DC2626; --cmd-accent-bg: #FEE2E2;}
+.cmd-stat-card--completed  { --cmd-accent: var(--ui-cta, #22C55E); --cmd-accent-bg: #DCFCE7; }
+
+.cmd-stat-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: .6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  background: var(--cmd-accent-bg, #F1F5F9);
+  color: var(--cmd-accent, #64748B);
+}
+
+.cmd-stat-label {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--ui-muted, #64748B);
+  margin-bottom: .25rem;
+}
+
+.cmd-stat-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ui-text, #164E63);
+  margin-bottom: .75rem;
+}
+
+.cmd-stat-breakdown {
+  display: flex;
+  gap: 1.1rem;
+  font-size: .75rem;
+  color: var(--ui-muted, #64748B);
+  border-top: 1px solid var(--ui-border, #E2E8F0);
+  padding-top: .6rem;
+}
+.cmd-stat-breakdown strong {
+  display: block;
+  font-size: .85rem;
+  color: var(--ui-text, #164E63);
+}
+
+/* ---- Toolbar ---- */
+.cmd-toolbar {
+  border: 1px solid var(--ui-border, #E2E8F0);
+  border-radius: .75rem;
+  background: #fff;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.cmd-toolbar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid var(--ui-border, #E2E8F0);
+}
+
+.cmd-toolbar-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ui-text, #164E63);
+  margin: 0;
+}
+
+.cmd-toolbar-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+.cmd-toolbar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .75rem;
+  padding: 1rem 1.25rem;
+}
+.cmd-toolbar-filters .cmd-search { flex: 1 1 280px; }
+.cmd-toolbar-filters .cmd-status-select { flex: 0 0 200px; }
+
+/* ---- Request cards ---- */
+.cmd-request-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--ui-border, #E2E8F0);
+  border-left: 4px solid var(--cmd-status-accent, #94A3B8);
+  border-radius: .75rem;
+}
+
+.cmd-request-card--warning { --cmd-status-accent: #D97706; }
+.cmd-request-card--success { --cmd-status-accent: var(--ui-cta, #22C55E); }
+.cmd-request-card--danger  { --cmd-status-accent: #DC2626; }
+.cmd-request-card--primary { --cmd-status-accent: var(--ui-primary, #0891B2); }
+
+.cmd-request-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .85rem 1.1rem;
+  border-bottom: 1px solid var(--ui-border, #E2E8F0);
+}
+
+.cmd-request-body { padding: .95rem 1.1rem; flex: 1; }
+
+.cmd-request-grid { display: grid; row-gap: .55rem; }
+
+.cmd-request-row {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  column-gap: .75rem;
+  font-size: .85rem;
+  align-items: baseline;
+}
+.cmd-request-row .cmd-label { color: var(--ui-muted, #64748B); font-weight: 500; }
+.cmd-request-row .cmd-value { color: var(--ui-text, #164E63); font-weight: 500; }
+
+.cmd-request-footer {
+  padding: .55rem 1.1rem;
+  border-top: 1px solid var(--ui-border, #E2E8F0);
+  font-size: .75rem;
+  color: var(--ui-muted, #64748B);
+  text-align: right;
+}
+
+@media (max-width: 420px) {
+  .cmd-request-row { grid-template-columns: 92px 1fr; font-size: .8rem; }
+}
+
+/* ---- Status badges (brand palette, not Bootstrap contextual colors) ---- */
+.cmd-badge {
+  display: inline-block;
+  color: #fff;
+  font-weight: 600;
+}
+.cmd-badge--danger   { background-color: #DC2626; }
+.cmd-badge--warning   { background-color: #D97706; }
+.cmd-badge--success   { background-color: var(--ui-cta, #22C55E); }
+.cmd-badge--primary   { background-color: var(--ui-primary, #0891B2); }
+.cmd-badge--info      { background-color: var(--ui-primary, #0891B2); }
+.cmd-badge--neutral   { background-color: var(--ui-muted, #64748B); }
+
+/* ---- Table-based listings (e.g. kWh Meter Request) ---- */
+.cmd-table-card {
+  border: 1px solid var(--ui-border, #E2E8F0);
+  border-radius: .75rem;
+  background: #fff;
+  overflow: hidden;
+}
+.cmd-table-card .table-responsive { margin: 0; }
+
+.cmd-table { margin-bottom: 0; }
+.cmd-table thead th {
+  background: var(--ui-bg, #ECFEFF);
+  color: var(--ui-text, #164E63);
+  font-weight: 600;
+  font-size: .82rem;
+  border-bottom: 2px solid var(--ui-border, #E2E8F0);
+  white-space: nowrap;
+}
+.cmd-table td {
+  vertical-align: middle;
+  font-size: .88rem;
+  color: var(--ui-text, #164E63);
+  border-color: var(--ui-border, #E2E8F0);
+}
+.cmd-table tbody tr:hover { background: var(--ui-bg, #ECFEFF); }
+.cmd-table-footer {
+  padding: .75rem 1.1rem;
+  border-top: 1px solid var(--ui-border, #E2E8F0);
+}
+
+/* ==========================================================================
+   DARK MODE
+   ========================================================================== */
+[data-theme="dark"] .cmd-stat-card,
+[data-theme="dark"] .cmd-toolbar,
+[data-theme="dark"] .cmd-request-card {
+  background-color: #1e1e1e;
+  border-top-color: #333;
+  border-right-color: #333;
+  border-bottom-color: #333;
+  /* border-left intentionally untouched: it carries the status/accent color
+     via --cmd-accent / --cmd-status-accent and must stay colored in dark mode */
+}
+
+[data-theme="dark"] .cmd-toolbar-top,
+[data-theme="dark"] .cmd-request-head,
+[data-theme="dark"] .cmd-request-footer,
+[data-theme="dark"] .cmd-stat-breakdown {
+  border-color: #333;
+}
+
+[data-theme="dark"] .cmd-stat-label,
+[data-theme="dark"] .cmd-stat-breakdown,
+[data-theme="dark"] .cmd-request-row .cmd-label,
+[data-theme="dark"] .cmd-request-footer {
+  color: #9a9a9a;
+}
+
+[data-theme="dark"] .cmd-stat-value,
+[data-theme="dark"] .cmd-toolbar-title,
+[data-theme="dark"] .cmd-request-row .cmd-value {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .cmd-stat-icon { filter: brightness(1.15); }
+
+[data-theme="dark"] .cmd-table-card { background-color: #1e1e1e; border-color: #333; }
+[data-theme="dark"] .cmd-table-footer { border-color: #333; }
+[data-theme="dark"] .cmd-table thead th {
+  background-color: #16333d !important;
+  color: #67e8f9 !important;
+  border-color: #2a5a6b !important;
+}
+[data-theme="dark"] .cmd-table tbody tr:hover { background-color: #16333d; }
