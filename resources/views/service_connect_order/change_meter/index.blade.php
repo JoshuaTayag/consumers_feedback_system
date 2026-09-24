@@ -8,10 +8,10 @@
       <div class="col-xl-3 col-md-6 mb-3">
           <div class="cmd-stat-card cmd-stat-card--unacted">
               <div class="cmd-stat-icon"><i class="fas fa-clipboard-list"></i></div>
-              <div class="flex-grow-1">
+              <div class="flex-grow-1 text-center">
                   <div class="cmd-stat-label">Unacted Requests</div>
                   <div class="cmd-stat-value">{{ $change_meter_status_count['total']['unacted'] ?? 0 }}</div>
-                  <div class="cmd-stat-breakdown">
+                  <div class="cmd-stat-breakdown justify-content-between">
                       <span>Today<strong>{{ $change_meter_status_count['today']['unacted'] ?? 0 }}</strong></span>
                       <span>Yesterday<strong>{{ $change_meter_status_count['yesterday']['unacted'] ?? 0 }}</strong></span>
                       <span>Older<strong>{{ $change_meter_status_count['old_transactions']['unacted'] ?? 0 }}</strong></span>
@@ -24,10 +24,10 @@
       <div class="col-xl-3 col-md-6 mb-3">
           <div class="cmd-stat-card cmd-stat-card--dispatched">
               <div class="cmd-stat-icon"><i class="fas fa-truck"></i></div>
-              <div class="flex-grow-1">
+              <div class="flex-grow-1 text-center">
                   <div class="cmd-stat-label">Dispatched Requests</div>
                   <div class="cmd-stat-value">{{ $change_meter_status_count['total']['dispatched'] ?? 0 }}</div>
-                  <div class="cmd-stat-breakdown">
+                  <div class="cmd-stat-breakdown justify-content-between">
                       <span>Today<strong>{{ $change_meter_status_count['today']['dispatched'] ?? 0 }}</strong></span>
                       <span>Yesterday<strong>{{ $change_meter_status_count['yesterday']['dispatched'] ?? 0 }}</strong></span>
                       <span>Older<strong>{{ $change_meter_status_count['old_transactions']['dispatched'] ?? 0 }}</strong></span>
@@ -40,10 +40,10 @@
       <div class="col-xl-3 col-md-6 mb-3">
           <div class="cmd-stat-card cmd-stat-card--progress">
               <div class="cmd-stat-icon"><i class="fas fa-exclamation-circle"></i></div>
-              <div class="flex-grow-1">
+              <div class="flex-grow-1 text-center">
                   <div class="cmd-stat-label">Acted &ndash; Not Completed</div>
                   <div class="cmd-stat-value">{{ $change_meter_status_count['total']['acted_not_completed'] ?? 0 }}</div>
-                  <div class="cmd-stat-breakdown">
+                  <div class="cmd-stat-breakdown justify-content-between">
                       <span>Today<strong>{{ $change_meter_status_count['today']['acted_not_completed'] ?? 0 }}</strong></span>
                       <span>Yesterday<strong>{{ $change_meter_status_count['yesterday']['acted_not_completed'] ?? 0 }}</strong></span>
                       <span>Older<strong>{{ $change_meter_status_count['old_transactions']['acted_not_completed'] ?? 0 }}</strong></span>
@@ -56,10 +56,10 @@
       <div class="col-xl-3 col-md-6 mb-3">
           <div class="cmd-stat-card cmd-stat-card--completed">
               <div class="cmd-stat-icon"><i class="fas fa-check-circle"></i></div>
-              <div class="flex-grow-1">
+              <div class="flex-grow-1 text-center">
                   <div class="cmd-stat-label">Acted &ndash; Completed</div>
                   <div class="cmd-stat-value">{{ $change_meter_status_count['total']['acted_completed'] ?? 0 }}</div>
-                  <div class="cmd-stat-breakdown">
+                  <div class="cmd-stat-breakdown justify-content-between">
                       <span>Today<strong>{{ $change_meter_status_count['today']['acted_completed'] ?? 0 }}</strong></span>
                       <span>Yesterday<strong>{{ $change_meter_status_count['yesterday']['acted_completed'] ?? 0 }}</strong></span>
                       <span>Older<strong>{{ $change_meter_status_count['old_transactions']['acted_completed'] ?? 0 }}</strong></span>
