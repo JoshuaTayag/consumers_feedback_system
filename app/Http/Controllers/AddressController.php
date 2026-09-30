@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Datamanagement\Municipality;
-use App\Models\Datamanagement\Barangay;
+use App\Models\DataManagement\Municipality;
+use App\Models\DataManagement\Barangay;
 
 class AddressController extends Controller
 {
