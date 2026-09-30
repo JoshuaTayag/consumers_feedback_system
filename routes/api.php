@@ -36,10 +36,10 @@ Route::get('fetch-account/{account_no}', 'App\Http\Controllers\AccountLedgerCont
 Route::get('fetch-account/{type}/{value}', 'App\Http\Controllers\AccountLedgerController@fetchAccountDetails');
 
 // Authentication API routes
-Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login'])->middleware('throttle:5,1');
-Route::post('/logout', [App\Http\Controllers\Api\AuthController::class, 'logout'])->middleware('auth:sanctum');
-Route::get('/me', [App\Http\Controllers\Api\AuthController::class, 'user'])->middleware('auth:sanctum');
-Route::post('/refresh', [App\Http\Controllers\Api\AuthController::class, 'refresh'])->middleware('auth:sanctum');
+Route::post('/login', [App\Http\Controllers\API\AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/logout', [App\Http\Controllers\API\AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::get('/me', [App\Http\Controllers\API\AuthController::class, 'user'])->middleware('auth:sanctum');
+Route::post('/refresh', [App\Http\Controllers\API\AuthController::class, 'refresh'])->middleware('auth:sanctum');
 
 // Change Meter API routes
 Route::get('/change-meter-requests', [App\Http\Controllers\API\ChangeMeterApiController::class, 'fetchChangeMeterDataPerContractor'])->middleware('auth:sanctum');
@@ -59,6 +59,6 @@ Route::middleware('auth:sanctum')->group(function () {
 // Public validation endpoints (no auth required for AJAX validation)
 Route::post('meters/validate-serial', [App\Http\Controllers\MeterController::class, 'validateSerialNumber']);
 Route::post('meters/validate-erc-seal', [App\Http\Controllers\MeterController::class, 'validateErcSeal']);
-Route::post('/sms', [SmsController::class, 'store']);
+// Route::post('/sms', [SmsController::class, 'store']);
 
 Route::get('fetch-kwh-meter-damage-cause-types', [App\Http\Controllers\API\ChangeMeterApiController::class, 'fetchKwhMeterDamageCauses'])->middleware('auth:sanctum');
