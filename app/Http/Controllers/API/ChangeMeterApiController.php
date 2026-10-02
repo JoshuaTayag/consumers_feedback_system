@@ -14,7 +14,7 @@ use App\Notifications\ChangeMeterCompletedNotification;
 use App\Enums\SmsTemplate;
 use App\Services\M360SmsService;
 use App\Services\SmsTemplateRenderer;
-use App\Models\Datamanagement\KwhMeterDamageCauseType;
+use App\Models\DataManagement\KwhMeterDamageCauseType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

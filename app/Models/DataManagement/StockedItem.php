@@ -12,12 +12,12 @@ class StockedItem extends Model
 
     public function structure_item()
     {
-        return $this->belongsTo('App\Models\Datamanagement\StructureItem');
+        return $this->belongsTo('App\Models\DataManagement\StructureItem');
     }
 
     public function temp_mrf()
     {
-        return $this->belongsTo('App\Models\Datamanagement\StructureItem');
+        return $this->belongsTo('App\Models\DataManagement\StructureItem');
     }
 
     public function temp_structure()
