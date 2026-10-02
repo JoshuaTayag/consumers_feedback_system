@@ -21,7 +21,7 @@ class Barangay extends Model implements Auditable
 
     public function municipality()
     {
-        return $this->belongsTo('App\Models\Datamanagement\Municipality');
+        return $this->belongsTo('App\Models\DataManagement\Municipality');
     }
 
     public function preMembership()

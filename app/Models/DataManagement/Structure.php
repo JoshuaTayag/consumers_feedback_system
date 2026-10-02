@@ -13,7 +13,7 @@ class Structure extends Model implements Auditable
 
     public function structure_items()
     {
-        return $this->hasMany('App\Models\Datamanagement\StructureItem');
+        return $this->hasMany('App\Models\DataManagement\StructureItem');
     }
 
     protected $fillable = [ 'structure_code', 
