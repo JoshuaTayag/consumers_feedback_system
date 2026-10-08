@@ -136,7 +136,7 @@
 <body>
     <header>
         <img src="{{ public_path('images/logo.png') }}" alt="" class="img-logo">
-        <img src="{{ public_path('images/iso_2025.JPg') }}" alt="" class="img-iso">
+        <img src="{{ public_path('images/iso_2025.jpg') }}" alt="" class="img-iso">
         <h2 class="heading">LEYTE V ELECTRIC COOPERATIVE, INC.</h2>
         <p class="sub-heading">
             (LEYECO V)<br>

@@ -94,9 +94,40 @@ class BarangayController extends Controller
     public function destroy(string $id)
     {
         $barangay = Barangay::findOrFail($id);
+
+        $references = [];
+
+        if ($barangay->preMembership()->exists()) {
+            $references[] = 'Pre-Membership';
+        }
+
+        if ($barangay->lifeline()->exists()) {
+            $references[] = 'Lifeline';
+        }
+
+        if ($barangay->mrf()->exists()) {
+            $references[] = 'Material Requisition Form';
+        }
+
+        if ($barangay->electrician_address()->exists()) {
+            $references[] = 'Electrician Address';
+        }
+
+        if (!empty($references)) {
+            return redirect()
+                ->route('barangays.index')
+                ->with(
+                    'error',
+                    'This barangay cannot be deleted because it is referenced by: ' .
+                    implode(', ', $references) . '.'
+                );
+        }
+
         $barangay->delete();
 
-        return redirect()->route('barangays.index')->with('success', 'Barangay deleted successfully.');
+        return redirect()
+            ->route('barangays.index')
+            ->with('success', 'Barangay deleted successfully.');
     }
 
     public function exportCsv()
