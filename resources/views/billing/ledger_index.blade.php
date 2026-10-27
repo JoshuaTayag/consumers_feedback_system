@@ -49,7 +49,7 @@
             </div>
             <div class="card-body">
               <div class="row">
-                <div class="col-lg-2">
+                <div class="col-lg-1">
                   <div class="mb-2">
                     <label class="form-label mb-1">Account No.  </label>
                     <input class="form-control form-control-sm fw-bold" name="account_name" id="account_name" type='text'
@@ -69,10 +69,22 @@
                     <input class="form-control form-control-sm" name="address" id="address" value="{{ isset($account) && $account !== null ? $account->{'Address'} : ''}}" readonly>
                   </div>
                 </div>
-                <div class="col-lg-2">
+                <div class="col-lg-1">
                   <div class="mb-2">
                     <label class="form-label mb-1">Type </label>
                     <input class="form-control form-control-sm" name="type" id="type" value="{{ isset($account) && $account !== null ? $account->{'Cons Type'} : ''}}" readonly>
+                  </div>
+                </div>
+                <div class="col-lg-1">
+                  <div class="mb-2">
+                    <label class="form-label mb-1">Lifeliner </label>
+                    <input class="form-control form-control-sm" name="name" id="name" value="{{ isset($account) && $account->{'LFflag'} !== null ? $account->{'LFflag'} : 'No'}}" readonly>
+                  </div>
+                </div>
+                <div class="col-lg-1">
+                  <div class="mb-2">
+                    <label class="form-label mb-1">Date of application </label>
+                    <input class="form-control form-control-sm" name="name" id="name" value="{{ isset($account) && $account->{'LFdate'} ? Carbon::parse($account->{'LFdate'})->format('m/d/Y') : 'N/A'}}" readonly>
                   </div>
                 </div>
                 <div class="col-lg-2">
@@ -130,7 +142,7 @@
                   </div>
                 </div>
                 {{-- {{dd($account->Latitude)}} --}}
-                <div class="col-lg-12">
+                <div class="col-lg-10">
                   <div class="mb-2">
                     <p class="form-label mb-1">CM History:</p>
                     @if(isset($change_meters))
