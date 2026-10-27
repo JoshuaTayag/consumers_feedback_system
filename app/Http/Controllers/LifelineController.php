@@ -135,7 +135,7 @@ class LifelineController extends Controller
             'date_of_birth' => ['required', 'string', 'max:255'],
             'marital_status' => ['required', 'string', 'max:255'],
             'ownership' => ['required', 'string', 'max:255'],
-            'electric_service_detail' => ['required','unique:lifelines,account_no'],
+            'electric_service_detail' => ['required'],
             'id_no' => ['required', 'string', 'max:255', 'unique:lifelines,valid_id_no'],
             'type_of_id' => ['required'],
             'date_of_application' => ['required'],
