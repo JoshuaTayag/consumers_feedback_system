@@ -466,15 +466,11 @@ class LifelineController extends Controller
         
         if($search == ''){
             $accounts = DB::table('Consumers Table as ct')
-            ->leftJoin('lifelines as ll', 'ct.Accnt No', '=', 'll.account_no')
-            ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No')
-            ->whereNull('ll.account_no'); // Ensures only non-existing accounts are selected
+            ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No');
 
         }else{
             $accounts = DB::table('Consumers Table as ct')
-            ->leftJoin('lifelines as ll', 'ct.Accnt No', '=', 'll.account_no')
             ->select('ct.Accnt No as id', 'ct.Name', 'ct.Address', 'ct.OR No', 'ct.Date', 'ct.Prev Reading', 'ct.Serial No')
-            ->whereNull('ll.account_no') // Ensures only non-existing accounts are selected
             ->where('ct.Accnt No', 'like', '%' .$search . '%');
         }
         $data = $accounts->paginate(10, ['*'], 'page', $request->page);

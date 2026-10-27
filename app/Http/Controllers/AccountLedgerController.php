@@ -28,7 +28,7 @@ class AccountLedgerController extends Controller
         // Adjust this list to match what billing.ledger_index uses.
         $query = DB::connection('sqlSrvBilling')
             ->table('Consumers Table')
-            ->select('Accnt No', 'Name', 'Serial No', 'Acct Stat', 'Address', 'Cons Type', 'Brand', 'Noma', 'Seq-No','Book No', 'Remarks', 'Latitude','Longitude'); // trim/extend as needed
+            ->select('Accnt No', 'Name', 'Serial No', 'Acct Stat', 'Address', 'Cons Type', 'Brand', 'Noma', 'Seq-No','Book No', 'Remarks', 'Latitude','Longitude','LFflag','LFdate'); // trim/extend as needed
 
         if (!empty($account_no)) {
             // Exact match instead of LIKE where possible — allows index usage

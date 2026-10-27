@@ -17,10 +17,11 @@ class DatabaseSeeder extends Seeder
         // $this->call(PermissionTableSeeder::class);
         // \App\Models\User::factory(10)->create();
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        \App\Models\User::factory()->create([
+            'name' => 'Joshua Tayag',
+            'email' => 'joshua_tayag@leyeco-v.com.ph',
+            'password' => bcrypt('PASSWORD'), // Set a default password for the test user
+        ]);
 
         // Create a new role
         $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
