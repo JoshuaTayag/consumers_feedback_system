@@ -54,6 +54,16 @@ class ChangeMeterRequest extends Model implements Auditable
         return 'No Name Available';
     }
 
+    public function area()
+    {
+        return $this->belongsTo(\App\Models\DataManagement\Area::class, 'area_id');
+    }
+
+    public function feeder()
+    {
+        return $this->belongsTo(\App\Models\DataManagement\Feeder::class, 'feeder_id');
+    }
+
     public function municipality()
     {
         return $this->belongsTo('App\Models\DataManagement\Municipality', 'municipality_id', 'id');
@@ -136,8 +146,8 @@ class ChangeMeterRequest extends Model implements Auditable
 
     protected $fillable = [
         'control_no', 'first_name', 'middle_name', 'last_name', 'contact_no',
-        'area', 'municipality_id', 'barangay_id', 'sitio', 'account_number',
-        'care_of', 'feeder', 'membership_or', 'consumer_type', 'old_meter_no',
+        'area_id', 'municipality_id', 'barangay_id', 'sitio', 'account_number',
+        'care_of', 'feeder_id', 'membership_or', 'consumer_type', 'old_meter_no',
         'meter_or_number', 'meter_or_date', 'new_meter_no', 'type_of_meter',
         'last_reading', 'initial_reading', 'remarks', 'location', 'crew',
         'date_time_acted', 'status', 'damage_cause', 'crew_remarks', 'created_by',
