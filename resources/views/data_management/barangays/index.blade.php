@@ -9,7 +9,7 @@
             <div class="card-header">
               <div class="row align-items-center">
                   <div class="col-lg-6">
-                      <span class="mb-0 align-middle fs-3">Barangays Management</span>
+                      <span class="mb-0 align-middle fs-3">Barangay Management</span>
                   </div>
                   <div class="col-lg-6 text-end">
                     <a class="btn btn-success" href="{{ route('barangays.create') }}"> Create New Barangay </a>

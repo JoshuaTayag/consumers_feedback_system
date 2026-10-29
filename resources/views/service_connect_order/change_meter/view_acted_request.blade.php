@@ -101,7 +101,7 @@
                       <span class="fs-5 fw-bold">Area:</span>
                     </div>
                     <div class="col-6">
-                      <span class="fs-5">A{{$cm_request->area}}</span>
+                      <span class="fs-5">{{ $cm_request->area?->name }}</span>
                     </div>
                   </div>
 
@@ -110,7 +110,7 @@
                       <span class="fs-5 fw-bold">Feeder:</span>
                     </div>
                     <div class="col-6">
-                      <span class="fs-5">{{$cm_request->feeder}}</span>
+                      <span class="fs-5">{{ $cm_request->feeder?->feeder_name }}</span>
                     </div>
                   </div>
 

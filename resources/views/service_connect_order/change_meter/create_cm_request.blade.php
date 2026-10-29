@@ -143,20 +143,22 @@
           <div class="card-body">
             <div class="row g-3">
               <div class="col-lg-1">
-                <label for="feeder" class="form-label ui-label">Feeder <span class="text-danger">*</span></label>
-                <select id="feeder" class="form-control" name="feeder" required>
+                <label for="area" class="form-label ui-label">Area <span class="text-danger">*</span></label>
+                <select id="area" class="form-control" name="area_id" required>
                   <option value=""></option>
-                  @foreach (Config::get('constants.feeders') as $feeder)
-                    <option value="{{ $feeder['name'] }}" {{ old('feeder') == $feeder['name'] ? 'selected' : '' }}>{{ $feeder['name'] }}</option>
+                  @foreach ($areas as $area)
+                    <option value="{{ $area->id }}" {{ old('area_id') == $area->id ? 'selected' : '' }}>{{ $area->name }}</option>
                   @endforeach
                 </select>
               </div>
               <div class="col-lg-1">
-                <label for="area" class="form-label ui-label">Area <span class="text-danger">*</span></label>
-                <select id="area" class="form-control" name="area" required>
+                <label for="feeder" class="form-label ui-label">Feeder <span class="text-danger">*</span></label>
+                <select id="feeder" class="form-control" name="feeder_id" required>
                   <option value=""></option>
-                  @foreach (Config::get('constants.coverage_areas') as $area)
-                    <option value="{{ $area['id'] }}" {{ old('area') == $area['id'] ? 'selected' : '' }}>{{ $area['name'] }}</option>
+                  @foreach ($areas as $area)
+                    @foreach ($area->feeders as $feeder)
+                      <option value="{{ $feeder->id }}" data-area="{{ $area->id }}" {{ old('feeder_id') == $feeder->id ? 'selected' : '' }}>{{ $feeder->feeder_name }}</option>
+                    @endforeach
                   @endforeach
                 </select>
               </div>
@@ -193,8 +195,8 @@
           <div class="card-body">
             <div class="row g-3">
               <div class="col-lg-4">
-                <label for="kwh_meter_request_control_no" class="form-label ui-label">kWh Meter Request <span class="text-danger">*</span></label>
-                <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no" required>
+                <label for="kwh_meter_request_control_no" class="form-label ui-label">kWh Meter Request</label>
+                <select id="kwh_meter_request_control_no" class="form-control" name="kwh_meter_request_control_no">
                   <option value="">Select kWh Meter Request</option>
                   @foreach ($kwh_meter_requests as $key => $control_no)
                     <option value="{{ $key }}" {{ old('kwh_meter_request_control_no') == $control_no ? 'selected' : '' }}>
@@ -258,6 +260,19 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
   $(document).ready(function() {
+      // Show only the feeders that belong to the selected area
+      const allFeederOptions = $('#feeder option[data-area]').detach();
+      function filterFeeders(keepValue) {
+          const areaId = $('#area').val();
+          $('#feeder option[data-area]').remove();
+          if (areaId) {
+              $('#feeder').append(allFeederOptions.filter('[data-area="' + areaId + '"]').clone());
+          }
+          $('#feeder').val(keepValue || '');
+      }
+      filterFeeders(allFeederOptions.filter('[selected]').first().val() || '');
+      $('#area').on('change', function () { filterFeeders(''); });
+
       // Handle kWh meter request selection change
       $('#kwh_meter_request_control_no').on('change', function() {
           const controlNo = $(this).val();

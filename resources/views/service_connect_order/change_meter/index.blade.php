@@ -183,7 +183,7 @@
             <div class="cmd-request-row"><span class="cmd-label">Name</span><span class="cmd-value">{{$cm_request->last_name.', '.$cm_request->first_name}}</span></div>
             <div class="cmd-request-row"><span class="cmd-label">Account</span><span class="cmd-value"><a style="text-decoration: none;" target="_blank" href="{{ route('ledger.search', ['account_no' => $cm_request->account_number]) }}">{{ substr($cm_request->account_number, 0, 2) }}-{{ substr($cm_request->account_number, 2, 4) }}-{{ substr($cm_request->account_number, 6, 4) }}</a></span></div>
             <div class="cmd-request-row"><span class="cmd-label">Process Date</span><span class="cmd-value">{{ date('F d, Y', strtotime($cm_request->created_at)) }}</span></div>
-            <div class="cmd-request-row"><span class="cmd-label">Area</span><span class="cmd-value">A{{$cm_request->area}}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">Area</span><span class="cmd-value">{{ $cm_request->area?->name }}</span></div>
             <div class="cmd-request-row"><span class="cmd-label">Address</span><span class="cmd-value">{{$cm_request->address}}</span></div>
             <div class="cmd-request-row"><span class="cmd-label">Consumer Type</span><span class="cmd-value">{{ $cm_request->consumer_type ?? 'Unknown Type'}}</span></div>
             <div class="cmd-request-row {{ $cm_request->status == null ? 'd-none' : '' }}">

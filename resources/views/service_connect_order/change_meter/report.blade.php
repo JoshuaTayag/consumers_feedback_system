@@ -68,8 +68,8 @@
                       <label for="area" class="form-label mb-1">Area</label>
                       <select id="area" class="form-control" name="area" value="{{ old('area')}}">
                         <option value="">ALL</option>
-                        @foreach (Config::get('constants.coverage_areas') as $area)          
-                          <option value="{{ $area['id'] }}" id="">{{ $area['description'] }}</option>
+                        @foreach ($areas as $area)
+                          <option value="{{ $area->id }}">{{ $area->name }}</option>
                         @endforeach
                       </select>
                   </div>

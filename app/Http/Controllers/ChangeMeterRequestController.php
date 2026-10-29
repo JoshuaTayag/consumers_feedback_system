@@ -27,6 +27,8 @@ use App\Services\M360SmsService;
 use App\Services\SmsTemplateRenderer;
 use App\Models\DataManagement\KwhMeterDamageCauseType;
 use App\Models\Employee;
+use App\Models\DataManagement\Feeder;
+use App\Models\DataManagement\Area;
 
 class ChangeMeterRequestController extends Controller
 {
@@ -99,7 +101,9 @@ class ChangeMeterRequestController extends Controller
         // fetch all meter requests with approved_at and have available quantity
         $kwh_meter_requests = $this->getAvailableKwhMeterRequests();
 
-        return view('service_connect_order.change_meter.create_cm_request')->with(compact( 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters', 'kwh_meter_requests'));
+        $areas = Area::with('feeders:id,area_id,feeder_name')->orderBy('id')->get();
+
+        return view('service_connect_order.change_meter.create_cm_request')->with(compact( 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters', 'kwh_meter_requests', 'areas'));
     }
 
     /**
@@ -124,18 +128,18 @@ class ChangeMeterRequestController extends Controller
             'electric_service_detail' => ['required', 'string', 'max:255'],
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'area' => ['required'],
+            'area_id' => ['required', 'exists:areas,id'],
+            'feeder_id' => ['required', 'exists:feeders,id,area_id,' . $request->area_id],
             'barangay' => ['required'],
             'municipality' => ['required'],
             'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
             'membership_or' => ['required'],
             'email' => ['nullable', 'email', 'max:255'],
-            'meter_code_no' => ['required_without:kwh_meter_request_control_no'], 
             'process_date' => ['required'],
             'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo'],
             
             // Liquidation fields validation
-            'kwh_meter_request_control_no' => ['required'],
+            // 'kwh_meter_request_control_no' => ['required'],
         ]);
         
         $year = date("y");
@@ -153,13 +157,13 @@ class ChangeMeterRequestController extends Controller
               "middle_name" => null,
               "last_name" => $request->last_name,
               "contact_no" => $request->contact_no,
-              "area" => $request->area,
+              "area_id" => $request->area_id,
               "municipality_id" => $request->municipality,
               "barangay_id" => $request->barangay,
               "sitio" => $request->sitio,
               "account_number" => $request->electric_service_detail,
               "care_of" => $request->care_of,
-              "feeder" => $request->feeder,
+              "feeder_id" => $request->feeder_id,
               "membership_or" => $request->membership_or,
               "consumer_type" => $request->consumer_type ? $request->consumer_type : 'N/A',
               "old_meter_no" => $request->old_meter,
@@ -295,7 +299,9 @@ class ChangeMeterRequestController extends Controller
             // Get meter types with available meter counts using service (exclude current request)
             $type_of_meters = $this->changeMeterService->getMeterTypesWithAvailability($id, null);
             
-            return view('service_connect_order.change_meter.edit_cm_request')->with(compact('change_meter_request', 'barangays', 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters', 'kwh_meter_requests'));
+            $areas = Area::with('feeders:id,area_id,feeder_name')->orderBy('id')->get();
+
+            return view('service_connect_order.change_meter.edit_cm_request')->with(compact('change_meter_request', 'barangays', 'municipalities', 'consumer_types', 'occupancy_types', 'type_of_meters', 'kwh_meter_requests', 'areas'));
         }
     }
 
@@ -307,7 +313,8 @@ class ChangeMeterRequestController extends Controller
         $this->validate($request, [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'area' => ['required'],
+            'area_id' => ['required', 'exists:areas,id'],
+            'feeder_id' => ['required', 'exists:feeders,id,area_id,' . $request->area_id],
             'barangay' => ['required'],
             'municipality' => ['required'],
             'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
@@ -315,9 +322,9 @@ class ChangeMeterRequestController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'consumer_type' => ['required'],
             'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo,' . $id . ',id'],
-            'meter_code_no' => ['required_without:kwh_meter_request_control_no'],
+            // 'meter_code_no' => ['required_without:kwh_meter_request_control_no'],
             'process_date' => ['required'],
-            'kwh_meter_request_control_no' => ['required'],
+            // 'kwh_meter_request_control_no' => ['required'],
         ]);
 
         $change_meter_request = ChangeMeterRequest::findOrFail($id);     
@@ -336,12 +343,12 @@ class ChangeMeterRequestController extends Controller
                 "middle_name" => null,
                 "last_name" => $request->last_name,
                 "contact_no" => $request->contact_no,
-                "area" => $request->area,
+                "area_id" => $request->area_id,
                 "municipality_id" => $request->municipality,
                 "barangay_id" => $request->barangay,
                 "sitio" => $request->sitio,
                 "care_of" => $request->care_of,
-                "feeder" => $request->feeder,
+                "feeder_id" => $request->feeder_id,
                 "membership_or" => $request->membership_or,
                 "consumer_type" => $request->consumer_type,
                 "old_meter_no" => $request->old_meter,
@@ -554,8 +561,8 @@ class ChangeMeterRequestController extends Controller
                 "new_meter_no" => $request->meter_no,
                 "date_time_acted" => $dateTimeActed,
                 "care_of" => $request->care_of,
-                "feeder" => $request->feeder,
-                "area" => $request->area,
+                "feeder_id" => $request->feeder_id,
+                "area_id" => $request->area_id,
                 "last_reading" => $request->last_reading,
                 "initial_reading" => $request->reading_initial,
                 "crew" => $request->crew,
@@ -614,8 +621,8 @@ class ChangeMeterRequestController extends Controller
                   "process_date" => date('Y-m-d', strtotime($change_meter_request->created_at)),
                   "date_installed" => $request->date_acted ? date('Y-m-d H:i:s', strtotime($request->date_acted)) : null,
                   "action_status" => $change_meter_request->status,
-                  "area" => $change_meter_request->area,
-                  "feeder" => $change_meter_request->feeder,
+                  "area" => $change_meter_request->area?->name,
+                  "feeder" => $change_meter_request->feeder?->feeder_name,
                   "leyeco_seal_no" => $request->seal_no,
                   "serial_no" => null,
                   "erc_seal_no" => $request->erc_seal,
@@ -882,7 +889,7 @@ class ChangeMeterRequestController extends Controller
 
         $damage_meter_causes = KwhMeterDamageCauseType::pluck('name', 'id');
 
-        return view('service_connect_order.change_meter.report', compact('municipalities', 'contractors', 'damage_meter_causes'));
+        return view('service_connect_order.change_meter.report', compact('municipalities', 'contractors', 'damage_meter_causes') + ['areas' => Area::orderBy('id')->get()]);
     }
 
     public function generateReport(Request $request)
@@ -912,7 +919,7 @@ class ChangeMeterRequestController extends Controller
         }
 
         if ($request->area) {
-            $query->where('area', $request->area);
+            $query->where('area_id', $request->area);
         }
 
         if ($request->municipality) {
@@ -1015,7 +1022,7 @@ class ChangeMeterRequestController extends Controller
                     // For created events, show important initial values
                     $importantFields = [
                         'control_no', 'first_name', 'last_name', 'account_number', 
-                        'area', 'municipality_id', 'barangay_id', 'old_meter_no', 
+                        'area_id', 'municipality_id', 'barangay_id', 'old_meter_no', 
                         'type_of_meter', 'created_by'
                     ];
                     
@@ -1110,7 +1117,7 @@ class ChangeMeterRequestController extends Controller
                         // For created events, export important initial values
                         $importantFields = [
                             'control_no', 'first_name', 'last_name', 'account_number', 
-                            'area', 'old_meter_no', 'type_of_meter'
+                            'area_id', 'old_meter_no', 'type_of_meter'
                         ];
                         
                         foreach ($importantFields as $field) {
