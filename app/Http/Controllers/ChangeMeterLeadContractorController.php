@@ -7,7 +7,15 @@ use App\Models\ChangeMeterLeadContractor;
 use Image;
 
 class ChangeMeterLeadContractorController extends Controller
-{
+{   
+    public function __construct()
+    {
+        $this->middleware('permission:change-meter-contractor-list|change-meter-contractor-create|change-meter-contractor-edit|change-meter-lead-contractor-delete', ['only' => ['index']]);
+        $this->middleware('permission:change-meter-contractor-create', ['only' => ['create','store']]);
+        $this->middleware('permission:change-meter-contractor-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:change-meter-contractor-delete', ['only' => ['destroy']]);
+    }
+    
     /**
      * Display a listing of the resource.
      */

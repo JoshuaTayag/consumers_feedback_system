@@ -9,6 +9,14 @@ use Illuminate\Validation\Rule;
 
 class BarangayController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:barangay-list|barangay-create|barangay-edit|barangay-delete', ['only' => ['index']]);
+        $this->middleware('permission:barangay-create', ['only' => ['create','store']]);
+        $this->middleware('permission:barangay-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:barangay-delete', ['only' => ['destroy']]);
+    }
+
     /**
      * Display a listing of the resource.
      */

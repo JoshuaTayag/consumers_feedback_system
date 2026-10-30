@@ -187,18 +187,26 @@
       DATA MANAGEMENT
     </a>
     <ul class="dropdown-menu" aria-labelledby="navbarPowerBill">
+      @can('municipality-list')
       <li>
         <a class="dropdown-item" href="{{ route('municipalities.index') }}">MUNICIPALITIES</a>
       </li>
+      @endcan
+      @can('barangay-list')
       <li>
         <a class="dropdown-item" href="{{ route('barangays.index') }}">BARANGAYS</a>
       </li>
+      @endcan
+      @can('area-list')
       <li>
         <a class="dropdown-item" href="{{ route('areas.index') }}">AREA</a>
       </li>
+      @endcan
+      @can('feeder-list')
       <li>
         <a class="dropdown-item" href="{{ route('feeders.index') }}">FEEDERS</a>
       </li>
+      @endcan
       <li>
         <a class="dropdown-item" href="#">
           WAREHOUSING&raquo;
@@ -207,9 +215,11 @@
           <li>
             <a class="dropdown-item" href="{{ route('structure.index') }}">STRUCTURE</a>
           </li>
+          @can('kwh-meter-type-list')
           <li>
             <a class="dropdown-item" href="{{ route('meter-type.index') }}">KWH METER TYPES</a>
           </li>
+          @endcan
         </ul>
       </li>
       <li>
@@ -217,15 +227,19 @@
           CM APP&raquo;
         </a>
         <ul class="dropdown-menu dropdown-submenu">
+          @can('kwh-meter-damage-cause-list')
           <li>
             <a class="dropdown-item" href="{{ route('kwh-meter-damage-cause-types.index') }}">KWH METER DAMAGE CAUSE</a>
           </li>
+          @endcan
+          @can('change-meter-contractor-list')
           <li>
               <a class="dropdown-item" href="{{ route('change-meter-lead-contractor.index') }}">CHANGE METER CONTRACTORS</a>
           </li>
           <li>
               <a class="dropdown-item" href="{{ route('change-meter-contractor.index') }}">CHANGE METER CONTRACTOR CREW</a>
           </li>
+          @endcan
         </ul>
       </li>
     </ul>

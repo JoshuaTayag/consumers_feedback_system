@@ -9,6 +9,14 @@ use Illuminate\Validation\Rule;
 
 class MunicipalityController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:municipality-list|municipality-create|municipality-edit|municipality-delete', ['only' => ['index']]);
+        $this->middleware('permission:municipality-create', ['only' => ['create','store']]);
+        $this->middleware('permission:municipality-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:municipality-delete', ['only' => ['destroy']]);
+    }
+    
     /**
      * Display a listing of the resource.
      */

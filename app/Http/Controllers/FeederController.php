@@ -8,6 +8,14 @@ use Illuminate\Http\Request;
 
 class FeederController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:feeder-list|feeder-create|feeder-edit|feeder-delete', ['only' => ['index']]);
+        $this->middleware('permission:feeder-create', ['only' => ['create','store']]);
+        $this->middleware('permission:feeder-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:feeder-delete', ['only' => ['destroy']]);
+    }
+
     /**
      * Display a listing of the resource.
      */
