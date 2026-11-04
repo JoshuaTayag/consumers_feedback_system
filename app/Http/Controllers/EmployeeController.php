@@ -9,6 +9,14 @@ use Image;
 
 class EmployeeController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:employee-list|employee-create|employee-edit|employee-delete', ['only' => ['index']]);
+        $this->middleware('permission:employee-create', ['only' => ['create','store']]);
+        $this->middleware('permission:employee-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:employee-delete', ['only' => ['destroy']]);
+    }
+    
     /**
      * Display a listing of the resource.
      */

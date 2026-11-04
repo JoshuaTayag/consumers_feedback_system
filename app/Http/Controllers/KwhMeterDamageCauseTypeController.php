@@ -7,6 +7,14 @@ use App\Models\DataManagement\KwhMeterDamageCauseType;
 
 class KwhMeterDamageCauseTypeController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:kwh-meter-damage-cause-list|kwh-meter-damage-cause-create|kwh-meter-damage-cause-edit|kwh-meter-damage-cause-delete', ['only' => ['index']]);
+        $this->middleware('permission:kwh-meter-damage-cause-create', ['only' => ['create','store']]);
+        $this->middleware('permission:kwh-meter-damage-cause-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:kwh-meter-damage-cause-delete', ['only' => ['destroy']]);
+    }
+    
     /**
      * Display a listing of the resource.
      */
