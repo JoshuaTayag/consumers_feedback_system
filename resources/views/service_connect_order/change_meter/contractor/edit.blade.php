@@ -51,7 +51,7 @@
                   <div class="form-group">
                     <strong>Mobile No.:</strong>
                     <input type="text" name="mobile_number" placeholder="Mobile Number"
-                      value="{{ $contractor->mobile_number }}" class="form-control" required>
+                      value="{{ $contractor->mobile_number }}" class="form-control">
                   </div>
                 </div>
                 <div class="col-xs-12 col-sm-12 col-md-3 mb-2">

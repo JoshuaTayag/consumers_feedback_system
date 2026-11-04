@@ -40,7 +40,7 @@
                 <div class="col-xs-12 col-sm-12 col-md-3 mb-2">
                   <div class="form-group">
                       <strong>Signature</strong>
-                      <input type="file" name="signature" class="form-control" required>
+                      <input type="file" name="signature" class="form-control">
                   </div>
                 </div>
                 <div class="col-xs-12 col-sm-12 col-md-12 text-end">
