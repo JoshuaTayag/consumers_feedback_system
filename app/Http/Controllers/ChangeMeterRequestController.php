@@ -179,8 +179,8 @@ class ChangeMeterRequestController extends Controller
           ->table('Transaction Table')
           ->insert([
             'SCONo' => $control_id,
-            'Kwhm Deposit' => $request->meter_accessories,
-            'Calibration' => $request->calibration_fee,
+            'Kwhm Deposit' => $request->meter_accessories ? $request->meter_accessories : 0.0,
+            'Calibration' => $request->calibration_fee ? $request->calibration_fee : 0.0,
             'VATPercentage' => 0.12,
             'WireUnitCost' => 35.0,
             'MeterSeal' => 0.0,
@@ -193,13 +193,15 @@ class ChangeMeterRequestController extends Controller
             'Lastname' => $request->last_name,
             'Firstname' => $request->first_name,
             'ProcessDate' => $request->process_date,
-            'ConsumerType' => $request->consumer_type,
+            'ConsumerType' => $request->consumer_type . '/ChangeMeter',
             'MeterNo' => $request->meter_no,
             'Remarks' => $request->remarks,
             'Qty' => 1,
             'LogName' => Auth::user()->name,
             'ContactNo' => $request->contact_no,
             'Location' => $request->location,
+            'Address' => $change_meter_request->address,
+            'OwnerCP' => $request->contact_no,
           ]);
       }
 
@@ -378,8 +380,8 @@ class ChangeMeterRequestController extends Controller
                   'SCONo' => $change_meter_request->control_no,
                 ],
                 [
-                  'Kwhm Deposit' => $request->meter_accessories,
-                  'Calibration' => $request->calibration_fee,
+                  'Kwhm Deposit' => $request->meter_accessories ? $request->meter_accessories : 0.0,
+                  'Calibration' => $request->calibration_fee ? $request->calibration_fee : 0.0,
                   'VATPercentage' => 0.12,
                   'WireUnitCost' => 35.0,
                   'MeterSeal' => 0.0,
@@ -397,13 +399,15 @@ class ChangeMeterRequestController extends Controller
                   'Lastname' => $request->last_name,
                   'Firstname' => $request->first_name,
                   'ProcessDate' => $request->process_date,
-                  'ConsumerType' => $request->consumer_type,
+                  'ConsumerType' => $request->consumer_type . '/ChangeMeter',
                   'MeterNo' => $request->meter_no,
                   'Remarks' => $request->remarks,
                   'Qty' => 1,
                   'LogName' => Auth::user()->name,
                   'ContactNo' => $request->contact_no,
                   'Location' => $request->location,
+                  'Address' => $change_meter_request->address,
+                  'OwnerCP' => $request->contact_no,
                 ],
               );
           }
