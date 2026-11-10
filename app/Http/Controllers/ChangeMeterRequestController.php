@@ -202,6 +202,9 @@ class ChangeMeterRequestController extends Controller
             'Location' => $request->location,
             'Address' => $change_meter_request->address,
             'OwnerCP' => $request->contact_no,
+            'Municipality' => $change_meter_request->municipality->municipality_name,
+            'Brgy' => $change_meter_request->barangay->barangay_name,
+            'Sitio' => $change_meter_request->sitio,
           ]);
       }
 
@@ -408,6 +411,9 @@ class ChangeMeterRequestController extends Controller
                   'Location' => $request->location,
                   'Address' => $change_meter_request->address,
                   'OwnerCP' => $request->contact_no,
+                  'Municipality' => $change_meter_request->municipality->municipality_name,
+                  'Brgy' => $change_meter_request->barangay->barangay_name,
+                  'Sitio' => $change_meter_request->sitio,
                 ],
               );
           }
