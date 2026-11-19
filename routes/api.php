@@ -15,18 +15,28 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+  return $request->user();
 });
 
 Route::middleware('auth:sanctum')->post('register', [App\Http\Controllers\AgmmController::class, 'agmmRegister']);
 Route::get('account/{id}', [App\Http\Controllers\AgmmController::class, 'validateAccount'])->middleware('auth:sanctum');
 Route::get('agmm-registration/{id}', [App\Http\Controllers\AgmmController::class, 'getRegistration'])->middleware('auth:sanctum');
 Route::get('agmm-pre-registration/{id}', [App\Http\Controllers\AgmmController::class, 'getPreRegistration'])->middleware('auth:sanctum');
-Route::get('agmm-registration/qr/{id}', [App\Http\Controllers\AgmmController::class, 'getRegistrationByQr'])->middleware('auth:sanctum')->name('checkRegistration');
-Route::get('agmm-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'getAllowance'])->middleware('auth:sanctum')->name('apiTranspoAllowance');
-Route::get('agmm-issue-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'issueAllowance'])->middleware('auth:sanctum')->name('apiIssueTranspoAllowance');
-Route::get('agmm-registration/from-preregistration/{id}', [App\Http\Controllers\AgmmController::class, 'agmmVerifyAccountFromPreReg'])->middleware('auth:sanctum')->name('apiVerifyPreRegistration');
-Route::get('agmm-verified-registration/{id}', [App\Http\Controllers\AgmmController::class, 'getVerifiedRegistration'])->middleware('auth:sanctum')->name('getVerifiedRegistration');
+Route::get('agmm-registration/qr/{id}', [App\Http\Controllers\AgmmController::class, 'getRegistrationByQr'])
+  ->middleware('auth:sanctum')
+  ->name('checkRegistration');
+Route::get('agmm-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'getAllowance'])
+  ->middleware('auth:sanctum')
+  ->name('apiTranspoAllowance');
+Route::get('agmm-issue-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'issueAllowance'])
+  ->middleware('auth:sanctum')
+  ->name('apiIssueTranspoAllowance');
+Route::get('agmm-registration/from-preregistration/{id}', [App\Http\Controllers\AgmmController::class, 'agmmVerifyAccountFromPreReg'])
+  ->middleware('auth:sanctum')
+  ->name('apiVerifyPreRegistration');
+Route::get('agmm-verified-registration/{id}', [App\Http\Controllers\AgmmController::class, 'getVerifiedRegistration'])
+  ->middleware('auth:sanctum')
+  ->name('getVerifiedRegistration');
 
 Route::get('fetch-members/', [App\Http\Controllers\MembershipController::class, 'getMembers']);
 Route::get('fetch-mcrt/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getMcrt']);
@@ -51,9 +61,9 @@ Route::post('/change-meter-request-contractors-filtered', [App\Http\Controllers\
 
 // Meter Management API
 Route::middleware('auth:sanctum')->group(function () {
-    Route::resource('meters', App\Http\Controllers\MeterController::class);
-    Route::get('meters/{id}/audit-logs', [App\Http\Controllers\MeterController::class, 'getAuditLogs']);
-    Route::get('meters/search', [App\Http\Controllers\MeterController::class, 'search']);
+  Route::resource('meters', App\Http\Controllers\MeterController::class);
+  Route::get('meters/{id}/audit-logs', [App\Http\Controllers\MeterController::class, 'getAuditLogs']);
+  Route::get('meters/search', [App\Http\Controllers\MeterController::class, 'search']);
 });
 
 // Public validation endpoints (no auth required for AJAX validation)
@@ -62,3 +72,10 @@ Route::post('meters/validate-erc-seal', [App\Http\Controllers\MeterController::c
 // Route::post('/sms', [SmsController::class, 'store']);
 
 Route::get('fetch-kwh-meter-damage-cause-types', [App\Http\Controllers\API\ChangeMeterApiController::class, 'fetchKwhMeterDamageCauses'])->middleware('auth:sanctum');
+Route::post('fetch-municipalities', [App\Http\Controllers\AddressController::class, 'fetchMunicipalities']);
+Route::post('fetch-barangays', [App\Http\Controllers\AddressController::class, 'fetchBarangays'])->name('fetchBarangays');
+
+// Data endpoints for the Change Meter Request Slip page - return JSON
+Route::get('/areas', [App\Http\Controllers\AreaController::class, 'fetchAreas']);
+Route::get('/feeders', [App\Http\Controllers\FeederController::class, 'fetchFeeders']);
+Route::get('/slips/{id}', [App\Http\Controllers\ChangeMeterRequestSlipController::class, 'fetchSlip']);

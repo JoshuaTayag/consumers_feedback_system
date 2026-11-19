@@ -144,6 +144,11 @@ class ChangeMeterRequest extends Model implements Auditable
         return $this->belongsTo('App\Models\DataManagement\KwhMeterDamageCauseType', 'damage_cause', 'id');
     }
 
+    public function changeMeterRequestSlips()
+    {
+        return $this->hasOne(ChangeMeterRequestSlip::class, 'change_meter_request_id', 'id');
+    }
+
     protected $fillable = [
         'control_no', 'first_name', 'middle_name', 'last_name', 'contact_no',
         'area_id', 'municipality_id', 'barangay_id', 'sitio', 'account_number',

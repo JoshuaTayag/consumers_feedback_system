@@ -32,7 +32,7 @@
                             <a href="{{ route('lifelineCoverageCertificate', $data->id) }}" target="_blank" class="btn btn-{{ $data->application_status == 0 ? 'warning' : 'success' }} btn-sm"><i class="fa fa-print"></i></a>
                         </div>
                         <div class="col-lg-4 p-1 text-center">
-                            <form method="POST" action="{{ route('LifelineUpdate', $data->id) }}">
+                            <form method="POST" action="{{ date('d') >= 7 && date('d') <= 10 ? route('LifelineUpdate', $data->id) : '#' }}">
                                 @method('PUT')
                                 @csrf
                                 {!! Form::hidden('account_no', $data->account_no )!!}

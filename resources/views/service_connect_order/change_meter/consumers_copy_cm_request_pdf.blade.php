@@ -213,9 +213,9 @@
           <td class="text-center" style="font-size: 14px;">Approved By:</td>
         </tr>
         <tr>
-          <td class="text-center"><img src="images/signatures/elma_manacap.GIF"  alt="" class="img-signature" style="opacity: 0.7"></td>
-          <td class="text-center"><img src="images/signatures/bernandino.GIF"  alt="" class="img-signature"></td>
-          <td class="text-center"><img src="images/signatures/pastor.GIF"  alt="" class="img-signature"></td>
+          <td class="text-center"><img src="images/signatures/elma_manacap.gif"  alt="" class="img-signature" style="opacity: 0.7"></td>
+          <td class="text-center"><img src="images/signatures/bernandino.gif"  alt="" class="img-signature"></td>
+          <td class="text-center"><img src="images/signatures/pastor.gif"  alt="" class="img-signature"></td>
         </tr>
         <tr>
           <td class="text-center" style="text-decoration: underline;">E. MAÑACAP / N. PONIENTE</td>

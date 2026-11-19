@@ -115,7 +115,13 @@ class PermissionTableSeeder extends Seeder
             'change-meter-contractor-list',
             'change-meter-contractor-create',
             'change-meter-contractor-edit',
-            'change-meter-contractor-delete'
+            'change-meter-contractor-delete',
+
+            'change-meter-request-slip-list',
+            'change-meter-request-slip-create',
+            'change-meter-request-slip-edit',
+            'change-meter-request-slip-delete'
+
          ];
       
          foreach ($permissions as $permission) {
