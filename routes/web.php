@@ -270,9 +270,12 @@ Route::group(['middleware' => 'auth'], function () {
   Route::resource('areas', App\Http\Controllers\AreaController::class);
   Route::resource('feeders', App\Http\Controllers\FeederController::class);
   Route::get('change-meter-request-slip/check-account', [App\Http\Controllers\ChangeMeterRequestSlipController::class, 'checkAccount'])->name('change-meter-request-slip.check-account');
+  Route::get('change-meter-request-slip/search', [App\Http\Controllers\ChangeMeterRequestSlipController::class, 'search'])->name('change-meter-request-slip.search');
   Route::resource('change-meter-request-slip', App\Http\Controllers\ChangeMeterRequestSlipController::class);
   Route::post('accept-change-meter-request-slip', [App\Http\Controllers\ChangeMeterRequestSlipController::class, 'acceptChangeMeterRequestSlip'])->name('change-meter-request-slip.accept');
   Route::post('reject-change-meter-request-slip', [App\Http\Controllers\ChangeMeterRequestSlipController::class, 'rejectChangeMeterRequestSlip'])->name('change-meter-request-slip.reject');
+  Route::get('change-meter-request-slip-report/pdf', [App\Http\Controllers\ChangeMeterRequestSlipController::class, 'generateChangeMeterRequestSlipReport'])->name('generateChangeMeterRequestSlipReport');
+  Route::get('change-meter-request-slip-report', [App\Http\Controllers\ChangeMeterRequestSlipController::class, 'viewReport'])->name('change-meter-request-slip.viewReport');
 });
 
 Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])
