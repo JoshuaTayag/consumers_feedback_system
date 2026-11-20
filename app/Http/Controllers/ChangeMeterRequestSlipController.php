@@ -9,12 +9,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\Helper;
 use App\Models\DataManagement\KwhMeterDamageCauseType;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 class ChangeMeterRequestSlipController extends Controller
 {
   public function __construct()
   {
-    $this->middleware('permission:change-meter-request-slip-list|change-meter-request-slip-create|change-meter-request-slip-edit|change-meter-request-slip-delete', ['only' => ['index']]);
+    $this->middleware('permission:change-meter-request-slip-list|change-meter-request-slip-create|change-meter-request-slip-edit|change-meter-request-slip-delete', ['only' => ['index', 'search']]);
     $this->middleware('permission:change-meter-request-slip-create', ['only' => ['create', 'store']]);
     $this->middleware('permission:change-meter-request-slip-edit', ['only' => ['edit', 'update']]);
     $this->middleware('permission:change-meter-request-slip-delete', ['only' => ['destroy']]);
@@ -29,11 +30,43 @@ class ChangeMeterRequestSlipController extends Controller
       ->orderBy('created_at', 'desc')
       ->paginate(10);
 
-    // Get status counts for dashboard cards
+    $slip_status_count = $this->getSlipStatusCounts();
+
+    return view('service_connect_order.change_meter.request_slip.index', compact('change_meter_request_slips', 'slip_status_count'));
+  }
+
+  public function search(Request $request)
+  {
+    $slips = ChangeMeterRequestSlip::with(['municipality', 'barangay', 'createdBy.employee']);
+
+    if ($request->filled('search')) {
+      $searchTerm = $request->search;
+      $slips->where(function ($q) use ($searchTerm) {
+        $q->where('control_no', 'LIKE', '%' . $searchTerm . '%')
+          ->orWhere('first_name', 'LIKE', '%' . $searchTerm . '%')
+          ->orWhere('last_name', 'LIKE', '%' . $searchTerm . '%')
+          ->orWhere('account_number', 'LIKE', '%' . $searchTerm . '%')
+          ->orWhere('meter_no', 'LIKE', '%' . $searchTerm . '%');
+      });
+    }
+
+    if ($request->filled('status')) {
+      $slips->where('status', $request->status);
+    }
+
+    $change_meter_request_slips = $slips->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+    $slip_status_count = $this->getSlipStatusCounts();
+
+    return view('service_connect_order.change_meter.request_slip.index', compact('change_meter_request_slips', 'slip_status_count'));
+  }
+
+  // Status counts for the dashboard cards
+  private function getSlipStatusCounts()
+  {
     $today = now()->startOfDay();
     $yesterday = now()->subDay()->startOfDay();
 
-    $slip_status_count = [
+    return [
       'total' => [
         'pending' => ChangeMeterRequestSlip::where('status', 1)->count(),
         'accepted' => ChangeMeterRequestSlip::where('status', 2)->count(),
@@ -55,8 +88,6 @@ class ChangeMeterRequestSlipController extends Controller
         'rejected' => ChangeMeterRequestSlip::where('status', 3)->whereDate('created_at', '<', $yesterday)->count(),
       ],
     ];
-
-    return view('service_connect_order.change_meter.request_slip.index', compact('change_meter_request_slips', 'slip_status_count'));
   }
 
   /**
@@ -204,5 +235,54 @@ class ChangeMeterRequestSlipController extends Controller
     }
 
     return response()->json(['slip' => $slip]);
+  }
+
+  public function viewReport(Request $request)
+  {
+    $municipalities = DB::connection('sqlSrvMembership')->table('municipalities')->select('*')->orderBy('municipality_name', 'asc')->get();
+
+    $damage_meter_causes = KwhMeterDamageCauseType::pluck('name', 'id');
+
+    return view('service_connect_order.change_meter.request_slip.report', compact('municipalities', 'damage_meter_causes'));
+  }
+
+  public function generateChangeMeterRequestSlipReport(Request $request)
+  {
+    // Start building the query
+    $query = ChangeMeterRequestSlip::query();
+
+    if ($request->app_status == 1 && $request->app_status !== null) {
+      $query->where('status', 1); // pending
+      $query->whereBetween('created_at', [$request->date_from, $request->date_to]);
+    }
+
+    if ($request->app_status == 2 && $request->app_status !== null) {
+      $query->whereBetween('created_at', [$request->date_from, $request->date_to]);
+      $query->where('status', 2); // accepted
+    }
+
+    if ($request->app_status == 3 && $request->app_status !== null) {
+      $query->where('status', 3); // rejected
+      $query->whereBetween('created_at', [$request->date_from, $request->date_to]);
+    }
+
+    if ($request->municipality) {
+      $query->where('municipality_id', $request->municipality);
+    }
+
+    if ($request->barangay) {
+      $query->where('barangay_id', $request->barangay);
+    }
+
+    if ($request->damage_cause) {
+      $query->where('reason_for_change_meter', $request->damage_cause);
+    }
+
+    // Execute the query and get the results
+    $change_meter_requests = $query->get();
+
+    view()->share('datas', $change_meter_requests);
+    $pdf = PDF::loadView('service_connect_order.change_meter.request_slip.pdf_report')->setPaper('legal', 'landscape');
+    return $pdf->stream();
   }
 }

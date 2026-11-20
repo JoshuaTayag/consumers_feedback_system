@@ -75,17 +75,36 @@
     <div class="cmd-toolbar-top">
         <h1 class="cmd-toolbar-title">Change Meter Request Slips</h1>
         <div class="cmd-toolbar-actions">
+          <a class="btn btn-sm btn-success" href="{{ route('change-meter-request-slip.viewReport') }}" target="_blank"><i class="fa fa-download"></i> Generate Report</a>
           <a class="btn btn-sm btn-success" href="{{ route('change-meter-request.index') }}" target="_blank"><i class="fa fa-file-alt"></i> CM Requests</a>
           @can('change-meter-request-slip-create')
             <a class="btn btn-sm ui-btn-cta" href="{{ route('change-meter-request-slip.create') }}"><i class="fa fa-save"></i> Create New Slip</a>
           @endcan
         </div>
     </div>
-    <div class="cmd-toolbar-filters">
-      <div class="cmd-search">
-          <input type="text" placeholder="Search by Control No. / Name / Account No. / Contact No." id="search" name="search" class="form-control">
+    <form action="{{ route('change-meter-request-slip.search') }}" method="GET">
+      <div class="cmd-toolbar-filters">
+        <div class="cmd-search">
+            <input type="text" placeholder="Search by Control No. / Name / Account No. / Meter No." id="search" name="search" class="form-control" value="{{ request('search') }}">
+        </div>
+        <div class="cmd-status-select">
+          <select class="form-select" name="status" onchange="this.form.submit()">
+              <option value="" {{ request('status') == '' ? 'selected' : '' }}>All</option>
+              <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Pending</option>
+              <option value="2" {{ request('status') == '2' ? 'selected' : '' }}>Accepted</option>
+              <option value="3" {{ request('status') == '3' ? 'selected' : '' }}>Rejected</option>
+          </select>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-info"><i class="fa fa-search"></i></button>
+          @if(request('search') || request('status'))
+            <a href="{{ route('change-meter-request-slip.index') }}" class="btn btn-outline-secondary" title="Clear All Filters">
+                <i class="fas fa-times"></i> Clear All
+            </a>
+          @endif
+        </div>
       </div>
-    </div>
+    </form>
   </div>
 
   <!-- Data Table -->
@@ -117,7 +136,7 @@
                   </tr>
                 </thead>
                 <tbody id="show_data">
-                  @foreach ($change_meter_request_slips as $request_slip)
+                  @forelse ($change_meter_request_slips as $request_slip)
                     <tr>
                       <td>{{ $request_slip->control_no }}</td>
                       <td>{{ $request_slip->complete_name }}</td>
@@ -183,7 +202,11 @@
                         </div>
                       </td>
                     </tr>
-                  @endforeach
+                  @empty
+                    <tr>
+                      <td colspan="11" class="text-center text-muted py-4">No request slips found.</td>
+                    </tr>
+                  @endforelse
                 </tbody>
                </table>
                <div id="pagination">{{ $change_meter_request_slips->links() }}</div>
