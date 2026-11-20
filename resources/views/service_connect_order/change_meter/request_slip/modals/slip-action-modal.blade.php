@@ -143,15 +143,15 @@
                     <label for="modal_municipality" class="form-label">Municipality <span class="text-danger">*</span></label>
                     <select id="modal_municipality" class="form-control" name="municipality" required></select>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <label for="modal_barangay" class="form-label">Barangay <span class="text-danger">*</span></label>
                     <select id="modal_barangay" class="form-control" name="barangay" required></select>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <label for="modal_sitio" class="form-label">Sitio</label>
                     <input type="text" id="modal_sitio" name="sitio" class="form-control">
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-12">
                     <label for="modal_location" class="form-label">Landmark <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" name="location" id="modal_location" required>
                   </div>
