@@ -29,6 +29,7 @@ use App\Models\DataManagement\KwhMeterDamageCauseType;
 use App\Models\Employee;
 use App\Models\DataManagement\Feeder;
 use App\Models\DataManagement\Area;
+use App\Models\ChangeMeterRequestSlip;
 
 class ChangeMeterRequestController extends Controller
 {
@@ -98,6 +99,7 @@ class ChangeMeterRequestController extends Controller
    */
   public function store(Request $request)
   {
+    // dd($request->all());
     $change_meter_request_exists = ChangeMeterRequest::where('account_number', $request->electric_service_detail)
       ->where(function ($query) {
         $query->where('status', null)->orWhere('status', 3); // dispatched to crew or pending for posting
@@ -119,7 +121,7 @@ class ChangeMeterRequestController extends Controller
       'barangay' => ['required'],
       'municipality' => ['required'],
       'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
-      'membership_or' => ['required'],
+      'membership_or' => ['nullable'],
       'email' => ['nullable', 'email', 'max:255'],
       'process_date' => ['required'],
       'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo'],
@@ -172,6 +174,16 @@ class ChangeMeterRequestController extends Controller
         'kwh_meter_request_id' => $request->kwh_meter_request_control_no,
         'email' => $request->email,
       ]);
+
+      if ($request->request_slip_id) {
+        // Additional logic if the request is from a request slip
+        $requestSlip = ChangeMeterRequestSlip::find($request->request_slip_id);
+        if ($requestSlip) {
+          $requestSlip->status = 2;
+          $requestSlip->change_meter_request_id = $change_meter_request->id;
+          $requestSlip->save();
+        }
+      }
 
       // check if there is a payment for meter accessories or calibration fee
       if ($request->meter_accessories > 0 || $request->calibration_fee > 0) {
@@ -239,7 +251,9 @@ class ChangeMeterRequestController extends Controller
       }
 
       DB::commit();
-
+      if ($request->request_slip_id) {
+        return redirect(route('change-meter-request-slip.index'))->withSuccess('Record Successfully Created! </br> SCO No:' . $control_id);
+      }
       return redirect(route('indexCM'))->withSuccess('Record Successfully Created! </br> SCO No:' . $control_id);
     } catch (\Exception $e) {
       // If an exception occurs during the transaction, rollback all changes
@@ -302,7 +316,7 @@ class ChangeMeterRequestController extends Controller
       'barangay' => ['required'],
       'municipality' => ['required'],
       'contact_no' => ['nullable', 'regex:/^((09))[0-9]{9}/', 'digits:11'],
-      'membership_or' => ['required'],
+      'membership_or' => ['nullable'],
       'email' => ['nullable', 'email', 'max:255'],
       'consumer_type' => ['required'],
       'meter_no' => ['nullable', 'unique:sqlSrvHousewiring.Service Connect Table,MeterNo,' . $id . ',id'],
@@ -471,6 +485,12 @@ class ChangeMeterRequestController extends Controller
           'new_meter_no' => $change_meter_request->new_meter_no,
         ]);
       }
+
+      // revert to change meter request slip to pending
+      $change_meter_request
+        ->changeMeterRequestSlips()
+        ->where('change_meter_request_id', $change_meter_request->id)
+        ->update(['status' => 1, 'change_meter_request_id' => null]);
 
       // Delete change meter request fees
       ChangeMeterRequestFees::where('cm_control_no', $change_meter_request->id)->delete();

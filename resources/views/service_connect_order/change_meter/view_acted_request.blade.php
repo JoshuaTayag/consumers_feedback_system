@@ -116,6 +116,15 @@
 
                   <div class="row mb-2">
                     <div class="col-6">
+                      <span class="fs-5 fw-bold">Contact No.:</span>
+                    </div>
+                    <div class="col-6">
+                      <span class="fs-5">{{ $cm_request->contact_no }}</span>
+                    </div>
+                  </div>
+
+                  <div class="row mb-2">
+                    <div class="col-6">
                       <span class="fs-5 fw-bold">Address:</span>
                     </div>
                     <div class="col-6">

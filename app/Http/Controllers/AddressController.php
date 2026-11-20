@@ -10,7 +10,15 @@ class AddressController extends Controller
 {
     public function fetchMunicipalities(Request $request)
     {
-        $data['municipalities'] = Municipality::where("district_id", $request->district_id)->get(["municipality_name", "id"]);
+        $query = Municipality::query();
+
+        if ($request->boolean('all')) {
+            $query->orderBy('municipality_name', 'asc');
+        } else {
+            $query->where("district_id", $request->district_id);
+        }
+
+        $data['municipalities'] = $query->get(["municipality_name", "id"]);
   
         return response()->json($data);
     }

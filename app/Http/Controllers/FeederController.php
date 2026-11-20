@@ -83,4 +83,18 @@ class FeederController extends Controller
         $feeder->delete();
         return redirect()->route('feeders.index')->with('success', 'Feeder deleted successfully.');
     }
+
+    /**
+     * Return the feeders of an area as JSON (used by AJAX dropdowns).
+     */
+    public function fetchFeeders(Request $request)
+    {
+        if (!$request->area_id) {
+            return response()->json(['data' => []]);
+        }
+
+        return response()->json([
+            'data' => Feeder::where('area_id', $request->area_id)->orderBy('feeder_name', 'asc')->get(),
+        ]);
+    }
 }

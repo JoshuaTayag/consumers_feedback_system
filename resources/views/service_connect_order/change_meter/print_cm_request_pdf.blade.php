@@ -228,7 +228,10 @@
           <td>Consumer Type: {{ $data->consumer_type ?? 'Unknown Type'}}</td>
           <td>Longtitude: {{$data->longitude}}</td>
         </tr>
-        <tr><td>Meter OR #: {{$data->meter_or_number }}</td></tr>
+        <tr>
+          <td>Meter OR #: {{$data->meter_or_number }}</td>
+          <td>Total Amount: PHP {{ number_format($data->cmr_fees->sum('amount'), 2) }}</td>
+        </tr>
         <tr><td>Remarks: {{$data->remarks}}</td></tr>
         <tr><td>Reference/Landmark: {{$data->location}}</td></tr>
       </tbody>
@@ -243,8 +246,8 @@
         </tr>
         <tr>
           <td class="text-center"></td>
-          <td class="text-center"><img src="images/signatures/bernandino.GIF"  alt="" class="img-signature"></td>
-          <td class="text-center"><img src="images/signatures/pastor.GIF"  alt="" class="img-signature"></td>
+          <td class="text-center"><img src="images/signatures/bernandino.gif"  alt="" class="img-signature"></td>
+          <td class="text-center"><img src="images/signatures/pastor.gif"  alt="" class="img-signature"></td>
         </tr>
         <tr>
           <td class="text-center" style="text-decoration: underline;">E. MAÑACAP / N. PONIENTE</td>

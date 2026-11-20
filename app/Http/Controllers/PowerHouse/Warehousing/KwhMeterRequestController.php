@@ -139,7 +139,7 @@ class KwhMeterRequestController extends Controller
       ->orderBy('created_at', 'asc')
       ->get();
 
-    $serivs = DB::connection('pgsql')->table('seriv')->select('seriv_number')->orderBy('created_at', 'desc')->where('approval_status', 2)->limit(100)->get();
+    $serivs = DB::connection('prismWarehouseConnection')->table('seriv')->select('seriv_number')->orderBy('created_at', 'desc')->where('approval_status', 2)->limit(1000)->get();
     // dd($serivs);
     return view('power_house.warehousing.kwh_meter_request.show', compact('kwh_meter_request', 'users', 'meters_types', 'audit_trail', 'serivs'));
   }

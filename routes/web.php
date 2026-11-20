@@ -14,276 +14,276 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 |
 */
 
-
-
 Auth::routes(['verify' => true]);
 
-
-
 Route::group(['middleware' => 'auth'], function () {
-    Route::get('/', function () {
-        
-        // if(Auth::user()->hasRole('Consumer')){
-        //     return view('consumer.dashboard');
-        // }
-        // else{
-            return view('home');
-        // }
-    });
+  Route::get('/', function () {
+    // if(Auth::user()->hasRole('Consumer')){
+    //     return view('consumer.dashboard');
+    // }
+    // else{
+    return view('home');
+    // }
+  });
 
-    Route::get('agmm/on-site/registration', [App\Http\Controllers\AgmmController::class, 'agmmRegistration'])->name('agmmRegistration');
-    Route::post('agmm/register', [App\Http\Controllers\AgmmController::class, 'agmmRegisterPost'])->name('agmmRegisterPost');
-    Route::get('agmm/qr-print/guest/{id}', [App\Http\Controllers\AgmmController::class, 'printRegistrationQRGuest'])->name('printRegistrationQRGuest');
+  Route::get('agmm/on-site/registration', [App\Http\Controllers\AgmmController::class, 'agmmRegistration'])->name('agmmRegistration');
+  Route::post('agmm/register', [App\Http\Controllers\AgmmController::class, 'agmmRegisterPost'])->name('agmmRegisterPost');
+  Route::get('agmm/qr-print/guest/{id}', [App\Http\Controllers\AgmmController::class, 'printRegistrationQRGuest'])->name('printRegistrationQRGuest');
 
-    Route::get('/raffle',                [App\Http\Controllers\AgmaRaffleWinnerController::class, 'index']);
-    Route::get('/raffle/winners',        [App\Http\Controllers\AgmaRaffleWinnerController::class, 'winners']);
-    Route::post('/raffle/winners',       [App\Http\Controllers\AgmaRaffleWinnerController::class, 'store']);
-    Route::delete('/raffle/winners',     [App\Http\Controllers\AgmaRaffleWinnerController::class, 'destroyAll']);
-    Route::delete('/raffle/winner/{id}', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'destroy'])->name('raffle.winner.destroy');
-    Route::get('/raffle/winners/export', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'export'])->name('raffle.winners.export');
-    Route::get('/raffle/winners/display', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'display']);
-    Route::get('/raffle/consumers/export', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'exportConsumersCsv'])->name('raffle.consumers.export');
+  Route::get('/raffle', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'index']);
+  Route::get('/raffle/winners', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'winners']);
+  Route::post('/raffle/winners', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'store']);
+  Route::delete('/raffle/winners', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'destroyAll']);
+  Route::delete('/raffle/winner/{id}', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'destroy'])->name('raffle.winner.destroy');
+  Route::get('/raffle/winners/export', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'export'])->name('raffle.winners.export');
+  Route::get('/raffle/winners/display', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'display']);
+  Route::get('/raffle/consumers/export', [App\Http\Controllers\AgmaRaffleWinnerController::class, 'exportConsumersCsv'])->name('raffle.consumers.export');
 
-    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+  Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-    Route::get('change-password', [App\Http\Controllers\Auth\UserController::class, 'showChangePasswordForm'])->name('changePasswordForm');
-    Route::put('change-password', [App\Http\Controllers\Auth\UserController::class, 'changePassword'])->name('changePassword');
-    
-    Route::get('agmm/verify', [App\Http\Controllers\AgmmController::class, 'agmmAccounts'])->name('agmmAccounts');
-    Route::post('agmm/verify/{id}', [App\Http\Controllers\AgmmController::class, 'agmmVerifyAccount'])->name('agmmVerifyAccount');
-    Route::get('agmm/qr-print/{id}', [App\Http\Controllers\AgmmController::class, 'printRegistrationQR'])->name('printRegistrationQR');
-    Route::get('agmm/scanner', [App\Http\Controllers\AgmmController::class, 'scanQR'])->name('scanAllowanceQR');
-    Route::get('agmm/status', [App\Http\Controllers\AgmmController::class, 'statusCount'])->name('agmmStatus');
-    Route::get('agmm/raffle', [App\Http\Controllers\AgmmController::class, 'agmmRaffle'])->name('agmmRaffle');
-    Route::get('agmm-issue-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'issueAllowance'])->name('issueTranspoAllowance');
-    Route::get('agmm-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'getAllowance'])->middleware('auth:sanctum')->name('transpoAllowance');
-    Route::get('agmm-registration/from-preregistration/{id}', [App\Http\Controllers\AgmmController::class, 'agmmVerifyAccountFromPreReg'])->middleware('auth:sanctum')->name('verifyPreRegistration');
-    Route::get('agmm/raffle/remove/{id}', [App\Http\Controllers\AgmmController::class, 'agmmRaffleRemove'])->name('agmmRaffleRemove');
-    Route::get('agmm/online-raffle/remove/{id}', [App\Http\Controllers\AgmmController::class, 'agmmOnlineRaffleRemove'])->name('agmmOnlineRaffleRemove');
-    Route::get('/export-onsite-winners', [App\Http\Controllers\AgmmController::class, 'exportOsiteWinners']);
-    Route::get('/export-online-winners', [App\Http\Controllers\AgmmController::class, 'exportOnlineWinners']);
+  Route::get('change-password', [App\Http\Controllers\Auth\UserController::class, 'showChangePasswordForm'])->name('changePasswordForm');
+  Route::put('change-password', [App\Http\Controllers\Auth\UserController::class, 'changePassword'])->name('changePassword');
 
-    // membership
-    Route::resource('membership', 'App\Http\Controllers\MembershipController');
-    Route::get('fetch-pre-members', [App\Http\Controllers\MembershipController::class, 'fetchPreMembers'])->name('fetchPreMembers');
-    Route::get('fetch-members', [App\Http\Controllers\MembershipController::class, 'fetchMembers'])->name('fetchMembers');
+  Route::get('agmm/verify', [App\Http\Controllers\AgmmController::class, 'agmmAccounts'])->name('agmmAccounts');
+  Route::post('agmm/verify/{id}', [App\Http\Controllers\AgmmController::class, 'agmmVerifyAccount'])->name('agmmVerifyAccount');
+  Route::get('agmm/qr-print/{id}', [App\Http\Controllers\AgmmController::class, 'printRegistrationQR'])->name('printRegistrationQR');
+  Route::get('agmm/scanner', [App\Http\Controllers\AgmmController::class, 'scanQR'])->name('scanAllowanceQR');
+  Route::get('agmm/status', [App\Http\Controllers\AgmmController::class, 'statusCount'])->name('agmmStatus');
+  Route::get('agmm/raffle', [App\Http\Controllers\AgmmController::class, 'agmmRaffle'])->name('agmmRaffle');
+  Route::get('agmm-issue-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'issueAllowance'])->name('issueTranspoAllowance');
+  Route::get('agmm-transportation-allowance/{id}', [App\Http\Controllers\AgmmController::class, 'getAllowance'])
+    ->middleware('auth:sanctum')
+    ->name('transpoAllowance');
+  Route::get('agmm-registration/from-preregistration/{id}', [App\Http\Controllers\AgmmController::class, 'agmmVerifyAccountFromPreReg'])
+    ->middleware('auth:sanctum')
+    ->name('verifyPreRegistration');
+  Route::get('agmm/raffle/remove/{id}', [App\Http\Controllers\AgmmController::class, 'agmmRaffleRemove'])->name('agmmRaffleRemove');
+  Route::get('agmm/online-raffle/remove/{id}', [App\Http\Controllers\AgmmController::class, 'agmmOnlineRaffleRemove'])->name('agmmOnlineRaffleRemove');
+  Route::get('/export-onsite-winners', [App\Http\Controllers\AgmmController::class, 'exportOsiteWinners']);
+  Route::get('/export-online-winners', [App\Http\Controllers\AgmmController::class, 'exportOnlineWinners']);
 
-    // pre membership
-    Route::get('pre-membership', [App\Http\Controllers\MembershipController::class, 'preMembershipIndex'])->name('pre_membership_index');
-    Route::get('pre-membership/create', [App\Http\Controllers\MembershipController::class, 'preMembershipCreate'])->name('pre_membership_create');
-    Route::post('pre-membership', [App\Http\Controllers\MembershipController::class, 'preMembershipStore'])->name('preMembershipStore');
-    Route::get('pre-membership/{id}/edit', [App\Http\Controllers\MembershipController::class, 'preMembershipEdit'])->name('pre_membership_edit');
-    Route::put('pre-membership/update/{id}', [App\Http\Controllers\MembershipController::class, 'preMembershipUpdate'])->name('preMembershipUpdate');
-    Route::delete('pre-membership/{id}', [App\Http\Controllers\MembershipController::class, 'preMembershipDestroy'])->name('preMembershipDestroy');
+  // membership
+  Route::resource('membership', 'App\Http\Controllers\MembershipController');
+  Route::get('fetch-pre-members', [App\Http\Controllers\MembershipController::class, 'fetchPreMembers'])->name('fetchPreMembers');
+  Route::get('fetch-members', [App\Http\Controllers\MembershipController::class, 'fetchMembers'])->name('fetchMembers');
 
-    // consumer online pre membership routes
-    Route::get('consumer/pre-membership/create-step-one', [App\Http\Controllers\MembershipController::class, 'consumerFirstPreMembershipIndex'])->name('consumer_pre_membership.create.step.one');
-    Route::post('consumer/pre-membership/create-step-one', [App\Http\Controllers\MembershipController::class, 'consumerFirstPreMembershipIndex'])->name('consumer_pre_membership.create.step.one.post');
-    
-    Route::get('consumer/pre-membership/create-step-two', [App\Http\Controllers\MembershipController::class, 'consumerSecondPreMembershipIndex'])->name('consumer_pre_membership.create.step.two');
-    Route::post('consumer/pre-membership/create-step-two', [App\Http\Controllers\MembershipController::class, 'consumerSecondPreMembershipIndex'])->name('consumer_pre_membership.create.step.two.post');
-    
-    Route::get('consumer/pre-membership/create-step-three', [App\Http\Controllers\MembershipController::class, 'consumerThirdPreMembershipIndex'])->name('consumer_pre_membership.create.step.three');
-    Route::post('consumer/pre-membership/create-step-three', [App\Http\Controllers\MembershipController::class, 'consumerThirdPreMembershipIndex'])->name('consumer_pre_membership.create.step.three.post');
+  // pre membership
+  Route::get('pre-membership', [App\Http\Controllers\MembershipController::class, 'preMembershipIndex'])->name('pre_membership_index');
+  Route::get('pre-membership/create', [App\Http\Controllers\MembershipController::class, 'preMembershipCreate'])->name('pre_membership_create');
+  Route::post('pre-membership', [App\Http\Controllers\MembershipController::class, 'preMembershipStore'])->name('preMembershipStore');
+  Route::get('pre-membership/{id}/edit', [App\Http\Controllers\MembershipController::class, 'preMembershipEdit'])->name('pre_membership_edit');
+  Route::put('pre-membership/update/{id}', [App\Http\Controllers\MembershipController::class, 'preMembershipUpdate'])->name('preMembershipUpdate');
+  Route::delete('pre-membership/{id}', [App\Http\Controllers\MembershipController::class, 'preMembershipDestroy'])->name('preMembershipDestroy');
 
+  // consumer online pre membership routes
+  Route::get('consumer/pre-membership/create-step-one', [App\Http\Controllers\MembershipController::class, 'consumerFirstPreMembershipIndex'])->name('consumer_pre_membership.create.step.one');
+  Route::post('consumer/pre-membership/create-step-one', [App\Http\Controllers\MembershipController::class, 'consumerFirstPreMembershipIndex'])->name('consumer_pre_membership.create.step.one.post');
 
-    //survey
-    Route::get('survey-report', [App\Http\Controllers\HomeController::class, 'surveyReport'])->name('surveyReport');
-    Route::post('api/fetch-survey', [App\Http\Controllers\HomeController::class, 'fetchSurvey']);
+  Route::get('consumer/pre-membership/create-step-two', [App\Http\Controllers\MembershipController::class, 'consumerSecondPreMembershipIndex'])->name('consumer_pre_membership.create.step.two');
+  Route::post('consumer/pre-membership/create-step-two', [App\Http\Controllers\MembershipController::class, 'consumerSecondPreMembershipIndex'])->name('consumer_pre_membership.create.step.two.post');
 
-    // roles and permissions
-    Route::resource('roles', App\Http\Controllers\Auth\RoleController::class);
+  Route::get('consumer/pre-membership/create-step-three', [App\Http\Controllers\MembershipController::class, 'consumerThirdPreMembershipIndex'])->name('consumer_pre_membership.create.step.three');
+  Route::post('consumer/pre-membership/create-step-three', [App\Http\Controllers\MembershipController::class, 'consumerThirdPreMembershipIndex'])->name('consumer_pre_membership.create.step.three.post');
 
-    // users routes
-    Route::get('users', [App\Http\Controllers\Auth\UserController::class, 'index'])->name('users.index');
-    Route::get('users/create', [App\Http\Controllers\Auth\UserController::class, 'create'])->name('users.create');
-    Route::post('users', [App\Http\Controllers\Auth\UserController::class, 'store'])->name('userStore');
-    Route::get('users/{id}/edit', [App\Http\Controllers\Auth\UserController::class, 'edit'])->name('users.edit');
-    Route::put('users/update/{id}', [App\Http\Controllers\Auth\UserController::class, 'update'])->name('userUpdate');
-    Route::post('users/{id}/toggle-status', [App\Http\Controllers\Auth\UserController::class, 'toggleStatus'])->name('users.toggleStatus');
-    Route::delete('users/{id}', [App\Http\Controllers\Auth\UserController::class, 'destroy'])->name('userDestroy');
+  //survey
+  Route::get('survey-report', [App\Http\Controllers\HomeController::class, 'surveyReport'])->name('surveyReport');
+  Route::post('api/fetch-survey', [App\Http\Controllers\HomeController::class, 'fetchSurvey']);
 
-    // employees
-    Route::resource('employee', App\Http\Controllers\EmployeeController::class);
+  // roles and permissions
+  Route::resource('roles', App\Http\Controllers\Auth\RoleController::class);
 
-    // roles and permissions
-    Route::resource('teller', App\Http\Controllers\PowerBill\TellerController::class);
+  // users routes
+  Route::get('users', [App\Http\Controllers\Auth\UserController::class, 'index'])->name('users.index');
+  Route::get('users/create', [App\Http\Controllers\Auth\UserController::class, 'create'])->name('users.create');
+  Route::post('users', [App\Http\Controllers\Auth\UserController::class, 'store'])->name('userStore');
+  Route::get('users/{id}/edit', [App\Http\Controllers\Auth\UserController::class, 'edit'])->name('users.edit');
+  Route::put('users/update/{id}', [App\Http\Controllers\Auth\UserController::class, 'update'])->name('userUpdate');
+  Route::post('users/{id}/toggle-status', [App\Http\Controllers\Auth\UserController::class, 'toggleStatus'])->name('users.toggleStatus');
+  Route::delete('users/{id}', [App\Http\Controllers\Auth\UserController::class, 'destroy'])->name('userDestroy');
 
-    // roles and permissions
-    Route::resource('service-connect-order', App\Http\Controllers\ServiceConnectOrderController::class);
-    Route::get('change-meter-request-index', [App\Http\Controllers\ChangeMeterRequestController::class, 'index'])->name('indexCM');
-    Route::get('change-meter-request-create', [App\Http\Controllers\ChangeMeterRequestController::class, 'create'])->name('createCM');
-    Route::post('change-meter-request-store', [App\Http\Controllers\ChangeMeterRequestController::class, 'store'])->name('storeCM');
-    Route::get('change-meter-request-edit/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'edit'])->name('editCM');
-    Route::put('change-meter-request-update/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'update'])->name('updateCM');
-    Route::post('change-meter-request-posting', [App\Http\Controllers\ChangeMeterRequestController::class, 'meterPosting'])->name('meterPostingCM');
-    Route::post('change-meter-request-dispatching', [App\Http\Controllers\ChangeMeterRequestController::class, 'cmDispatched'])->name('cmDispatching');
-    Route::post('change-meter-request-assign-meter', [App\Http\Controllers\ChangeMeterRequestController::class, 'cmAssignMeter'])->name('cmAssignMeter');
-    Route::put('change-meter-request-reset-status/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'resetStatus'])->name('service_connect_order.change_meter.reset_status');
-    Route::post('change-meter-request-transfer-dispatching', [App\Http\Controllers\ChangeMeterRequestController::class, 'cmTransferOfDispatching'])->name('cmTransferOfDispatching');
-    Route::post('validate-meter-no', [App\Http\Controllers\ChangeMeterRequestController::class, 'validateMeterPosting'])->name('validateMeterPosting');
-    Route::get('pdf-sco-cm/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'printChangeMeterRequest'])->name('printChangeMeterRequest');
-    // Route::get('fetch-applications', [App\Http\Controllers\ServiceConnectOrderController::class, 'fetchServiceConnectApplications'])->name('fetchServiceConnectApplications');
-    Route::get('change-meter-request/search', [App\Http\Controllers\ChangeMeterRequestController::class, 'search'])->name('cm.search');
-    Route::get('change-meter-request/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'destroy'])->name('deleteCM');
-    Route::get('change-meter-request-view/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'view'])->name('viewCM');
-    Route::get('change-meter-request-report', [App\Http\Controllers\ChangeMeterRequestController::class, 'viewReport'])->name('viewReport');
-    Route::get('change-meter-request-report/pdf', [App\Http\Controllers\ChangeMeterRequestController::class, 'generateReport'])->name('generateReport');
-    Route::get('cm-fetch-accounts-records', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAccountDetails'])->name('cmFetchAccounts');
-    Route::get('change-meter-request-audit-logs/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAuditLogs'])->name('cmAuditLogs');
-    Route::get('change-meter-request-export-audit-logs/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'exportAuditLogs'])->name('cmExportAuditLogs');
-    
-    // AJAX routes for auto-fill functionality
-    Route::get('kwh-meter-request-details', [App\Http\Controllers\ChangeMeterRequestController::class, 'getKwhMeterRequestDetails'])->name('kwhMeterRequestDetails');
-    Route::get('kwh-meter-serial-numbers', [App\Http\Controllers\ChangeMeterRequestController::class, 'getKwhMeterSerialNumbers'])->name('kwhMeterSerialNumbers');
-    Route::get('meter-seal-details', [App\Http\Controllers\ChangeMeterRequestController::class, 'getMeterSealDetails'])->name('meterSealDetails');
+  // employees
+  Route::resource('employee', App\Http\Controllers\EmployeeController::class);
 
-    Route::resource('change-meter-request', App\Http\Controllers\ChangeMeterRequestController::class);
-    Route::resource('change-meter-contractor', App\Http\Controllers\ChangeMeterRequestContractorController::class);
-    Route::resource('change-meter-lead-contractor', App\Http\Controllers\ChangeMeterLeadContractorController::class);
+  // roles and permissions
+  Route::resource('teller', App\Http\Controllers\PowerBill\TellerController::class);
 
-    // lifeline
-    Route::resource('lifeline', App\Http\Controllers\LifelineController::class);
-    Route::post('lifeline-store-non-poor', [App\Http\Controllers\LifelineController::class, 'storeNonPoor'])->name('lifeline.store.non_poor');
-    Route::get('fetch-accounts-records', [App\Http\Controllers\LifelineController::class, 'getAccountDetailsNotExisting'])->name('fetchAccounts');
-    Route::get('fetch-accounts', [App\Http\Controllers\LifelineController::class, 'getAccountDetails'])->name('fetchAllAccounts');
-    Route::get('lifeline-approval', [App\Http\Controllers\LifelineController::class, 'approveLifelineIndex'])->name('approvedLifelineIndex');
-    Route::put('lifeline-approval/{id}', [App\Http\Controllers\LifelineController::class, 'approveLifeline'])->name('LifelineUpdate');
-    Route::put('lifeline-approval', [App\Http\Controllers\LifelineController::class, 'approveLifelineMultiple'])->name('LifelineMassUpdate');
-    Route::get('lifeline-generate-pdf/{id}', [App\Http\Controllers\LifelineController::class, 'lifelineCoverageCertificate'])->name('lifelineCoverageCertificate');
-    Route::get('lifeline-report', [App\Http\Controllers\LifelineController::class, 'lifelineReport'])->name('lifeline.report');
-    Route::get('lifeline-report-generate', [App\Http\Controllers\LifelineController::class, 'lifelineGenerateReport'])->name('lifeline.generate.report');
-    Route::get('fetch-lifelines', [App\Http\Controllers\LifelineController::class, 'fetchLifelineApplication'])->name('fetchLifelineApplication');
-    Route::get('upload-lifelines', [App\Http\Controllers\LifelineController::class, 'uploadLifeline'])->name('uploadLifeline');
+  // roles and permissions
+  Route::resource('service-connect-order', App\Http\Controllers\ServiceConnectOrderController::class);
+  Route::get('change-meter-request-index', [App\Http\Controllers\ChangeMeterRequestController::class, 'index'])->name('indexCM');
+  Route::get('change-meter-request-create', [App\Http\Controllers\ChangeMeterRequestController::class, 'create'])->name('createCM');
+  Route::post('change-meter-request-store', [App\Http\Controllers\ChangeMeterRequestController::class, 'store'])->name('storeCM');
+  Route::get('change-meter-request-edit/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'edit'])->name('editCM');
+  Route::put('change-meter-request-update/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'update'])->name('updateCM');
+  Route::post('change-meter-request-posting', [App\Http\Controllers\ChangeMeterRequestController::class, 'meterPosting'])->name('meterPostingCM');
+  Route::post('change-meter-request-dispatching', [App\Http\Controllers\ChangeMeterRequestController::class, 'cmDispatched'])->name('cmDispatching');
+  Route::post('change-meter-request-assign-meter', [App\Http\Controllers\ChangeMeterRequestController::class, 'cmAssignMeter'])->name('cmAssignMeter');
+  Route::put('change-meter-request-reset-status/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'resetStatus'])->name('service_connect_order.change_meter.reset_status');
+  Route::post('change-meter-request-transfer-dispatching', [App\Http\Controllers\ChangeMeterRequestController::class, 'cmTransferOfDispatching'])->name('cmTransferOfDispatching');
+  Route::post('validate-meter-no', [App\Http\Controllers\ChangeMeterRequestController::class, 'validateMeterPosting'])->name('validateMeterPosting');
+  Route::get('pdf-sco-cm/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'printChangeMeterRequest'])->name('printChangeMeterRequest');
+  // Route::get('fetch-applications', [App\Http\Controllers\ServiceConnectOrderController::class, 'fetchServiceConnectApplications'])->name('fetchServiceConnectApplications');
+  Route::get('change-meter-request/search', [App\Http\Controllers\ChangeMeterRequestController::class, 'search'])->name('cm.search');
+  Route::get('change-meter-request/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'destroy'])->name('deleteCM');
+  Route::get('change-meter-request-view/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'view'])->name('viewCM');
+  Route::get('change-meter-request-report', [App\Http\Controllers\ChangeMeterRequestController::class, 'viewReport'])->name('viewReport');
+  Route::get('change-meter-request-report/pdf', [App\Http\Controllers\ChangeMeterRequestController::class, 'generateReport'])->name('generateReport');
+  Route::get('cm-fetch-accounts-records', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAccountDetails'])->name('cmFetchAccounts');
+  Route::get('change-meter-request-audit-logs/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'getAuditLogs'])->name('cmAuditLogs');
+  Route::get('change-meter-request-export-audit-logs/{id}', [App\Http\Controllers\ChangeMeterRequestController::class, 'exportAuditLogs'])->name('cmExportAuditLogs');
 
-    // Strucutures
-    Route::resource('structure', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class);
-    Route::get('fetch-items', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'fetchItemsFromPrism'])->name('fetchItems');
+  // AJAX routes for auto-fill functionality
+  Route::get('kwh-meter-request-details', [App\Http\Controllers\ChangeMeterRequestController::class, 'getKwhMeterRequestDetails'])->name('kwhMeterRequestDetails');
+  Route::get('kwh-meter-serial-numbers', [App\Http\Controllers\ChangeMeterRequestController::class, 'getKwhMeterSerialNumbers'])->name('kwhMeterSerialNumbers');
+  Route::get('meter-seal-details', [App\Http\Controllers\ChangeMeterRequestController::class, 'getMeterSealDetails'])->name('meterSealDetails');
 
-    // TEMP Structures
-    Route::post('edit-structure-items', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'updateStructureItem'])->name('updateStructureItem');
-    Route::post('temp-structure-edit-quantity', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'structureUpdateQuantity'])->name('structureUpdateQuantity');
-    Route::post('temp-structure-edit-cost', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'structureUpdateCost'])->name('structureUpdateCost');
-    Route::delete('temp-structure-delete-item', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'structureDeleteItem'])->name('structureDeleteItem');
+  Route::resource('change-meter-request', App\Http\Controllers\ChangeMeterRequestController::class);
+  Route::resource('change-meter-contractor', App\Http\Controllers\ChangeMeterRequestContractorController::class);
+  Route::resource('change-meter-lead-contractor', App\Http\Controllers\ChangeMeterLeadContractorController::class);
 
-    // MRF
-    Route::resource('material-requisition-form', App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class);
-    Route::get('fetch-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getItems'])->name('getItems');
-    Route::post('mrf-edit-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItems'])->name('mrfUpdateItems');
-    Route::post('mrf-edit-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItem'])->name('mrfUpdateItem');
-    Route::post('mrf-edit-material-code', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItemCode'])->name('mrfUpdateItemCode');
-    Route::post('mrf-edit-material-quantity', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItemQuantity'])->name('mrfUpdateItemQuantity');
-    Route::post('mrf-edit-material-cost', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItemCost'])->name('mrfUpdateItemCost');
-    Route::delete('mrf-delete-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfDeleteItem'])->name('mrfDeleteItem');
-    Route::get('mrf-approval', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfApprovalIndex'])->name('mrfApprovalIndex');
-    Route::put('mrf-approval/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfApprovalUpdate'])->name('mrfApprovalUpdate');
-    Route::get('mrf-print-pdf/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfPrintPdf'])->name('mrfPrintPdf');
-    Route::get('mrf-liquidate/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidate'])->name('mrfLiquidate');
-    Route::get('fetch-mrv-records', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getMrvs'])->name('fetchMrvs');
-    Route::get('fetch-seriv-records', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getSerivs'])->name('fetchSerivs');
-    Route::put('mrf-create-liquidation/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationCreate'])->name('mrfLiquidationCreate');
-    Route::get('view-liquidated-mrf/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'viewLiquidatedMrf'])->name('viewLiquidatedMrf');
-    Route::get('mrf-liquidation-report-pdf', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationReport'])->name('mrfLiquidationReport');
-    Route::get('mrf-approval/liquidation', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationApprovalIndex'])->name('mrfLiquidationApprovalIndex');
-    Route::put('mrf-approval/liquidation/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationApprovalUpdate'])->name('mrfLiquidationApprovalUpdate');
-    Route::get('mrf-approval/liquidation/view/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationApprovalView'])->name('mrfLiquidationApprovalView');
-    Route::put('mrf-approval/liquidation/disapproved/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationIadDisapproved'])->name('mrfLiquidationIadDisapproved');
-    Route::get('fetch-MER', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'fetchMaterialRequisitionRecords'])->name('fetchMaterialRequisitionRecords');
+  // lifeline
+  Route::resource('lifeline', App\Http\Controllers\LifelineController::class);
+  Route::post('lifeline-store-non-poor', [App\Http\Controllers\LifelineController::class, 'storeNonPoor'])->name('lifeline.store.non_poor');
+  Route::get('fetch-accounts-records', [App\Http\Controllers\LifelineController::class, 'getAccountDetailsNotExisting'])->name('fetchAccounts');
+  Route::get('fetch-accounts', [App\Http\Controllers\LifelineController::class, 'getAccountDetails'])->name('fetchAllAccounts');
+  Route::get('lifeline-approval', [App\Http\Controllers\LifelineController::class, 'approveLifelineIndex'])->name('approvedLifelineIndex');
+  Route::put('lifeline-approval/{id}', [App\Http\Controllers\LifelineController::class, 'approveLifeline'])->name('LifelineUpdate');
+  Route::put('lifeline-approval', [App\Http\Controllers\LifelineController::class, 'approveLifelineMultiple'])->name('LifelineMassUpdate');
+  Route::get('lifeline-generate-pdf/{id}', [App\Http\Controllers\LifelineController::class, 'lifelineCoverageCertificate'])->name('lifelineCoverageCertificate');
+  Route::get('lifeline-report', [App\Http\Controllers\LifelineController::class, 'lifelineReport'])->name('lifeline.report');
+  Route::get('lifeline-report-generate', [App\Http\Controllers\LifelineController::class, 'lifelineGenerateReport'])->name('lifeline.generate.report');
+  Route::get('fetch-lifelines', [App\Http\Controllers\LifelineController::class, 'fetchLifelineApplication'])->name('fetchLifelineApplication');
+  Route::get('upload-lifelines', [App\Http\Controllers\LifelineController::class, 'uploadLifeline'])->name('uploadLifeline');
 
-    //TEMP MRF
-    Route::post('edit-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItems'])->name('updateItems');
-    Route::post('edit-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItem'])->name('updateItem');
-    Route::post('edit-material-code', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItemCode'])->name('updateItemCode');
-    Route::post('edit-material-quantity', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItemQuantity'])->name('updateItemQuantity');
-    Route::post('edit-material-cost', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItemCost'])->name('updateItemCost');
-    Route::delete('delete-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'deleteItem'])->name('removeItem');
+  // Strucutures
+  Route::resource('structure', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class);
+  Route::get('fetch-items', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'fetchItemsFromPrism'])->name('fetchItems');
 
-    // METER MANAGEMENT
-    // Specific routes must come before resource routes to avoid conflicts
-    Route::get('meters/search', [App\Http\Controllers\MeterController::class, 'search'])->name('meters.search');
-    Route::post('meters/validate-serial', [App\Http\Controllers\MeterController::class, 'validateSerialNumber'])->name('meters.validate-serial');
-    Route::post('meters/validate-erc-seal', [App\Http\Controllers\MeterController::class, 'validateErcSeal'])->name('meters.validate-erc-seal');
-    Route::post('meters/validate-leyeco-seal', [App\Http\Controllers\MeterController::class, 'validateLeyecoSeal'])->name('meters.validate-leyeco-seal');
-    Route::post('meters/validate-control-number', [App\Http\Controllers\MeterController::class, 'validateControlNumber'])->name('meters.validate-control-number');
-    Route::get('meters/{id}/audit-logs', [App\Http\Controllers\MeterController::class, 'getAuditLogs'])->name('meters.audit-logs');
-    Route::get('meters/change-meter-requests', [App\Http\Controllers\MeterController::class, 'getChangeMeterRequests'])->name('meters.change-meter-requests');
-    Route::get('meters/kwh-meter-requests', [App\Http\Controllers\MeterController::class, 'getKwhMeterRequests'])->name('meters.kwh-meter-requests');
-    Route::put('meters/{id}/assign', [App\Http\Controllers\MeterController::class, 'assign'])->name('meters.assign');
-    Route::put('meters/{id}/return', [App\Http\Controllers\MeterController::class, 'returnMeter'])->name('meters.return');
-    Route::put('meters/{id}/make-available', [App\Http\Controllers\MeterController::class, 'makeMeterAvailable'])->name('meters.makeAvailable');
-    Route::get('meters/mass-assignment', [App\Http\Controllers\MeterController::class, 'massAssignmentIndex'])->name('meters.massAssignmentIndex');
-    Route::post('meters/mass-assignment/assign', [App\Http\Controllers\MeterController::class, 'massAssignmentAssign'])->name('meters.massAssignmentAssign');
-    Route::get('meters/mass-assignment/assigned-meters', [App\Http\Controllers\MeterController::class, 'massAssignmentGetAssignedMeters'])->name('meters.massAssignmentGetAssignedMeters');
-    Route::delete('meters/mass-assignment/remove', [App\Http\Controllers\MeterController::class, 'massAssignmentRemove'])->name('meters.massAssignmentRemove');
-    Route::resource('meters', App\Http\Controllers\MeterController::class);
+  // TEMP Structures
+  Route::post('edit-structure-items', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'updateStructureItem'])->name('updateStructureItem');
+  Route::post('temp-structure-edit-quantity', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'structureUpdateQuantity'])->name('structureUpdateQuantity');
+  Route::post('temp-structure-edit-cost', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'structureUpdateCost'])->name('structureUpdateCost');
+  Route::delete('temp-structure-delete-item', [App\Http\Controllers\PowerHouse\DataManagement\Warehousing\StructureController::class, 'structureDeleteItem'])->name('structureDeleteItem');
 
-    // ELECTRICIAN
-    Route::resource('electrician', App\Http\Controllers\ElectricianController::class);
-    Route::get('electrician-complaints', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintIndex'])->name('electricianComplaintIndex');
-    Route::get('electrician-complaint-create', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintCreate'])->name('electricianComplaintCreate');
-    Route::post('electrician-complaint-store', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintStore'])->name('electricianComplaintStore');
-    Route::delete('electrician-complaint-delete/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintDelete'])->name('electricianComplaintDelete');
-    Route::delete('electrician-activity-delete/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianActivityDelete'])->name('electricianActivityDelete');
-    Route::get('electrician-complaint-edit/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintEdit'])->name('electricianComplaintEdit');
-    Route::put('electrician-complaint-update/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintUpdate'])->name('electricianComplaintUpdate');
-    Route::put('electrician-activity-update/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianActivityUpdate'])->name('electricianActivityUpdate');
-    Route::get('electrician-masterlist-report', [App\Http\Controllers\ElectricianController::class, 'electricianMasterlistReport'])->name('electricianMasterlistReport');
-    Route::get('electrician-masterlist-report-pdf', [App\Http\Controllers\ElectricianController::class, 'electricianMasterlistReportPdf'])->name('electricianMasterlistReportPdf');
-    Route::get('electrician-complaint-view/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintView'])->name('electricianComplaintView');
-    Route::get('fetch-electrician', [App\Http\Controllers\ElectricianController::class, 'fetchElectricianApplication'])->name('fetchElectricianApplication');
-    Route::get('electrician-activities', [App\Http\Controllers\ElectricianController::class, 'electricianActivityIndex'])->name('electricianActivityIndex');
-    Route::get('electrician-activities/create', [App\Http\Controllers\ElectricianController::class, 'electricianActivityCreate'])->name('electricianActivityCreate');
-    Route::get('fetch-electricians', [App\Http\Controllers\ElectricianController::class, 'fetchElectricians'])->name('fetchElectricians');
-    Route::post('electrician-activity-store', [App\Http\Controllers\ElectricianController::class, 'electricianActivityStore'])->name('electricianActivityStore');
-    Route::get('electrician-activity-edit/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianActivityEdit'])->name('electricianActivityEdit');
-    // Strucutures
-    // Route::resource('signatory', App\Http\Controllers\SignatoryController::class);
+  // MRF
+  Route::resource('material-requisition-form', App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class);
+  Route::get('fetch-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getItems'])->name('getItems');
+  Route::post('mrf-edit-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItems'])->name('mrfUpdateItems');
+  Route::post('mrf-edit-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItem'])->name('mrfUpdateItem');
+  Route::post('mrf-edit-material-code', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItemCode'])->name('mrfUpdateItemCode');
+  Route::post('mrf-edit-material-quantity', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItemQuantity'])->name('mrfUpdateItemQuantity');
+  Route::post('mrf-edit-material-cost', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfUpdateItemCost'])->name('mrfUpdateItemCost');
+  Route::delete('mrf-delete-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfDeleteItem'])->name('mrfDeleteItem');
+  Route::get('mrf-approval', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfApprovalIndex'])->name('mrfApprovalIndex');
+  Route::put('mrf-approval/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfApprovalUpdate'])->name('mrfApprovalUpdate');
+  Route::get('mrf-print-pdf/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfPrintPdf'])->name('mrfPrintPdf');
+  Route::get('mrf-liquidate/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidate'])->name('mrfLiquidate');
+  Route::get('fetch-mrv-records', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getMrvs'])->name('fetchMrvs');
+  Route::get('fetch-seriv-records', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'getSerivs'])->name('fetchSerivs');
+  Route::put('mrf-create-liquidation/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationCreate'])->name('mrfLiquidationCreate');
+  Route::get('view-liquidated-mrf/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'viewLiquidatedMrf'])->name('viewLiquidatedMrf');
+  Route::get('mrf-liquidation-report-pdf', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationReport'])->name('mrfLiquidationReport');
+  Route::get('mrf-approval/liquidation', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationApprovalIndex'])->name('mrfLiquidationApprovalIndex');
+  Route::put('mrf-approval/liquidation/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationApprovalUpdate'])->name('mrfLiquidationApprovalUpdate');
+  Route::get('mrf-approval/liquidation/view/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationApprovalView'])->name('mrfLiquidationApprovalView');
+  Route::put('mrf-approval/liquidation/disapproved/{id}', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'mrfLiquidationIadDisapproved'])->name('mrfLiquidationIadDisapproved');
+  Route::get('fetch-MER', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'fetchMaterialRequisitionRecords'])->name('fetchMaterialRequisitionRecords');
 
-    // LEDGER
-    Route::get('ledger', [App\Http\Controllers\AccountLedgerController::class, 'indexLedger'])->name('ledger.index');
-    Route::get('ledger/search', [App\Http\Controllers\AccountLedgerController::class, 'searchLedger'])->name('ledger.search');
-    Route::get('fetch-accounts-records-by-name', [App\Http\Controllers\AccountLedgerController::class, 'getAccountName'])->name('getAccountName');
+  //TEMP MRF
+  Route::post('edit-materials', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItems'])->name('updateItems');
+  Route::post('edit-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItem'])->name('updateItem');
+  Route::post('edit-material-code', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItemCode'])->name('updateItemCode');
+  Route::post('edit-material-quantity', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItemQuantity'])->name('updateItemQuantity');
+  Route::post('edit-material-cost', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'updateItemCost'])->name('updateItemCost');
+  Route::delete('delete-material', [App\Http\Controllers\PowerHouse\Warehousing\MaterialRequisitionFormController::class, 'deleteItem'])->name('removeItem');
 
-    // POWER BILL
-    Route::resource('change-meter-request-transact', App\Http\Controllers\ChangeMeterRequestTransactionController::class);
-    Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
-    Route::get('change-meter-request-pay/receipt/{id}', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'changeMeterReceipt'])->name('changeMeterReceipt');
+  // METER MANAGEMENT
+  // Specific routes must come before resource routes to avoid conflicts
+  Route::get('meters/search', [App\Http\Controllers\MeterController::class, 'search'])->name('meters.search');
+  Route::post('meters/validate-serial', [App\Http\Controllers\MeterController::class, 'validateSerialNumber'])->name('meters.validate-serial');
+  Route::post('meters/validate-erc-seal', [App\Http\Controllers\MeterController::class, 'validateErcSeal'])->name('meters.validate-erc-seal');
+  Route::post('meters/validate-leyeco-seal', [App\Http\Controllers\MeterController::class, 'validateLeyecoSeal'])->name('meters.validate-leyeco-seal');
+  Route::post('meters/validate-control-number', [App\Http\Controllers\MeterController::class, 'validateControlNumber'])->name('meters.validate-control-number');
+  Route::get('meters/{id}/audit-logs', [App\Http\Controllers\MeterController::class, 'getAuditLogs'])->name('meters.audit-logs');
+  Route::get('meters/change-meter-requests', [App\Http\Controllers\MeterController::class, 'getChangeMeterRequests'])->name('meters.change-meter-requests');
+  Route::get('meters/kwh-meter-requests', [App\Http\Controllers\MeterController::class, 'getKwhMeterRequests'])->name('meters.kwh-meter-requests');
+  Route::put('meters/{id}/assign', [App\Http\Controllers\MeterController::class, 'assign'])->name('meters.assign');
+  Route::put('meters/{id}/return', [App\Http\Controllers\MeterController::class, 'returnMeter'])->name('meters.return');
+  Route::put('meters/{id}/make-available', [App\Http\Controllers\MeterController::class, 'makeMeterAvailable'])->name('meters.makeAvailable');
+  Route::get('meters/mass-assignment', [App\Http\Controllers\MeterController::class, 'massAssignmentIndex'])->name('meters.massAssignmentIndex');
+  Route::post('meters/mass-assignment/assign', [App\Http\Controllers\MeterController::class, 'massAssignmentAssign'])->name('meters.massAssignmentAssign');
+  Route::get('meters/mass-assignment/assigned-meters', [App\Http\Controllers\MeterController::class, 'massAssignmentGetAssignedMeters'])->name('meters.massAssignmentGetAssignedMeters');
+  Route::delete('meters/mass-assignment/remove', [App\Http\Controllers\MeterController::class, 'massAssignmentRemove'])->name('meters.massAssignmentRemove');
+  Route::resource('meters', App\Http\Controllers\MeterController::class);
 
-    Route::resource('payment-transact', App\Http\Controllers\PaymentTransactionController::class);
+  // ELECTRICIAN
+  Route::resource('electrician', App\Http\Controllers\ElectricianController::class);
+  Route::get('electrician-complaints', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintIndex'])->name('electricianComplaintIndex');
+  Route::get('electrician-complaint-create', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintCreate'])->name('electricianComplaintCreate');
+  Route::post('electrician-complaint-store', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintStore'])->name('electricianComplaintStore');
+  Route::delete('electrician-complaint-delete/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintDelete'])->name('electricianComplaintDelete');
+  Route::delete('electrician-activity-delete/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianActivityDelete'])->name('electricianActivityDelete');
+  Route::get('electrician-complaint-edit/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintEdit'])->name('electricianComplaintEdit');
+  Route::put('electrician-complaint-update/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintUpdate'])->name('electricianComplaintUpdate');
+  Route::put('electrician-activity-update/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianActivityUpdate'])->name('electricianActivityUpdate');
+  Route::get('electrician-masterlist-report', [App\Http\Controllers\ElectricianController::class, 'electricianMasterlistReport'])->name('electricianMasterlistReport');
+  Route::get('electrician-masterlist-report-pdf', [App\Http\Controllers\ElectricianController::class, 'electricianMasterlistReportPdf'])->name('electricianMasterlistReportPdf');
+  Route::get('electrician-complaint-view/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianComplaintView'])->name('electricianComplaintView');
+  Route::get('fetch-electrician', [App\Http\Controllers\ElectricianController::class, 'fetchElectricianApplication'])->name('fetchElectricianApplication');
+  Route::get('electrician-activities', [App\Http\Controllers\ElectricianController::class, 'electricianActivityIndex'])->name('electricianActivityIndex');
+  Route::get('electrician-activities/create', [App\Http\Controllers\ElectricianController::class, 'electricianActivityCreate'])->name('electricianActivityCreate');
+  Route::get('fetch-electricians', [App\Http\Controllers\ElectricianController::class, 'fetchElectricians'])->name('fetchElectricians');
+  Route::post('electrician-activity-store', [App\Http\Controllers\ElectricianController::class, 'electricianActivityStore'])->name('electricianActivityStore');
+  Route::get('electrician-activity-edit/{id}', [App\Http\Controllers\ElectricianController::class, 'electricianActivityEdit'])->name('electricianActivityEdit');
+  // Strucutures
+  // Route::resource('signatory', App\Http\Controllers\SignatoryController::class);
 
-    Route::resource('meter-type', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\MeterTypeController::class);
-    Route::resource('kwh-meter-request', App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class);
-    Route::post('kwh-meter-request/{id}/liquidate', [App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class, 'liquidate'])->name('kwh-meter-request.liquidate');
-    Route::get('pending-transactions', [App\Http\Controllers\PendingController::class, 'index'])->name('pending.index');
-    Route::get('pending-transactions/search', [App\Http\Controllers\PendingController::class, 'search'])->name('pending.search');
-    Route::get('pending-transactions/statistics', [App\Http\Controllers\PendingController::class, 'getStatistics'])->name('pending.statistics');
-    Route::get('pending-transactions/{id}/details', [App\Http\Controllers\PendingController::class, 'showDetails'])->name('pending.details');
-    Route::post('pending-transactions/approve', [App\Http\Controllers\PendingController::class, 'approve'])->name('pending.approve');
-    Route::post('pending-transactions/disapprove', [App\Http\Controllers\PendingController::class, 'disapprove'])->name('pending.disapprove');
-    Route::get('kwh-meter-request-report', [App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class, 'generateKwhMeterReport'])->name('generateKwhMeterReport');
-    Route::get('kwh-meter-request-report-pdf', [App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class, 'KwhMeterPdfReport'])->name('KwhMeterPdfReport');
-    // Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
+  // LEDGER
+  Route::get('ledger', [App\Http\Controllers\AccountLedgerController::class, 'indexLedger'])->name('ledger.index');
+  Route::get('ledger/search', [App\Http\Controllers\AccountLedgerController::class, 'searchLedger'])->name('ledger.search');
+  Route::get('fetch-accounts-records-by-name', [App\Http\Controllers\AccountLedgerController::class, 'getAccountName'])->name('getAccountName');
 
-    Route::resource('barangays', App\Http\Controllers\BarangayController::class);
-    Route::get('export_barangays', [App\Http\Controllers\BarangayController::class, 'exportCsv'])->name('barangays.exportCsv');
-    Route::resource('municipalities', App\Http\Controllers\MunicipalityController::class);
-    Route::resource('kwh-meter-damage-cause-types', App\Http\Controllers\KwhMeterDamageCauseTypeController::class);
+  // POWER BILL
+  Route::resource('change-meter-request-transact', App\Http\Controllers\ChangeMeterRequestTransactionController::class);
+  Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
+  Route::get('change-meter-request-pay/receipt/{id}', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'changeMeterReceipt'])->name('changeMeterReceipt');
 
-    Route::resource('areas', App\Http\Controllers\AreaController::class);
-    Route::resource('feeders', App\Http\Controllers\FeederController::class);
+  Route::resource('payment-transact', App\Http\Controllers\PaymentTransactionController::class);
+
+  Route::resource('meter-type', App\Http\Controllers\PowerHouse\DataManagement\Warehousing\MeterTypeController::class);
+  Route::resource('kwh-meter-request', App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class);
+  Route::post('kwh-meter-request/{id}/liquidate', [App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class, 'liquidate'])->name('kwh-meter-request.liquidate');
+  Route::get('pending-transactions', [App\Http\Controllers\PendingController::class, 'index'])->name('pending.index');
+  Route::get('pending-transactions/search', [App\Http\Controllers\PendingController::class, 'search'])->name('pending.search');
+  Route::get('pending-transactions/statistics', [App\Http\Controllers\PendingController::class, 'getStatistics'])->name('pending.statistics');
+  Route::get('pending-transactions/{id}/details', [App\Http\Controllers\PendingController::class, 'showDetails'])->name('pending.details');
+  Route::post('pending-transactions/approve', [App\Http\Controllers\PendingController::class, 'approve'])->name('pending.approve');
+  Route::post('pending-transactions/disapprove', [App\Http\Controllers\PendingController::class, 'disapprove'])->name('pending.disapprove');
+  Route::get('kwh-meter-request-report', [App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class, 'generateKwhMeterReport'])->name('generateKwhMeterReport');
+  Route::get('kwh-meter-request-report-pdf', [App\Http\Controllers\PowerHouse\Warehousing\KwhMeterRequestController::class, 'KwhMeterPdfReport'])->name('KwhMeterPdfReport');
+  // Route::get('change-meter-request-pay/search', [App\Http\Controllers\ChangeMeterRequestTransactionController::class, 'createCMSearch'])->name('cmTransactionSearch');
+
+  Route::resource('barangays', App\Http\Controllers\BarangayController::class);
+  Route::get('export_barangays', [App\Http\Controllers\BarangayController::class, 'exportCsv'])->name('barangays.exportCsv');
+  Route::resource('municipalities', App\Http\Controllers\MunicipalityController::class);
+  Route::resource('kwh-meter-damage-cause-types', App\Http\Controllers\KwhMeterDamageCauseTypeController::class);
+
+  Route::resource('areas', App\Http\Controllers\AreaController::class);
+  Route::resource('feeders', App\Http\Controllers\FeederController::class);
+  Route::get('change-meter-request-slip/check-account', [App\Http\Controllers\ChangeMeterRequestSlipController::class, 'checkAccount'])->name('change-meter-request-slip.check-account');
+  Route::resource('change-meter-request-slip', App\Http\Controllers\ChangeMeterRequestSlipController::class);
+  Route::post('accept-change-meter-request-slip', [App\Http\Controllers\ChangeMeterRequestSlipController::class, 'acceptChangeMeterRequestSlip'])->name('change-meter-request-slip.accept');
+  Route::post('reject-change-meter-request-slip', [App\Http\Controllers\ChangeMeterRequestSlipController::class, 'rejectChangeMeterRequestSlip'])->name('change-meter-request-slip.reject');
 });
 
-Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])->name('online.pms')->middleware(['auth', 'verified']);
-
-
+Route::get('online-pre-membership', [App\Http\Controllers\MembershipController::class, 'onlineSeminarQuestionare'])
+  ->name('online.pms')
+  ->middleware(['auth', 'verified']);
 
 Route::get('/survey', function () {
-    return view('welcome');
+  return view('welcome');
 });
 Route::get('/survey-custcare', function () {
-    return view('welcome_custcare');
+  return view('welcome_custcare');
 });
 Route::post('store-survey', [App\Http\Controllers\SurveyController::class, 'store']);
 Route::post('store-survey-custcare', [App\Http\Controllers\SurveyController::class, 'storeCustcareSurvey'])->name('store.custcare.survey');
-Route::post('api/fetch-municipalities', [App\Http\Controllers\AddressController::class, 'fetchMunicipalities']);
-Route::post('api/fetch-barangays', [App\Http\Controllers\AddressController::class, 'fetchBarangays']);

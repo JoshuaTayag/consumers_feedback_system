@@ -74,6 +74,7 @@
     <div class="cmd-toolbar-top">
         <h1 class="cmd-toolbar-title">Change Meter Request</h1>
         <div class="cmd-toolbar-actions">
+          <a class="btn btn-sm btn-success" href="{{ route('change-meter-request-slip.index') }}" target="_blank"><i class="fa fa-clipboard-list"></i> Request Slip</a>
           <a class="btn btn-sm btn-success" href="{{ route('viewReport') }}" target="_blank"><i class="fa fa-download"></i> Generate Report</a>
           @can('change-meter-request-create')
             <a class="btn btn-sm ui-btn-cta" href="{{ route('createCM') }}"> Create New Request </a>
@@ -186,11 +187,6 @@
             <div class="cmd-request-row"><span class="cmd-label">Area</span><span class="cmd-value">{{ $cm_request->area?->name }}</span></div>
             <div class="cmd-request-row"><span class="cmd-label">Address</span><span class="cmd-value">{{$cm_request->address}}</span></div>
             <div class="cmd-request-row"><span class="cmd-label">Consumer Type</span><span class="cmd-value">{{ $cm_request->consumer_type ?? 'Unknown Type'}}</span></div>
-            <div class="cmd-request-row {{ $cm_request->status == null ? 'd-none' : '' }}">
-              <span class="cmd-label">Application Status</span>
-              <!-- 1 = installed, 2 = rejected -->
-              <span class="cmd-value"></span>
-            </div>
             <div class="cmd-request-row"><span class="cmd-label">Crew</span><span class="cmd-value">{{$cm_request->crew_full_name}}</span></div>
             <div class="cmd-request-row"><span class="cmd-label">Old Meter No.</span><span class="cmd-value">{{$cm_request->old_meter_no}}</span></div>
             <div class="cmd-request-row"><span class="cmd-label">New Meter No.</span><span class="cmd-value text-{{$cm_request->new_meter_no ? '' : 'danger'}}">{{$cm_request->new_meter_no ? $cm_request->new_meter_no : "N/A"}}</span></div>
@@ -198,6 +194,7 @@
             <div class="cmd-request-row"><span class="cmd-label">Landmark</span><span class="cmd-value">{{$cm_request->location}}</span></div>
             <div class="cmd-request-row"><span class="cmd-label">Remarks</span><span class="cmd-value">{{$cm_request->remarks}}</span></div>
             <div class="cmd-request-row"><span class="cmd-label">OR No.</span><span class="cmd-value {{$cm_request->changeMeterRequestTransaction ? 'fw-bold text-success' : ''}}">{{$cm_request->changeMeterRequestTransaction ? $cm_request->changeMeterRequestTransaction->or_no : "None"}}</span></div>
+            <div class="cmd-request-row"><span class="cmd-label">CM Slip:</span><span class="cmd-value {{$cm_request->changeMeterRequestSlips ? 'fw-bold text-danger' : ''}}">{{$cm_request->changeMeterRequestSlips ? $cm_request->changeMeterRequestSlips->control_no : "N/A"}}</span></div>
           </div>
         </div>
         <div class="cmd-request-footer">created by: {{$cm_request->created_name}}</div>

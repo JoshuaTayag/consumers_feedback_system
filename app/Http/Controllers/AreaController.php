@@ -95,4 +95,14 @@ class AreaController extends Controller
         $area->delete();
         return redirect()->route('areas.index')->with('success', 'Area deleted successfully.');
     }
+
+    /**
+     * Return all areas with their feeders as JSON (used by AJAX dropdowns).
+     */
+    public function fetchAreas()
+    {
+        return response()->json([
+            'data' => Area::with('feeders:id,area_id,feeder_name')->orderBy('name', 'asc')->get(),
+        ]);
+    }
 }
