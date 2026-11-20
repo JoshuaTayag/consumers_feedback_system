@@ -38,6 +38,9 @@
               <li>
                 <a class="dropdown-item" href="{{ route('indexCM') }}">CHANGE METER</a>
               </li>
+              <li>
+                <a class="dropdown-item" href="{{ route('change-meter-request-slip.index') }}">CHANGE METER SLIP</a>
+              </li>
             </ul>
           </li>
           {{-- <li>
